@@ -1,0 +1,223 @@
+{
+  "$comment": "Fonte única do PDF 'Stack e Padrões'. Só nomes, sem explicação. Bibliotecas e versões são lidas do package.json automaticamente.",
+  "title": "HackaRun 2026 · Landing Page",
+  "subtitle": "Stack, bibliotecas, recursos, padrões e conceitos aplicados",
+  "repository": "https://github.com/Marcos-Codfy/lp-hackarun",
+  "sections": [
+    {
+      "title": "Linguagens e formatos",
+      "items": [
+        "TypeScript",
+        "HTML5 semântico",
+        "CSS3 (Custom Properties, Cascade Layers, clamp())",
+        "GLSL (WebGL shaders)",
+        "Google Apps Script (JavaScript V8)",
+        "JSON",
+        "Markdown"
+      ]
+    },
+    {
+      "title": "Frameworks e runtime",
+      "items": ["Astro (SSG / Static Site Generation)", "Node.js", "Vite", "WebGL / WebGL2"]
+    },
+    {
+      "title": "Recursos de plataforma (Web APIs)",
+      "items": [
+        "Web Audio API",
+        "IntersectionObserver",
+        "ResizeObserver",
+        "requestAnimationFrame",
+        "requestIdleCallback",
+        "AbortController",
+        "Fetch API",
+        "localStorage",
+        "matchMedia (prefers-reduced-motion, pointer)",
+        "Network Information API (save-data)",
+        "Page Visibility API",
+        "History API",
+        "Canvas 2D (amostragem de texto)",
+        "<details>/<summary> nativos",
+        "iCalendar (.ics, RFC 5545)"
+      ]
+    },
+    {
+      "title": "Infraestrutura e serviços (100% gratuitos)",
+      "items": [
+        "Cloudflare Pages (hospedagem estática + CDN global)",
+        "GitHub (repositório público)",
+        "GitHub Actions (CI)",
+        "Google Sheets (base de inscrições)",
+        "Google Apps Script Web App (API de inscrições e equipes)",
+        "Google Apps Script LockService / CacheService"
+      ]
+    },
+    {
+      "title": "Ferramentas de qualidade e fluxo",
+      "items": [
+        "ESLint (flat config) + typescript-eslint + eslint-plugin-astro",
+        "Prettier + prettier-plugin-astro",
+        "Vitest + happy-dom",
+        "Astro Check",
+        "Husky (git hooks)",
+        "lint-staged",
+        "commitlint",
+        "Conventional Commits",
+        "Semantic Versioning",
+        "EditorConfig",
+        "PDFKit (geração deste documento)"
+      ]
+    },
+    {
+      "title": "Arquitetura",
+      "items": [
+        "Clean Architecture",
+        "Arquitetura em camadas (Domain, Application, Infrastructure, Presentation, Composition)",
+        "Regra de Dependência",
+        "Ports and Adapters (Hexagonal)",
+        "Composition Root",
+        "Injeção de Dependência (por construtor)",
+        "MVVM (Model-View-ViewModel)",
+        "Islands / Progressive Enhancement",
+        "Static Site Generation",
+        "Lazy loading / Code splitting"
+      ]
+    },
+    {
+      "title": "DDD (Domain-Driven Design)",
+      "items": [
+        "Linguagem Ubíqua",
+        "Entity",
+        "Value Object",
+        "Aggregate / Aggregate Root",
+        "Domain Service",
+        "Repository (interface no domínio)",
+        "Domain Error",
+        "Invariantes de domínio",
+        "Factory Method estático (create)",
+        "DTO",
+        "Mapper (anti-corruption layer)",
+        "Use Case / Interactor",
+        "Bounded Context (Evento · Inscrição)"
+      ]
+    },
+    {
+      "title": "Padrões de projeto (GoF e afins)",
+      "items": [
+        "Singleton",
+        "Factory",
+        "Strategy",
+        "Facade",
+        "Adapter",
+        "Decorator",
+        "Observer",
+        "Publish/Subscribe (Event Bus)",
+        "Template Method",
+        "Registry",
+        "Null Object",
+        "Proxy (carregamento sob demanda)",
+        "Repository",
+        "Result / Either"
+      ]
+    },
+    {
+      "title": "Princípios e padrões de código",
+      "items": [
+        "POO (Programação Orientada a Objetos)",
+        "SOLID",
+        "DRY",
+        "KISS",
+        "YAGNI",
+        "Separation of Concerns",
+        "Imutabilidade",
+        "Fail Fast",
+        "Tipagem estrita (strictest)",
+        "Imports por alias de camada",
+        "Clean Code",
+        "BEM (nomenclatura CSS)",
+        "Design Tokens",
+        "Mobile First"
+      ]
+    },
+    {
+      "title": "Experiência, design e motion",
+      "items": [
+        "Scrollytelling",
+        "3D scroll-driven (morph de partículas)",
+        "Partículas em GPU (THREE.Points + ShaderMaterial)",
+        "Simplex Noise 3D",
+        "Additive blending / fake bloom",
+        "Smooth scroll",
+        "Pin e scroll horizontal",
+        "Split text reveal",
+        "HUD de progresso",
+        "Gamificação (easter egg NPC)",
+        "Estética e-sports",
+        "Glassmorphism",
+        "Qualidade adaptativa por dispositivo e FPS"
+      ]
+    },
+    {
+      "title": "Gatilhos de UX e conversão",
+      "items": [
+        "Curiosity Gap",
+        "Urgência",
+        "Escassez",
+        "Prova social",
+        "Autoridade",
+        "Efeito Zeigarnik",
+        "Regra do pico-fim",
+        "Microcompromisso",
+        "CTA recorrente"
+      ]
+    },
+    {
+      "title": "Acessibilidade",
+      "items": [
+        "WCAG 2.2 AA",
+        "WAI-ARIA",
+        "Skip link",
+        "Foco visível",
+        "prefers-reduced-motion",
+        "aria-live",
+        "Contraste AA",
+        "Alvos de toque de 44px",
+        "Navegação por teclado",
+        "Conteúdo sem JS e sem WebGL"
+      ]
+    },
+    {
+      "title": "Performance",
+      "items": [
+        "Core Web Vitals (LCP, CLS, INP)",
+        "Orçamento de performance",
+        "Fontes self-hosted com subset e preload",
+        "font-display: swap",
+        "Cache imutável de assets com hash",
+        "Device pixel ratio adaptativo",
+        "Pausa de render em aba oculta",
+        "Save-Data"
+      ]
+    },
+    {
+      "title": "SEO e compartilhamento",
+      "items": [
+        "Schema.org Event (JSON-LD)",
+        "Open Graph",
+        "Twitter Cards",
+        "Sitemap",
+        "robots.txt",
+        "URL canônica"
+      ]
+    },
+    {
+      "title": "Segurança e privacidade",
+      "items": [
+        "LGPD (consentimento)",
+        "Honeypot anti-spam",
+        "Rate limit por tempo de preenchimento",
+        "Security headers (_headers)",
+        "Exposição mínima de dados públicos"
+      ]
+    }
+  ]
+}

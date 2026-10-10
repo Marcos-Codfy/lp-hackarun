@@ -7,6 +7,7 @@ const site = process.env.PUBLIC_SITE_URL ?? 'https://lp-hackarun.pages.dev';
 export default defineConfig({
   site,
   integrations: [sitemap()],
+  devToolbar: { enabled: false },
   build: {
     // css pequeno vai inline, evita request bloqueante no primeiro paint
     inlineStylesheets: 'auto',
