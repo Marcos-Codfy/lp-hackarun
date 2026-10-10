@@ -49,3 +49,13 @@ vec3 shapeDust(vec3 p) {
   );
   return p + drift * 0.14;
 }
+
+// ganchos de brilho por forma (0 = sem destaque); o objeto pode acender partes de si
+float orbitHeat(vec3 p) { return 0.0; }
+float enigmaHeat(vec3 p) { return 0.0; }
+float terrainHeat(vec3 p) { return 0.0; }
+float stageHeat(vec3 p) { return 0.0; }
+
+vec3 shapeStage(vec3 p) {
+  return p;
+}

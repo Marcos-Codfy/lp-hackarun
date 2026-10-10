@@ -29,11 +29,11 @@ void main() {
 #endif
 #ifdef HAS_ORBIT
   w = weightOf(IDX_ORBIT, tp);
-  if (w > 0.001) pos += shapeOrbit(aOrbit) * w;
+  if (w > 0.001) { pos += shapeOrbit(aOrbit) * w; heat += orbitHeat(aOrbit) * w; }
 #endif
 #ifdef HAS_ENIGMA
   w = weightOf(IDX_ENIGMA, tp);
-  if (w > 0.001) pos += shapeEnigma(aEnigma) * w;
+  if (w > 0.001) { pos += shapeEnigma(aEnigma) * w; heat += enigmaHeat(aEnigma) * w; }
 #endif
 #ifdef HAS_MAP
   w = weightOf(IDX_MAP, tp);
@@ -41,11 +41,11 @@ void main() {
 #endif
 #ifdef HAS_TERRAIN
   w = weightOf(IDX_TERRAIN, tp);
-  if (w > 0.001) pos += shapeTerrain(aTerrain) * w;
+  if (w > 0.001) { pos += shapeTerrain(aTerrain) * w; heat += terrainHeat(aTerrain) * w; }
 #endif
 #ifdef HAS_STAGE
   w = weightOf(IDX_STAGE, tp);
-  if (w > 0.001) pos += aStage * w;
+  if (w > 0.001) { pos += shapeStage(aStage) * w; heat += stageHeat(aStage) * w; }
 #endif
 #ifdef HAS_TROPHY
   w = weightOf(IDX_TROPHY, tp);
