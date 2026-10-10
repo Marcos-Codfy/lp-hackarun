@@ -1,20 +1,70 @@
 ---
-// STUB — conteúdo da seção será implementado
 import type { LandingPageDTO } from '@application/index';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import PrizeCard from './prizes/PrizeCard.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { data: _data } = Astro.props;
+const { prizes } = Astro.props.data;
 ---
 
 <section
   id="premios"
-  class="section"
+  class="section prizes"
   data-scene="trophy"
   data-checkpoint="Prêmios"
   aria-labelledby="premios-title"
 >
-  <h2 id="premios-title">Prêmios</h2>
+  <div class="container section-stack">
+    <SectionHeading
+      id="premios-title"
+      code="07"
+      eyebrow="Prêmios"
+      title="O que está <em>em jogo</em>"
+      lead="Troféu, certificados e prêmios entregues no palco, na frente de todo mundo."
+    />
+
+    <ul class="prizes__grid" role="list" data-reveal-group>
+      {prizes.map((prize, index) => (
+        <PrizeCard prize={prize} featured={index === 0} />
+      ))}
+    </ul>
+
+    <p class="section-note" data-reveal="up">
+      <Icon name="lock" />
+      <span>Prêmios e valores anunciados em breve pela organização.</span>
+    </p>
+  </div>
 </section>
+
+<style>
+  .prizes__grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .prizes__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .prizes__grid > :global(.prize--featured) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .prizes__grid {
+      grid-template-columns: 1.4fr 1fr 1fr;
+    }
+
+    .prizes__grid > :global(.prize--featured) {
+      grid-column: auto;
+      min-height: 26rem;
+    }
+  }
+</style>

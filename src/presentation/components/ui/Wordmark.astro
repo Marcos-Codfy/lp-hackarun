@@ -1,0 +1,52 @@
+---
+// logotipo em texto: HACKA branco + RUN com o degradê de energia, inclinado como o logo oficial
+// decorativo: quem usa dá o nome acessível (aria-label no link ou texto sr-only)
+interface Props {
+  size?: 'sm' | 'md' | 'xl';
+  class?: string;
+}
+
+const { size = 'sm', class: className } = Astro.props;
+---
+
+<span class:list={['wordmark', `wordmark--${size}`, className]} aria-hidden="true">
+  <span class="wordmark__hacka">HACKA</span>
+  <span class="wordmark__run">RUN</span>
+</span>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.86;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+    transform: skewX(-8deg);
+    white-space: nowrap;
+  }
+
+  .wordmark--sm {
+    font-size: 1.625rem;
+  }
+
+  .wordmark--md {
+    font-size: var(--fs-2xl);
+  }
+
+  .wordmark--xl {
+    font-size: clamp(3.5rem, 1rem + 13vw, 13rem);
+  }
+
+  .wordmark__hacka {
+    color: var(--c-white);
+  }
+
+  .wordmark__run {
+    padding-right: 0.06em;
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+</style>

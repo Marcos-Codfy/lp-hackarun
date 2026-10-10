@@ -1,0 +1,45 @@
+---
+// número grande que conta de 0 até o valor (CounterAnimator); sem JS já mostra o valor final
+interface Props {
+  value: number;
+  label: string;
+  pad?: number;
+  // texto pro leitor de tela quando o rótulo visual não basta
+  srLabel?: string;
+}
+
+const { value, label, pad = 2, srLabel } = Astro.props;
+const display = String(value).padStart(pad, '0');
+---
+
+<div class="stat">
+  <p class="stat__value tabular">
+    <span aria-hidden="true" data-count-to={value} data-count-pad={pad}>
+      {display}
+    </span>
+    <span class="sr-only">{srLabel ?? `${value} ${label}`}</span>
+  </p>
+  <p class="stat__label hud-label" aria-hidden="true">
+    {label}
+  </p>
+</div>
+
+<style>
+  .stat {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .stat__value {
+    font-family: var(--font-display);
+    font-size: var(--fs-3xl);
+    font-weight: 800;
+    line-height: 0.9;
+    color: var(--text);
+    text-shadow: 0 0 28px rgb(0 207 255 / 0.35);
+  }
+
+  .stat__label {
+    color: var(--text-muted);
+  }
+</style>

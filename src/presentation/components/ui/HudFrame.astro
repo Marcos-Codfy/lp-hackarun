@@ -1,0 +1,45 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import HudCorners from './HudCorners.astro';
+
+// painel com cantoneiras de HUD; glass = vidro com blur (usar com parcimônia, custa GPU)
+type Props = HTMLAttributes<'div'> & {
+  as?: 'div' | 'aside' | 'article' | 'figure';
+  label?: string;
+  glass?: boolean;
+  tone?: 'accent' | 'time' | 'muted';
+};
+
+const { as: Tag = 'div', label, glass = false, tone = 'accent', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['hud-frame', glass && 'hud-frame--glass', className]} {...rest}>
+  <HudCorners tone={tone} />
+  {label && <p class="hud-frame__label hud-label">{label}</p>}
+  <slot />
+</Tag>
+
+<style>
+  .hud-frame {
+    position: relative;
+    padding: var(--space-5);
+    background: linear-gradient(180deg, rgb(11 36 80 / 0.42), rgb(4 11 24 / 0.72));
+    border: 1px solid var(--surface-line);
+  }
+
+  .hud-frame--glass {
+    background: var(--surface);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .hud-frame__label {
+    margin-bottom: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .hud-frame {
+      padding: var(--space-6);
+    }
+  }
+</style>

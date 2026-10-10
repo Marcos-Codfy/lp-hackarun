@@ -25,6 +25,7 @@ const {
 } = Astro.props;
 const Tag = href ? 'a' : 'button';
 const classes = ['btn', `btn--${variant}`, `btn--${size}`, className];
+const hasIcon = Astro.slots.has('icon');
 ---
 
 <Tag
@@ -37,6 +38,11 @@ const classes = ['btn', `btn--${variant}`, `btn--${size}`, className];
   <span class="btn__label">
     <slot />
   </span>
+  {hasIcon && (
+    <span class="btn__icon" aria-hidden="true">
+      <slot name="icon" />
+    </span>
+  )}
   <span class="btn__shine" aria-hidden="true"></span>
 </Tag>
 
@@ -85,9 +91,19 @@ const classes = ['btn', `btn--${variant}`, `btn--${size}`, className];
     --btn-fg: var(--c-deep);
   }
 
-  .btn__label {
+  .btn__label,
+  .btn__icon {
     position: relative;
     z-index: 1;
+  }
+
+  .btn__icon {
+    display: inline-flex;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .btn:hover .btn__icon {
+    transform: translateX(3px);
   }
 
   /* reflexo que atravessa o botão no hover */
@@ -111,8 +127,12 @@ const classes = ['btn', `btn--${variant}`, `btn--${size}`, className];
     transform: scale(0.98);
   }
 
+  /* clip-path corta o outline: o foco vira um anel âmbar por dentro do corte */
   .btn:focus-visible {
-    outline-offset: 4px;
+    outline: none;
+    box-shadow:
+      inset 0 0 0 2px var(--focus),
+      inset 0 0 0 4px var(--c-deep);
   }
 
   .btn[aria-disabled='true'],

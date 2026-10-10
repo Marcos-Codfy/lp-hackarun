@@ -1,0 +1,142 @@
+---
+import type { PrizeDTO } from '@application/index';
+import Icon from '@presentation/components/ui/Icon.astro';
+
+interface Props {
+  prize: PrizeDTO;
+  featured?: boolean;
+}
+
+const { prize, featured = false } = Astro.props;
+const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
+---
+
+<li class:list={['prize', featured && 'prize--featured']}>
+  <div class="prize__top">
+    <span class="prize__rank" aria-hidden="true">
+      <span class="hud-label">Rank</span>
+      <span class="prize__rank-num">{rank}</span>
+    </span>
+    <Icon name={featured ? 'trophy' : 'crown'} size={featured ? 40 : 28} />
+  </div>
+  <h3 class="prize__title">{prize.title}</h3>
+  <p class="prize__desc">{prize.description}</p>
+  {prize.revealed ? (
+    <p class="prize__reward">{prize.reward}</p>
+  ) : (
+    <p class="prize__locked">
+      <Icon name="lock" size={18} />
+      <span>A revelar</span>
+    </p>
+  )}
+</li>
+
+<style>
+  .prize {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    clip-path: var(--clip-card);
+    background: rgb(127 231 255 / 0.16);
+  }
+
+  .prize::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    clip-path: var(--clip-card);
+    background: linear-gradient(170deg, rgb(11 36 80 / 0.88), rgb(5 14 30 / 0.94) 70%);
+  }
+
+  .prize--featured {
+    background: var(--grad-energy);
+    box-shadow: 0 0 60px rgb(0 207 255 / 0.2);
+  }
+
+  .prize--featured::before {
+    background:
+      radial-gradient(90% 60% at 80% 0%, rgb(0 207 255 / 0.25), transparent 70%),
+      linear-gradient(170deg, rgb(13 52 110 / 0.95), rgb(5 14 30 / 0.96) 70%);
+  }
+
+  .prize__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+    color: var(--c-cyan);
+  }
+
+  .prize__rank {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .prize__rank-num {
+    font-family: var(--font-display);
+    font-size: var(--fs-3xl);
+    font-weight: 900;
+    line-height: 0.85;
+    color: var(--text);
+  }
+
+  .prize__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .prize__desc {
+    color: var(--text-muted);
+  }
+
+  .prize__reward,
+  .prize__locked {
+    margin-top: auto;
+    padding-top: var(--space-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  /* estado bloqueado com um brilho lento passando pelo texto */
+  .prize__locked {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: linear-gradient(100deg, var(--text-dim) 40%, var(--c-cyan-soft) 50%, var(--text-dim) 60%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: prize-shimmer 4s linear infinite;
+  }
+
+  .prize__locked :global(.icon) {
+    color: var(--text-dim);
+  }
+
+  @keyframes prize-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: 0 0;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .prize {
+      padding: var(--space-6);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prize__locked {
+      animation: none;
+    }
+  }
+</style>

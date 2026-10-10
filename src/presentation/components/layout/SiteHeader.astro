@@ -1,14 +1,175 @@
 ---
-// STUB — header com navegação, toggle de som e CTA
 import type { RegistrationDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import Wordmark from '@presentation/components/ui/Wordmark.astro';
+import SoundToggle from '@presentation/components/sound/SoundToggle.astro';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+import MenuToggle from './MenuToggle.astro';
+import MobileMenu from './MobileMenu.astro';
+import { NAV_LINKS } from './navLinks';
 
 interface Props {
   registration: RegistrationDTO;
 }
 
-const { registration: _registration } = Astro.props;
+const { registration } = Astro.props;
+const copy = new RegistrationCopy();
+const cta = copy.cta(registration.status);
+const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-nav-link': true };
 ---
 
-<header class="site-header">
-  <a href="#inicio">HackaRun</a>
+<header class="site-header" data-site-header>
+  <div class="site-header__inner">
+    <a class="site-header__brand" href="#inicio" data-nav-link aria-label="HackaRun 2026, voltar ao início">
+      <Wordmark size="sm" />
+    </a>
+
+    <nav class="site-header__nav" aria-label="Principal">
+      <ul role="list">
+        {NAV_LINKS.map((link) => (
+          <li>
+            <a class="site-header__link" href={link.href} data-nav-link>
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <SoundToggle />
+      <span class="site-header__cta">
+        <Button href={cta.href} {...ctaAttrs}>
+          {copy.headerLabel(registration.status)}
+        </Button>
+      </span>
+      <MenuToggle controls="site-menu" />
+    </div>
+  </div>
+
+  <MobileMenu id="site-menu" registration={registration} />
 </header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-header);
+  }
+
+  /* vidro no pseudo (e não no header): backdrop-filter no pai quebraria o menu fixed */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--header-h);
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgb(4 11 24 / 0.7), transparent);
+    border-bottom: 1px solid transparent;
+    transition:
+      background var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out);
+  }
+
+  .site-header.is-scrolled::before,
+  .site-header.is-menu-open::before {
+    background: rgb(4 11 24 / 0.78);
+    border-bottom-color: var(--surface-line);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .site-header__inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    width: min(100% - 2 * var(--gutter), 90rem);
+    height: var(--header-h);
+    margin-inline: auto;
+  }
+
+  .site-header__brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-right: auto;
+    text-decoration: none;
+  }
+
+  .site-header__nav {
+    display: none;
+  }
+
+  .site-header__nav ul {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .site-header__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: var(--space-3);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .site-header__link::after {
+    content: '';
+    position: absolute;
+    inset: auto var(--space-3) 8px;
+    height: 1px;
+    background: var(--c-cyan);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .site-header__link:hover,
+  .site-header__link[aria-current='true'] {
+    color: var(--text);
+  }
+
+  .site-header__link:hover::after,
+  .site-header__link[aria-current='true']::after {
+    transform: none;
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .site-header__cta {
+    display: none;
+  }
+
+  .site-header__cta :global(.btn) {
+    min-height: 44px;
+    padding-inline: var(--space-4);
+    font-size: var(--fs-base);
+  }
+
+  @media (min-width: 400px) {
+    .site-header__cta {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .site-header__nav {
+      display: block;
+    }
+  }
+</style>

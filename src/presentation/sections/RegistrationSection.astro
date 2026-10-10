@@ -1,21 +1,102 @@
 ---
-// STUB — conteúdo da seção será implementado
 import type { LandingPageDTO } from '@application/index';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import Countdown from '@presentation/components/countdown/Countdown.astro';
+import { EventStampFormatter } from '@presentation/formatters/EventStampFormatter';
+import ChargeCta from './registration/ChargeCta.astro';
+import LobbyPanel from './registration/LobbyPanel.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { data: _data } = Astro.props;
+const { event } = Astro.props.data;
+const kickoffAt = event.milestones.find((m) => m.key === 'kickoff')?.at ?? null;
+const kickoff = kickoffAt ? new EventStampFormatter(event.timezone).format(kickoffAt) : null;
+const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()}` : null;
 ---
 
 <section
   id="inscricao"
-  class="section"
+  class="section registration"
   data-scene="core"
   data-scene-hold="1500"
   data-checkpoint="Inscrição"
   aria-labelledby="inscricao-title"
 >
-  <h2 id="inscricao-title">Inscrição</h2>
+  {/* palco alto com miolo sticky: o globo fica no centro enquanto rola, sem travar o scroll */}
+  <div class="registration__stage">
+    <div class="registration__sticky">
+      <div class="registration__scrim" aria-hidden="true"></div>
+      <div class="container registration__center">
+        <SectionHeading
+          id="inscricao-title"
+          code="10"
+          eyebrow="Inscrição"
+          hud="// Checkpoint final"
+          title="Sua vaga na <em>corrida</em>"
+          align="center"
+        />
+        <div class="registration__countdown">
+          <Countdown milestones={event.milestones} variant="compact" />
+        </div>
+        <ChargeCta registration={event.registration} />
+      </div>
+    </div>
+  </div>
+
+  <div class="container--narrow registration__lobby">
+    <LobbyPanel registration={event.registration} kickoffLabel={kickoffLabel} />
+  </div>
 </section>
+
+<style>
+  .registration {
+    padding-top: 0;
+  }
+
+  .registration__stage {
+    min-height: 160svh;
+  }
+
+  .registration__sticky {
+    position: sticky;
+    top: 0;
+    display: grid;
+    align-items: center;
+    min-height: 100svh;
+    padding-block: calc(var(--header-h) + var(--space-5)) var(--space-6);
+  }
+
+  .registration__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 58% 44% at 50% 50%,
+      rgb(4 11 24 / 0.62) 0%,
+      rgb(4 11 24 / 0.3) 60%,
+      transparent 100%
+    );
+  }
+
+  .registration__center {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-6);
+    text-align: center;
+  }
+
+  .registration__countdown {
+    display: grid;
+    justify-items: center;
+    width: 100%;
+  }
+
+  .registration__lobby {
+    position: relative;
+    margin-top: calc(var(--space-9) * -0.5);
+  }
+</style>

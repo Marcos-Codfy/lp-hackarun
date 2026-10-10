@@ -1,20 +1,177 @@
 ---
-// STUB — conteúdo da seção será implementado
 import type { LandingPageDTO } from '@application/index';
+import type { IconName } from '@presentation/components/ui/icons';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { EventStampFormatter } from '@presentation/formatters/EventStampFormatter';
+import SpotlightBeams from './final/SpotlightBeams.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { data: _data } = Astro.props;
+const { event } = Astro.props.data;
+const venue = event.venues.find((v) => v.role === 'final');
+const ceremonyAt = event.milestones.find((m) => m.key === 'ceremony')?.at ?? null;
+const stamp = ceremonyAt ? new EventStampFormatter(event.timezone).format(ceremonyAt) : null;
+
+const highlights: { icon: IconName; label: string }[] = [
+  { icon: 'spotlight', label: 'Palco iluminado' },
+  { icon: 'monitor', label: 'Telão gigante com o ranking' },
+  { icon: 'music', label: 'Banda ao vivo' },
+  { icon: 'crown', label: 'Anúncio dos campeões' },
+];
 ---
 
 <section
   id="final"
-  class="section"
+  class="section section--split final"
   data-scene="screen"
   data-checkpoint="Grande final"
   aria-labelledby="final-title"
+  data-spotlight
 >
-  <h2 id="final-title">Grande final</h2>
+  <SpotlightBeams />
+
+  <div class="container">
+    <div class="section-split__content section-stack final__content">
+      <SectionHeading
+        id="final-title"
+        code="06"
+        eyebrow="Grande final"
+        title="A final é no <em>telão</em>."
+      />
+
+      {stamp && ceremonyAt && (
+        <p class="final__stamp" data-reveal="up">
+          <time datetime={ceremonyAt}>
+            <span aria-hidden="true">
+              {stamp.date}
+              <span class="final__dot">·</span>
+              <span class="final__hour">{stamp.hour}</span>
+            </span>
+            <span class="sr-only">{stamp.long}</span>
+          </time>
+        </p>
+      )}
+
+      {venue && (
+        <div class="final__venue" data-reveal="up">
+          <Icon name="map-pin" size={26} />
+          <div>
+            <p class="hud-label">Local da final</p>
+            <p class="final__venue-name">{venue.name}</p>
+            {venue.mapUrl && (
+              <a class="final__map" href={venue.mapUrl} target="_blank" rel="noopener noreferrer">
+                Ver no mapa
+                <Icon name="external" size={16} />
+                <span class="sr-only"> (abre em nova aba)</span>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      <ul class="final__highlights" role="list" data-reveal-group>
+        {highlights.map((item) => (
+          <li>
+            <Icon name={item.icon} size={22} />
+            <span>{item.label}</span>
+          </li>
+        ))}
+      </ul>
+
+      <p class="final__cheer" data-reveal="up">
+        Chame sua torcida.
+      </p>
+    </div>
+  </div>
 </section>
+
+<style>
+  .final {
+    min-height: 100svh;
+    overflow: hidden;
+  }
+
+  .final__stamp {
+    font-family: var(--font-display);
+    font-size: clamp(3.25rem, 1.5rem + 9vw, 10rem);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 40px rgb(0 207 255 / 0.25);
+  }
+
+  .final__dot {
+    color: var(--text-dim);
+  }
+
+  .final__hour {
+    color: var(--time);
+    text-shadow: var(--glow-amber);
+  }
+
+  .final__venue {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  .final__venue > :global(.icon) {
+    color: var(--c-cyan);
+  }
+
+  .final__venue-name {
+    margin-block: var(--space-1) var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .final__map {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-weight: 600;
+  }
+
+  .final__highlights {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .final__highlights li {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    clip-path: var(--clip-btn);
+    background: rgb(4 11 24 / 0.66);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .final__highlights :global(.icon) {
+    color: var(--c-cyan);
+  }
+
+  .final__cheer {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+</style>

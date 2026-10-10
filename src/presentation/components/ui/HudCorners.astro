@@ -1,0 +1,73 @@
+---
+// cantoneiras finas de HUD; o pai precisa ser position: relative
+interface Props {
+  size?: number;
+  tone?: 'accent' | 'time' | 'muted';
+  class?: string;
+}
+
+const { size = 14, tone = 'accent', class: className } = Astro.props;
+---
+
+<span
+  class:list={['hud-corners', `hud-corners--${tone}`, className]}
+  style={`--hc-size: ${size}px`}
+  aria-hidden="true"
+>
+  <span class="hud-corners__c hud-corners__c--tl"></span>
+  <span class="hud-corners__c hud-corners__c--tr"></span>
+  <span class="hud-corners__c hud-corners__c--bl"></span>
+  <span class="hud-corners__c hud-corners__c--br"></span>
+</span>
+
+<style>
+  .hud-corners {
+    --hc-color: var(--line-strong);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hud-corners--time {
+    --hc-color: rgb(255 181 71 / 0.6);
+  }
+
+  .hud-corners--muted {
+    --hc-color: var(--surface-line);
+  }
+
+  .hud-corners__c {
+    position: absolute;
+    width: var(--hc-size);
+    height: var(--hc-size);
+    border: 0 solid var(--hc-color);
+  }
+
+  .hud-corners__c--tl {
+    top: 0;
+    left: 0;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .hud-corners__c--tr {
+    top: 0;
+    right: 0;
+    border-top-width: 1px;
+    border-right-width: 1px;
+  }
+
+  .hud-corners__c--bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .hud-corners__c--br {
+    right: 0;
+    bottom: 0;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+</style>

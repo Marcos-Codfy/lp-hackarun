@@ -1,0 +1,81 @@
+---
+import type { SpeakerDTO } from '@application/index';
+
+// convidado já revelado; o bloqueado usa o LockedCard
+interface Props {
+  speaker: SpeakerDTO;
+  role: string;
+}
+
+const { speaker, role } = Astro.props;
+const name = speaker.name ?? '';
+const initials = name
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((part) => part[0]?.toUpperCase() ?? '')
+  .join('');
+---
+
+<li class="crew-card">
+  <div class="crew-card__portrait">
+    {speaker.avatarUrl ? (
+      <img src={speaker.avatarUrl} alt="" width="320" height="320" loading="lazy" decoding="async" />
+    ) : (
+      <span class="crew-card__initials" aria-hidden="true">
+        {initials}
+      </span>
+    )}
+  </div>
+  <p class="hud-label crew-card__role">{role}</p>
+  <h3 class="crew-card__name">{name}</h3>
+  <p class="crew-card__headline">{speaker.headline}</p>
+  {speaker.topic && <p class="crew-card__topic">{speaker.topic}</p>}
+</li>
+
+<style>
+  .crew-card {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    clip-path: var(--clip-card);
+    background: linear-gradient(170deg, rgb(13 52 110 / 0.75), rgb(4 11 24 / 0.88));
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+  }
+
+  .crew-card__portrait {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    margin-bottom: var(--space-2);
+    overflow: hidden;
+    clip-path: var(--clip-btn);
+    background: radial-gradient(circle at 50% 35%, rgb(0 207 255 / 0.3), rgb(4 11 24 / 0.9) 70%);
+  }
+
+  .crew-card__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .crew-card__initials {
+    font-family: var(--font-display);
+    font-size: var(--fs-3xl);
+    font-weight: 900;
+  }
+
+  .crew-card__name {
+    font-size: var(--fs-xl);
+  }
+
+  .crew-card__headline,
+  .crew-card__topic {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .crew-card__topic {
+    color: var(--c-cyan-soft);
+  }
+</style>

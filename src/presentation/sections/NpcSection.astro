@@ -1,14 +1,55 @@
 ---
-// STUB — conteúdo da seção será implementado
 import type { LandingPageDTO } from '@application/index';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import QuestLog from './npc/QuestLog.astro';
+import NpcTerminal from './npc/NpcTerminal.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
+// seção não depende de dados por enquanto; a prop fica pelo contrato da página
 const { data: _data } = Astro.props;
 ---
 
-<section id="npcs" class="section" data-scene="enigma" data-checkpoint="NPCs" aria-labelledby="npcs-title">
-  <h2 id="npcs-title">NPCs</h2>
+<section
+  id="npcs"
+  class="section section--split npcs"
+  data-scene="enigma"
+  data-checkpoint="NPCs"
+  aria-labelledby="npcs-title"
+>
+  <div class="container">
+    <div class="section-split__content section-stack">
+      <SectionHeading
+        id="npcs-title"
+        code="02"
+        eyebrow="NPCs"
+        title="Os <em>NPCs</em> estão entre nós."
+        lead="Espalhados pela corrida, eles guardam as pistas do desafio. Ache, converse, decifre. Onde eles estão? Isso também é uma pista."
+      />
+
+      <QuestLog />
+
+      <div data-reveal="up">
+        <NpcTerminal />
+      </div>
+
+      <p class="section-note section-note--time" data-reveal="up">
+        <Icon name="shield" />
+        <span>
+          <strong>Corra contra o relógio, não pelos corredores.</strong> Entre as estações é sempre
+          caminhando.
+        </span>
+      </p>
+    </div>
+  </div>
 </section>
+
+<style>
+  .npcs {
+    min-height: 100svh;
+  }
+</style>

@@ -1,0 +1,76 @@
+---
+// linha de HUD do topo do hero: rótulo, régua que se desenha e coordenadas de Palmas
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="hero-hud">
+  <p class="hud-label">
+    <span aria-hidden="true">// </span>
+    {label}
+  </p>
+  <span class="hero-hud__rule" aria-hidden="true"></span>
+  <p class="hud-label hero-hud__coords">
+    <span aria-hidden="true">10°11'S 48°20'W · PALMAS–TO</span>
+    <span class="sr-only">Palmas, Tocantins</span>
+  </p>
+</div>
+
+<style>
+  .hero-hud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2) var(--space-4);
+    text-align: center;
+    animation: hud-in 0.9s var(--ease-out) both;
+  }
+
+  .hero-hud__rule {
+    display: none;
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line-strong), transparent);
+    transform-origin: left;
+    animation: rule-draw 1.2s 0.3s var(--ease-out) both;
+  }
+
+  .hero-hud__coords {
+    color: var(--text-dim);
+  }
+
+  @keyframes hud-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes rule-draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @media (min-width: 640px) {
+    .hero-hud {
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      text-align: start;
+    }
+
+    .hero-hud__rule {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-hud,
+    .hero-hud__rule {
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,173 @@
+---
+import type { StationDTO } from '@application/index';
+import Chip from '@presentation/components/ui/Chip.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import NpcToken from '@presentation/components/npc/NpcToken.astro';
+import { stationIcon } from './stationIcon';
+
+interface Props {
+  station: StationDTO;
+  maxPoints: number;
+  withToken?: boolean;
+}
+
+const { station, maxPoints, withToken = false } = Astro.props;
+const isFinal = station.kind === 'final';
+const titleId = `station-${station.id}`;
+---
+
+<li class:list={['station', isFinal && 'station--final']} data-station>
+  <div class="station__top">
+    <p class="hud-label station__code">Missão {station.code}</p>
+    {isFinal ? (
+      <span class="station__badge">Final</span>
+    ) : (
+      <span class="hud-label station__pts">Até {maxPoints} pts</span>
+    )}
+  </div>
+  <span class="station__num" aria-hidden="true">
+    {station.code}
+  </span>
+  <h3 class="station__title" id={titleId}>
+    {station.title}
+  </h3>
+  <p class="station__challenge">{station.challenge}</p>
+  <p class="station__space">
+    <Icon name={stationIcon(station.space)} size={18} />
+    <span class="sr-only">Local: </span>
+    {station.space}
+  </p>
+  <ul class="station__skills" role="list" aria-label="Habilidades">
+    {station.skills.map((skill) => (
+      <Chip as="li" tone={isFinal ? 'accent' : 'default'}>
+        {skill}
+      </Chip>
+    ))}
+  </ul>
+  {withToken && (
+    <span class="station__token">
+      <NpcToken id="npc-2" label="Token NPC escondido numa missão" />
+    </span>
+  )}
+</li>
+
+<style>
+  .station {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    overflow: hidden;
+    clip-path: var(--clip-card);
+    background: rgb(127 231 255 / 0.16);
+  }
+
+  .station::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    clip-path: var(--clip-card);
+    background: linear-gradient(165deg, rgb(11 36 80 / 0.88) 0%, rgb(5 14 30 / 0.94) 65%);
+  }
+
+  .station--final {
+    background: var(--grad-energy);
+    box-shadow: 0 0 40px rgb(0 207 255 / 0.25);
+  }
+
+  .station--final::before {
+    background:
+      radial-gradient(120% 70% at 100% 0%, rgb(0 207 255 / 0.22), transparent 60%),
+      linear-gradient(165deg, rgb(13 52 110 / 0.95) 0%, rgb(5 14 30 / 0.96) 70%);
+  }
+
+  .station__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .station__pts {
+    color: var(--text-dim);
+  }
+
+  .station__badge {
+    padding: var(--space-1) var(--space-3);
+    clip-path: var(--clip-btn);
+    background: var(--grad-energy);
+    color: var(--c-deep);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* número vazado gigante no fundo do card */
+  .station__num {
+    position: absolute;
+    right: var(--space-4);
+    bottom: -0.12em;
+    z-index: -1;
+    font-family: var(--font-display);
+    font-size: 7rem;
+    font-weight: 900;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(127 231 255 / 0.18);
+  }
+
+  .station__title {
+    margin-top: var(--space-4);
+    font-size: var(--fs-xl);
+  }
+
+  .station__challenge {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .station__space {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: var(--space-3);
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+  }
+
+  .station__space :global(.icon) {
+    color: var(--c-cyan);
+  }
+
+  .station__skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .station__token {
+    position: absolute;
+    top: 3.25rem;
+    right: var(--space-4);
+  }
+
+  /* modo trilho horizontal (desktop com pin): largura fixa por card */
+  :global(.is-horizontal) .station {
+    flex: none;
+    width: clamp(19rem, 25vw, 23rem);
+    min-height: 26rem;
+  }
+
+  @media (min-width: 640px) {
+    .station {
+      padding: var(--space-6);
+    }
+  }
+</style>

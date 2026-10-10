@@ -1,0 +1,74 @@
+---
+// feixes de palco em CSS puro; o SpotlightAnimator só pausa fora da tela e acende na entrada
+---
+
+<div class="beams" aria-hidden="true">
+  <span class="beams__beam beams__beam--a" data-beam></span>
+  <span class="beams__beam beams__beam--b" data-beam></span>
+  <span class="beams__beam beams__beam--c" data-beam></span>
+</div>
+
+<style>
+  .beams {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .beams__beam {
+    position: absolute;
+    bottom: -10%;
+    width: 38vmax;
+    height: 130%;
+    transform-origin: 50% 100%;
+    background: linear-gradient(0deg, rgb(0 207 255 / 0.22) 0%, rgb(30 123 255 / 0.08) 45%, transparent 85%);
+    clip-path: polygon(46% 100%, 54% 100%, 100% 0, 0 0);
+    mix-blend-mode: screen;
+    animation: beam-sweep 9s var(--ease-in-out) infinite alternate;
+  }
+
+  .beams__beam--a {
+    left: -6%;
+    --from: -18deg;
+    --to: 12deg;
+  }
+
+  .beams__beam--b {
+    left: 30%;
+    --from: 10deg;
+    --to: -14deg;
+    animation-duration: 11s;
+    opacity: 0.7;
+  }
+
+  .beams__beam--c {
+    right: -8%;
+    --from: 16deg;
+    --to: -10deg;
+    animation-duration: 13s;
+    background: linear-gradient(0deg, rgb(255 181 71 / 0.12) 0%, rgb(255 181 71 / 0.04) 45%, transparent 85%);
+  }
+
+  /* fora da tela não gasta GPU */
+  :global(.is-idle) .beams__beam {
+    animation-play-state: paused;
+  }
+
+  @keyframes beam-sweep {
+    from {
+      transform: rotate(var(--from));
+    }
+    to {
+      transform: rotate(var(--to));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .beams__beam {
+      animation: none;
+      transform: rotate(var(--from));
+    }
+  }
+</style>

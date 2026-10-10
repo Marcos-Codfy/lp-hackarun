@@ -1,0 +1,142 @@
+---
+import type { RegistrationDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+
+// CTA que "carrega" junto com o globo: a seção recebe is-awaiting-charge e depois is-charged
+// sem JS nenhuma classe entra e o CTA fica simplesmente visível
+interface Props {
+  registration: RegistrationDTO;
+}
+
+const { registration } = Astro.props;
+const copy = new RegistrationCopy();
+const cta = copy.cta(registration.status);
+const href = cta.isRegistration ? '#inscricao-lobby' : cta.href;
+const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav-link': true };
+---
+
+<div class="charge" data-charge-reveal>
+  <span class="charge__bar" aria-hidden="true">
+    <span class="charge__fill"></span>
+  </span>
+  <div class="charge__button">
+    <Button size="lg" href={href} {...ctaAttrs}>
+      {cta.label}
+      <Icon slot="icon" name="arrow-down" />
+    </Button>
+  </div>
+  <p class:list={['charge__status', copy.isUrgent(registration.status) && 'charge__status--urgent']}>
+    {copy.statusLine(registration)}
+  </p>
+</div>
+
+<style>
+  .charge {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out),
+      filter var(--dur-slow) var(--ease-out);
+  }
+
+  /* barra de energia: invisível até a carga começar */
+  .charge__bar {
+    position: relative;
+    width: min(16rem, 70vw);
+    height: 2px;
+    overflow: hidden;
+    background: rgb(127 231 255 / 0.12);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease-out);
+  }
+
+  .charge__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--grad-energy);
+    box-shadow: 0 0 12px var(--c-cyan);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .charge__status {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .charge__status--urgent {
+    color: var(--time);
+  }
+
+  /* aguardando a carga: CTA apagado e a barra enchendo em 1,5s */
+  :global(.is-awaiting-charge) .charge {
+    opacity: 0.5;
+    transform: scale(0.96);
+    filter: saturate(0.4);
+  }
+
+  :global(.is-awaiting-charge) .charge__bar {
+    opacity: 1;
+  }
+
+  :global(.is-awaiting-charge) .charge__fill {
+    animation: charge-fill 1500ms linear forwards;
+  }
+
+  /* carregou: estouro de brilho no botão */
+  :global(.is-charged) .charge__bar {
+    opacity: 0;
+  }
+
+  :global(.is-charged) .charge__fill {
+    transform: none;
+  }
+
+  :global(.is-charged) .charge__button {
+    animation: charge-burst 1.2s var(--ease-out) both;
+  }
+
+  @keyframes charge-fill {
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes charge-burst {
+    0% {
+      filter: drop-shadow(0 0 0 rgb(0 207 255 / 0));
+      transform: scale(1);
+    }
+    30% {
+      filter: drop-shadow(0 0 36px rgb(0 207 255 / 0.95)) brightness(1.25);
+      transform: scale(1.06);
+    }
+    100% {
+      filter: drop-shadow(0 0 18px rgb(0 207 255 / 0.45));
+      transform: scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.is-awaiting-charge) .charge {
+      transform: none;
+    }
+
+    :global(.is-awaiting-charge) .charge__fill {
+      animation: none;
+      transform: scaleX(0.5);
+    }
+
+    :global(.is-charged) .charge__button {
+      animation: none;
+      filter: drop-shadow(0 0 18px rgb(0 207 255 / 0.45));
+    }
+  }
+</style>

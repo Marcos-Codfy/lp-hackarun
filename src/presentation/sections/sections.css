@@ -1,0 +1,66 @@
+/* base compartilhada das seções: camada acima do canvas, respiro e scrims de leitura */
+.section {
+  position: relative;
+  z-index: var(--z-content);
+  padding-block: var(--space-9);
+}
+
+/* foco programático da navegação por âncora não precisa de contorno na seção inteira */
+.section:focus {
+  outline: none;
+}
+
+.section-stack {
+  display: grid;
+  gap: var(--space-7);
+}
+
+@media (min-width: 1024px) {
+  .section-stack {
+    gap: var(--space-8);
+  }
+}
+
+/* seções com o objeto 3D à direita: texto à esquerda com um véu escuro atrás */
+.section--split::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(4 11 24 / 0.2) 0%, rgb(4 11 24 / 0.5) 40%, rgb(4 11 24 / 0.2) 100%);
+}
+
+@media (min-width: 1024px) {
+  .section--split::before {
+    background: linear-gradient(90deg, rgb(4 11 24 / 0.78) 0%, rgb(4 11 24 / 0.5) 38%, rgb(4 11 24 / 0) 62%);
+  }
+
+  .section--split .section-split__content {
+    max-width: min(36rem, 50%);
+  }
+}
+
+/* nota curta de rodapé de seção (regras, escassez, segurança) */
+.section-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 40rem;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.section-note .icon {
+  margin-top: 0.15em;
+  color: var(--accent);
+}
+
+.section-note--time .icon {
+  color: var(--time);
+}
+
+.section-note strong {
+  color: var(--text);
+  font-weight: 600;
+}

@@ -1,20 +1,136 @@
 ---
-// STUB — conteúdo da seção será implementado
 import type { LandingPageDTO } from '@application/index';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import StationCard from './missions/StationCard.astro';
+import ScoringPanel from './missions/ScoringPanel.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { data: _data } = Astro.props;
+const { missions } = Astro.props.data;
+const { stations, scoring } = missions;
+const total = stations.length;
+const pad = (n: number) => String(n).padStart(2, '0');
+// token npc-2 fica na 5ª estação (Detetives de Dados); se a lista encolher, vai pra última
+const tokenIndex = Math.min(4, total - 1);
 ---
 
 <section
   id="missoes"
-  class="section"
+  class="section missions"
   data-scene="route"
   data-checkpoint="Missões"
   aria-labelledby="missoes-title"
+  data-missions
 >
-  <h2 id="missoes-title">Missões</h2>
+  <div class="container section-stack">
+    <div class="missions__head">
+      <SectionHeading
+        id="missoes-title"
+        code="03"
+        eyebrow="Missões"
+        title={`${total} missões. <em>1 relógio.</em>`}
+        lead={`Rotas rotativas entre salas e laboratórios: cada equipe percorre as estações numa ordem diferente. Cada estação classificatória vale até ${scoring.maxPoints} pontos.`}
+      />
+    </div>
+
+    <div class="missions__pin" data-missions-pin>
+      <ol
+        class="missions__track"
+        role="list"
+        aria-label="Estações da corrida"
+        data-missions-track
+        data-reveal-group
+      >
+        {stations.map((station, index) => (
+          <StationCard station={station} maxPoints={scoring.maxPoints} withToken={index === tokenIndex} />
+        ))}
+      </ol>
+
+      <div class="missions__progress" aria-hidden="true">
+        <span class="hud-label missions__count">
+          <span data-missions-current>01</span> / {pad(total)}
+        </span>
+        <span class="missions__bar">
+          <span class="missions__bar-fill" data-missions-bar></span>
+        </span>
+        <span class="hud-label missions__hint">Role para avançar →</span>
+      </div>
+    </div>
+
+    <ScoringPanel scoring={scoring} />
+  </div>
 </section>
+
+<style>
+  .missions__track {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  /* o indicador 01/08 só faz sentido no trilho horizontal */
+  .missions__progress {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .missions__track {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .missions__track {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* trilho horizontal: o JS liga essa classe só no desktop sem reduced motion */
+  .missions.is-horizontal .missions__pin {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding-inline: max(var(--gutter), (100vw - var(--container)) / 2);
+    overflow-x: clip;
+  }
+
+  .missions.is-horizontal .missions__track {
+    display: flex;
+    width: max-content;
+    gap: var(--space-5);
+    will-change: transform;
+  }
+
+  .missions.is-horizontal .missions__progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+
+  .missions__count {
+    color: var(--text);
+  }
+
+  .missions__bar {
+    position: relative;
+    flex: 1;
+    max-width: 24rem;
+    height: 2px;
+    background: rgb(127 231 255 / 0.12);
+  }
+
+  .missions__bar-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--grad-energy);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .missions__hint {
+    margin-left: auto;
+    color: var(--text-dim);
+  }
+</style>

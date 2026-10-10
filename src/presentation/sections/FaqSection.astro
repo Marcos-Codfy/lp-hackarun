@@ -1,14 +1,90 @@
 ---
-// STUB — conteúdo da seção será implementado
-import type { LandingPageDTO } from '@application/index';
+import type { FaqItemDTO, LandingPageDTO } from '@application/index';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import FaqEntry from './faq/FaqEntry.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { data: _data } = Astro.props;
+const { faq } = Astro.props.data;
+
+// agrupa por categoria mantendo a ordem do conteúdo
+const groups = new Map<string, FaqItemDTO[]>();
+for (const item of faq) groups.set(item.category, [...(groups.get(item.category) ?? []), item]);
+
+// token npc-3 mora na resposta sobre os NPCs (só aparece pra quem abre); senão vai na última
+const tokenId = faq.find((item) => item.id === 'npcs')?.id ?? faq.at(-1)?.id;
+const numberOf = (item: FaqItemDTO) => faq.indexOf(item) + 1;
 ---
 
-<section id="faq" class="section" data-scene="dust" data-checkpoint="FAQ" aria-labelledby="faq-title">
-  <h2 id="faq-title">FAQ</h2>
+<section id="faq" class="section faq" data-scene="dust" data-checkpoint="FAQ" aria-labelledby="faq-title">
+  <div class="container faq__layout">
+    <div class="faq__aside">
+      <SectionHeading
+        id="faq-title"
+        code="09"
+        eyebrow="FAQ"
+        title="Perguntas <em>frequentes</em>"
+        lead="O que todo mundo pergunta antes de entrar na corrida. Regulamento completo sai junto com o link oficial."
+      />
+    </div>
+
+    <div class="faq__groups">
+      {[...groups.entries()].map(([category, items]) => (
+        <div class="faq__group" data-reveal="up">
+          <h3 class="hud-label faq__category">{category}</h3>
+          {items.map((item) => (
+            <FaqEntry item={item} number={numberOf(item)} withToken={item.id === tokenId} />
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
 </section>
+
+<style>
+  .faq__layout {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .faq__groups {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .faq__group {
+    padding: var(--space-4) var(--space-4) var(--space-2);
+    background: rgb(4 11 24 / 0.6);
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .faq__category {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--surface-line);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  @media (min-width: 640px) {
+    .faq__group {
+      padding-inline: var(--space-6);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .faq__layout {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: var(--space-8);
+      align-items: start;
+    }
+
+    .faq__aside {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-6));
+    }
+  }
+</style>

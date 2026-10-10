@@ -1,0 +1,67 @@
+---
+import type { RegistrationDTO } from '@application/index';
+import HudFrame from '@presentation/components/ui/HudFrame.astro';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import RegistrationForm from '@presentation/components/registration/RegistrationForm.astro';
+
+// "lobby" da equipe: painel de vidro com o formulário (o form em si é de outro módulo)
+interface Props {
+  registration: RegistrationDTO;
+  // "11.11 · 19H" da largada, quando existir
+  kickoffLabel?: string | null;
+}
+
+const { registration, kickoffLabel = null } = Astro.props;
+const { min, max } = registration.teamSize;
+---
+
+<HudFrame as="div" glass label="// Lobby · inscrição de equipe" class="lobby" id="inscricao-lobby">
+  <div class="lobby__head">
+    <h3 class="lobby__title">Monte sua equipe</h3>
+    <p class="lobby__lead">
+      Equipes de {min} a {max} pessoas. Junte o time e preencha os dados abaixo.
+    </p>
+  </div>
+
+  <RegistrationForm registration={registration} />
+
+  <div class="lobby__agenda">
+    <Button variant="ghost" href="/hackarun-2026.ics" download="hackarun-2026.ics">
+      Adicionar à agenda
+      <Icon slot="icon" name="calendar" size={18} />
+    </Button>
+    {kickoffLabel && <p class="lobby__agenda-hint">Não perca a largada: {kickoffLabel}.</p>}
+  </div>
+</HudFrame>
+
+<style>
+  .lobby__head {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  .lobby__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .lobby__lead {
+    color: var(--text-muted);
+  }
+
+  .lobby__agenda {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--surface-line);
+  }
+
+  .lobby__agenda-hint {
+    color: var(--text-dim);
+    font-size: var(--fs-sm);
+  }
+</style>

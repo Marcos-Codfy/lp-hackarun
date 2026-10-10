@@ -1,0 +1,47 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+// etiqueta curta de HUD (skills, tópicos, datas)
+type Props = HTMLAttributes<'span'> & {
+  as?: 'span' | 'li' | 'p';
+  tone?: 'default' | 'accent' | 'time';
+};
+
+const { as: Tag = 'span', tone = 'default', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['chip', `chip--${tone}`, className]} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .chip {
+    --chip-line: var(--surface-line);
+    --chip-fg: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 1.75rem;
+    padding: var(--space-1) var(--space-3);
+    clip-path: var(--clip-btn);
+    background: rgb(4 11 24 / 0.55);
+    box-shadow: inset 0 0 0 1px var(--chip-line);
+    color: var(--chip-fg);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .chip--accent {
+    --chip-line: var(--line-strong);
+    --chip-fg: var(--c-cyan-soft);
+  }
+
+  .chip--time {
+    --chip-line: rgb(255 181 71 / 0.55);
+    --chip-fg: var(--time);
+  }
+</style>

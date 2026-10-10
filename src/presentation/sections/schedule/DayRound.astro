@@ -1,0 +1,124 @@
+---
+import type { EventDayDTO } from '@application/index';
+import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
+import SessionItem from './SessionItem.astro';
+
+interface Props {
+  day: EventDayDTO;
+  index: number;
+}
+
+const { day, index } = Astro.props;
+const label = new DayLabelFormatter().format(day.date);
+const round = String(index + 1).padStart(2, '0');
+const isFinal = day.stage === 'final';
+---
+
+<li class:list={['round', isFinal && 'round--final']} data-timeline-node>
+  <span class="round__node" aria-hidden="true"></span>
+  <div class="round__head">
+    <p class="hud-label round__code">Round {round}</p>
+    <p class="round__date">
+      <time datetime={day.date}>
+        <span aria-hidden="true">{label.short}</span>
+        <span class="sr-only">{label.long}</span>
+      </time>
+    </p>
+  </div>
+  <h3 class="round__title">{day.title}</h3>
+  <p class="round__summary">{day.summary}</p>
+  <ul class="round__sessions" role="list">
+    {day.sessions.map((session) => (
+      <SessionItem session={session} />
+    ))}
+  </ul>
+</li>
+
+<style>
+  .round {
+    position: relative;
+    display: grid;
+    gap: var(--space-3);
+    padding-left: var(--space-6);
+  }
+
+  /* nó na linha do tempo; acende quando o scroll chega (classe vem do TimelineAnimator) */
+  .round__node {
+    position: absolute;
+    top: 0.35rem;
+    left: 0;
+    width: 13px;
+    height: 13px;
+    transform: translateX(-6px) rotate(45deg);
+    background: var(--c-deep);
+    border: 1px solid var(--line-strong);
+    transition:
+      background var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .round.is-reached .round__node {
+    background: var(--c-cyan);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .round--final.is-reached .round__node {
+    background: var(--time);
+    border-color: var(--time);
+    box-shadow: var(--glow-amber);
+  }
+
+  .round__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .round__date {
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--text);
+  }
+
+  .round--final .round__code {
+    color: var(--time);
+  }
+
+  .round__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .round__summary {
+    max-width: 38rem;
+    color: var(--text-muted);
+  }
+
+  .round__sessions {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  @media (min-width: 1024px) {
+    .round {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      column-gap: var(--space-7);
+      padding-left: var(--space-7);
+    }
+
+    .round__head,
+    .round__title,
+    .round__summary {
+      grid-column: 1;
+    }
+
+    .round__sessions {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+      margin-top: 0;
+    }
+  }
+</style>

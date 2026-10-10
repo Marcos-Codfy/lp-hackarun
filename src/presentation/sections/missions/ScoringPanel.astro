@@ -1,0 +1,120 @@
+---
+import type { ScoringDTO } from '@application/index';
+import HudFrame from '@presentation/components/ui/HudFrame.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+
+interface Props {
+  scoring: ScoringDTO;
+}
+
+const { scoring } = Astro.props;
+---
+
+<HudFrame label="// Pontuação por estação" class="scoring" data-reveal="up">
+  <div class="scoring__grid">
+    <div class="scoring__intro">
+      <h3 class="scoring__title">
+        Até <span class="scoring__max tabular">{scoring.maxPoints}</span> pontos por estação
+      </h3>
+      <p class="section-note section-note--time scoring__note">
+        <Icon name="clock" />
+        <span>
+          <strong>O tempo nunca vale mais que a correção técnica.</strong> A missão final tem avaliação
+          própria da banca.
+        </span>
+      </p>
+    </div>
+
+    <ul class="scoring__bars" role="list" data-bars>
+      {scoring.criteria.map((criterion) => (
+        <li class:list={['bar', criterion.key === 'time' && 'bar--time']}>
+          <div class="bar__head">
+            <span class="bar__label">{criterion.label}</span>
+            <span class="bar__pts tabular">{criterion.points} pts</span>
+          </div>
+          <span class="bar__track" aria-hidden="true">
+            <span class="bar__fill" data-bar-fill style={`--share: ${criterion.share}`} />
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</HudFrame>
+
+<style>
+  .scoring__grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .scoring__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .scoring__max {
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .scoring__note {
+    margin-top: var(--space-4);
+  }
+
+  .scoring__bars {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .bar__head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+    font-size: var(--fs-sm);
+  }
+
+  .bar__label {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .bar__pts {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--c-cyan-soft);
+  }
+
+  .bar__track {
+    display: block;
+    height: 6px;
+    background: rgb(127 231 255 / 0.08);
+  }
+
+  .bar__fill {
+    display: block;
+    width: calc(var(--share) * 100%);
+    height: 100%;
+    background: var(--grad-energy);
+    box-shadow: 0 0 12px rgb(0 207 255 / 0.5);
+    transform-origin: left center;
+  }
+
+  .bar--time .bar__pts {
+    color: var(--time);
+  }
+
+  .bar--time .bar__fill {
+    background: var(--time);
+    box-shadow: var(--glow-amber);
+  }
+
+  @media (min-width: 1024px) {
+    .scoring__grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: center;
+      gap: var(--space-8);
+    }
+  }
+</style>

@@ -1,0 +1,58 @@
+---
+// "role para largar": dica visual de scroll, decorativa
+---
+
+<div class="scroll-cue" aria-hidden="true">
+  <span class="hud-label">Role para largar</span>
+  <span class="scroll-cue__line"></span>
+</div>
+
+<style>
+  .scroll-cue {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+  }
+
+  .scroll-cue .hud-label {
+    color: var(--text-dim);
+  }
+
+  .scroll-cue__line {
+    position: relative;
+    width: 1px;
+    height: 2.75rem;
+    overflow: hidden;
+    background: var(--surface-line);
+  }
+
+  .scroll-cue__line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent, var(--c-cyan));
+    animation: cue-run 1.8s var(--ease-in-out) infinite;
+  }
+
+  @keyframes cue-run {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  /* tela baixa (celular deitado, notebook pequeno): sai pra não apertar o hero */
+  @media (max-height: 720px) {
+    .scroll-cue {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-cue__line::after {
+      animation: none;
+    }
+  }
+</style>

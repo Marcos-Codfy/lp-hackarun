@@ -8,19 +8,28 @@ interface Props {
   lead?: string;
   align?: 'start' | 'center';
   level?: 'h2' | 'h3';
+  // rótulo HUD completo, quando o padrão "// código — eyebrow" não serve
+  hud?: string;
 }
 
-const { code, eyebrow, title, id, lead, align = 'start', level = 'h2' } = Astro.props;
+const { code, eyebrow, title, id, lead, align = 'start', level = 'h2', hud } = Astro.props;
 const Heading = level;
 ---
 
 <header class:list={['section-heading', `section-heading--${align}`]} data-reveal="heading">
-  <p class="hud-label section-heading__eyebrow">
-    <span aria-hidden="true">// {code} —</span>
-    {eyebrow}
+  <p class="hud-label section-heading__eyebrow" data-reveal-part>
+    {hud ?? (
+      <>
+        <span aria-hidden="true">// {code} —</span> {eyebrow}
+      </>
+    )}
   </p>
-  <Heading class="section-heading__title" id={id} set:html={title} />
-  {lead && <p class="section-heading__lead">{lead}</p>}
+  <Heading class="section-heading__title" id={id} data-reveal-title set:html={title} />
+  {lead && (
+    <p class="section-heading__lead" data-reveal-part>
+      {lead}
+    </p>
+  )}
 </header>
 
 <style>
@@ -36,8 +45,31 @@ const Heading = level;
     justify-items: center;
   }
 
+  .section-heading__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  /* régua curta depois do código: assinatura de HUD */
+  .section-heading__eyebrow::after {
+    content: '';
+    width: 2.5rem;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  .section-heading--center .section-heading__eyebrow::before {
+    content: '';
+    width: 2.5rem;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
   .section-heading__title {
     font-size: var(--fs-3xl);
+    /* sombra escura: título legível mesmo com partículas atrás */
+    text-shadow: 0 2px 28px rgb(4 11 24 / 0.85);
   }
 
   /* destaque dentro do título: <em>palavra</em> */
@@ -47,11 +79,13 @@ const Heading = level;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    text-shadow: none;
   }
 
   .section-heading__lead {
     max-width: 40rem;
     color: var(--text-muted);
     font-size: var(--fs-lg);
+    text-shadow: 0 1px 16px rgb(4 11 24 / 0.9);
   }
 </style>

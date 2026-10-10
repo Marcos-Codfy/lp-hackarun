@@ -1,0 +1,62 @@
+---
+import CutCard from '@presentation/components/ui/CutCard.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import type { IconName } from '@presentation/components/ui/icons';
+
+interface Props {
+  index: number;
+  icon: IconName;
+  title: string;
+  text: string;
+}
+
+const { index, icon, title, text } = Astro.props;
+const code = `P.${String(index + 1).padStart(2, '0')}`;
+---
+
+<CutCard as="li" interactive class="pillar">
+  <div class="pillar__top">
+    <span class="pillar__icon">
+      <Icon name={icon} size={22} />
+    </span>
+    <span class="hud-label pillar__code" aria-hidden="true">
+      {code}
+    </span>
+  </div>
+  <h3 class="pillar__title">{title}</h3>
+  <p class="pillar__text">{text}</p>
+</CutCard>
+
+<style>
+  .pillar__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-5);
+  }
+
+  .pillar__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    clip-path: var(--clip-btn);
+    background: rgb(0 207 255 / 0.1);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    color: var(--c-cyan);
+  }
+
+  .pillar__code {
+    color: var(--text-dim);
+  }
+
+  .pillar__title {
+    margin-bottom: var(--space-3);
+    font-size: var(--fs-xl);
+  }
+
+  .pillar__text {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+</style>

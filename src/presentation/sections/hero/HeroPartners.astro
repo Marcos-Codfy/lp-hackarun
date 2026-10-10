@@ -1,0 +1,43 @@
+---
+// linha de autoridade: quem realiza e quem é parceiro
+interface Props {
+  organizer: string;
+  partner: string;
+}
+
+const { organizer, partner } = Astro.props;
+---
+
+<p class="hero-partners">
+  <span>
+    <span class="hud-label">Realização</span> {organizer}
+  </span>{' '}
+  <span class="hero-partners__sep" aria-hidden="true"></span>
+  <span class="sr-only">·</span>{' '}
+  <span>
+    <span class="hud-label">Parceria</span> {partner}
+  </span>
+</p>
+
+<style>
+  .hero-partners {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .hero-partners .hud-label {
+    margin-right: var(--space-2);
+    color: var(--text-dim);
+  }
+
+  .hero-partners__sep {
+    width: 1px;
+    height: 1rem;
+    background: var(--surface-line);
+  }
+</style>

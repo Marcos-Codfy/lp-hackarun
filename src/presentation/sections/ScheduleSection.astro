@@ -1,20 +1,110 @@
 ---
-// STUB — conteúdo da seção será implementado
 import type { LandingPageDTO } from '@application/index';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import DayRound from './schedule/DayRound.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { data: _data } = Astro.props;
+const { schedule } = Astro.props.data;
+const days = schedule.length;
 ---
 
 <section
   id="programacao"
-  class="section"
+  class="section schedule"
   data-scene="arena"
   data-checkpoint="Programação"
   aria-labelledby="programacao-title"
 >
-  <h2 id="programacao-title">Programação</h2>
+  <div class="container section-stack">
+    <div class="schedule__head">
+      <SectionHeading
+        id="programacao-title"
+        code="04"
+        eyebrow="Programação"
+        title={`${days} dias. <em>${days} rounds.</em>`}
+        lead="Capacitação, lançamento, corrida e final. Cada noite é um round, e o último termina no palco."
+      />
+      <div class="schedule__agenda" data-reveal="up">
+        <Button variant="ghost" href="/hackarun-2026.ics" download="hackarun-2026.ics">
+          Adicionar à agenda
+          <Icon slot="icon" name="calendar" size={18} />
+        </Button>
+        <p class="schedule__agenda-hint">Arquivo .ics com todos os horários</p>
+      </div>
+    </div>
+
+    <div class="timeline" data-timeline>
+      <span class="timeline__rail" aria-hidden="true">
+        <span class="timeline__fill" data-timeline-fill></span>
+      </span>
+      <ol class="timeline__list" role="list">
+        {schedule.map((day, index) => (
+          <DayRound day={day} index={index} />
+        ))}
+      </ol>
+    </div>
+  </div>
 </section>
+
+<style>
+  .schedule__head {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .schedule__agenda {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+  }
+
+  .schedule__agenda-hint {
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+  }
+
+  .timeline {
+    position: relative;
+  }
+
+  /* trilho da linha do tempo; o preenchimento "desenha" com o scroll */
+  .timeline__rail {
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: var(--surface-line);
+  }
+
+  .timeline__fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, var(--c-cyan), var(--c-royal) 70%, var(--time));
+    box-shadow: 0 0 10px rgb(0 207 255 / 0.6);
+    transform-origin: top center;
+  }
+
+  .timeline__list {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 1024px) {
+    .schedule__head {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+    }
+
+    .schedule__agenda {
+      justify-items: end;
+      text-align: end;
+    }
+  }
+</style>

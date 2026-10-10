@@ -1,0 +1,119 @@
+---
+import type { RegistrationDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import HudCorners from '@presentation/components/ui/HudCorners.astro';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+import { NAV_LINKS } from './navLinks';
+
+// painel de tela cheia do mobile (padrão disclosure, não dialog: o botão de fechar fica no header)
+// abre/fecha pelo MobileMenuController: foco, Esc, scroll lock e resto da página inert
+interface Props {
+  id: string;
+  registration: RegistrationDTO;
+}
+
+const { id, registration } = Astro.props;
+const cta = new RegistrationCopy().cta(registration.status);
+// CTA de inscrição é interceptado pelo módulo de inscrição; o resto passa pelo smooth scroll
+const ctaAttrs = cta.isRegistration ? { registrationCta: 'menu' } : { 'data-nav-link': true };
+---
+
+<div id={id} class="mobile-menu" hidden data-menu-panel>
+  <div class="container mobile-menu__inner">
+    <HudCorners size={16} />
+    <p class="hud-label" aria-hidden="true">
+      // Navegação
+    </p>
+    <nav aria-label="Menu principal">
+      <ol class="mobile-menu__list" role="list">
+        {NAV_LINKS.map((link, index) => (
+          <li>
+            <a class="mobile-menu__link" href={link.href} data-nav-link>
+              <span class="hud-label" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span>{link.label}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <div class="mobile-menu__cta">
+      <Button size="lg" href={cta.href} {...ctaAttrs}>
+        {cta.label}
+      </Button>
+    </div>
+    <p class="hud-label mobile-menu__meta" aria-hidden="true">
+      Unicatólica · Palmas–TO
+    </p>
+  </div>
+</div>
+
+<style>
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: calc(var(--header-h) + var(--space-4)) var(--space-6);
+    background:
+      radial-gradient(80% 50% at 100% 0%, rgb(30 123 255 / 0.18), transparent 70%), rgb(4 11 24 / 0.97);
+    animation: menu-in var(--dur) var(--ease-out);
+  }
+
+  .mobile-menu__inner {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-6);
+    min-height: 100%;
+    padding: var(--space-5);
+  }
+
+  .mobile-menu__list {
+    display: grid;
+  }
+
+  .mobile-menu__link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    min-height: 56px;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--surface-line);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .mobile-menu__link:hover,
+  .mobile-menu__link[aria-current='true'] {
+    color: var(--c-cyan);
+  }
+
+  .mobile-menu__cta {
+    display: grid;
+  }
+
+  .mobile-menu__meta {
+    color: var(--text-dim);
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-menu {
+      display: none;
+    }
+  }
+</style>

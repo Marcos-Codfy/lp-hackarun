@@ -1,20 +1,119 @@
 ---
-// STUB — conteúdo da seção será implementado
 import type { LandingPageDTO } from '@application/index';
+import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import LockedCard from '@presentation/components/ui/LockedCard.astro';
+import HudFrame from '@presentation/components/ui/HudFrame.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
+import CrewCard from './crew/CrewCard.astro';
+import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { data: _data } = Astro.props;
+const { speakers } = Astro.props.data;
+const roles = new SpeakerRoleLabel();
 ---
 
 <section
   id="mentores"
-  class="section"
+  class="section crew"
   data-scene="arena"
   data-checkpoint="Mentores"
   aria-labelledby="mentores-title"
 >
-  <h2 id="mentores-title">Mentores</h2>
+  <div class="container section-stack">
+    <SectionHeading
+      id="mentores-title"
+      code="05"
+      eyebrow="Mentores"
+      title="Quem vai estar <em>do seu lado</em>"
+      lead="Instrutores nos minicursos, egressos na mentoria das equipes e uma banca de olho em cada entrega. Os nomes saem aos poucos."
+    />
+
+    <ul class="crew__grid" role="list" data-reveal-group>
+      {speakers.map((speaker) =>
+        speaker.revealed ? (
+          <CrewCard speaker={speaker} role={roles.of(speaker.role)} />
+        ) : (
+          <LockedCard label={roles.of(speaker.role)} hint={speaker.topic} />
+        ),
+      )}
+    </ul>
+
+    <HudFrame label="// Regras da mentoria" class="crew__rules" data-reveal="up">
+      <ul class="crew__rules-list" role="list">
+        <li>
+          <Icon name="chat" size={22} />
+          <p>
+            <strong>
+              O mentor orienta arquitetura, planejamento e boas práticas, mas não escreve a solução.
+            </strong>{' '}
+            Presencial ou por vídeo, sem gabarito.
+          </p>
+        </li>
+        <li>
+          <Icon name="trophy" size={22} />
+          <p>
+            <strong>O mentor da equipe campeã também é premiado.</strong> Escolha bem quem vai correr com
+            vocês.
+          </p>
+        </li>
+      </ul>
+    </HudFrame>
+  </div>
 </section>
+
+<style>
+  .crew__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .crew__rules-list {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .crew__rules-list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  .crew__rules-list :global(.icon) {
+    color: var(--c-cyan);
+  }
+
+  .crew__rules-list p {
+    color: var(--text-muted);
+  }
+
+  .crew__rules-list strong {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  @media (min-width: 640px) {
+    .crew__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .crew__grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .crew__rules-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-7);
+    }
+  }
+</style>

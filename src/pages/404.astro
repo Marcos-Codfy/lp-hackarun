@@ -1,0 +1,134 @@
+---
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import Wordmark from '@presentation/components/ui/Wordmark.astro';
+import HudCorners from '@presentation/components/ui/HudCorners.astro';
+import { serverContainer } from '@composition/server';
+import type { AppConfig } from '@presentation/app/AppConfig';
+import '@presentation/sections/sections.css';
+
+const { event } = await serverContainer().getLandingPage.execute();
+
+const appConfig: AppConfig = {
+  milestones: event.milestones,
+  registration: event.registration,
+  teamsEndpoint: event.registration.endpoint,
+  audioCueUrl: '/audio/cta-globe.mp3',
+};
+
+const seo = {
+  title: 'Página não encontrada · HackaRun 2026',
+  description: 'Essa rota não existe. Volte para a largada do HackaRun 2026.',
+  path: '/404',
+};
+---
+
+<BaseLayout seo={seo} appConfig={appConfig}>
+  <header class="lost__header">
+    <a class="lost__brand" href="/" aria-label="HackaRun 2026, página inicial">
+      <Wordmark size="sm" />
+    </a>
+  </header>
+  <main id="conteudo">
+    <section
+      id="perdido"
+      class="section lost"
+      data-scene="core"
+      data-checkpoint="Fora da rota"
+      aria-labelledby="perdido-title"
+    >
+      <div class="container lost__frame">
+        <HudCorners size={18} />
+        <p class="hud-label">
+          <span aria-hidden="true">// </span>Erro 404 · checkpoint não encontrado
+        </p>
+        <p class="lost__code" aria-hidden="true">
+          404
+        </p>
+        <h1 id="perdido-title" class="lost__title">
+          Você saiu da <em>rota</em>.
+        </h1>
+        <p class="lost__text">
+          Essa página não existe. Ou um NPC escondeu ela bem demais. De qualquer jeito, a corrida continua na
+          largada.
+        </p>
+        <Button size="lg" href="/">
+          Voltar para a largada
+          <Icon slot="icon" name="arrow-right" />
+        </Button>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .lost__header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-header);
+    display: flex;
+    align-items: center;
+    height: var(--header-h);
+    padding-inline: var(--gutter);
+  }
+
+  .lost__brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+  }
+
+  .lost {
+    display: grid;
+    align-items: center;
+    min-height: 100svh;
+  }
+
+  .lost::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(ellipse 60% 45% at 50% 50%, rgb(4 11 24 / 0.65), transparent 100%);
+  }
+
+  .lost__frame {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-5);
+    padding: var(--space-7) var(--space-5);
+    text-align: center;
+  }
+
+  .lost__code {
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 3rem + 18vw, 16rem);
+    font-weight: 900;
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--c-cyan);
+    text-shadow: 0 0 40px rgb(0 207 255 / 0.35);
+    transform: skewX(-8deg);
+  }
+
+  .lost__title {
+    font-size: var(--fs-3xl);
+  }
+
+  .lost__title em {
+    font-style: normal;
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lost__text {
+    max-width: 34rem;
+    color: var(--text-muted);
+    font-size: var(--fs-lg);
+  }
+</style>
