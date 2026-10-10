@@ -1,0 +1,23 @@
+[
+  {
+    "id": "champion",
+    "rank": 1,
+    "title": "Equipe campeã",
+    "description": "Troféu, certificados e o prêmio principal, entregues no palco do Capim Dourado.",
+    "reward": null
+  },
+  {
+    "id": "podium",
+    "rank": 2,
+    "title": "Equipes classificadas",
+    "description": "Troféus, certificados e prêmios para as equipes do pódio.",
+    "reward": null
+  },
+  {
+    "id": "mentor",
+    "rank": 3,
+    "title": "Mentor da equipe campeã",
+    "description": "Prêmio individual para o mentor egresso oficialmente vinculado à equipe vencedora.",
+    "reward": null
+  }
+]

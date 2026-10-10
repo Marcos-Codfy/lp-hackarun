@@ -1,0 +1,138 @@
+{
+  "id": "hackarun-2026",
+  "name": "HackaRun",
+  "edition": "2026",
+  "tagline": "Hackathon de Engenharia de Software e IA",
+  "city": "Palmas – TO",
+  "timezone": "America/Araguaina",
+  "venues": [
+    {
+      "id": "unicatolica",
+      "name": "Centro Universitário Católica do Tocantins",
+      "shortName": "Unicatólica",
+      "city": "Palmas – TO",
+      "role": "host",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Unicat%C3%B3lica+Palmas+TO"
+    },
+    {
+      "id": "capim-dourado",
+      "name": "Capim Dourado Shopping",
+      "shortName": "Capim Dourado",
+      "city": "Palmas – TO",
+      "role": "final",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Capim+Dourado+Shopping+Palmas+TO"
+    }
+  ],
+  "milestones": [
+    { "key": "kickoff", "label": "O HackaRun começa em", "at": "2026-11-11T19:00:00-03:00" },
+    { "key": "submission", "label": "Entrega final em", "at": "2026-11-14T15:00:00-03:00" },
+    { "key": "ceremony", "label": "A premiação começa em", "at": "2026-11-14T18:00:00-03:00" }
+  ],
+  "registration": {
+    "endpoint": "",
+    "closesAt": null,
+    "capacity": null,
+    "teamSize": { "min": 2, "max": 5 }
+  },
+  "days": [
+    {
+      "id": "day-1",
+      "date": "2026-11-11",
+      "stage": "training",
+      "title": "Capacitação",
+      "summary": "Minicursos com prática orientada pra todo mundo chegar afiado na largada.",
+      "sessions": [
+        {
+          "id": "workshops",
+          "title": "Minicursos de capacitação",
+          "kind": "workshop",
+          "start": "19:00",
+          "end": "22:00",
+          "venueId": "unicatolica",
+          "description": "Práticas orientadas em laboratório com professores, instrutores e egressos convidados.",
+          "topics": [
+            "Algoritmos e programação",
+            "Testes de software",
+            "Git e colaboração",
+            "Análise de dados",
+            "Fundamentos de IA",
+            "Uso responsável de assistentes de código"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "day-2",
+      "date": "2026-11-12",
+      "stage": "launch",
+      "title": "Lançamento",
+      "summary": "O problema é revelado, as equipes são oficializadas e o relógio começa a correr.",
+      "sessions": [
+        {
+          "id": "launch",
+          "title": "Lançamento do desafio",
+          "kind": "launch",
+          "start": "19:00",
+          "end": "22:00",
+          "venueId": "unicatolica",
+          "description": "Apresentação de instrutores e mentores, regulamento, critérios de pontuação e credenciamento das equipes.",
+          "topics": [
+            "Problema central revelado",
+            "Credenciamento e QR Codes",
+            "Regras de uso de IA",
+            "Critérios de desempate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "day-3",
+      "date": "2026-11-13",
+      "stage": "race",
+      "title": "Corrida de missões",
+      "summary": "Estações técnicas espalhadas por salas e laboratórios. Cada pista vale pontos.",
+      "sessions": [
+        {
+          "id": "race",
+          "title": "Corrida de missões técnicas",
+          "kind": "challenge",
+          "start": "19:00",
+          "end": "22:00",
+          "venueId": "unicatolica",
+          "description": "Rotas rotativas entre salas e laboratórios, com monitores acompanhando cada estação.",
+          "topics": ["7 estações classificatórias", "NPCs com pistas", "Mentoria por equipe"]
+        }
+      ]
+    },
+    {
+      "id": "day-4",
+      "date": "2026-11-14",
+      "stage": "final",
+      "title": "Grande final",
+      "summary": "Últimas horas de código, entrega até as 15h e a premiação no Capim Dourado Shopping.",
+      "sessions": [
+        {
+          "id": "submission",
+          "title": "Desenvolvimento e entrega final",
+          "kind": "deadline",
+          "start": null,
+          "startHint": "Manhã",
+          "end": "15:00",
+          "venueId": "unicatolica",
+          "description": "Continuação dos desafios e submissão da solução final (repositório, documentação e demo), impreterivelmente até as 15h.",
+          "topics": ["Submissão com carimbo de horário", "Homologação pela banca"]
+        },
+        {
+          "id": "ceremony",
+          "title": "Show ao vivo + premiação",
+          "kind": "ceremony",
+          "start": "18:00",
+          "end": null,
+          "venueId": "capim-dourado",
+          "description": "Palco iluminado, telão gigante, banda ao vivo e o anúncio dos campeões.",
+          "topics": ["Banda ao vivo", "Telão com o ranking", "Troféus e prêmios"]
+        }
+      ]
+    }
+  ]
+}

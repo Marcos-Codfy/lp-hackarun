@@ -1,0 +1,56 @@
+[
+  {
+    "id": "what",
+    "category": "Evento",
+    "question": "O que é o HackaRun?",
+    "answer": "Um hackathon em formato de corrida: minicursos, mentoria de egressos e uma sequência de missões técnicas espalhadas por salas e laboratórios da Unicatólica. A grande final e a premiação acontecem no Capim Dourado Shopping."
+  },
+  {
+    "id": "when-where",
+    "category": "Evento",
+    "question": "Quando e onde acontece?",
+    "answer": "De 11 a 14 de novembro de 2026. Nos dias 11, 12 e 13 é das 19h às 22h, na Unicatólica. No dia 14 os desafios seguem pela manhã até a entrega das 15h, e a premiação começa às 18h no Capim Dourado Shopping."
+  },
+  {
+    "id": "npcs",
+    "category": "Corrida",
+    "question": "Quem são os NPCs?",
+    "answer": "Personagens espalhados pela corrida que guardam pistas sobre o desafio. Encontrar, conversar e decifrar o que eles dizem faz parte da missão. Onde eles estão? Isso também é uma pista."
+  },
+  {
+    "id": "running",
+    "category": "Corrida",
+    "question": "Vou precisar correr pelos corredores?",
+    "answer": "Não. A corrida é contra o relógio, não pelos corredores: o deslocamento entre as estações é sempre caminhando, sem correria em corredores e escadas."
+  },
+  {
+    "id": "scoring",
+    "category": "Corrida",
+    "question": "Como funciona a pontuação?",
+    "answer": "Cada uma das sete estações classificatórias vale até 100 pontos: solução correta (60), trabalho em equipe (20), criatividade e estratégia (10) e bônus de tempo (10). A missão final tem avaliação própria pela banca. O tempo nunca vale mais que a correção técnica."
+  },
+  {
+    "id": "ai",
+    "category": "Regras",
+    "question": "Posso usar IA durante a competição?",
+    "answer": "Pode, seguindo as regras de uso apresentadas no lançamento, iguais para todas as equipes. A organização prevê acesso a ferramentas como Claude e Codex, conforme disponibilidade e licenciamento."
+  },
+  {
+    "id": "mentoring",
+    "category": "Regras",
+    "question": "Como funciona a mentoria?",
+    "answer": "Cada equipe pode ter um mentor egresso de referência, que orienta arquitetura, planejamento, boas práticas e comunicação, presencialmente ou por vídeo. O mentor não escreve a solução nem entrega gabarito. E o mentor da equipe campeã também é premiado."
+  },
+  {
+    "id": "delivery",
+    "category": "Regras",
+    "question": "O que precisa ser entregue no final?",
+    "answer": "A solução final é submetida até as 15h do dia 14/11, com link do repositório, documentação e, se quiser, uma demo em vídeo. Depois do prazo, a banca confere as entregas e homologa os resultados antes da premiação."
+  },
+  {
+    "id": "signup",
+    "category": "Inscrição",
+    "question": "Como faço minha inscrição?",
+    "answer": "Pelo botão de inscrição aqui da página. Regulamento, elegibilidade e formação das equipes são publicados pela organização junto com o link oficial."
+  }
+]

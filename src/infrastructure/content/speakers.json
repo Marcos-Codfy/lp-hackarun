@@ -1,0 +1,50 @@
+[
+  {
+    "id": "instructor-1",
+    "name": null,
+    "role": "instructor",
+    "headline": "Instrutor · minicursos",
+    "topic": null,
+    "avatarUrl": null
+  },
+  {
+    "id": "instructor-2",
+    "name": null,
+    "role": "instructor",
+    "headline": "Instrutor · minicursos",
+    "topic": null,
+    "avatarUrl": null
+  },
+  {
+    "id": "mentor-1",
+    "name": null,
+    "role": "mentor",
+    "headline": "Mentor egresso",
+    "topic": null,
+    "avatarUrl": null
+  },
+  {
+    "id": "mentor-2",
+    "name": null,
+    "role": "mentor",
+    "headline": "Mentor egresso",
+    "topic": null,
+    "avatarUrl": null
+  },
+  {
+    "id": "speaker-1",
+    "name": null,
+    "role": "speaker",
+    "headline": "Palestra convidada",
+    "topic": null,
+    "avatarUrl": null
+  },
+  {
+    "id": "judge-1",
+    "name": null,
+    "role": "judge",
+    "headline": "Banca avaliadora",
+    "topic": null,
+    "avatarUrl": null
+  }
+]

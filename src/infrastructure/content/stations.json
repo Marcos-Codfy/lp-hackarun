@@ -1,0 +1,85 @@
+{
+  "scoring": {
+    "maxPoints": 100,
+    "criteria": [
+      { "key": "correctness", "label": "Solução correta", "points": 60 },
+      { "key": "teamwork", "label": "Trabalho em equipe", "points": 20 },
+      { "key": "creativity", "label": "Criatividade e estratégia", "points": 10 },
+      { "key": "time", "label": "Bônus de tempo", "points": 10 }
+    ]
+  },
+  "stations": [
+    {
+      "id": "secret-code",
+      "order": 1,
+      "title": "Código Secreto",
+      "challenge": "Resolver enigmas de lógica e algoritmos e registrar a chave de validação.",
+      "space": "Sala de aula",
+      "kind": "qualifier",
+      "skills": ["Lógica", "Algoritmos"]
+    },
+    {
+      "id": "code-red",
+      "order": 2,
+      "title": "Código Vermelho",
+      "challenge": "Corrigir defeitos no código e provar com testes passando.",
+      "space": "Laboratório",
+      "kind": "qualifier",
+      "skills": ["Debug", "Testes"]
+    },
+    {
+      "id": "hackers",
+      "order": 3,
+      "title": "Hackers em Ação",
+      "challenge": "Investigar um incidente fictício em ambiente isolado e apontar as evidências.",
+      "space": "Laboratório de redes",
+      "kind": "qualifier",
+      "skills": ["Segurança", "Redes"]
+    },
+    {
+      "id": "ai",
+      "order": 4,
+      "title": "Inteligência Artificial",
+      "challenge": "Usar IA, revisar criticamente o que ela entrega e justificar as melhorias.",
+      "space": "Sala multimídia",
+      "kind": "qualifier",
+      "skills": ["IA", "Pensamento crítico"]
+    },
+    {
+      "id": "data-detectives",
+      "order": 5,
+      "title": "Detetives de Dados",
+      "challenge": "Analisar um conjunto de dados, limpar inconsistências e chegar a uma conclusão.",
+      "space": "Laboratório",
+      "kind": "qualifier",
+      "skills": ["Dados", "Análise"]
+    },
+    {
+      "id": "bug-hunters",
+      "order": 6,
+      "title": "Caçadores de Bugs",
+      "challenge": "Encontrar, reproduzir e priorizar falhas de um aplicativo de teste.",
+      "space": "Laboratório",
+      "kind": "qualifier",
+      "skills": ["QA", "Priorização"]
+    },
+    {
+      "id": "startup-15",
+      "order": 7,
+      "title": "Startup em 15 Minutos",
+      "challenge": "Propor uma solução e defender um pitch objetivo.",
+      "space": "Sala de inovação",
+      "kind": "qualifier",
+      "skills": ["Produto", "Pitch"]
+    },
+    {
+      "id": "final-challenge",
+      "order": 8,
+      "title": "Grande Desafio Final",
+      "challenge": "Juntar todas as pistas e o que aprendeu num protótipo ou solução final.",
+      "space": "Laboratório ou auditório",
+      "kind": "final",
+      "skills": ["Integração", "Entrega"]
+    }
+  ]
+}

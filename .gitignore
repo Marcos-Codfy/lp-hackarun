@@ -1,0 +1,27 @@
+# deps
+node_modules/
+
+# build
+dist/
+.astro/
+coverage/
+docs/dist/
+
+# env
+.env
+.env.*
+!.env.example
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# logs
+npm-debug.log*
+*.log
+
+# claude local
+.claude/
