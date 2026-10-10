@@ -6,7 +6,10 @@ import {
   type GatewayFailure,
   type RegistrationGateway,
   type RegistrationPayload,
+  type SubmissionMeta,
 } from '../ports/RegistrationGateway';
+
+const DEFAULT_META: SubmissionMeta = { honeypot: '', elapsedMs: 0 };
 
 export type SubmitRegistrationResult =
   | { status: 'invalid'; errors: RegistrationErrors }
@@ -38,12 +41,15 @@ export class SubmitRegistration {
     return result.ok ? {} : result.error;
   }
 
-  async execute(input: RegistrationInput): Promise<SubmitRegistrationResult> {
+  async execute(
+    input: RegistrationInput,
+    meta: SubmissionMeta = DEFAULT_META,
+  ): Promise<SubmitRegistrationResult> {
     const result = TeamRegistration.create(input, this.teamSize);
     if (!result.ok) return { status: 'invalid', errors: result.error };
 
     try {
-      const receipt = await this.gateway.submit(this.toPayload(result.value));
+      const receipt = await this.gateway.submit(this.toPayload(result.value, meta));
       return { status: 'success', protocol: receipt.protocol };
     } catch (error) {
       const reason = error instanceof RegistrationGatewayError ? error.kind : 'network';
@@ -51,7 +57,7 @@ export class SubmitRegistration {
     }
   }
 
-  private toPayload(registration: TeamRegistration): RegistrationPayload {
+  private toPayload(registration: TeamRegistration, meta: SubmissionMeta): RegistrationPayload {
     return {
       mode: registration.mode,
       teamName: registration.teamName,
@@ -59,7 +65,9 @@ export class SubmitRegistration {
       members: registration.members.map((m) => ({ ...m })),
       accessibilityNeeds: registration.accessibilityNeeds,
       submittedAt: this.clock.now().toISOString(),
-      source: 'landing-page',
+      source: meta.source ?? 'landing-page',
+      honeypot: meta.honeypot,
+      elapsedMs: Math.max(0, Math.round(meta.elapsedMs)),
     };
   }
 }

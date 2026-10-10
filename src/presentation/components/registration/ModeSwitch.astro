@@ -1,0 +1,118 @@
+---
+// modalidade: equipe pronta ou inscrição individual (radio group nativo, setas funcionam sozinhas)
+interface Props {
+  min: number;
+  max: number;
+}
+
+const { min, max } = Astro.props;
+const options = [
+  { value: 'team', title: 'Tenho equipe', text: `Inscreva a equipe completa, de ${min} a ${max} pessoas.` },
+  {
+    value: 'solo',
+    title: 'Quero entrar numa equipe',
+    text: 'Inscrição individual, sem equipe definida ainda.',
+  },
+];
+---
+
+<fieldset class="mode">
+  <legend class="mode__legend">Modalidade</legend>
+  <div class="mode__options">
+    {options.map((o, i) => (
+      <label class="mode__option">
+        <input class="mode__input" type="radio" name="mode" value={o.value} checked={i === 0} data-reg-mode />
+        <span class="mode__title">{o.title}</span>
+        <span class="mode__text">{o.text}</span>
+      </label>
+    ))}
+  </div>
+</fieldset>
+
+<style>
+  .mode {
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .mode__legend {
+    margin-bottom: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .mode__options {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .mode__option {
+    position: relative;
+    display: grid;
+    gap: var(--space-1);
+    min-height: 44px;
+    padding: var(--space-4) var(--space-5) var(--space-4) calc(var(--space-5) + 22px);
+    background: var(--surface-strong);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+    clip-path: var(--clip-card);
+    cursor: pointer;
+    transition: box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  /* o radio de verdade fica por cima, invisível: mantém teclado e leitor de tela */
+  .mode__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .mode__option::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--space-4) + 4px);
+    left: var(--space-4);
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--line-strong);
+    transform: rotate(45deg);
+  }
+
+  .mode__option:has(:checked) {
+    background: rgb(0 207 255 / 0.1);
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+
+  .mode__option:has(:checked)::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .mode__option:has(:focus-visible) {
+    box-shadow: inset 0 0 0 2px var(--focus);
+  }
+
+  .mode__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 800;
+    line-height: var(--lh-snug);
+    text-transform: uppercase;
+  }
+
+  .mode__text {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  @media (min-width: 40rem) {
+    .mode__options {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

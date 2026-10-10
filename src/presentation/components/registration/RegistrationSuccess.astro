@@ -1,0 +1,97 @@
+---
+// tela de sucesso: protocolo + próximos passos (a View preenche e foca o título)
+import Button from '@presentation/components/ui/Button.astro';
+---
+
+<div class="success" data-reg-success hidden>
+  <p class="success__code" aria-hidden="true">
+    // inscrição recebida
+  </p>
+  <h3 class="success__title" tabindex="-1" data-reg-success-title>
+    Tá dentro! Agora é com a organização.
+  </h3>
+  <div class="success__protocol-box">
+    <p class="success__label">Seu protocolo</p>
+    <p class="success__protocol" data-reg-protocol></p>
+  </div>
+  <ol class="success__steps">
+    <li>Guarde o protocolo: é ele que identifica a sua inscrição.</li>
+    <li>A organização confere os dados e confirma pelo e-mail ou WhatsApp informado.</li>
+    <li>Confirmada, a equipe aparece na lista de equipes aqui no site.</li>
+    <li>Salve as datas na agenda pra não perder a largada.</li>
+  </ol>
+  <div class="success__actions">
+    <Button href="/hackarun-2026.ics" variant="time" download="hackarun-2026.ics">
+      Adicionar à agenda
+    </Button>
+    <Button href="#equipes" variant="ghost">
+      Ver equipes
+    </Button>
+  </div>
+</div>
+
+<style>
+  .success {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .success__code {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--c-success);
+  }
+
+  .success__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .success__title:focus {
+    outline: none;
+  }
+
+  .success__protocol-box {
+    justify-self: start;
+    padding: var(--space-4) var(--space-5);
+    clip-path: var(--clip-card);
+    background: rgb(61 245 176 / 0.08);
+    box-shadow: inset 0 0 0 1px rgb(61 245 176 / 0.45);
+  }
+
+  .success__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .success__protocol {
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--c-success);
+    user-select: all;
+  }
+
+  .success__steps {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: 1.25rem;
+    color: var(--text-muted);
+  }
+
+  .success__steps li::marker {
+    color: var(--accent);
+    font-family: var(--font-mono);
+  }
+
+  .success__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

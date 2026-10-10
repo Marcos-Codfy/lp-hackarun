@@ -1,5 +1,118 @@
 ---
-// STUB — HUD de progresso da corrida (checkpoint atual + barra)
+// HUD da corrida: checkpoint atual, barra de progresso e contador de NPCs (HudView)
 ---
 
-<div class="hud-progress" data-hud></div>
+<div class="hud" data-hud>
+  <div class="hud__chip">
+    <p class="hud__row" aria-hidden="true">
+      <span class="hud__checkpoint" data-hud-checkpoint>
+        01 · Largada
+      </span>
+      <span class="hud__npc" data-hud-npc hidden>
+        NPC <span data-hud-npc-count>0</span>/3
+      </span>
+    </p>
+    <div class="hud__bar" aria-hidden="true">
+      <span class="hud__fill" data-hud-fill></span>
+    </div>
+    <p class="hud__secret" aria-hidden="true" data-hud-secret hidden></p>
+  </div>
+  <p class="sr-only" aria-live="polite" data-hud-live></p>
+</div>
+
+<style>
+  /* fica escondido até o JS montar: sem JS não tem HUD mentindo o checkpoint */
+  .hud {
+    position: fixed;
+    left: var(--space-3);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    z-index: var(--z-hud);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease-out);
+  }
+
+  .hud.is-ready {
+    opacity: 1;
+  }
+
+  .hud__chip {
+    display: grid;
+    gap: 6px;
+    min-width: 11rem;
+    max-width: min(20rem, calc(100vw - 2 * var(--space-3)));
+    padding: 7px 10px 8px;
+    background: var(--surface-strong);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+    clip-path: var(--clip-btn);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .hud__row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    white-space: nowrap;
+  }
+
+  .hud__npc {
+    color: var(--c-success);
+  }
+
+  .hud__bar {
+    height: 2px;
+    background: rgb(127 231 255 / 0.14);
+    overflow: hidden;
+  }
+
+  .hud__fill {
+    display: block;
+    height: 100%;
+    background: var(--grad-energy);
+    transform: scaleX(0);
+    transform-origin: left;
+    will-change: transform;
+  }
+
+  .hud__secret {
+    max-width: 18rem;
+    color: var(--time);
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    text-transform: none;
+    white-space: normal;
+  }
+
+  .hud__secret.is-revealed {
+    animation: hud-secret 900ms var(--ease-out);
+  }
+
+  @keyframes hud-secret {
+    from {
+      opacity: 0;
+      filter: blur(4px);
+    }
+  }
+
+  /* desktop: sobe pro topo, logo abaixo do header */
+  @media (min-width: 64rem) {
+    .hud {
+      top: calc(var(--header-h) + var(--space-3));
+      bottom: auto;
+      left: var(--gutter);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hud__secret.is-revealed {
+      animation: none;
+    }
+  }
+</style>

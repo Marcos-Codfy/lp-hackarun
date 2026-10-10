@@ -8,6 +8,16 @@ export interface RegistrationPayload {
   accessibilityNeeds: string;
   submittedAt: string;
   source: string;
+  // anti-spam: honeypot preenchido ou envio rápido demais = robô (o servidor decide)
+  honeypot: string;
+  elapsedMs: number;
+}
+
+// metadados do envio que não fazem parte da inscrição em si
+export interface SubmissionMeta {
+  honeypot: string;
+  elapsedMs: number;
+  source?: string;
 }
 
 export interface RegistrationReceipt {

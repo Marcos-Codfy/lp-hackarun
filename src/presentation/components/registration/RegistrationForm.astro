@@ -1,14 +1,161 @@
 ---
-// STUB — formulário de inscrição (RegistrationFormView + RegistrationFormViewModel)
+// lobby de inscrição (RegistrationFormView + RegistrationFormViewModel); grava na planilha via Apps Script
 import type { RegistrationDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import TextField from './TextField.astro';
+import ModeSwitch from './ModeSwitch.astro';
+import MemberList from './MemberList.astro';
+import ConsentField from './ConsentField.astro';
+import RegistrationNotice from './RegistrationNotice.astro';
+import RegistrationSuccess from './RegistrationSuccess.astro';
+// css global com prefixo .regform (as linhas de integrante são clonadas em runtime)
+import './registration-form.css';
 
 interface Props {
   registration: RegistrationDTO;
 }
 
 const { registration } = Astro.props;
+const { min, max } = registration.teamSize;
+// dev sem planilha: libera o formulário com o gateway em memória pra testar a UX
+const simulated = import.meta.env.DEV && registration.status === 'soon' && !registration.endpoint;
+const status = simulated ? 'open' : registration.status;
+const isOpen = status === 'open' || status === 'closing';
+const SEMESTERS = ['1º período', '2º período', '3º período', '4º período', '5º período'].concat([
+  '6º período',
+  '7º período',
+  '8º período',
+  '9º período',
+  '10º período',
+  'Outro',
+]);
+const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas de Informação'].concat([
+  'Análise e Desenvolvimento de Sistemas',
+  'Engenharia da Computação',
+  'Redes de Computadores',
+]);
 ---
 
-<form class="registration-form" data-registration-form data-status={registration.status}>
-  <p>Formulário de inscrição</p>
-</form>
+<div class="regform" data-registration-form data-status={status} data-team-min={min} data-team-max={max}>
+  <RegistrationNotice status={status} simulated={simulated} />
+  {status !== 'closed' && (
+    <div class="regform__panel">
+      <div class="regform__squad" aria-hidden="true">
+        <span>// formação</span>
+        <span data-reg-squad>Esquadrão 1/{max}</span>
+      </div>
+      <noscript>
+        <p class="regform__noscript">Pra se inscrever, ative o JavaScript do navegador.</p>
+      </noscript>
+      <form class="regform__form" data-reg-form novalidate inert={!isOpen} aria-label="Inscrição no HackaRun">
+        <fieldset class="regform__fields" disabled={!isOpen}>
+          <div class="regform__summary" data-error-summary hidden>
+            <p class="regform__summary-title" data-error-summary-title></p>
+            <ul class="regform__summary-list" data-error-summary-list></ul>
+          </div>
+          <ModeSwitch min={min} max={max} />
+          <div class="regform__block" data-mode-only="team">
+            <TextField
+              id="reg-team-name"
+              field="teamName"
+              label="Nome da equipe"
+              maxlength={40}
+              autocomplete="off"
+            />
+          </div>
+          <fieldset class="regform__group">
+            <legend class="regform__legend">Seus dados</legend>
+            <div class="regform__grid">
+              <TextField
+                id="reg-leader-name"
+                field="leader.name"
+                label="Nome completo"
+                autocomplete="name"
+                maxlength={80}
+                wide
+              />
+              <TextField
+                id="reg-leader-email"
+                field="leader.email"
+                label="E-mail"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                maxlength={120}
+              />
+              <TextField
+                id="reg-leader-phone"
+                field="leader.phone"
+                label="WhatsApp"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel-national"
+                placeholder="(63) 99999-9999"
+                maxlength={20}
+              />
+              <TextField
+                id="reg-leader-course"
+                field="leader.course"
+                label="Curso"
+                list="reg-courses"
+                autocomplete="off"
+                maxlength={80}
+              />
+              <TextField
+                id="reg-leader-semester"
+                field="leader.semester"
+                label="Período/semestre"
+                as="select"
+                options={SEMESTERS}
+                optional
+              />
+            </div>
+          </fieldset>
+          <MemberList min={min} max={max} />
+          <TextField
+            id="reg-accessibility"
+            field="accessibilityNeeds"
+            label="Alguma necessidade de acessibilidade?"
+            as="textarea"
+            maxlength={500}
+            hint="Ex.: intérprete de Libras, mesa adaptada, material ampliado."
+            optional
+          />
+          <ConsentField />
+          <div class="regform__hp" aria-hidden="true">
+            <label for="reg-website">Website</label>
+            <input
+              id="reg-website"
+              name="website"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+              data-field="honeypot"
+            />
+          </div>
+          <div class="regform__failure" data-reg-failure role="alert" hidden>
+            <p data-reg-failure-text></p>
+            <button type="button" class="regform__retry" data-reg-retry>
+              Tentar de novo
+            </button>
+          </div>
+          <div class="regform__actions">
+            <Button type="submit" size="lg" data-reg-submit>
+              Confirmar inscrição
+            </Button>
+            <p class="regform__privacy">
+              Seus dados ficam só com a organização. Nada de pessoal aparece no site.
+            </p>
+          </div>
+        </fieldset>
+      </form>
+      <RegistrationSuccess />
+      <p class="sr-only" aria-live="polite" data-reg-live></p>
+      <datalist id="reg-courses">
+        {COURSES.map((c) => (
+          <option value={c} />
+        ))}
+      </datalist>
+    </div>
+  )}
+</div>

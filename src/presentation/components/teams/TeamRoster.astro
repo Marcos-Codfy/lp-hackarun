@@ -1,19 +1,200 @@
 ---
-// STUB — lista de equipes com busca e atualização ao vivo da planilha (TeamsView + TeamsViewModel)
+// lista de equipes confirmadas: SSR do build + atualização ao vivo da planilha (TeamsView + TeamsViewModel)
 import type { SlotsDTO, TeamDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import { toPublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
+import TeamCard from './TeamCard.astro';
 
 interface Props {
   teams: TeamDTO[];
   slots: SlotsDTO;
 }
 
-const { teams, slots: _slots } = Astro.props;
+const { teams, slots } = Astro.props;
+// só o que é público vai pro HTML (nada de nome de integrante)
+const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam);
+const countLabel = confirmed.length === 1 ? 'equipe confirmada' : 'equipes confirmadas';
+const LINEUP = ['01', '02', '03', '04', '05'];
 ---
 
-<div class="team-roster" data-teams>
-  <ul>
-    {teams.map((t) => (
-      <li>{t.name}</li>
+<div
+  class="roster"
+  data-teams
+  data-teams-initial={JSON.stringify(confirmed)}
+  data-teams-slots={JSON.stringify(slots)}
+  data-slots-level={slots.level}
+>
+  <div class="roster__bar">
+    <p class="roster__counter">
+      <span class="roster__count" data-teams-count>
+        {confirmed.length}
+      </span>
+      <span data-teams-count-label>{countLabel}</span>
+      <span class="roster__slots" data-teams-slots-text hidden={slots.remaining === null}>
+        · <span data-teams-remaining>{slots.remaining}</span> vagas restantes
+      </span>
+    </p>
+    <div class="roster__search" data-teams-search-wrap hidden>
+      <label class="roster__search-label" for="team-search">
+        Buscar equipe
+      </label>
+      <input
+        id="team-search"
+        class="roster__search-input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        enterkeyhint="search"
+        placeholder="Nome da equipe ou curso"
+        data-teams-search
+      />
+    </div>
+  </div>
+
+  <p class="sr-only" aria-live="polite" data-teams-live></p>
+
+  <ol role="list" class="roster__list" data-teams-list hidden={confirmed.length === 0}>
+    {confirmed.map((t, i) => (
+      <TeamCard rank={i + 1} name={t.name} course={t.course} memberCount={t.memberCount} />
     ))}
-  </ul>
+  </ol>
+
+  <p class="roster__noresults" data-teams-noresults hidden>
+    Nenhuma equipe com “<span data-teams-query></span>”. Confira a grafia ou busque pelo curso.
+  </p>
+
+  <div class="roster__empty" data-teams-empty hidden={confirmed.length > 0}>
+    <ol role="list" class="lineup" aria-hidden="true">
+      {LINEUP.map((code) => (
+        <li class="lineup__slot">
+          <span class="lineup__code">#{code}</span>
+          <span class="lineup__label">Vaga aberta</span>
+        </li>
+      ))}
+    </ol>
+    <p class="roster__empty-text">
+      As primeiras equipes confirmadas aparecem aqui. A sua pode ser a primeira.
+    </p>
+    <Button href="#inscricao" variant="ghost" registrationCta="teams-empty">
+      Inscrever minha equipe
+    </Button>
+  </div>
+
+  <template data-teams-template>
+    <TeamCard />
+  </template>
 </div>
+
+<style>
+  .roster {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .roster__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .roster__counter {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .roster__count {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .roster[data-slots-level='last'] .roster__slots {
+    color: var(--time);
+  }
+
+  .roster__search {
+    display: grid;
+    gap: var(--space-2);
+    width: min(100%, 22rem);
+  }
+
+  .roster__search-label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .roster__search-input {
+    min-height: 48px;
+    padding: 0 var(--space-4);
+    background: var(--surface-strong);
+    border: 0;
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+    clip-path: var(--clip-btn);
+    font-size: max(16px, var(--fs-base));
+  }
+
+  .roster__search-input:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--focus);
+  }
+
+  .roster__list {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .roster__list[aria-busy='true'] {
+    opacity: 0.7;
+  }
+
+  .roster__noresults,
+  .roster__empty-text {
+    color: var(--text-muted);
+  }
+
+  .roster__empty {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+  }
+
+  /* lineup vazio estilo e-sports: os slots esperando as equipes */
+  .lineup {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  .lineup__slot {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4);
+    border: 1px dashed rgb(127 231 255 / 0.28);
+    clip-path: var(--clip-card);
+    background: repeating-linear-gradient(135deg, rgb(0 207 255 / 0.04) 0 10px, transparent 10px 20px);
+  }
+
+  .lineup__code {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 800;
+    line-height: 1;
+    color: rgb(0 207 255 / 0.35);
+  }
+
+  .lineup__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+</style>

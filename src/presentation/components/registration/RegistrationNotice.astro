@@ -1,0 +1,107 @@
+---
+// avisos de estado da inscrição: em breve, últimas horas, encerrada e modo dev
+import type { RegistrationStatus } from '@domain/index';
+import Button from '@presentation/components/ui/Button.astro';
+
+interface Props {
+  status: RegistrationStatus;
+  simulated: boolean;
+}
+
+const { status, simulated } = Astro.props;
+---
+
+{status === 'closing' && (
+  <p class="notice-badge">
+    <span class="notice-badge__dot" aria-hidden="true" />
+    Últimas horas · as inscrições estão quase fechando
+  </p>
+)}
+
+{(status === 'soon' || status === 'closed') && (
+  <div class="notice" data-reg-notice>
+    <p class="notice__code" aria-hidden="true">
+      // {status === 'soon' ? 'lobby em preparação' : 'lobby fechado'}
+    </p>
+    <h3 class="notice__title" tabindex="-1" data-reg-notice-title>
+      {status === 'soon' ? 'As inscrições abrem em breve' : 'Inscrições encerradas'}
+    </h3>
+    {status === 'soon' ? (
+      <>
+        <p class="notice__text">Enquanto isso, salve as datas e já chama a sua equipe.</p>
+        <Button href="/hackarun-2026.ics" variant="time" download="hackarun-2026.ics">
+          Adicionar à agenda
+        </Button>
+      </>
+    ) : (
+      <>
+        <p class="notice__text">Valeu pelo interesse! Acompanhe quem vai correr.</p>
+        <Button href="#equipes" variant="ghost">
+          Ver equipes confirmadas
+        </Button>
+      </>
+    )}
+  </div>
+)}
+
+{simulated && <p class="notice-dev">Modo dev: sem planilha configurada, os envios são simulados.</p>}
+
+<style>
+  .notice-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    justify-self: start;
+    padding: var(--space-2) var(--space-4);
+    clip-path: var(--clip-btn);
+    background: rgb(255 181 71 / 0.12);
+    box-shadow: inset 0 0 0 1px rgb(255 181 71 / 0.5);
+    color: var(--time);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .notice-badge__dot {
+    width: 6px;
+    height: 6px;
+    background: var(--time);
+    box-shadow: var(--glow-amber);
+  }
+
+  .notice {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+  }
+
+  .notice__code {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--time);
+  }
+
+  .notice__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .notice__title:focus {
+    outline: none;
+  }
+
+  .notice__text {
+    color: var(--text-muted);
+  }
+
+  .notice-dev {
+    padding: var(--space-2) var(--space-3);
+    border-left: 2px solid var(--time);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+  }
+</style>

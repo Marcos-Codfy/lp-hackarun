@@ -1,15 +1,182 @@
 ---
-// STUB — contador regressivo (CountdownView + CountdownViewModel)
+// contador âmbar pro próximo marco (largada -> entrega 15h -> premiação 18h); CountdownView dá vida
 import type { MilestoneDTO } from '@application/index';
+import { milestoneSentence, milestoneTag } from '@presentation/view-models/countdown/milestoneText';
 
 interface Props {
   milestones: MilestoneDTO[];
   variant?: 'hero' | 'compact';
 }
 
-const { milestones: _milestones, variant = 'hero' } = Astro.props;
+const { milestones, variant = 'hero' } = Astro.props;
+
+// SSR usa o próximo marco na hora do build; o browser corrige assim que monta
+const now = Date.now();
+const next = [...milestones]
+  .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
+  .find((m) => Date.parse(m.at) > now);
+const label = next?.label ?? 'Corrida encerrada';
+const units = [
+  { key: 'days', name: 'dias' },
+  { key: 'hours', name: 'horas' },
+  { key: 'minutes', name: 'min' },
+  { key: 'seconds', name: 'seg' },
+];
 ---
 
-<div class:list={['countdown', `countdown--${variant}`]} data-countdown>
-  --:--:--:--
+<div class:list={['countdown', `countdown--${variant}`]} data-countdown data-milestone={next?.key ?? 'over'}>
+  <p class="countdown__label" aria-hidden="true">
+    <span class="countdown__pulse"></span>
+    <span data-countdown-label>{label}</span>
+  </p>
+  <p class="sr-only" data-countdown-sr>
+    {milestoneSentence(label, next?.at ?? null)}
+  </p>
+  <div class="countdown__digits" aria-hidden="true">
+    {units.map((u) => (
+      <span class:list={['countdown__unit', `countdown__unit--${u.key}`]}>
+        <span class="countdown__value" data-countdown-unit={u.key}>
+          --
+        </span>
+        <span class="countdown__name">{u.name}</span>
+      </span>
+    ))}
+  </div>
+  <p class="countdown__tag" aria-hidden="true">
+    <span class="countdown__tag-code">// alvo</span>
+    <span data-countdown-tag>{milestoneTag(next?.at ?? null)}</span>
+  </p>
 </div>
+
+<style>
+  .countdown {
+    --cd-line: rgb(255 181 71 / 0.28);
+    display: inline-grid;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--cd-line);
+    clip-path: var(--clip-card);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .countdown__label,
+  .countdown__tag {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--time);
+  }
+
+  .countdown__tag {
+    color: var(--text-dim);
+  }
+
+  .countdown__tag-code {
+    color: var(--time);
+  }
+
+  /* ponto "ao vivo" */
+  .countdown__pulse {
+    width: 6px;
+    height: 6px;
+    background: var(--time);
+    box-shadow: var(--glow-amber);
+    animation: cd-pulse 1.6s var(--ease-in-out) infinite;
+  }
+
+  .countdown__digits {
+    display: flex;
+    align-items: flex-start;
+    /* em = tamanho do dígito, facilita posicionar os ":" */
+    font-size: var(--cd-size);
+    line-height: 1;
+  }
+
+  .countdown__unit {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+  }
+
+  .countdown__unit + .countdown__unit {
+    margin-left: 0.42em;
+  }
+
+  .countdown__unit + .countdown__unit::before {
+    content: ':';
+    position: absolute;
+    top: 0;
+    left: -0.3em;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: rgb(255 181 71 / 0.45);
+  }
+
+  .countdown__value {
+    min-width: 2ch;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--time);
+    text-shadow: 0 0 18px rgb(255 181 71 / 0.35);
+  }
+
+  .countdown__name {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .countdown--hero {
+    --cd-size: clamp(2.5rem, 1.6rem + 4.2vw, 5.25rem);
+  }
+
+  .countdown--compact {
+    --cd-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  /* troca de marco: um flash curto pra chamar atenção */
+  .countdown.is-switching .countdown__digits {
+    animation: cd-flash 700ms var(--ease-out);
+  }
+
+  /* reduced motion: sem segundos correndo na tela */
+  .countdown.is-calm .countdown__unit--seconds {
+    display: none;
+  }
+
+  @keyframes cd-pulse {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @keyframes cd-flash {
+    0% {
+      opacity: 0.2;
+      filter: brightness(1.8);
+    }
+    100% {
+      opacity: 1;
+      filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .countdown__pulse {
+      animation: none;
+    }
+  }
+</style>

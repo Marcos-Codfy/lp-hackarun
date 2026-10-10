@@ -1,0 +1,125 @@
+---
+// card de equipe; sem props vira o molde do <template> que o TeamsView clona
+interface Props {
+  rank?: number;
+  name?: string;
+  course?: string | null;
+  memberCount?: number;
+}
+
+const { rank, name = '', course = null, memberCount = 0 } = Astro.props;
+const rankText = rank ? `#${String(rank).padStart(2, '0')}` : '';
+const countText = memberCount ? `${memberCount} ${memberCount === 1 ? 'integrante' : 'integrantes'}` : '';
+---
+
+<li class="team-card">
+  <span class="team-card__rank" aria-hidden="true" data-team-rank>
+    {rankText}
+  </span>
+  <div class="team-card__body">
+    <p class="team-card__name" data-team-name>
+      {name}
+    </p>
+    <p class="team-card__course" data-team-course hidden={!course}>
+      {course}
+    </p>
+  </div>
+  <p class="team-card__members">
+    <span class="team-card__pips" aria-hidden="true" data-team-pips style={`--count: ${memberCount}`}></span>
+    <span data-team-count>{countText}</span>
+  </p>
+  <span class="team-card__badge" aria-hidden="true">
+    Confirmada
+  </span>
+</li>
+
+<style>
+  .team-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+    clip-path: var(--clip-card);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .team-card__rank {
+    grid-row: 1 / span 3;
+    align-self: start;
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 800;
+    line-height: 1;
+    color: rgb(0 207 255 / 0.55);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .team-card__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 800;
+    line-height: var(--lh-snug);
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .team-card__course {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .team-card__members {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* um quadradinho por integrante, sem gerar DOM extra */
+  .team-card__pips {
+    width: calc(var(--count, 0) * 9px);
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 9px);
+  }
+
+  .team-card__badge {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    color: var(--c-success);
+  }
+
+  .team-card__body,
+  .team-card__members,
+  .team-card__badge {
+    grid-column: 2;
+  }
+
+  @media (min-width: 40rem) {
+    .team-card {
+      grid-template-columns: auto 1fr auto auto;
+    }
+
+    .team-card__rank {
+      grid-row: auto;
+    }
+
+    .team-card__members {
+      grid-column: 3;
+    }
+
+    .team-card__badge {
+      grid-column: 4;
+    }
+  }
+</style>

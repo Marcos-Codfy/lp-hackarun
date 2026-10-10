@@ -1,0 +1,55 @@
+import {
+  RegistrationGatewayError,
+  type GatewayFailure,
+  type RegistrationGateway,
+  type RegistrationPayload,
+  type RegistrationReceipt,
+} from '@application/index';
+
+export interface RetryOptions {
+  attempts?: number;
+  baseDelayMs?: number;
+  sleep?: (ms: number) => Promise<void>;
+  random?: () => number;
+}
+
+const RETRYABLE: ReadonlySet<GatewayFailure> = new Set(['network', 'rate-limited']);
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+// decorator: tenta de novo só o que é passageiro (rede, fila cheia), com backoff exponencial + jitter
+export class RetryingRegistrationGateway implements RegistrationGateway {
+  private readonly inner: RegistrationGateway;
+  private readonly attempts: number;
+  private readonly baseDelayMs: number;
+  private readonly sleep: (ms: number) => Promise<void>;
+  private readonly random: () => number;
+
+  constructor(inner: RegistrationGateway, options: RetryOptions = {}) {
+    this.inner = inner;
+    this.attempts = Math.max(1, options.attempts ?? 3);
+    this.baseDelayMs = options.baseDelayMs ?? 700;
+    this.sleep = options.sleep ?? wait;
+    this.random = options.random ?? Math.random;
+  }
+
+  async submit(payload: RegistrationPayload): Promise<RegistrationReceipt> {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.inner.submit(payload);
+      } catch (error) {
+        if (attempt >= this.attempts || !RetryingRegistrationGateway.isRetryable(error)) throw error;
+        await this.sleep(this.delayFor(attempt));
+      }
+    }
+  }
+
+  // 700ms, 1.4s... + até 1x a base de jitter pra não sincronizar a galera toda
+  delayFor(attempt: number): number {
+    return Math.round(this.baseDelayMs * 2 ** (attempt - 1) + this.random() * this.baseDelayMs);
+  }
+
+  private static isRetryable(error: unknown): boolean {
+    return error instanceof RegistrationGatewayError && RETRYABLE.has(error.kind);
+  }
+}

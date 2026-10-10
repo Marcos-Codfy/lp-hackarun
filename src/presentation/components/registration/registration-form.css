@@ -1,0 +1,201 @@
+/* lobby de inscrição: global de propósito, tudo com prefixo .regform */
+.regform {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: var(--space-5);
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+}
+
+/* brilho atrás do painel: pseudo-elemento, porque filter no pai quebraria o vidro */
+.regform::before {
+  content: '';
+  position: absolute;
+  inset: 8% 4%;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(0 207 255 / 0.35), transparent);
+  filter: blur(40px);
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out);
+  pointer-events: none;
+}
+
+/* sem vidro próprio: a moldura (HudFrame do LobbyPanel) é de quem hospeda */
+.regform__panel {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.regform__squad {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--surface-line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hud);
+  letter-spacing: var(--tracking-hud);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.regform__noscript {
+  color: var(--time);
+}
+
+.regform__fields {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.regform__group {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.regform__legend {
+  margin-bottom: var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.regform__grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.regform__summary {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-left: 3px solid var(--c-danger);
+  background: rgb(255 92 122 / 0.08);
+}
+
+.regform__summary:focus {
+  outline: none;
+}
+
+.regform__summary-title {
+  font-weight: 700;
+}
+
+.regform__summary-list {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: 1.1rem;
+}
+
+.regform__summary-list a {
+  color: var(--text);
+}
+
+/* honeypot: fora da tela, não display:none (alguns robôs pulam campos escondidos) */
+.regform__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.regform__failure {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-4);
+  border-left: 3px solid var(--time);
+  background: rgb(255 181 71 / 0.08);
+}
+
+.regform__retry {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  clip-path: var(--clip-btn);
+  background: var(--c-amber);
+  color: var(--c-deep);
+  font-weight: 700;
+}
+
+.regform__retry:focus-visible {
+  outline-offset: -4px;
+  outline-color: var(--c-deep);
+}
+
+.regform__actions {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+
+.regform__privacy {
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+}
+
+/* botão enviando: spinner no lugar do brilho */
+.regform.is-submitting [data-reg-submit] {
+  cursor: progress;
+}
+
+.regform.is-submitting [data-reg-submit] .btn__label::after {
+  content: '';
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-left: 0.5em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -0.05em;
+  animation: regform-spin 0.8s linear infinite;
+}
+
+/* "em breve": prévia apagada do formulário */
+.regform[data-status='soon'] .regform__form {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+  user-select: none;
+}
+
+/* pico-fim: o globo carrega e o lobby acende */
+.is-awaiting-charge .regform:not(:focus-within) {
+  opacity: 0.55;
+  transform: translateY(12px);
+}
+
+.is-charged .regform::before {
+  opacity: 0.55;
+}
+
+@keyframes regform-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 48rem) {
+  .regform__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .regform.is-submitting [data-reg-submit] .btn__label::after {
+    animation-duration: 2.4s;
+  }
+
+  .is-awaiting-charge .regform:not(:focus-within) {
+    transform: none;
+  }
+}
