@@ -1,0 +1,13 @@
+---
+// STUB — token NPC escondido (easter egg: achar os 3 revela a mensagem secreta)
+interface Props {
+  id: string;
+  label: string;
+}
+
+const { id, label } = Astro.props;
+---
+
+<button class="npc-token" type="button" data-npc-token={id} aria-label={label}>
+  ?
+</button>

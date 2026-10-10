@@ -1,4 +1,56 @@
 ---
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import SiteHeader from '@presentation/components/layout/SiteHeader.astro';
+import SiteFooter from '@presentation/components/layout/SiteFooter.astro';
+import HudProgress from '@presentation/components/hud/HudProgress.astro';
+import HeroSection from '@presentation/sections/HeroSection.astro';
+import AboutSection from '@presentation/sections/AboutSection.astro';
+import NpcSection from '@presentation/sections/NpcSection.astro';
+import MissionsSection from '@presentation/sections/MissionsSection.astro';
+import ScheduleSection from '@presentation/sections/ScheduleSection.astro';
+import CrewSection from '@presentation/sections/CrewSection.astro';
+import GrandFinalSection from '@presentation/sections/GrandFinalSection.astro';
+import PrizesSection from '@presentation/sections/PrizesSection.astro';
+import TeamsSection from '@presentation/sections/TeamsSection.astro';
+import FaqSection from '@presentation/sections/FaqSection.astro';
+import RegistrationSection from '@presentation/sections/RegistrationSection.astro';
+import { serverContainer } from '@composition/server';
+import { buildEventJsonLd } from '@presentation/components/seo/eventJsonLd';
+import type { AppConfig } from '@presentation/app/AppConfig';
+
+const data = await serverContainer().getLandingPage.execute();
+const { event } = data;
+
+const appConfig: AppConfig = {
+  milestones: event.milestones,
+  registration: event.registration,
+  teamsEndpoint: event.registration.endpoint,
+  audioCueUrl: '/audio/cta-globe.mp3',
+};
+
+const seo = {
+  title: 'HackaRun 2026 · Hackathon de Engenharia de Software e IA · Unicatólica',
+  description:
+    'Encontre os NPCs, decifre as pistas e codifique contra o relógio. De 11 a 14 de novembro em Palmas, com final no Capim Dourado Shopping. Inscreva sua equipe.',
+  jsonLd: buildEventJsonLd(data, Astro.site?.href ?? ''),
+};
 ---
 
-<p>bootstrap</p>
+<BaseLayout seo={seo} appConfig={appConfig}>
+  <SiteHeader registration={event.registration} />
+  <HudProgress />
+  <main id="conteudo">
+    <HeroSection data={data} />
+    <AboutSection data={data} />
+    <NpcSection data={data} />
+    <MissionsSection data={data} />
+    <ScheduleSection data={data} />
+    <CrewSection data={data} />
+    <GrandFinalSection data={data} />
+    <PrizesSection data={data} />
+    <TeamsSection data={data} />
+    <FaqSection data={data} />
+    <RegistrationSection data={data} />
+  </main>
+  <SiteFooter data={data} />
+</BaseLayout>

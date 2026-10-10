@@ -75,6 +75,7 @@ export interface RawTeam {
   id: string;
   name: string;
   members?: string[];
+  memberCount?: number;
   course?: string | null;
   mentor?: string | null;
   status?: TeamStatus;

@@ -7,6 +7,8 @@ export interface TeamProps {
   id: string;
   name: TeamName;
   members: string[];
+  // fonte pública (planilha) não expõe nomes, só a quantidade
+  memberCount?: number;
   course: string | null;
   mentor: string | null;
   status: TeamStatus;
@@ -15,6 +17,7 @@ export interface TeamProps {
 export class Team extends Entity {
   readonly name: TeamName;
   readonly members: readonly string[];
+  readonly size: number;
   readonly course: string | null;
   readonly mentor: string | null;
   readonly status: TeamStatus;
@@ -23,6 +26,7 @@ export class Team extends Entity {
     super(props.id);
     this.name = props.name;
     this.members = [...props.members];
+    this.size = props.memberCount ?? props.members.length;
     this.course = props.course;
     this.mentor = props.mentor;
     this.status = props.status;

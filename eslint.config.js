@@ -14,7 +14,10 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' },
+      ],
       'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },

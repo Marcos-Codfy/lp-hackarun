@@ -98,7 +98,7 @@ export const toTeamDTO = (t: Team): TeamDTO => ({
   id: t.id,
   name: t.name.value,
   members: [...t.members],
-  memberCount: t.members.length,
+  memberCount: t.size,
   course: t.course,
   mentor: t.mentor,
   status: t.status,

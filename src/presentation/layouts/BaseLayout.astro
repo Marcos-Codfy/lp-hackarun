@@ -1,0 +1,119 @@
+---
+import displayFont from '@fontsource-variable/big-shoulders/files/big-shoulders-latin-wght-normal.woff2?url';
+import bodyFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import monoFont from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+import Seo, { type SeoProps } from '@presentation/components/seo/Seo.astro';
+import { APP_CONFIG_ID, type AppConfig } from '@presentation/app/AppConfig';
+import '@presentation/styles/tokens.css';
+import '@presentation/styles/base.css';
+
+interface Props {
+  seo: SeoProps;
+  appConfig: AppConfig;
+}
+
+const { seo, appConfig } = Astro.props;
+
+// só o subset latin (cobre todo o português); as fontes ficam no próprio site
+const LATIN =
+  'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD';
+const face = (family: string, url: string, weights: string) =>
+  `@font-face{font-family:'${family}';font-style:normal;font-display:swap;font-weight:${weights};src:url(${url}) format('woff2');unicode-range:${LATIN}}`;
+const fontFaces = [
+  face('Big Shoulders Variable', displayFont, '100 900'),
+  face('Inter Variable', bodyFont, '100 900'),
+  face('JetBrains Mono Variable', monoFont, '100 800'),
+].join('');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#07152c" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+    <Seo {...seo} />
+    <style is:inline set:html={fontFaces} />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">
+      Pular para o conteúdo
+    </a>
+
+    <!-- palco 3D fixo atrás de tudo; decorativo, por isso aria-hidden -->
+    <div class="experience-layer" aria-hidden="true">
+      <div class="experience-fallback" data-experience-fallback></div>
+      <canvas class="experience-canvas" data-experience></canvas>
+    </div>
+
+    <slot />
+
+    <script type="application/json" id={APP_CONFIG_ID} set:html={JSON.stringify(appConfig)} />
+    <script>
+      import { App } from '@presentation/app/App';
+      App.boot();
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: fixed;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: var(--z-skip);
+    padding: var(--space-3) var(--space-4);
+    background: var(--c-amber);
+    color: var(--c-deep);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  .experience-layer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-canvas);
+    pointer-events: none;
+    contain: strict;
+  }
+
+  .experience-canvas {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease-out);
+  }
+
+  :global(.is-experience-ready) .experience-canvas {
+    opacity: 1;
+  }
+
+  /* brilho em CSS enquanto o three.js não chega (ou se nunca chegar) */
+  .experience-fallback {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        circle at 50% 42%,
+        rgb(0 207 255 / 0.22) 0,
+        rgb(30 123 255 / 0.12) 18%,
+        transparent 42%
+      ),
+      radial-gradient(circle at 50% 42%, transparent 23%, rgb(0 207 255 / 0.18) 24.5%, transparent 27%);
+    transition: opacity 1.2s var(--ease-out);
+  }
+
+  :global(.is-experience-ready) .experience-fallback {
+    opacity: 0;
+  }
+</style>

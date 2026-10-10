@@ -15,6 +15,7 @@ export class ContentMapper {
       id: raw.id,
       name: TeamName.create(raw.name),
       members: raw.members ?? [],
+      ...(raw.memberCount !== undefined && { memberCount: raw.memberCount }),
       course: raw.course ?? null,
       mentor: raw.mentor ?? null,
       status: raw.status ?? 'confirmed',

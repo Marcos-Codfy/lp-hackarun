@@ -1,0 +1,57 @@
+---
+interface Props {
+  // código estilo HUD, ex.: "03" vira "// 03 — MISSÕES"
+  code: string;
+  eyebrow: string;
+  title: string;
+  id?: string;
+  lead?: string;
+  align?: 'start' | 'center';
+  level?: 'h2' | 'h3';
+}
+
+const { code, eyebrow, title, id, lead, align = 'start', level = 'h2' } = Astro.props;
+const Heading = level;
+---
+
+<header class:list={['section-heading', `section-heading--${align}`]} data-reveal="heading">
+  <p class="hud-label section-heading__eyebrow">
+    <span aria-hidden="true">// {code} —</span>
+    {eyebrow}
+  </p>
+  <Heading class="section-heading__title" id={id} set:html={title} />
+  {lead && <p class="section-heading__lead">{lead}</p>}
+</header>
+
+<style>
+  .section-heading {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 52rem;
+  }
+
+  .section-heading--center {
+    margin-inline: auto;
+    text-align: center;
+    justify-items: center;
+  }
+
+  .section-heading__title {
+    font-size: var(--fs-3xl);
+  }
+
+  /* destaque dentro do título: <em>palavra</em> */
+  .section-heading__title :global(em) {
+    font-style: normal;
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .section-heading__lead {
+    max-width: 40rem;
+    color: var(--text-muted);
+    font-size: var(--fs-lg);
+  }
+</style>

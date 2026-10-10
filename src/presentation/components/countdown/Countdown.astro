@@ -1,0 +1,15 @@
+---
+// STUB — contador regressivo (CountdownView + CountdownViewModel)
+import type { MilestoneDTO } from '@application/index';
+
+interface Props {
+  milestones: MilestoneDTO[];
+  variant?: 'hero' | 'compact';
+}
+
+const { milestones: _milestones, variant = 'hero' } = Astro.props;
+---
+
+<div class:list={['countdown', `countdown--${variant}`]} data-countdown>
+  --:--:--:--
+</div>

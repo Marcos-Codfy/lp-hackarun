@@ -1,0 +1,19 @@
+---
+// STUB — lista de equipes com busca e atualização ao vivo da planilha (TeamsView + TeamsViewModel)
+import type { SlotsDTO, TeamDTO } from '@application/index';
+
+interface Props {
+  teams: TeamDTO[];
+  slots: SlotsDTO;
+}
+
+const { teams, slots: _slots } = Astro.props;
+---
+
+<div class="team-roster" data-teams>
+  <ul>
+    {teams.map((t) => (
+      <li>{t.name}</li>
+    ))}
+  </ul>
+</div>
