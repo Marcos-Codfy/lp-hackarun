@@ -1,5 +1,36 @@
 # HackaRun 2026 — Especificação de design e experiência
 
+> **Versão 2 (vigente).** A v1 ficou "correta" demais. A v2 é cinematográfica: vazio quase preto, neon saturado,
+> brilho real (bloom), câmera coreografada e a identidade oficial (logo, Orbitron + Montserrat, paleta do manual).
+> Onde a v2 e o texto antigo abaixo divergirem, vale a v2.
+
+## v2 · Direção de arte
+
+- **Referência do globo:** `design/references/particle-globe-blue.jpg`. Fitas finas de partículas formando lâminas que
+  ondulam, azul ultra-saturado (#1F35FF → #1264FF), cristas ciano (#00E5FF) e picos quase brancos. Miolo escuro.
+  Fundo quase preto.
+- **Fundo:** vazio `#02030B` com aurora (manchas desfocadas em azul elétrico, violeta e um toque de ciano/magenta)
+  que muda de cor por cena + granulação de filme a 7%.
+- **Paleta oficial (manual):** Azul Noturno #060B24 · Azul Elétrico #1264FF · Ciano Neon #00E5FF ·
+  Roxo Neon #941BFF · Magenta #ED28E8 · Laranja Conquista #FF852F · Branco Gelo #F5F8FF (+ ouro #FFC24A).
+  O azul domina; violeta/magenta = mistério e gamificação (NPCs); laranja/ouro = tempo, prazos e prêmios.
+- **Cor por cena:** core azul/ciano · nebula violeta/magenta/azul · enigma violeta + ciano · route ciano/azul ·
+  arena azul com horizonte magenta · screen ciano/branco · trophy laranja/ouro · dust azul-violeta suave.
+- **Tipografia:** Orbitron (títulos, botões, números; caixa alta, 700–900) · Montserrat (texto) · JetBrains Mono (HUD).
+- **Logo:** sempre a imagem oficial (`src/assets/brand/hackarun-logo.png`), nunca redesenhada. Raios animados por
+  código ao redor dela (ramificados, orgânicos; nada de linha fixa tipo eletrocardiograma).
+- **Slogan oficial:** "Desvende. Programe. Conquiste."
+- **Botões:** paralelogramo (skew -12°), degradê de energia, brilho externo real, reflexo que atravessa, ícone `>>`
+  (grafismo do manual). Ghost com borda degradê de 1px sobre vidro.
+- **Header:** barra de vidro flutuante (blur), logo oficial, links com sublinhado degradê animado, botão de som com
+  barras de equalizador, CTA. Mobile: overlay de tela cheia com links grandes numerados e entrada em cascata.
+- **Cards:** vidro escuro com borda degradê de 1px, cantoneiras HUD, hover com brilho e leve elevação.
+- **3D cinematográfico:** bloom real, vinheta, aberração cromática sutil, campo de estrelas ao fundo, bokeh na frente,
+  câmera coreografada (atravessa o globo rumo à nebulosa, grua sobre a arena, órbita no troféu), carga final com
+  tremor + flash branco sincronizado com o som.
+- **Parceiros:** logos oficiais da Unicatólica e do Capim Dourado na hero (discretos) e numa faixa grande antes do rodapé.
+
+
 > Fonte de verdade visual e de interação da landing page. Antes de mexer em seção, componente ou 3D, leia isto.
 
 ## 1. Conceito: "a página é a corrida"

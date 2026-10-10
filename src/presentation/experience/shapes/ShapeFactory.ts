@@ -1,13 +1,13 @@
 import type { SceneKey } from '@presentation/app/AppEvents';
 import { seededRandom } from '@shared/utils/math';
 import type { ShapeStrategy } from './ShapeStrategy';
-import { ArenaShape } from './ArenaShape';
+import { TerrainShape } from './TerrainShape';
 import { CoreShape } from './CoreShape';
 import { DustShape } from './DustShape';
 import { EnigmaShape } from './EnigmaShape';
-import { NebulaShape } from './NebulaShape';
-import { RouteShape } from './RouteShape';
-import { ScreenShape } from './ScreenShape';
+import { OrbitShape } from './OrbitShape';
+import { MapShape } from './MapShape';
+import { StageShape } from './StageShape';
 import { TrophyShape } from './TrophyShape';
 import { coherentOrder, sharedPermutation } from './sampling';
 
@@ -32,11 +32,11 @@ export class ShapeFactory {
   static createDefault(): ShapeFactory {
     return new ShapeFactory([
       new CoreShape(),
-      new NebulaShape(),
+      new OrbitShape(),
       new EnigmaShape(),
-      new RouteShape(),
-      new ArenaShape(),
-      new ScreenShape(),
+      new MapShape(),
+      new TerrainShape(),
+      new StageShape(),
       new TrophyShape(),
       new DustShape(),
     ]);

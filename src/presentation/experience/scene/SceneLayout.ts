@@ -12,11 +12,11 @@ const fit = (radius: number): number => radius / SHAPE_RADIUS;
 // paisagem: forma ao lado do texto quando a seção tem conteúdo à esquerda
 const WIDE: Record<SceneKey, PoseFn> = {
   core: (hw, hh) => [0, 0, 0, fit(Math.min(0.8 * hh, 0.62 * hw)), 0, 0, 0, 1],
-  nebula: (hw, hh) => [0, -0.05 * hh, -0.6, fit(hw * 1.25), -1.0, 0, 0.3, 0.55],
+  orbit: (hw, hh) => [0, -0.05 * hh, -0.6, fit(hw * 1.25), -1.0, 0, 0.3, 0.55],
   enigma: (hw, hh) => [0.48 * hw, 0.02 * hh, 0, fit(Math.min(0.78 * hh, 0.4 * hw)), 0, -0.3, 0.06, 0.9],
-  route: (hw, hh) => [0, -0.14 * hh, 0, fit(hw * 1.06), 0, 0, -0.02, 1],
-  arena: (hw, hh) => [0, -0.58 * hh, 0.2, fit(hw * 1.15), 0.12, 0, 0, 0.7],
-  screen: (hw, hh) => [0.4 * hw, 0.04 * hh, 0, fit(Math.min(0.95 * hh, 0.5 * hw)), 0, -0.38, 0, 0.85],
+  map: (hw, hh) => [0, -0.14 * hh, 0, fit(hw * 1.06), 0, 0, -0.02, 1],
+  terrain: (hw, hh) => [0, -0.58 * hh, 0.2, fit(hw * 1.15), 0.12, 0, 0, 0.7],
+  stage: (hw, hh) => [0.4 * hw, 0.04 * hh, 0, fit(Math.min(0.95 * hh, 0.5 * hw)), 0, -0.38, 0, 0.85],
   trophy: (hw, hh) => [0.48 * hw, 0, 0, fit(Math.min(0.72 * hh, 0.4 * hw)), 0.05, 0, 0, 0.95],
   dust: (hw, hh) => [0, 0, 0, fit(Math.max(hw, hh) * 1.2), 0, 0, 0, 0.32],
 };
@@ -24,11 +24,11 @@ const WIDE: Record<SceneKey, PoseFn> = {
 // retrato: tudo centralizado, menor e mais apagado atrás do texto; a rota vira vertical
 const TALL: Record<SceneKey, PoseFn> = {
   core: (hw, hh) => [0, 0.04 * hh, 0, fit(Math.min(0.9 * hw, 0.5 * hh)), 0, 0, 0, 0.8],
-  nebula: (_hw, hh) => [0, 0, -0.6, fit(hh * 1.0), -1.0, 0, 0.3, 0.4],
+  orbit: (_hw, hh) => [0, 0, -0.6, fit(hh * 1.0), -1.0, 0, 0.3, 0.4],
   enigma: (hw, hh) => [0, 0.1 * hh, 0, fit(Math.min(0.85 * hw, 0.45 * hh)), 0, 0, 0, 0.42],
-  route: (_hw, hh) => [0, 0, 0, fit(hh * 0.98), 0, 0, Math.PI / 2, 0.55],
-  arena: (hw, hh) => [0, -0.62 * hh, 0.4, fit(hw * 1.9), 0.16, 0, 0, 0.5],
-  screen: (hw, hh) => [0, 0.06 * hh, 0, fit(Math.min(0.98 * hw, 0.6 * hh)), 0, 0, 0, 0.5],
+  map: (_hw, hh) => [0, 0, 0, fit(hh * 0.98), 0, 0, Math.PI / 2, 0.55],
+  terrain: (hw, hh) => [0, -0.62 * hh, 0.4, fit(hw * 1.9), 0.16, 0, 0, 0.5],
+  stage: (hw, hh) => [0, 0.06 * hh, 0, fit(Math.min(0.98 * hw, 0.6 * hh)), 0, 0, 0, 0.5],
   trophy: (hw, hh) => [0, 0, 0, fit(Math.min(0.8 * hw, 0.5 * hh)), 0.05, 0, 0, 0.5],
   dust: (_hw, hh) => [0, 0, 0, fit(hh * 1.15), 0, 0, 0, 0.3],
 };

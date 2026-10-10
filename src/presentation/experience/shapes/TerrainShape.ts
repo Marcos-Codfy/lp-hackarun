@@ -8,9 +8,9 @@ const COLS = 26;
 const Z_FAR = -1.5;
 const Z_NEAR = 0.6;
 
-// piso de arena: grade de linhas pontilhadas (a onda vem do shader)
-export class ArenaShape implements ShapeStrategy {
-  readonly key = 'arena';
+// piso de terrain: grade de linhas pontilhadas (a onda vem do shader)
+export class TerrainShape implements ShapeStrategy {
+  readonly key = 'terrain';
 
   generate(count: number, random: Random): Float32Array {
     const writer = new PointWriter(count);

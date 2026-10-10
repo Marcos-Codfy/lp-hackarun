@@ -18,20 +18,20 @@ attribute float aScale;
 #ifdef HAS_CORE
 attribute vec3 aCore;
 #endif
-#ifdef HAS_NEBULA
-attribute vec3 aNebula;
+#ifdef HAS_ORBIT
+attribute vec3 aOrbit;
 #endif
 #ifdef HAS_ENIGMA
 attribute vec3 aEnigma;
 #endif
-#ifdef HAS_ROUTE
-attribute vec3 aRoute;
+#ifdef HAS_MAP
+attribute vec3 aMap;
 #endif
-#ifdef HAS_ARENA
-attribute vec3 aArena;
+#ifdef HAS_TERRAIN
+attribute vec3 aTerrain;
 #endif
-#ifdef HAS_SCREEN
-attribute vec3 aScreen;
+#ifdef HAS_STAGE
+attribute vec3 aStage;
 #endif
 #ifdef HAS_TROPHY
 attribute vec3 aTrophy;

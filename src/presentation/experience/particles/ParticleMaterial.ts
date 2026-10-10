@@ -11,6 +11,7 @@ import {
 import type { SceneKey } from '@presentation/app/AppEvents';
 import commonGlsl from '../shaders/common.glsl?raw';
 import noiseGlsl from '../shaders/noise.glsl?raw';
+import coreGlsl from '../shaders/core.glsl?raw';
 import shapesGlsl from '../shaders/shapes.glsl?raw';
 import vertexGlsl from '../shaders/particles.vert.glsl?raw';
 import fragmentGlsl from '../shaders/particles.frag.glsl?raw';
@@ -38,11 +39,11 @@ export type ParticleUniforms = {
 
 const ALL_KEYS: readonly SceneKey[] = [
   'core',
-  'nebula',
+  'orbit',
   'enigma',
-  'route',
-  'arena',
-  'screen',
+  'map',
+  'terrain',
+  'stage',
   'trophy',
   'dust',
 ];
@@ -91,7 +92,7 @@ export function createParticleMaterial(keys: readonly SceneKey[]): {
   const material = new ShaderMaterial({
     uniforms,
     defines: definesFor(keys),
-    vertexShader: [commonGlsl, noiseGlsl, shapesGlsl, vertexGlsl].join('\n'),
+    vertexShader: [commonGlsl, noiseGlsl, coreGlsl, shapesGlsl, vertexGlsl].join('\n'),
     fragmentShader: fragmentGlsl,
     transparent: true,
     depthWrite: false,

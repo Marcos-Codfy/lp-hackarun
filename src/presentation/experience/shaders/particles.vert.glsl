@@ -27,25 +27,25 @@ void main() {
 #ifdef HAS_CORE
   if (wCore > 0.001) { coreP = shapeCore(aCore); pos += coreP * wCore; }
 #endif
-#ifdef HAS_NEBULA
-  w = weightOf(IDX_NEBULA, tp);
-  if (w > 0.001) pos += shapeNebula(aNebula) * w;
+#ifdef HAS_ORBIT
+  w = weightOf(IDX_ORBIT, tp);
+  if (w > 0.001) pos += shapeOrbit(aOrbit) * w;
 #endif
 #ifdef HAS_ENIGMA
   w = weightOf(IDX_ENIGMA, tp);
   if (w > 0.001) pos += shapeEnigma(aEnigma) * w;
 #endif
-#ifdef HAS_ROUTE
-  w = weightOf(IDX_ROUTE, tp);
-  if (w > 0.001) { pos += shapeRoute(aRoute) * w; heat += routeHeat(aRoute) * w; }
+#ifdef HAS_MAP
+  w = weightOf(IDX_MAP, tp);
+  if (w > 0.001) { pos += shapeMap(aMap) * w; heat += mapHeat(aMap) * w; }
 #endif
-#ifdef HAS_ARENA
-  w = weightOf(IDX_ARENA, tp);
-  if (w > 0.001) pos += shapeArena(aArena) * w;
+#ifdef HAS_TERRAIN
+  w = weightOf(IDX_TERRAIN, tp);
+  if (w > 0.001) pos += shapeTerrain(aTerrain) * w;
 #endif
-#ifdef HAS_SCREEN
-  w = weightOf(IDX_SCREEN, tp);
-  if (w > 0.001) pos += aScreen * w;
+#ifdef HAS_STAGE
+  w = weightOf(IDX_STAGE, tp);
+  if (w > 0.001) pos += aStage * w;
 #endif
 #ifdef HAS_TROPHY
   w = weightOf(IDX_TROPHY, tp);

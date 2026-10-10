@@ -1,5 +1,5 @@
 // contrato de eventos do front: quem emite e quem escuta não se conhecem
-export type SceneKey = 'core' | 'nebula' | 'enigma' | 'route' | 'arena' | 'screen' | 'trophy' | 'dust';
+export type SceneKey = 'core' | 'orbit' | 'enigma' | 'map' | 'terrain' | 'stage' | 'trophy' | 'dust';
 
 export type QualityTier = 'low' | 'medium' | 'high';
 

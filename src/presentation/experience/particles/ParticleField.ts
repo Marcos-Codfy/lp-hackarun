@@ -6,11 +6,11 @@ import { createParticleMaterial, type ParticleUniforms } from './ParticleMateria
 
 const ATTRIBUTE: Record<SceneKey, string> = {
   core: 'aCore',
-  nebula: 'aNebula',
+  orbit: 'aOrbit',
   enigma: 'aEnigma',
-  route: 'aRoute',
-  arena: 'aArena',
-  screen: 'aScreen',
+  map: 'aMap',
+  terrain: 'aTerrain',
+  stage: 'aStage',
   trophy: 'aTrophy',
   dust: 'aDust',
 };

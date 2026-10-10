@@ -16,8 +16,8 @@ const BEAMS: readonly (readonly [number, number])[] = [
 ];
 
 // a final: telão gigante com grade fraca, borda do palco e feixes de luz
-export class ScreenShape implements ShapeStrategy {
-  readonly key = 'screen';
+export class StageShape implements ShapeStrategy {
+  readonly key = 'stage';
 
   generate(count: number, random: Random): Float32Array {
     const w = new PointWriter(count);

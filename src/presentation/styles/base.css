@@ -58,7 +58,7 @@
 
 @layer base {
   html {
-    background: var(--bg-deep);
+    background: var(--bg);
     scroll-padding-top: calc(var(--header-h) + var(--space-4));
   }
 
@@ -76,12 +76,10 @@
     overflow: hidden;
   }
 
+  /* fundo fica no html: a aurora (z-index -1) precisa ficar entre ele e o conteúdo */
   body {
     min-height: 100dvh;
-    background:
-      radial-gradient(120% 80% at 50% 0%, var(--c-navy) 0%, transparent 60%),
-      radial-gradient(90% 60% at 50% 100%, rgb(30 123 255 / 0.12) 0%, transparent 70%), var(--bg);
-    background-attachment: fixed;
+    background: transparent;
     color: var(--text);
     font-family: var(--font-body);
     font-size: var(--fs-base);
@@ -98,6 +96,7 @@
   h3 {
     font-family: var(--font-display);
     font-weight: 800;
+    font-optical-sizing: none;
     line-height: var(--lh-tight);
     letter-spacing: var(--tracking-display);
     text-transform: uppercase;

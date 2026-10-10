@@ -17,8 +17,8 @@ const PROFILE: readonly (readonly [number, number])[] = [
 ];
 
 // a corrida: raio elétrico atravessando a tela, 8 estações brilhando e faíscas soltas
-export class RouteShape implements ShapeStrategy {
-  readonly key = 'route';
+export class MapShape implements ShapeStrategy {
+  readonly key = 'map';
 
   generate(count: number, random: Random): Float32Array {
     const writer = new PointWriter(count);

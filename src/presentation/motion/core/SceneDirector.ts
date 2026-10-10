@@ -6,16 +6,7 @@ import { ScrollTrigger } from './gsap';
 import { layoutBoxOf, progressAt, spanOf, type SceneSpan } from './SceneMap';
 import { VelocityMeter } from './VelocityMeter';
 
-const SCENE_KEYS = new Set<string>([
-  'core',
-  'nebula',
-  'enigma',
-  'route',
-  'arena',
-  'screen',
-  'trophy',
-  'dust',
-]);
+const SCENE_KEYS = new Set<string>(['core', 'orbit', 'enigma', 'map', 'terrain', 'stage', 'trophy', 'dust']);
 
 const isSceneKey = (value: string | undefined): value is SceneKey =>
   value !== undefined && SCENE_KEYS.has(value);

@@ -1,60 +1,75 @@
-/* design tokens: única fonte de verdade de cor, tipo, espaço e movimento */
+/* design tokens v2: paleta do manual oficial levada ao limite (vazio quase preto + neon saturado) */
 :root {
   color-scheme: dark;
 
-  /* paleta base */
-  --c-abyss: #040b18;
-  --c-deep: #07152c;
-  --c-navy: #0b2450;
-  --c-royal: #1e7bff;
-  --c-cyan: #00cfff;
-  --c-cyan-soft: #7fe7ff;
-  --c-white: #ffffff;
-  --c-amber: #ffb547;
-  --c-danger: #ff5c7a;
-  --c-success: #3df5b0;
+  /* base: o escuro é o que faz o neon brilhar */
+  --c-void: #02030b;
+  --c-night: #060b24;
+  --c-indigo: #0b1242;
+  --c-deep-violet: #1a0b3d;
+
+  /* energia (manual HackaRun 2026) */
+  --c-electric: #1264ff;
+  --c-ultra: #3b5bff;
+  --c-cyan: #00e5ff;
+  --c-violet: #941bff;
+  --c-magenta: #ed28e8;
+  --c-orange: #ff852f;
+  --c-gold: #ffc24a;
+  --c-ice: #f5f8ff;
+  --c-danger: #ff4d8d;
+  --c-success: #2cf5b4;
 
   /* papéis semânticos (use estes nos componentes) */
-  --bg: var(--c-deep);
-  --bg-deep: var(--c-abyss);
-  --surface: rgb(11 36 80 / 0.38);
-  --surface-strong: rgb(9 26 56 / 0.82);
-  --surface-line: rgb(127 231 255 / 0.14);
-  --line-strong: rgb(0 207 255 / 0.45);
-  --text: var(--c-white);
-  --text-muted: rgb(214 230 255 / 0.72);
-  --text-dim: rgb(214 230 255 / 0.6);
+  --bg: var(--c-void);
+  --bg-elevated: var(--c-night);
+  --surface: linear-gradient(160deg, rgb(28 44 140 / 0.32) 0%, rgb(8 10 34 / 0.62) 100%);
+  --surface-solid: rgb(8 12 38 / 0.86);
+  --surface-line: rgb(120 150 255 / 0.16);
+  --line-strong: rgb(0 229 255 / 0.5);
+  --text: var(--c-ice);
+  --text-muted: rgb(222 230 255 / 0.74);
+  --text-dim: rgb(222 230 255 / 0.6);
   --accent: var(--c-cyan);
-  --accent-2: var(--c-royal);
-  --time: var(--c-amber);
-  --focus: var(--c-amber);
+  --accent-2: var(--c-electric);
+  --mystic: var(--c-violet);
+  --time: var(--c-orange);
+  --prize: var(--c-gold);
+  --focus: var(--c-gold);
 
-  --grad-energy: linear-gradient(100deg, var(--c-cyan) 0%, var(--c-royal) 100%);
-  --grad-fade: linear-gradient(180deg, rgb(7 21 44 / 0) 0%, var(--c-deep) 100%);
-  --glow-cyan: 0 0 24px rgb(0 207 255 / 0.35), 0 0 2px rgb(0 207 255 / 0.9);
-  --glow-amber: 0 0 22px rgb(255 181 71 / 0.35);
+  /* degradês */
+  --grad-energy: linear-gradient(95deg, #00e5ff 0%, #1264ff 42%, #941bff 76%, #ed28e8 100%);
+  --grad-blue: linear-gradient(100deg, #00e5ff 0%, #1264ff 100%);
+  --grad-mystic: linear-gradient(100deg, #941bff 0%, #ed28e8 100%);
+  --grad-prize: linear-gradient(100deg, #ffc24a 0%, #ff852f 55%, #ed28e8 100%);
+  --grad-line: linear-gradient(90deg, transparent, rgb(0 229 255 / 0.7), rgb(148 27 255 / 0.7), transparent);
 
-  /* tipografia */
-  --font-display: 'Big Shoulders Variable', 'Arial Narrow', 'Roboto Condensed', sans-serif;
-  --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* brilhos */
+  --glow-cyan: 0 0 18px rgb(0 229 255 / 0.55), 0 0 48px rgb(18 100 255 / 0.35);
+  --glow-violet: 0 0 18px rgb(148 27 255 / 0.55), 0 0 48px rgb(237 40 232 / 0.25);
+  --glow-orange: 0 0 18px rgb(255 133 47 / 0.55), 0 0 44px rgb(255 194 74 / 0.25);
+
+  /* tipografia oficial: Orbitron nos títulos, Montserrat no texto */
+  --font-display: 'Orbitron Variable', 'Orbitron', 'Segoe UI', sans-serif;
+  --font-body: 'Montserrat Variable', 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace;
 
-  /* escala fluida (mobile first: min no celular, max no desktop) */
+  /* escala fluida (Orbitron é larga: tamanhos menores que uma condensada) */
   --fs-hud: 0.6875rem;
   --fs-xs: 0.8125rem;
   --fs-sm: 0.9375rem;
-  --fs-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
-  --fs-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
-  --fs-xl: clamp(1.375rem, 1.2rem + 0.8vw, 1.875rem);
-  --fs-2xl: clamp(2rem, 1.5rem + 2.4vw, 3.5rem);
-  --fs-3xl: clamp(2.75rem, 1.8rem + 4.6vw, 6rem);
-  --fs-hero: clamp(3.5rem, 1.6rem + 10vw, 11rem);
+  --fs-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --fs-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --fs-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --fs-2xl: clamp(1.625rem, 1.3rem + 1.5vw, 2.5rem);
+  --fs-3xl: clamp(2rem, 1.3rem + 3vw, 4rem);
+  --fs-hero: clamp(2.5rem, 1.2rem + 6vw, 7rem);
 
-  --lh-tight: 0.92;
-  --lh-snug: 1.15;
-  --lh-body: 1.6;
-  --tracking-hud: 0.18em;
-  --tracking-display: 0.01em;
+  --lh-tight: 1.04;
+  --lh-snug: 1.2;
+  --lh-body: 1.65;
+  --tracking-hud: 0.22em;
+  --tracking-display: 0.02em;
 
   /* espaço */
   --space-1: 0.25rem;
@@ -65,16 +80,17 @@
   --space-6: 2rem;
   --space-7: 3rem;
   --space-8: 4.5rem;
-  --space-9: clamp(4.5rem, 3rem + 7vw, 9rem);
+  --space-9: clamp(5rem, 3rem + 8vw, 10rem);
   --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
   --container: 76rem;
   --container-narrow: 46rem;
-  --header-h: 4rem;
+  --header-h: 4.5rem;
 
-  /* forma: cortes angulares estilo e-sports */
+  /* forma */
   --cut: 14px;
   --cut-sm: 8px;
-  --radius: 4px;
+  --radius: 6px;
+  --skew: -12deg;
   --clip-card: polygon(
     var(--cut) 0,
     100% 0,
@@ -100,11 +116,23 @@
   --dur-slow: 700ms;
 
   /* camadas */
+  --z-aurora: -1;
   --z-canvas: 0;
   --z-content: 1;
   --z-hud: 20;
   --z-header: 30;
   --z-skip: 100;
+
+  /* compatibilidade com nomes antigos (componentes ainda não migrados) */
+  --c-deep: var(--c-night);
+  --c-abyss: var(--c-void);
+  --c-navy: var(--c-indigo);
+  --c-royal: var(--c-electric);
+  --c-cyan-soft: #7ff0ff;
+  --c-white: var(--c-ice);
+  --c-amber: var(--c-orange);
+  --bg-deep: var(--c-void);
+  --glow-amber: var(--glow-orange);
 }
 
 @media (prefers-reduced-motion: reduce) {

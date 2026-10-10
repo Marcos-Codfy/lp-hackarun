@@ -5,8 +5,8 @@ const ARMS = 3;
 const TWIST = 2.6;
 
 // o globo "explode" numa galáxia em espiral: núcleo denso, 3 braços e um halo solto
-export class NebulaShape implements ShapeStrategy {
-  readonly key = 'nebula';
+export class OrbitShape implements ShapeStrategy {
+  readonly key = 'orbit';
 
   generate(count: number, random: Random): Float32Array {
     const writer = new PointWriter(count);
