@@ -1,7 +1,7 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
+import SectionHeader from './shared/SectionHeader.astro';
 import PrizeCard from './prizes/PrizeCard.astro';
 import './sections.css';
 
@@ -14,34 +14,54 @@ const { prizes } = Astro.props.data;
 
 <section
   id="premios"
-  class="section prizes"
+  class="section section--split prizes tone-gold"
   data-scene="trophy"
   data-checkpoint="Prêmios"
   aria-labelledby="premios-title"
 >
-  <div class="container section-stack">
-    <SectionHeading
-      id="premios-title"
-      code="07"
-      eyebrow="Prêmios"
-      title="O que está <em>em jogo</em>"
-      lead="Troféu, certificados e prêmios entregues no palco, na frente de todo mundo."
-    />
+  <span class="prizes__haze" aria-hidden="true"></span>
+  <div class="container">
+    <div class="section-split__content section-stack">
+      <SectionHeader
+        id="premios-title"
+        code="07"
+        eyebrow="Prêmios"
+        title="O que está <em>em jogo</em>"
+        lead="Troféu, certificados e prêmios entregues no palco, na frente de todo mundo."
+      />
 
-    <ul class="prizes__grid" role="list" data-reveal-group>
-      {prizes.map((prize, index) => (
-        <PrizeCard prize={prize} featured={index === 0} />
-      ))}
-    </ul>
+      <ul class="prizes__grid" role="list" data-reveal-group>
+        {prizes.map((prize, index) => (
+          <PrizeCard prize={prize} featured={index === 0} />
+        ))}
+      </ul>
 
-    <p class="section-note" data-reveal="up">
-      <Icon name="lock" />
-      <span>Prêmios e valores anunciados em breve pela organização.</span>
-    </p>
+      <p class="section-note" data-reveal="up">
+        <Icon name="lock" />
+        <span>Prêmios e valores anunciados em breve pela organização.</span>
+      </p>
+    </div>
   </div>
 </section>
 
 <style>
+  .prizes {
+    overflow: clip;
+  }
+
+  /* brilho dourado vindo do troféu (direita) */
+  .prizes__haze {
+    position: absolute;
+    top: 20%;
+    right: -10%;
+    z-index: -1;
+    width: 55vw;
+    height: 60%;
+    background: radial-gradient(closest-side, rgb(255 133 47 / 0.12), transparent);
+    filter: blur(30px);
+    pointer-events: none;
+  }
+
   .prizes__grid {
     display: grid;
     gap: var(--space-4);
@@ -54,17 +74,6 @@ const { prizes } = Astro.props.data;
 
     .prizes__grid > :global(.prize--featured) {
       grid-column: 1 / -1;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .prizes__grid {
-      grid-template-columns: 1.4fr 1fr 1fr;
-    }
-
-    .prizes__grid > :global(.prize--featured) {
-      grid-column: auto;
-      min-height: 26rem;
     }
   }
 </style>

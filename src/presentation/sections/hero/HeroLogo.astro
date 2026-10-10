@@ -1,0 +1,117 @@
+---
+import BrandLogo from '@presentation/components/ui/BrandLogo.astro';
+
+// H1 do hero = logo oficial (é o LCP: eager + fetchpriority alta, entra visível no 1º frame).
+// O canvas por cima recebe os raios procedurais (LogoLightning, montado pelo HeroIntroAnimator)
+---
+
+<h1 id="inicio-title" class="hero-logo" data-hero-logo-wrap>
+  <span class="hero-logo__halo" aria-hidden="true"></span>
+  <BrandLogo
+    alt="HackaRun 2026"
+    widths={[480, 720, 960, 1280, 1600, 2156]}
+    sizes="(min-width: 1024px) min(62vw, 980px), 94vw"
+    priority
+    class="hero-logo__img"
+    data-hero-logo
+  />
+  <canvas class="hero-logo__bolts" aria-hidden="true" data-hero-lightning></canvas>
+</h1>
+
+<style>
+  .hero-logo {
+    --logo-w: min(94vw, 980px);
+    position: relative;
+    width: var(--logo-w);
+    max-width: 100%;
+    /* o PNG tem respiro transparente em cima/embaixo: a margem negativa devolve o espaço */
+    margin-block: calc(var(--logo-w) * -0.06) calc(var(--logo-w) * -0.05);
+    line-height: 0;
+    transform-origin: 50% 55%;
+  }
+
+  /* mesma lista de funções no filtro base e nos keyframes: senão o navegador não interpola */
+  .hero-logo :global(.hero-logo__img) {
+    position: relative;
+    z-index: 1;
+    filter: brightness(1) blur(0) drop-shadow(0 10px 40px rgb(2 3 11 / 0.85))
+      drop-shadow(0 0 26px rgb(18 100 255 / 0.32));
+    transition: filter 0.45s var(--ease-out);
+    /* backwards (e não both): depois da entrada o filtro volta pro CSS e o clarão do raio funciona */
+    animation: logo-ignite 1.25s var(--ease-out) backwards;
+  }
+
+  /* clarão do logo a cada descarga grande; só desktop (filtro em imagem grande custa no celular) */
+  @media (hover: hover) {
+    .hero-logo:global(.is-zapped) :global(.hero-logo__img) {
+      filter: brightness(1.2) blur(0) drop-shadow(0 10px 40px rgb(2 3 11 / 0.85))
+        drop-shadow(0 0 34px rgb(0 229 255 / 0.55));
+      transition: none;
+    }
+  }
+
+  /* halo atrás das letras: separa o logo do globo sem caixa nenhuma */
+  .hero-logo__halo {
+    position: absolute;
+    inset: 22% 4% 18%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(18 100 255 / 0.38), rgb(0 229 255 / 0.1) 55%, transparent);
+    opacity: 0.6;
+    transition: opacity 0.7s var(--ease-out);
+    animation: halo-in 1.6s 0.2s var(--ease-out) both;
+  }
+
+  /* clarão a cada descarga grande (classe posta pelo LogoLightning por ~110 ms) */
+  .hero-logo:global(.is-zapped) .hero-logo__halo {
+    opacity: 1;
+    transition: none;
+  }
+
+  .hero-logo__bolts {
+    position: absolute;
+    z-index: 2;
+    inset: -34% -7% -30%;
+    width: 114%;
+    height: 164%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  /* entra já visível (opacidade > 0 conta pro LCP) e "liga" com um flash */
+  @keyframes logo-ignite {
+    0% {
+      opacity: 0.12;
+      transform: scale(1.06);
+      filter: brightness(2.4) blur(8px) drop-shadow(0 10px 40px rgb(2 3 11 / 0))
+        drop-shadow(0 0 40px rgb(0 229 255 / 0.9));
+    }
+    35% {
+      opacity: 1;
+      filter: brightness(1.5) blur(0) drop-shadow(0 10px 40px rgb(2 3 11 / 0.6))
+        drop-shadow(0 0 40px rgb(0 229 255 / 0.7));
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  @keyframes halo-in {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-logo {
+      --logo-w: min(62vw, 980px, max(30rem, (100svh - 26rem) * 2.6));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-logo :global(.hero-logo__img),
+    .hero-logo__halo {
+      animation: none;
+    }
+  }
+</style>

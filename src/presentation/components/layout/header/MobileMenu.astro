@@ -1,0 +1,223 @@
+---
+import type { RegistrationDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import ButtonChevrons from '@presentation/components/ui/ButtonChevrons.astro';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+import { NAV_LINKS } from '../navLinks';
+
+// overlay de tela cheia do mobile (padrão disclosure: o botão de fechar é o próprio toggle da barra)
+// abre/fecha pelo MobileMenuController: foco, Esc, scroll lock e resto da página inert
+interface Props {
+  id: string;
+  registration: RegistrationDTO;
+}
+
+const { id, registration } = Astro.props;
+const cta = new RegistrationCopy().cta(registration.status);
+// CTA de inscrição é interceptado pelo módulo de inscrição; o resto passa pelo smooth scroll
+const ctaAttrs = cta.isRegistration ? { registrationCta: 'menu' } : { 'data-nav-link': true };
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<div id={id} class="mobile-menu" hidden data-menu-panel>
+  <div class="mobile-menu__inner">
+    <p class="mobile-menu__eyebrow" aria-hidden="true">
+      // Navegação · {pad(NAV_LINKS.length)} checkpoints
+    </p>
+    <nav aria-label="Menu principal">
+      <ol class="mobile-menu__list" role="list">
+        {NAV_LINKS.map((link, index) => (
+          <li class="mobile-menu__item" style={`--i: ${index}`}>
+            <a class="mobile-menu__link" href={link.href} data-nav-link>
+              <span class="mobile-menu__num" aria-hidden="true">
+                {pad(index + 1)}
+              </span>
+              <span class="mobile-menu__label">{link.label}</span>
+              <span class="mobile-menu__go">
+                <ButtonChevrons />
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <div class="mobile-menu__foot">
+      <Button size="lg" href={cta.href} class="mobile-menu__cta" {...ctaAttrs}>
+        {cta.label}
+      </Button>
+      <p class="mobile-menu__meta" aria-hidden="true">
+        Unicatólica · Palmas – TO
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+    background:
+      radial-gradient(70% 45% at 100% 0%, rgb(148 27 255 / 0.32), transparent 70%),
+      radial-gradient(80% 50% at 0% 100%, rgb(18 100 255 / 0.36), transparent 70%),
+      radial-gradient(50% 30% at 70% 80%, rgb(237 40 232 / 0.12), transparent 70%), rgb(2 3 11 / 0.88);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    animation: menu-in 0.45s var(--ease-out) both;
+  }
+
+  .mobile-menu__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    min-height: 100%;
+    width: min(100% - 2 * var(--gutter), 40rem);
+    margin-inline: auto;
+    padding-block: calc(var(--header-h) + var(--space-6))
+      calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-menu__eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--c-cyan);
+    animation: item-in 0.5s 0.05s var(--ease-out) both;
+  }
+
+  .mobile-menu__list {
+    display: grid;
+  }
+
+  .mobile-menu__item {
+    animation: item-in 0.6s var(--ease-out) both;
+    animation-delay: calc(0.1s + var(--i) * 0.055s);
+  }
+
+  .mobile-menu__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.25rem 1fr auto;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 64px;
+    padding-block: var(--space-3);
+    color: var(--text);
+    font-family: var(--font-display);
+    /* "PROGRAMAÇÃO" (~9,6em) precisa caber em 360px */
+    font-size: min(2.75rem, 7.2vw);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  /* fio degradê embaixo de cada link */
+  .mobile-menu__link::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgb(0 229 255 / 0.5), rgb(148 27 255 / 0.25) 50%, transparent);
+  }
+
+  .mobile-menu__num {
+    align-self: start;
+    padding-top: 0.35em;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    background: var(--grad-blue);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .mobile-menu__go {
+    display: inline-flex;
+    font-size: 1rem;
+    color: var(--c-cyan);
+    opacity: 0;
+    transform: translateX(-8px);
+    transition:
+      opacity var(--dur) var(--ease-out),
+      transform var(--dur) var(--ease-out);
+  }
+
+  .mobile-menu__link:hover .mobile-menu__go,
+  .mobile-menu__link:focus-visible .mobile-menu__go,
+  .mobile-menu__link[aria-current='true'] .mobile-menu__go {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mobile-menu__link:hover .mobile-menu__label,
+  .mobile-menu__link[aria-current='true'] .mobile-menu__label {
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 14px rgb(0 229 255 / 0.35));
+  }
+
+  .mobile-menu__link:focus-visible {
+    outline-offset: 4px;
+  }
+
+  .mobile-menu__foot {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: auto;
+    padding-top: var(--space-5);
+    animation: item-in 0.6s 0.45s var(--ease-out) both;
+  }
+
+  .mobile-menu__foot :global(.mobile-menu__cta) {
+    width: 100%;
+  }
+
+  .mobile-menu__meta {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes item-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 22px, 0);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-menu {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu,
+    .mobile-menu__eyebrow,
+    .mobile-menu__item,
+    .mobile-menu__foot {
+      animation: none;
+    }
+  }
+</style>

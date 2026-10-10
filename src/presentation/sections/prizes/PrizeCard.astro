@@ -11,89 +11,132 @@ const { prize, featured = false } = Astro.props;
 const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
 ---
 
-<li class:list={['prize', featured && 'prize--featured']}>
+<li class:list={['prize sx-glass sx-corners sx-hover', featured && 'prize--featured']}>
+  <span class="prize__fx" aria-hidden="true">
+    <span class="prize__glow"></span>
+  </span>
   <div class="prize__top">
-    <span class="prize__rank" aria-hidden="true">
-      <span class="hud-label">Rank</span>
-      <span class="prize__rank-num">{rank}</span>
+    <span class="prize__badge" aria-hidden="true">
+      <span class="prize__badge-label">Rank</span>
+      <span class="prize__badge-num">{rank}</span>
     </span>
-    <Icon name={featured ? 'trophy' : 'crown'} size={featured ? 40 : 28} />
+    <span class="prize__icon">
+      <Icon name={featured ? 'trophy' : 'crown'} size={featured ? 34 : 24} />
+    </span>
   </div>
   <h3 class="prize__title">{prize.title}</h3>
   <p class="prize__desc">{prize.description}</p>
   {prize.revealed ? (
     <p class="prize__reward">{prize.reward}</p>
   ) : (
-    <p class="prize__locked">
-      <Icon name="lock" size={18} />
-      <span>A revelar</span>
-    </p>
+    <div class="prize__locked">
+      <span class="prize__redacted" aria-hidden="true"></span>
+      <p class="prize__locked-text">
+        <Icon name="lock" size={16} />
+        <span>A revelar</span>
+      </p>
+    </div>
   )}
 </li>
 
 <style>
   .prize {
-    position: relative;
-    isolation: isolate;
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-5);
-    clip-path: var(--clip-card);
-    background: rgb(127 231 255 / 0.16);
   }
 
-  .prize::before {
-    content: '';
+  .prize__fx {
     position: absolute;
-    inset: 1px;
-    z-index: -1;
-    clip-path: var(--clip-card);
-    background: linear-gradient(170deg, rgb(11 36 80 / 0.88), rgb(5 14 30 / 0.94) 70%);
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  /* luz de cima, como refletor no troféu */
+  .prize__glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(70% 55% at 85% 0%, rgb(255 194 74 / 0.16), transparent 70%);
   }
 
   .prize--featured {
-    background: var(--grad-energy);
-    box-shadow: 0 0 60px rgb(0 207 255 / 0.2);
+    --sx-border: linear-gradient(150deg, #ffe7a3 0%, #ffc24a 25%, rgb(255 133 47 / 0.3) 60%, #ff852f 100%);
+    box-shadow:
+      0 0 80px -20px rgb(255 194 74 / 0.45),
+      0 30px 60px -36px rgb(0 0 0 / 0.9);
   }
 
-  .prize--featured::before {
+  .prize--featured .prize__glow {
     background:
-      radial-gradient(90% 60% at 80% 0%, rgb(0 207 255 / 0.25), transparent 70%),
-      linear-gradient(170deg, rgb(13 52 110 / 0.95), rgb(5 14 30 / 0.96) 70%);
+      radial-gradient(60% 70% at 90% 0%, rgb(255 194 74 / 0.24), transparent 70%),
+      radial-gradient(50% 60% at 0% 100%, rgb(255 133 47 / 0.1), transparent 70%);
   }
 
   .prize__top {
+    position: relative;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: var(--space-4);
-    color: var(--c-cyan);
+    margin-bottom: var(--space-3);
   }
 
-  .prize__rank {
-    display: grid;
-    gap: var(--space-1);
+  /* insígnia de rank em chevron dourado */
+  .prize__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0.45rem 1.4rem 0.45rem 0.9rem;
+    background: linear-gradient(100deg, #ffe7a3, #ffc24a 45%, #ff852f);
+    clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 50%, calc(100% - 0.8rem) 100%, 0 100%);
+    color: var(--c-void);
+    filter: drop-shadow(0 0 14px rgb(255 194 74 / 0.5));
   }
 
-  .prize__rank-num {
+  .prize__badge-label {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .prize__badge-num {
     font-family: var(--font-display);
-    font-size: var(--fs-3xl);
+    font-size: var(--fs-xl);
     font-weight: 900;
-    line-height: 0.85;
-    color: var(--text);
+    line-height: 1;
+  }
+
+  .prize--featured .prize__badge-num {
+    font-size: var(--fs-2xl);
+  }
+
+  .prize__icon {
+    color: var(--sx-ink);
+    filter: drop-shadow(0 0 12px rgb(255 194 74 / 0.6));
   }
 
   .prize__title {
+    position: relative;
+    font-size: var(--fs-lg);
+    line-height: 1.1;
+  }
+
+  .prize--featured .prize__title {
     font-size: var(--fs-2xl);
   }
 
   .prize__desc {
+    position: relative;
     color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.6;
   }
 
-  .prize__reward,
-  .prize__locked {
+  .prize__reward {
     margin-top: auto;
     padding-top: var(--space-4);
     font-family: var(--font-display);
@@ -102,29 +145,49 @@ const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
     text-transform: uppercase;
   }
 
-  /* estado bloqueado com um brilho lento passando pelo texto */
+  /* estado bloqueado: tarja "censurada" com brilho passando + rótulo */
   .prize__locked {
+    position: relative;
+    display: grid;
+    gap: var(--space-3);
+    margin-top: auto;
+    padding-top: var(--space-4);
+    border-top: 1px dashed rgb(255 194 74 / 0.25);
+  }
+
+  .prize__redacted {
+    position: relative;
+    display: block;
+    width: 72%;
+    height: 0.9rem;
+    overflow: hidden;
+    background: rgb(255 194 74 / 0.12);
+  }
+
+  .prize__redacted::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgb(255 231 163 / 0.55) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: prize-shimmer 2.8s var(--ease-in-out) infinite;
+  }
+
+  .prize__locked-text {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    background: linear-gradient(100deg, var(--text-dim) 40%, var(--c-cyan-soft) 50%, var(--text-dim) 60%);
-    background-size: 300% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: prize-shimmer 4s linear infinite;
-  }
-
-  .prize__locked :global(.icon) {
-    color: var(--text-dim);
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
   }
 
   @keyframes prize-shimmer {
-    from {
-      background-position: 100% 0;
-    }
     to {
-      background-position: 0 0;
+      transform: translateX(100%);
     }
   }
 
@@ -135,8 +198,9 @@ const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .prize__locked {
+    .prize__redacted::after {
       animation: none;
+      opacity: 0;
     }
   }
 </style>

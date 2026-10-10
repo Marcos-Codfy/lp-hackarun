@@ -19,24 +19,42 @@ function holdIndexOf(sequence: readonly SceneKey[]): number {
   return index >= 0 ? index : sequence.lastIndexOf('core');
 }
 
+// maior gl_PointSize que a GPU aceita (o bokeh grande respeita esse teto)
+function maxPointSizeOf(renderer: WebGLRenderer): number {
+  const gl = renderer.getContext();
+  const range = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE) as Float32Array | null;
+  return Math.max(16, range?.[1] ?? 64);
+}
+
 // Builder: renderer → tier → formas (assíncrono, uma por vez) → palco pronto pra start()
 export async function buildStage(canvas: HTMLCanvasElement, ctx: AppContext): Promise<ExperienceStage> {
-  // sem WebGL2 (three r163+) o construtor lança: quem chama cai no fallback em CSS
+  // sem WebGL2 (three r163+) o construtor lança: quem chama cai no fallback em CSS.
+  // canvas opaco e preto: a luz compõe sobre a aurora em "screen" (sem briga de alpha pré-multiplicado)
   const renderer = new WebGLRenderer({
     canvas,
-    alpha: true,
+    alpha: false,
     antialias: false,
     powerPreference: 'high-performance',
   });
   try {
-    renderer.setClearColor(0x000000, 0);
-    const profile = profileFor(new QualityDetector(renderer.getContext(), ctx.coarsePointer).detect());
+    renderer.setClearColor(0x000000, 1);
+    const detector = new QualityDetector(renderer.getContext(), ctx.coarsePointer);
+    const profile = profileFor(detector.detect());
     const sequence: readonly SceneKey[] = ctx.scenes.keys.length > 0 ? ctx.scenes.keys : ['core'];
     // core aparece no começo e no fim, mas vira um atributo só
     const keys = [...new Set(sequence)];
     const mixer = new SceneMixer(sequence, keys);
     const field = await ParticleField.create(keys, profile.count, ShapeFactory.createDefault());
-    const parts: StageParts = { renderer, field, mixer, keys, profile, holdIndex: holdIndexOf(sequence) };
+    const parts: StageParts = {
+      renderer,
+      field,
+      mixer,
+      keys,
+      profile,
+      adaptive: !detector.forced,
+      holdIndex: holdIndexOf(sequence),
+      maxPointSize: maxPointSizeOf(renderer),
+    };
     return new ExperienceStage(parts, ctx);
   } catch (error) {
     renderer.dispose();

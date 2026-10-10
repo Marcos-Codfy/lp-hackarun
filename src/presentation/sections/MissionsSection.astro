@@ -1,6 +1,6 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
+import SectionHeader from './shared/SectionHeader.astro';
 import StationCard from './missions/StationCard.astro';
 import ScoringPanel from './missions/ScoringPanel.astro';
 import './sections.css';
@@ -19,15 +19,16 @@ const tokenIndex = Math.min(4, total - 1);
 
 <section
   id="missoes"
-  class="section missions"
+  class="section missions tone-cyan"
   data-scene="map"
   data-checkpoint="Missões"
   aria-labelledby="missoes-title"
   data-missions
 >
   <div class="container section-stack">
+    {/* canto superior direito fica livre: é onde o mapa 3D das missões aparece */}
     <div class="missions__head">
-      <SectionHeading
+      <SectionHeader
         id="missoes-title"
         code="03"
         eyebrow="Missões"
@@ -50,13 +51,14 @@ const tokenIndex = Math.min(4, total - 1);
       </ol>
 
       <div class="missions__progress" aria-hidden="true">
-        <span class="hud-label missions__count">
-          <span data-missions-current>01</span> / {pad(total)}
+        <span class="missions__count">
+          <b data-missions-current>01</b>
+          <span>/ {pad(total)}</span>
         </span>
         <span class="missions__bar">
           <span class="missions__bar-fill" data-missions-bar></span>
         </span>
-        <span class="hud-label missions__hint">Role para avançar →</span>
+        <span class="sx-hud missions__hint">Role para avançar &raquo;</span>
       </div>
     </div>
 
@@ -65,6 +67,10 @@ const tokenIndex = Math.min(4, total - 1);
 </section>
 
 <style>
+  .missions__head {
+    max-width: 44rem;
+  }
+
   .missions__track {
     display: grid;
     gap: var(--space-4);
@@ -91,40 +97,70 @@ const tokenIndex = Math.min(4, total - 1);
   .missions.is-horizontal .missions__pin {
     width: 100vw;
     margin-left: calc(50% - 50vw);
+    padding-top: 2.5rem;
     padding-inline: max(var(--gutter), (100vw - var(--container)) / 2);
     overflow-x: clip;
   }
 
   .missions.is-horizontal .missions__track {
+    position: relative;
     display: flex;
     width: max-content;
     gap: var(--space-5);
     will-change: transform;
   }
 
+  /* a rota: linha tracejada que liga os nós de cada missão */
+  .missions.is-horizontal .missions__track::before {
+    content: '';
+    position: absolute;
+    top: -1.6rem;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, rgb(0 229 255 / 0.5) 0 8px, transparent 8px 14px);
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+
   .missions.is-horizontal .missions__progress {
     display: flex;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-5);
     margin-top: var(--space-6);
   }
 
   .missions__count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+  }
+
+  .missions__count b {
     color: var(--text);
+    font-size: var(--fs-2xl);
+    font-weight: 900;
+    line-height: 1;
+    text-shadow: 0 0 22px rgb(0 229 255 / 0.5);
   }
 
   .missions__bar {
     position: relative;
     flex: 1;
-    max-width: 24rem;
+    max-width: 28rem;
     height: 2px;
-    background: rgb(127 231 255 / 0.12);
+    background: rgb(143 243 255 / 0.12);
   }
 
   .missions__bar-fill {
     position: absolute;
     inset: 0;
     background: var(--grad-energy);
+    box-shadow: 0 0 12px rgb(0 229 255 / 0.7);
     transform: scaleX(0);
     transform-origin: left center;
   }

@@ -1,0 +1,144 @@
+---
+// título de seção v2: índice HUD + eyebrow, título com destaque no degradê da seção (<em>) e lead
+// segue o contrato do HeadingRevealAnimator (data-reveal="heading" / -part / -title)
+interface Props {
+  code: string;
+  eyebrow: string;
+  title: string;
+  id?: string;
+  lead?: string;
+  align?: 'start' | 'center';
+  size?: 'sm' | 'md' | 'lg';
+  level?: 'h2' | 'h3';
+}
+
+const { code, eyebrow, title, id, lead, align = 'start', size = 'md', level = 'h2' } = Astro.props;
+const Heading = level;
+---
+
+<header class:list={['sx-head', `sx-head--${align}`, `sx-head--${size}`]} data-reveal="heading">
+  <p class="sx-head__meta" data-reveal-part>
+    <span class="sx-head__code" aria-hidden="true">
+      {code}
+    </span>
+    <span class="sx-head__rule" aria-hidden="true"></span>
+    <span class="sx-head__eyebrow">{eyebrow}</span>
+  </p>
+  <Heading class="sx-head__title" id={id} data-reveal-title set:html={title} />
+  {lead && (
+    <p class="sx-head__lead" data-reveal-part>
+      {lead}
+    </p>
+  )}
+</header>
+
+<style>
+  .sx-head {
+    position: relative;
+    display: grid;
+    gap: var(--space-5);
+    max-width: 52rem;
+  }
+
+  /* celular: o 3D passa atrás do texto, então um véu escuro suave acompanha o título */
+  .sx-head::before {
+    content: '';
+    position: absolute;
+    inset: -2.5rem -2rem;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(2 3 11 / 0.62), rgb(2 3 11 / 0.3) 65%, transparent);
+    pointer-events: none;
+  }
+
+  @media (min-width: 1024px) {
+    .sx-head::before {
+      display: none;
+    }
+  }
+
+  .sx-head--center {
+    margin-inline: auto;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .sx-head__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .sx-head__code {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.25rem;
+    height: 1.5rem;
+    padding-inline: 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--sx-accent) 60%, transparent);
+    background: color-mix(in srgb, var(--sx-accent) 16%, transparent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--sx-accent) 30%, transparent);
+    color: var(--text);
+    letter-spacing: 0.08em;
+    transform: skewX(var(--skew));
+  }
+
+  .sx-head__rule {
+    width: clamp(1.5rem, 4vw, 3.5rem);
+    height: 1px;
+    background: linear-gradient(90deg, var(--sx-accent), transparent);
+  }
+
+  .sx-head--center .sx-head__rule {
+    background: linear-gradient(90deg, transparent, var(--sx-accent), transparent);
+  }
+
+  .sx-head__eyebrow {
+    color: var(--sx-ink);
+  }
+
+  .sx-head__title {
+    font-size: clamp(2.1rem, 1.25rem + 3.3vw, 4.25rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    /* halo escuro: legível mesmo com partículas atrás */
+    text-shadow:
+      0 2px 30px rgb(2 3 11 / 0.9),
+      0 0 2px rgb(2 3 11 / 0.6);
+  }
+
+  .sx-head--sm .sx-head__title {
+    font-size: clamp(2rem, 1.2rem + 2.4vw, 3.25rem);
+  }
+
+  .sx-head--lg .sx-head__title {
+    font-size: clamp(2.4rem, 1.2rem + 4.4vw, 5.25rem);
+  }
+
+  .sx-head__title :global(em) {
+    font-style: normal;
+    background: var(--sx-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 22px color-mix(in srgb, var(--sx-accent) 42%, transparent));
+  }
+
+  .sx-head__lead {
+    max-width: 36rem;
+    color: var(--text-muted);
+    font-size: var(--fs-lg);
+    line-height: 1.6;
+    text-shadow: 0 1px 18px rgb(2 3 11 / 0.95);
+  }
+
+  .sx-head--center .sx-head__lead {
+    margin-inline: auto;
+  }
+</style>

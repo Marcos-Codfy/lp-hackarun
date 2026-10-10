@@ -1,6 +1,5 @@
 ---
 import type { ScoringDTO } from '@application/index';
-import HudFrame from '@presentation/components/ui/HudFrame.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 
 interface Props {
@@ -10,11 +9,12 @@ interface Props {
 const { scoring } = Astro.props;
 ---
 
-<HudFrame label="// Pontuação por estação" class="scoring" data-reveal="up">
+<div class="scoring sx-glass sx-corners" data-reveal="up">
   <div class="scoring__grid">
     <div class="scoring__intro">
+      <p class="sx-hud">// Pontuação por estação</p>
       <h3 class="scoring__title">
-        Até <span class="scoring__max tabular">{scoring.maxPoints}</span> pontos por estação
+        Até <span class="scoring__max sx-grad-text">{scoring.maxPoints}</span> pontos por estação
       </h3>
       <p class="section-note section-note--time scoring__note">
         <Icon name="clock" />
@@ -27,92 +27,117 @@ const { scoring } = Astro.props;
 
     <ul class="scoring__bars" role="list" data-bars>
       {scoring.criteria.map((criterion) => (
-        <li class:list={['bar', criterion.key === 'time' && 'bar--time']}>
-          <div class="bar__head">
-            <span class="bar__label">{criterion.label}</span>
-            <span class="bar__pts tabular">{criterion.points} pts</span>
+        <li class:list={['meter', criterion.key === 'time' && 'meter--time']}>
+          <div class="meter__head">
+            <span class="meter__label">{criterion.label}</span>
+            <span class="meter__pts">
+              <b>{criterion.points}</b> pts
+            </span>
           </div>
-          <span class="bar__track" aria-hidden="true">
-            <span class="bar__fill" data-bar-fill style={`--share: ${criterion.share}`} />
+          <span class="meter__track" aria-hidden="true">
+            <span class="meter__fill" data-bar-fill style={`--share: ${criterion.share}`}></span>
           </span>
         </li>
       ))}
     </ul>
   </div>
-</HudFrame>
+</div>
 
 <style>
+  .scoring {
+    padding: var(--space-6) var(--space-5);
+  }
+
   .scoring__grid {
     display: grid;
-    gap: var(--space-6);
+    gap: var(--space-7);
+  }
+
+  .scoring__intro {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
   }
 
   .scoring__title {
     font-size: var(--fs-2xl);
+    line-height: 1.1;
   }
 
   .scoring__max {
-    background: var(--grad-energy);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .scoring__note {
-    margin-top: var(--space-4);
+    display: inline-block;
+    font-size: 1.6em;
+    font-weight: 900;
+    line-height: 0.9;
+    vertical-align: -0.12em;
+    filter: drop-shadow(0 0 20px rgb(0 229 255 / 0.45));
   }
 
   .scoring__bars {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
 
-  .bar__head {
+  .meter__head {
     display: flex;
+    align-items: baseline;
     justify-content: space-between;
     gap: var(--space-3);
     margin-bottom: var(--space-2);
     font-size: var(--fs-sm);
   }
 
-  .bar__label {
+  .meter__label {
     color: var(--text);
-    font-weight: 500;
+    font-weight: 600;
   }
 
-  .bar__pts {
+  .meter__pts {
+    color: var(--text-dim);
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
-    color: var(--c-cyan-soft);
   }
 
-  .bar__track {
-    display: block;
-    height: 6px;
-    background: rgb(127 231 255 / 0.08);
+  .meter__pts b {
+    color: var(--sx-ink);
+    font-weight: 700;
   }
 
-  .bar__fill {
+  /* medidor segmentado: a máscara fica no trilho, então o preenchimento cresce sem distorcer os blocos */
+  .meter__track {
+    position: relative;
     display: block;
+    height: 10px;
+    background: rgb(143 243 255 / 0.1);
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
+    mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
+  }
+
+  .meter__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
     width: calc(var(--share) * 100%);
-    height: 100%;
-    background: var(--grad-energy);
-    box-shadow: 0 0 12px rgb(0 207 255 / 0.5);
+    background: var(--grad-blue);
     transform-origin: left center;
   }
 
-  .bar--time .bar__pts {
-    color: var(--time);
+  .meter--time .meter__pts b {
+    color: #ffb27a;
   }
 
-  .bar--time .bar__fill {
-    background: var(--time);
-    box-shadow: var(--glow-amber);
+  .meter--time .meter__fill {
+    background: linear-gradient(90deg, var(--c-gold), var(--c-orange));
+  }
+
+  @media (min-width: 640px) {
+    .scoring {
+      padding: var(--space-7);
+    }
   }
 
   @media (min-width: 1024px) {
     .scoring__grid {
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
       align-items: center;
       gap: var(--space-8);
     }

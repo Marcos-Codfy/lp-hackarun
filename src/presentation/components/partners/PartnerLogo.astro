@@ -1,0 +1,121 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// um parceiro na faixa: logo oficial branca + papel + descrição; vira link quando tem site
+interface Props {
+  logo: ImageMetadata;
+  name: string;
+  role: string;
+  caption: string;
+  url?: string | null;
+  tone: 'blue' | 'gold';
+  // largura de exibição em rem (as logos têm proporções bem diferentes)
+  width: number;
+}
+
+const { logo, name, role, caption, url = null, tone, width } = Astro.props;
+const Tag = url ? 'a' : 'div';
+const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<Tag class:list={['partner', `partner--${tone}`]} {...linkAttrs}>
+  <span class="partner__role">{role}</span>
+  <span class="partner__mark" style={`--w: ${width}rem`}>
+    <Image
+      class="partner__img"
+      src={logo}
+      alt={name}
+      widths={[Math.round(width * 16), Math.round(width * 32)]}
+      sizes={`${width}rem`}
+      loading="lazy"
+    />
+  </span>
+  <span class="partner__caption">
+    {caption}
+    {url && <span class="sr-only"> (abre em nova aba)</span>}
+  </span>
+</Tag>
+
+<style>
+  .partner {
+    --glow: rgb(0 229 255 / 0.55);
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: var(--space-5);
+    padding: var(--space-6) var(--space-5);
+    border-radius: 4px;
+    color: inherit;
+    text-align: center;
+    text-decoration: none;
+    transition: background var(--dur) var(--ease-out);
+  }
+
+  .partner--gold {
+    --glow: rgb(255 194 74 / 0.5);
+  }
+
+  .partner:hover {
+    background: radial-gradient(
+      60% 70% at 50% 45%,
+      color-mix(in srgb, var(--glow) 18%, transparent),
+      transparent 75%
+    );
+  }
+
+  .partner__role {
+    color: #8ff3ff;
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .partner--gold .partner__role {
+    color: #ffd88a;
+  }
+
+  .partner__mark {
+    display: grid;
+    place-items: center;
+    width: min(var(--w), 70vw);
+    min-height: 8rem;
+  }
+
+  .partner__img {
+    width: 100%;
+    height: auto;
+    opacity: 0.88;
+    transition:
+      opacity var(--dur) var(--ease-out),
+      filter var(--dur) var(--ease-out),
+      translate var(--dur) var(--ease-out);
+  }
+
+  .partner:hover .partner__img,
+  .partner:focus-visible .partner__img {
+    opacity: 1;
+    filter: drop-shadow(0 0 22px var(--glow));
+    translate: 0 -3px;
+  }
+
+  .partner__caption {
+    max-width: 22rem;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+  }
+
+  .partner:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .partner:hover .partner__img {
+      translate: none;
+    }
+  }
+</style>

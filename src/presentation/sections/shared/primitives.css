@@ -1,0 +1,177 @@
+/* primitivas visuais das seções (vidro, cantoneiras HUD, tags, ícones); dependem das variáveis --sx-* da seção */
+/* ---------- vidro com borda degradê de 1px + cantoneiras HUD ---------- */
+.sx-glass {
+  --sx-border: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--sx-accent) 75%, transparent) 0%,
+    rgb(140 160 255 / 0.12) 32%,
+    rgb(140 160 255 / 0.06) 64%,
+    color-mix(in srgb, var(--sx-accent-2) 55%, transparent) 100%
+  );
+  --sx-corner: color-mix(in srgb, var(--sx-accent) 90%, white 10%);
+  position: relative;
+  isolation: isolate;
+  border-radius: 3px;
+  background:
+    radial-gradient(
+      120% 80% at 0% 0%,
+      color-mix(in srgb, var(--sx-accent) 11%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(170deg, rgb(12 16 48 / 0.62) 0%, rgb(4 5 20 / 0.74) 100%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 30px 60px -36px rgb(0 0 0 / 0.9);
+  /* hover usa a propriedade translate (não transform): o GSAP anima transform nas entradas e os dois não brigam */
+  transition:
+    translate var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+
+/* sem blur: listas grandes e coisas que se movem (blur sobre o canvas custa GPU) */
+.sx-glass--solid {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background:
+    radial-gradient(
+      120% 80% at 0% 0%,
+      color-mix(in srgb, var(--sx-accent) 12%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(170deg, rgb(10 14 42 / 0.86) 0%, rgb(4 5 18 / 0.92) 100%);
+}
+
+.sx-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--sx-border);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+/* cantoneiras: 8 traços num pseudo só */
+.sx-corners::after {
+  --s: 12px;
+  --w: 1.5px;
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--sx-corner), var(--sx-corner)) top left / var(--s) var(--w),
+    linear-gradient(var(--sx-corner), var(--sx-corner)) top left / var(--w) var(--s),
+    linear-gradient(var(--sx-corner), var(--sx-corner)) top right / var(--s) var(--w),
+    linear-gradient(var(--sx-corner), var(--sx-corner)) top right / var(--w) var(--s),
+    linear-gradient(var(--sx-corner), var(--sx-corner)) bottom left / var(--s) var(--w),
+    linear-gradient(var(--sx-corner), var(--sx-corner)) bottom left / var(--w) var(--s),
+    linear-gradient(var(--sx-corner), var(--sx-corner)) bottom right / var(--s) var(--w),
+    linear-gradient(var(--sx-corner), var(--sx-corner)) bottom right / var(--w) var(--s);
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  transition:
+    inset var(--dur) var(--ease-out),
+    opacity var(--dur) var(--ease-out);
+}
+
+.sx-hover:hover,
+.sx-hover:focus-within {
+  translate: 0 -4px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 26px 60px -28px color-mix(in srgb, var(--sx-accent) 60%, transparent),
+    0 0 64px -12px color-mix(in srgb, var(--sx-accent) 48%, transparent);
+}
+
+.sx-hover:hover::after,
+.sx-hover:focus-within::after {
+  inset: -6px;
+  opacity: 1;
+}
+
+/* ---------- peças pequenas ---------- */
+.sx-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 1.75rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--sx-accent) 34%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--sx-accent) 9%, rgb(4 5 18 / 0.6));
+  color: var(--sx-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hud);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  /* tag longa quebra em vez de empurrar o card pra fora da tela */
+  max-width: 100%;
+}
+
+.sx-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.875rem;
+  height: 2.875rem;
+  border: 1px solid color-mix(in srgb, var(--sx-accent) 45%, transparent);
+  border-radius: 2px;
+  background: radial-gradient(
+    circle at 50% 30%,
+    color-mix(in srgb, var(--sx-accent) 26%, transparent),
+    transparent 75%
+  );
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--sx-accent) 22%, transparent);
+  color: var(--sx-ink);
+  transform: rotate(45deg);
+}
+
+.sx-icon > * {
+  transform: rotate(-45deg);
+}
+
+.sx-hud {
+  font-family: var(--font-mono);
+  font-size: var(--fs-hud);
+  font-weight: 500;
+  letter-spacing: var(--tracking-hud);
+  text-transform: uppercase;
+  color: var(--sx-ink);
+}
+
+.sx-grad-text {
+  background: var(--sx-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* número vazado gigante */
+.sx-outline-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--sx-accent) 46%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sx-hover:hover,
+  .sx-hover:focus-within {
+    translate: none;
+  }
+}

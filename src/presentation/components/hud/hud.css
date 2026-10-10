@@ -1,0 +1,169 @@
+/* HUD da corrida (global: os tiques são criados pelo HudRailController) */
+.hud {
+  --hud-accent: var(--c-cyan);
+  position: fixed;
+  z-index: var(--z-hud);
+  left: var(--space-3);
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+}
+
+/* sem JS não tem HUD (ele mentiria o checkpoint); no mobile some enquanto o hero está na tela */
+.hud.is-ready:not(.is-start) {
+  opacity: 1;
+  transform: none;
+}
+
+/* o acento acompanha a cena (data-scene-theme vem do SceneThemeController) */
+:root[data-scene-theme='enigma'] .hud {
+  --hud-accent: #d48bff;
+}
+
+:root[data-scene-theme='trophy'] .hud {
+  --hud-accent: var(--c-gold);
+}
+
+/* ---------- mobile: pílula ---------- */
+.hud__rail {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgb(4 6 22 / 0.72);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--hud-accent) 26%, transparent),
+    0 8px 24px -10px rgb(0 0 0 / 0.9);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.hud__checkpoint {
+  color: var(--hud-accent);
+}
+
+.hud__track {
+  position: relative;
+  width: 44px;
+  height: 2px;
+}
+
+.hud__bar {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(150 175 255 / 0.18);
+}
+
+.hud__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--grad-energy);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+
+/* no mobile a régua é curta demais pra 11 tiques: só no desktop */
+.hud__ticks {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.hud__tick {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--p) * 100%);
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: rgb(150 175 255 / 0.35);
+  transition:
+    background var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.hud__tick.is-passed {
+  background: var(--hud-accent);
+}
+
+.hud__tick.is-current {
+  background: #fff;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--hud-accent) 35%, transparent),
+    0 0 10px var(--hud-accent);
+  transform: scale(1.4);
+}
+
+.hud__npc {
+  display: inline-flex;
+  gap: 0.4em;
+  color: var(--c-success);
+}
+
+.hud__npc-label {
+  color: var(--text-dim);
+}
+
+.hud__secret {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + var(--space-3));
+  width: min(18rem, calc(100vw - 2 * var(--space-3)));
+  padding: var(--space-3) var(--space-4);
+  border-radius: 10px;
+  background: rgb(10 8 26 / 0.86);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 133 47 / 0.5),
+    0 0 30px -6px rgb(255 133 47 / 0.45);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hud);
+  letter-spacing: 0.06em;
+  line-height: 1.55;
+  color: var(--c-gold);
+}
+
+.hud__secret.is-revealed {
+  animation: hud-secret 900ms var(--ease-out);
+}
+
+@keyframes hud-secret {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud,
+  .hud__tick {
+    transition: none;
+  }
+
+  .hud__secret.is-revealed {
+    animation: none;
+  }
+}

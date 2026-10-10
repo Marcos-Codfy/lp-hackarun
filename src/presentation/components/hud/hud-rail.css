@@ -1,0 +1,97 @@
+/* HUD no desktop: trilho vertical fino na borda direita (complementa o hud.css) */
+@media (min-width: 1024px) {
+  .hud {
+    top: 50%;
+    right: 10px;
+    bottom: auto;
+    left: auto;
+    transform: translate(8px, -50%);
+  }
+
+  .hud.is-ready:not(.is-start),
+  .hud.is-ready.is-start {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+
+  .hud__rail {
+    flex-direction: column;
+    gap: var(--space-4);
+    height: auto;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .hud__checkpoint {
+    display: none;
+    writing-mode: vertical-rl;
+    letter-spacing: 0.26em;
+    text-shadow: 0 0 12px color-mix(in srgb, var(--hud-accent) 50%, transparent);
+  }
+
+  .hud__track {
+    width: 2px;
+    height: min(36vh, 22rem);
+  }
+
+  /* a View escala o preenchimento em X: o trilho é a barra horizontal girada 90° */
+  .hud__bar {
+    inset: 0 auto auto 0;
+    width: min(36vh, 22rem);
+    height: 2px;
+    transform-origin: 0 0;
+    transform: rotate(90deg) translateY(-100%);
+  }
+
+  .hud__fill {
+    box-shadow: 0 0 10px color-mix(in srgb, var(--hud-accent) 60%, transparent);
+  }
+
+  .hud__ticks {
+    display: block;
+  }
+
+  .hud__tick {
+    top: calc(var(--p) * 100%);
+    left: 50%;
+    width: 9px;
+    height: 1px;
+    margin: 0 0 0 -4.5px;
+    border-radius: 0;
+  }
+
+  .hud__tick.is-current {
+    width: 13px;
+    height: 2px;
+    margin: -0.5px 0 0 -6.5px;
+    transform: none;
+  }
+
+  .hud__npc {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.5625rem;
+  }
+
+  .hud__secret {
+    left: auto;
+    right: calc(100% + var(--space-4));
+    bottom: 0;
+  }
+}
+
+/* com sobra de margem lateral o rótulo vertical cabe sem encostar no conteúdo */
+@media (min-width: 1280px) {
+  .hud {
+    right: 22px;
+  }
+
+  .hud__checkpoint {
+    display: block;
+  }
+}

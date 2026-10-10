@@ -1,16 +1,14 @@
 ---
 import type { LandingPageDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
-import Chip from '@presentation/components/ui/Chip.astro';
-import Icon from '@presentation/components/ui/Icon.astro';
-import HudCorners from '@presentation/components/ui/HudCorners.astro';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
-import HeroWordmark from './hero/HeroWordmark.astro';
 import HeroHud from './hero/HeroHud.astro';
-import HeroPartners from './hero/HeroPartners.astro';
-import ScrollCue from './hero/ScrollCue.astro';
+import HeroLogo from './hero/HeroLogo.astro';
+import HeroSlogan from './hero/HeroSlogan.astro';
+import HeroMeta from './hero/HeroMeta.astro';
+import HeroFooter from './hero/HeroFooter.astro';
 import './sections.css';
 
 interface Props {
@@ -18,7 +16,11 @@ interface Props {
 }
 
 const { event, partners } = Astro.props.data;
-const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
+const days = new DayLabelFormatter();
+const first = days.format(event.firstDate);
+const last = days.format(event.lastDate);
+const dates = `${days.range(event.firstDate, event.lastDate)} ${event.edition}`;
+const datesLong = `De ${Number(first.day)} a ${last.long.split(', ')[1] ?? ''} de ${event.edition}`;
 const host = event.venues.find((v) => v.role === 'host')?.shortName ?? 'Unicatólica';
 const finalVenue = event.venues.find((v) => v.role === 'final');
 const organizer = partners.find((p) => p.role === 'organizer')?.name ?? host;
@@ -36,46 +38,43 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : { 'data-nav-
   data-hero
 >
   <div class="hero__scrim" aria-hidden="true"></div>
+
   <div class="container hero__frame">
-    <HudCorners size={18} class="hero__corners" />
-    <HeroHud label={event.tagline} />
-
-    <div class="hero__content" data-hero-content>
-      <div class="hero-in" style="--d: 120ms">
-        {/* espaços explícitos: o compressHTML some com quebra de linha e o leitor de tela grudaria as palavras */}
-        <Chip tone="accent">
-          <span>{dates}</span> <span aria-hidden="true">·</span>
-          <span class="sr-only">,</span> <span>{host}</span> <span aria-hidden="true">→</span>
-          <span class="sr-only">e</span> <span>Final no {finalVenue?.shortName ?? 'Capim Dourado'}</span>
-        </Chip>
+    <div class="hero__content" data-hero-fade>
+      <HeroHud label={event.tagline} />
+      <HeroLogo />
+      <HeroSlogan />
+      <div class="hero-in" style="--d: 1.05s">
+        <HeroMeta
+          dates={dates}
+          datesLong={datesLong}
+          host={host}
+          finalVenue={finalVenue?.shortName ?? 'Capim Dourado'}
+        />
       </div>
 
-      <HeroWordmark />
-
-      <p class="hero__tagline hero-in" style="--d: 260ms">
-        Encontre os NPCs. Decifre as pistas. <strong>Codifique contra o relógio.</strong>
-      </p>
-
-      <div class="hero__countdown hero-in" style="--d: 380ms">
-        <Countdown milestones={event.milestones} variant="hero" />
-      </div>
-
-      <div class="hero__ctas hero-in" style="--d: 480ms">
-        <Button size="lg" href={cta.href} {...ctaAttrs}>
-          {cta.label}
-          <Icon slot="icon" name="arrow-right" />
-        </Button>
-        <Button variant="ghost" size="lg" href="#programacao" data-nav-link>
-          Ver programação
-        </Button>
-      </div>
-
-      <div class="hero-in" style="--d: 580ms">
-        <HeroPartners organizer={organizer} partner={partner} />
+      <div class="hero__actions hero-in" style="--d: 1.2s">
+        <div class="hero__countdown">
+          <Countdown milestones={event.milestones} variant="hero" />
+        </div>
+        <span class="hero__divider" aria-hidden="true"></span>
+        <div class="hero__ctas">
+          <Button size="lg" href={cta.href} {...ctaAttrs}>
+            {cta.label}
+          </Button>
+          <Button variant="ghost" size="lg" href="#programacao" data-nav-link>
+            Ver programação
+          </Button>
+        </div>
       </div>
     </div>
 
-    <ScrollCue />
+    {/* a entrada (CSS) e a saída no scroll (GSAP) ficam em elementos diferentes: opacidade não briga */}
+    <div class="hero-in" style="--d: 1.4s">
+      <div data-hero-fade>
+        <HeroFooter organizer={organizer} partner={partner} />
+      </div>
+    </div>
   </div>
 </section>
 
@@ -83,33 +82,31 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : { 'data-nav-
   .hero {
     display: grid;
     min-height: 100svh;
-    padding-block: calc(var(--header-h) + var(--space-3)) var(--space-4);
+    /* os raios do logo podem passar da borda no celular */
+    overflow-x: clip;
+    padding-block: calc(var(--header-h) + var(--space-4)) var(--space-4);
   }
 
-  /* véu radial: o globo continua aparecendo, mas o centro fica legível */
+  /* véu só na faixa do texto: o centro (logo + globo) fica aberto */
   .hero__scrim {
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(
-      ellipse 60% 46% at 50% 50%,
-      rgb(4 11 24 / 0.6) 0%,
-      rgb(4 11 24 / 0.32) 55%,
-      transparent 100%
-    );
+    background:
+      radial-gradient(
+        ellipse 70% 34% at 50% 72%,
+        rgb(2 3 11 / 0.62) 0%,
+        rgb(2 3 11 / 0.2) 60%,
+        transparent 100%
+      ),
+      linear-gradient(180deg, transparent 70%, rgb(2 3 11 / 0.55) 100%);
   }
 
   .hero__frame {
-    position: relative;
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: var(--space-5);
-    padding-block: var(--space-3);
-  }
-
-  .hero__frame :global(.hero__corners) {
-    display: none;
+    grid-template-rows: 1fr auto;
+    gap: var(--space-6);
   }
 
   .hero__content {
@@ -120,29 +117,27 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : { 'data-nav-
     text-align: center;
   }
 
-  .hero__tagline {
-    max-width: 30ch;
-    color: var(--text-muted);
-    font-size: var(--fs-lg);
-    text-shadow: 0 1px 18px rgb(4 11 24 / 0.9);
-  }
-
-  .hero__tagline strong {
-    color: var(--text);
-    font-weight: 600;
+  .hero__actions {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-6);
+    width: 100%;
+    margin-top: var(--space-2);
   }
 
   .hero__countdown {
     display: grid;
     justify-items: center;
-    width: 100%;
+  }
+
+  .hero__divider {
+    display: none;
   }
 
   .hero__ctas {
     display: grid;
-    width: 100%;
-    max-width: 22rem;
     gap: var(--space-3);
+    width: min(100%, 22rem);
   }
 
   /* entradas em CSS: começam no primeiro paint e terminam mesmo se o JS falhar */
@@ -159,19 +154,39 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : { 'data-nav-
   }
 
   @media (min-width: 640px) {
-    .hero__frame {
-      padding: var(--space-5);
-    }
-
-    .hero__frame :global(.hero__corners) {
-      display: block;
-    }
-
     .hero__ctas {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      max-width: none;
+      width: auto;
+      gap: var(--space-4);
+    }
+  }
+
+  /* desktop: contador e CTAs lado a lado, separados por um fio vertical */
+  @media (min-width: 1024px) {
+    .hero__content {
+      gap: var(--space-5);
+    }
+
+    .hero__actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-7);
+    }
+
+    .hero__divider {
+      display: block;
+      width: 1px;
+      height: 5.5rem;
+      background: linear-gradient(180deg, transparent, rgb(150 175 255 / 0.35), transparent);
+    }
+
+    /* CTAs empilhados com a mesma largura: o bloco fica do tamanho do logo */
+    .hero__ctas {
+      display: grid;
+      gap: var(--space-3);
     }
   }
 

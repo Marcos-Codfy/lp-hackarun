@@ -1,24 +1,44 @@
 ---
-// tela de sucesso: protocolo + próximos passos (a View preenche e foca o título)
+// tela de sucesso: emblema + protocolo "decodificando" + próximos passos (a View preenche e foca o título)
 import Button from '@presentation/components/ui/Button.astro';
+
+const steps = [
+  'Guarde o protocolo: é ele que identifica a sua inscrição.',
+  'A organização confere os dados e confirma pelo e-mail ou WhatsApp informado.',
+  'Confirmada, a equipe aparece na lista de equipes aqui no site.',
+  'Salve as datas na agenda pra não perder a largada.',
+];
 ---
 
 <div class="success" data-reg-success hidden>
+  <div class="success__emblem" aria-hidden="true">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" stroke="currentColor" stroke-width="1.5"></path>
+      <path d="m15.5 24.5 6 6 11-12.5" stroke="currentColor" stroke-width="3" stroke-linecap="square"></path>
+    </svg>
+  </div>
   <p class="success__code" aria-hidden="true">
-    // inscrição recebida
+    // inscrição recebida · checkpoint liberado
   </p>
   <h3 class="success__title" tabindex="-1" data-reg-success-title>
     Tá dentro! Agora é com a organização.
   </h3>
-  <div class="success__protocol-box">
+  <div class="success__ticket">
     <p class="success__label">Seu protocolo</p>
-    <p class="success__protocol" data-reg-protocol></p>
+    <p class="success__protocol">
+      <span class="sr-only" data-reg-protocol></span>
+      <span aria-hidden="true" data-reg-protocol-typed></span>
+    </p>
   </div>
-  <ol class="success__steps">
-    <li>Guarde o protocolo: é ele que identifica a sua inscrição.</li>
-    <li>A organização confere os dados e confirma pelo e-mail ou WhatsApp informado.</li>
-    <li>Confirmada, a equipe aparece na lista de equipes aqui no site.</li>
-    <li>Salve as datas na agenda pra não perder a largada.</li>
+  <ol class="success__steps" role="list">
+    {steps.map((step, i) => (
+      <li>
+        <span class="success__step-num" aria-hidden="true">
+          {String(i + 1).padStart(2, '0')}
+        </span>
+        <span>{step}</span>
+      </li>
+    ))}
   </ol>
   <div class="success__actions">
     <Button href="/hackarun-2026.ics" variant="time" download="hackarun-2026.ics">
@@ -33,15 +53,31 @@ import Button from '@presentation/components/ui/Button.astro';
 <style>
   .success {
     display: grid;
+    justify-items: start;
     gap: var(--space-5);
+    animation: success-in 700ms var(--ease-out);
+  }
+
+  .success__emblem {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    color: var(--c-success);
+    filter: drop-shadow(0 0 18px rgb(44 245 180 / 0.6));
+  }
+
+  .success__emblem svg {
+    width: 100%;
+    height: 100%;
   }
 
   .success__code {
+    color: var(--c-success);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
-    color: var(--c-success);
   }
 
   .success__title {
@@ -52,46 +88,81 @@ import Button from '@presentation/components/ui/Button.astro';
     outline: none;
   }
 
-  .success__protocol-box {
-    justify-self: start;
-    padding: var(--space-4) var(--space-5);
-    clip-path: var(--clip-card);
-    background: rgb(61 245 176 / 0.08);
-    box-shadow: inset 0 0 0 1px rgb(61 245 176 / 0.45);
+  /* protocolo num "ticket" com recortes laterais */
+  .success__ticket {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-5) var(--space-6);
+    border: 1px solid rgb(44 245 180 / 0.45);
+    border-radius: 4px;
+    background:
+      radial-gradient(80% 120% at 0% 0%, rgb(44 245 180 / 0.12), transparent 60%), rgb(4 10 20 / 0.8);
+    box-shadow: 0 0 40px -10px rgb(44 245 180 / 0.35);
+    -webkit-mask:
+      radial-gradient(circle 12px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 12px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 12px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 12px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
   }
 
   .success__label {
+    color: var(--text-muted);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
-    color: var(--text-muted);
   }
 
   .success__protocol {
-    font-family: var(--font-mono);
-    font-size: var(--fs-2xl);
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    min-height: 1.3em;
     color: var(--c-success);
+    font-family: var(--font-mono);
+    font-size: clamp(1.25rem, 1rem + 1.4vw, 1.875rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 18px rgb(44 245 180 / 0.55);
     user-select: all;
   }
 
   .success__steps {
     display: grid;
-    gap: var(--space-2);
-    padding-left: 1.25rem;
+    gap: var(--space-3);
+  }
+
+  .success__steps li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
     color: var(--text-muted);
   }
 
-  .success__steps li::marker {
-    color: var(--accent);
+  .success__step-num {
+    color: #8ff3ff;
     font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
   }
 
   .success__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+  }
+
+  @keyframes success-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .success {
+      animation: none;
+    }
   }
 </style>

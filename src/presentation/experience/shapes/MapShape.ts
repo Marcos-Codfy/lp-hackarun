@@ -1,86 +1,89 @@
-import { SHAPE_RADIUS, type ShapeStrategy } from './ShapeStrategy';
-import { PolylinePath } from './PolylinePath';
-import { PointWriter, TAU, gaussian, split, vec3, type Random, type Vec3 } from './sampling';
+import type { ShapeStrategy } from './ShapeStrategy';
+import { PLANE_XZ, at } from './PointBrush';
+import { BEAM_BASE, MissionRoute, PACKET, STATIONS, beaconHeight } from './MissionRoute';
+import { TAU, type Random, type Vec3 } from './sampling';
+import { arc, blob, line, paint, trail, type Stroke } from './strokes';
 
-const STATIONS = 8;
-const STRANDS = 3;
-// perfil do raio da referência: entra à esquerda, afunda no meio e sobe forte no fim (t, y)
-const PROFILE: readonly (readonly [number, number])[] = [
-  [0, 0.12],
-  [0.18, 0.18],
-  [0.33, 0.02],
-  [0.48, -0.34],
-  [0.62, -0.18],
-  [0.72, -0.14],
-  [0.86, 0.2],
-  [1, 0.3],
+const RINGS: readonly (readonly [number, number])[] = [
+  [1.585, 760],
+  [1.615, 760],
+  [1.28, 380],
+  [0.95, 300],
+  [0.62, 300],
+  [0.3, 340],
 ];
+const PACKET_LEN = 0.026;
 
-// a corrida: raio elétrico atravessando a tela, 8 estações brilhando e faíscas soltas
+// mapa de missões em holograma: plataforma redonda (anéis, raios, régua), rota em S ligando 8 faróis
+// e o farol final mais alto com coroa. Tudo deitado em y = 0 com faróis em pé: a inclinação pra câmera
+// vem do shader (shapeMap), pra os feixes continuarem verticais na tela
 export class MapShape implements ShapeStrategy {
   readonly key = 'map';
 
   generate(count: number, random: Random): Float32Array {
-    const writer = new PointWriter(count);
-    const bolt = new PolylinePath(buildBolt(random));
-    const [core = 0, strands = 0, nodes = 0, sparks = 0] = split(count, [0.44, 0.16, 0.28, 0.12]);
-    const p = vec3();
-
-    for (let i = 0; i < core; i++) {
-      bolt.sample(random(), p);
-      writer.push(p.x, p.y + gaussian(random) * 0.01, p.z + gaussian(random) * 0.01);
-    }
-    // filamentos finos que serpenteiam em volta do raio principal
-    for (let i = 0; i < strands; i++) {
-      const strand = i % STRANDS;
-      const u = random();
-      bolt.sample(u, p);
-      const wave = Math.sin(u * TAU * (3 + strand * 2) + strand * 1.7) * (0.025 + strand * 0.018);
-      writer.push(p.x, p.y + wave, p.z + wave * 0.6);
-    }
-    // estações: aglomerados densos em pontos igualmente espaçados do caminho
-    for (let i = 0; i < nodes; i++) {
-      bolt.sample(((i % STATIONS) + 0.5) / STATIONS, p);
-      const r = 0.012 + Math.pow(random(), 2) * 0.07;
-      const a = random() * TAU;
-      const b = Math.acos(2 * random() - 1);
-      writer.push(
-        p.x + Math.sin(b) * Math.cos(a) * r,
-        p.y + Math.cos(b) * r,
-        p.z + Math.sin(b) * Math.sin(a) * r,
-      );
-    }
-    for (let i = 0; i < sparks; i++) {
-      bolt.sample(random(), p);
-      const reach = 0.05 + Math.pow(random(), 2.5) * 0.45;
-      writer.push(
-        p.x + gaussian(random) * 0.05,
-        p.y + (random() - 0.5) * reach * 2,
-        p.z + (random() - 0.5) * reach,
-      );
-    }
-    return writer.finish();
+    const route = new MissionRoute();
+    return paint([...platform(), ...road(route), ...beacons(route)], count, random);
   }
 }
 
-// deslocamento de ponto médio: cada nível quebra os segmentos com metade da amplitude
-function buildBolt(random: Random): Vec3[] {
-  let points: Vec3[] = PROFILE.map(([t, y]) => ({ x: (t * 2 - 1) * SHAPE_RADIUS, y, z: 0 }));
-  let amplitude = 0.16;
-  for (let level = 0; level < 4; level++) {
-    const next: Vec3[] = [];
-    points.forEach((a, i) => {
-      next.push(a);
-      const b = points[i + 1];
-      if (!b) return;
-      next.push({
-        x: (a.x + b.x) / 2,
-        y: (a.y + b.y) / 2 + (random() - 0.5) * amplitude,
-        z: (a.z + b.z) / 2 + (random() - 0.5) * amplitude * 0.6,
-      });
-    });
-    points = next;
-    amplitude *= 0.55;
+function platform(): Stroke[] {
+  const o = at(0, 0, 0);
+  const strokes: Stroke[] = RINGS.map(([r, d]) => arc(o, r, d, { plane: PLANE_XZ }));
+  // borda de baixo da mesa: dá espessura ao holograma
+  strokes.push(arc(at(0, -0.09, 0), 1.6, 300, { plane: PLANE_XZ }));
+  for (let i = 0; i < 72; i++) {
+    const a = (i * TAU) / 72;
+    const inner = i % 6 === 0 ? 1.47 : 1.52;
+    strokes.push(
+      line(
+        at(Math.cos(a) * inner, 0, Math.sin(a) * inner),
+        at(Math.cos(a) * 1.565, 0, Math.sin(a) * 1.565),
+        1300,
+      ),
+    );
   }
-  return points;
+  for (let i = 0; i < 12; i++) {
+    const a = (i * TAU) / 12 + TAU / 24;
+    strokes.push(
+      line(at(Math.cos(a) * 0.32, 0, Math.sin(a) * 0.32), at(Math.cos(a) * 1.45, 0, Math.sin(a) * 1.45), 110),
+    );
+  }
+  return strokes;
+}
+
+// estrada: linha central forte e duas bordas finas
+function road(route: MissionRoute): Stroke[] {
+  return [trail(route.path(0), 2200), trail(route.path(0.04), 900), trail(route.path(-0.04), 900)];
+}
+
+function beacons(route: MissionRoute): Stroke[] {
+  const strokes: Stroke[] = [];
+  for (let k = 0; k < STATIONS; k++) {
+    const s = route.station(k);
+    const h = beaconHeight(k);
+    const final = k === STATIONS - 1;
+    strokes.push(arc(at(s.x, 0.004, s.z), 0.085, 1500, { plane: PLANE_XZ }));
+    strokes.push(arc(at(s.x, 0.004, s.z), 0.135, final ? 900 : 600, { plane: PLANE_XZ }));
+    strokes.push(...beam(s, h, final));
+    strokes.push(arc(at(s.x, h, s.z), 0.05, 1600, { plane: PLANE_XZ }));
+    strokes.push(blob(final ? 90 : 45, (b, n) => b.cluster(at(s.x, h + 0.01, s.z), 0.016, n)));
+    if (final) {
+      strokes.push(arc(at(s.x, h + 0.06, s.z), 0.13, 1300, { plane: PLANE_XZ }));
+      strokes.push(arc(at(s.x, h + 0.1, s.z), 0.2, 800, { plane: PLANE_XZ }));
+    }
+  }
+  return strokes;
+}
+
+// feixe fino: um trilho fraco e pacotes densos que o shader faz subir (grosso demais estoura no bloom)
+function beam(s: Vec3, h: number, final: boolean): Stroke[] {
+  const packets = Math.round((h - BEAM_BASE) / PACKET);
+  const rail = line(at(s.x, BEAM_BASE, s.z), at(s.x, h - 0.012, s.z), 650);
+  const pulses = blob((final ? 2000 : 1500) * packets * PACKET_LEN, (b, n) => {
+    for (let j = 0; j < n; j++) {
+      const slot = Math.floor(b.random() * packets);
+      b.dot(s.x, BEAM_BASE + slot * PACKET + b.random() * PACKET_LEN, s.z, 0.002);
+    }
+  });
+  return [rail, pulses];
 }

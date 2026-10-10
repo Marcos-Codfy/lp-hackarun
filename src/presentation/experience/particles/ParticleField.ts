@@ -15,6 +15,20 @@ const ATTRIBUTE: Record<SceneKey, string> = {
   dust: 'aDust',
 };
 
+// o que o shader precisa saber a cada frame
+export interface ParticleFrame {
+  from: number;
+  to: number;
+  t: number;
+  time: number;
+  velocity: number;
+  charge: number;
+  pulse: number;
+  afterglow: number;
+  opacity: number;
+  size: number;
+}
+
 // devolve a thread pro navegador entre uma forma e outra (sem travar input)
 const yieldToMain = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -54,13 +68,27 @@ export class ParticleField {
       seeds[i * 3 + 1] = random() * 2 - 1;
       seeds[i * 3 + 2] = random() * 2 - 1;
       // maioria pequena, umas poucas grandes que viram "estrelas"
-      scales[i] = 0.55 + Math.pow(random(), 4) * 1.6;
+      scales[i] = 0.75 + Math.pow(random(), 6) * 1.25;
     }
     geometry.setAttribute('aSeed', new BufferAttribute(seeds, 3));
     geometry.setAttribute('aScale', new BufferAttribute(scales, 1));
 
     const { material, uniforms } = createParticleMaterial(keys);
     return new ParticleField(geometry, uniforms, material);
+  }
+
+  update(frame: ParticleFrame): void {
+    const u = this.uniforms;
+    u.uFrom.value = frame.from;
+    u.uTo.value = frame.to;
+    u.uT.value = frame.t;
+    u.uTime.value = frame.time;
+    u.uVelocity.value = frame.velocity;
+    u.uCharge.value = frame.charge;
+    u.uPulse.value = frame.pulse;
+    u.uAfterglow.value = frame.afterglow;
+    u.uOpacity.value = frame.opacity;
+    u.uSize.value = frame.size;
   }
 
   // rebaixar o tier só esconde o fim do buffer (a permutação comum mantém as formas inteiras)

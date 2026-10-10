@@ -1,0 +1,111 @@
+---
+import type { PartnerDTO } from '@application/index';
+import unicatolicaLogo from '../../../assets/brand/unicatolica-white.png';
+import capimLogo from '../../../assets/brand/capim-dourado-white.png';
+import PartnerLogo from './PartnerLogo.astro';
+
+// faixa de autoridade antes do rodapé: quem realiza e quem é parceiro, com as logos oficiais
+interface Props {
+  partners: PartnerDTO[];
+}
+
+const { partners } = Astro.props;
+const organizer = partners.find((p) => p.role === 'organizer');
+const partner = partners.find((p) => p.role === 'partner');
+---
+
+<section class="partners" aria-labelledby="partners-title">
+  <div class="container partners__inner">
+    <h2 class="partners__title" id="partners-title">
+      <span class="partners__rule" aria-hidden="true"></span>
+      Quem faz acontecer
+      <span class="partners__rule" aria-hidden="true"></span>
+    </h2>
+    <div class="partners__row">
+      <PartnerLogo
+        logo={unicatolicaLogo}
+        name={organizer?.name ?? 'Unicatólica'}
+        role="Realização"
+        caption="Cursos de Engenharia de Software e Inteligência Artificial"
+        url={organizer?.url ?? null}
+        tone="blue"
+        width={10.5}
+      />
+      <span class="partners__divider" aria-hidden="true"></span>
+      <PartnerLogo
+        logo={capimLogo}
+        name={partner?.name ?? 'Capim Dourado Shopping'}
+        role="Parceria"
+        caption="Palco da grande final, com telão e banda ao vivo"
+        url={partner?.url ?? null}
+        tone="gold"
+        width={16}
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .partners {
+    position: relative;
+    padding-block: clamp(3.5rem, 2.5rem + 3vw, 5.5rem);
+    border-block: 1px solid rgb(140 160 255 / 0.1);
+    background:
+      radial-gradient(50% 80% at 25% 50%, rgb(18 100 255 / 0.1), transparent 70%),
+      radial-gradient(50% 80% at 75% 50%, rgb(255 194 74 / 0.06), transparent 70%),
+      linear-gradient(180deg, rgb(2 3 11 / 0.4), rgb(6 11 36 / 0.6) 50%, rgb(2 3 11 / 0.4));
+  }
+
+  .partners__inner {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .partners__title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+  }
+
+  .partners__rule {
+    width: clamp(2rem, 8vw, 6rem);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(0 229 255 / 0.6));
+  }
+
+  .partners__rule:last-child {
+    transform: scaleX(-1);
+  }
+
+  .partners__row {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+  }
+
+  .partners__divider {
+    width: 8rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(140 160 255 / 0.4), transparent);
+  }
+
+  @media (min-width: 768px) {
+    .partners__row {
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: var(--space-6);
+    }
+
+    .partners__divider {
+      width: 1px;
+      height: 10rem;
+      background: linear-gradient(180deg, transparent, rgb(140 160 255 / 0.45), transparent);
+    }
+  }
+</style>

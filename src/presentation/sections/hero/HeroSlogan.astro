@@ -1,0 +1,103 @@
+---
+// slogan oficial + linha de apoio. Cada verbo tem a cor do seu papel na paleta:
+// desvendar = mistério (violeta), programar = energia (azul), conquistar = prêmio (ouro)
+const WORDS = [
+  { text: 'Desvende', tone: 'mystic' },
+  { text: 'Programe', tone: 'blue' },
+  { text: 'Conquiste', tone: 'prize' },
+] as const;
+---
+
+<div class="hero-slogan">
+  <p class="hero-slogan__line">
+    {WORDS.map((word, index) => (
+      <>
+        <span class:list={['hero-slogan__word', `hero-slogan__word--${word.tone}`]} style={`--i: ${index}`}>
+          {word.text}.
+        </span>{' '}
+      </>
+    ))}
+  </p>
+  <p class="hero-slogan__support">Encontre os NPCs, decifre as pistas e codifique contra o relógio.</p>
+</div>
+
+<style>
+  .hero-slogan {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    text-align: center;
+  }
+
+  .hero-slogan__line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 0.7em;
+    font-family: var(--font-display);
+    font-size: clamp(1.0625rem, 0.72rem + 1.5vw, 1.875rem);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  .hero-slogan__word {
+    --word-grad: var(--grad-blue);
+    --word-glow: rgb(0 229 255 / 0.5);
+    background: var(--word-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 16px var(--word-glow));
+    animation: word-in 0.9s var(--ease-out) both;
+    animation-delay: calc(0.55s + var(--i) * 0.12s);
+  }
+
+  .hero-slogan__word--mystic {
+    --word-grad: linear-gradient(100deg, #c47bff 0%, #941bff 45%, #ed28e8 100%);
+    --word-glow: rgb(148 27 255 / 0.6);
+  }
+
+  .hero-slogan__word--blue {
+    --word-grad: linear-gradient(100deg, #7ff0ff 0%, #00e5ff 35%, #3b7bff 100%);
+    --word-glow: rgb(0 229 255 / 0.55);
+  }
+
+  .hero-slogan__word--prize {
+    --word-grad: linear-gradient(100deg, #ffe0a3 0%, #ffc24a 40%, #ff852f 100%);
+    --word-glow: rgb(255 133 47 / 0.55);
+  }
+
+  .hero-slogan__support {
+    max-width: 34ch;
+    color: var(--text-muted);
+    font-size: var(--fs-base);
+    font-weight: 500;
+    line-height: 1.55;
+    text-shadow: 0 1px 18px rgb(2 3 11 / 0.95);
+    animation: word-in 0.9s 0.95s var(--ease-out) both;
+  }
+
+  @keyframes word-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 0.5em, 0);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .hero-slogan__support {
+      max-width: none;
+      font-size: var(--fs-lg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-slogan__word,
+    .hero-slogan__support {
+      animation: none;
+    }
+  }
+</style>

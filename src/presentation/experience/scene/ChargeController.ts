@@ -4,19 +4,33 @@ import type { AppEvents } from '@presentation/app/AppEvents';
 import { damp, smoothstep } from '@shared/utils/math';
 
 const PULSE_S = 1.2;
+const SHOCK_S = 1.8;
+const FLASH_ATTACK_S = 0.05;
+const FLASH_DECAY = 4.2;
+const BURST_S = 2;
 // distância (em seções) da cena de carga que conta como "saiu"
 const AWAY = 0.85;
 
-// carga do globo final: sobe em curva (acúmulo de energia), estoura num pulso e descarrega se o usuário sair
+type ChargeState = 'idle' | 'charging' | 'charged';
+
+// clímax do globo final: acumula energia em curva, estoura (flash + pulso + anel) no 'experience:charged'
+// e assenta num brilho calmo; descarrega se o usuário sair
 export class ChargeController {
+  // agitação/contração/calor da carga
   charge = 0;
+  // empurrão radial das partículas no estouro
   pulse = 0;
+  flash = 0;
+  // fase do anel de choque (< 0 = sem anel)
+  shock = -1;
+  // brilho calmo depois do estouro
+  afterglow = 0;
+  private state: ChargeState = 'idle';
   private from = 0;
   private elapsed = 0;
   private duration = 0;
-  private charging = false;
-  private pulseAge = -1;
-  private readonly off: () => void;
+  private burstAge = -1;
+  private readonly offs: (() => void)[] = [];
 
   constructor(
     bus: EventBus<AppEvents>,
@@ -24,54 +38,79 @@ export class ChargeController {
     private readonly anchor: number,
     private readonly instant: boolean,
   ) {
-    this.off = bus.on('experience:charging', ({ durationMs }) => this.begin(durationMs / 1000));
-    // o 3D chegou com o usuário já parado no final (deep link): o evento passou, começa carregado
-    if (anchor >= 0 && Math.abs(progress.value - anchor) < 0.25) this.charge = 1;
+    this.offs.push(bus.on('experience:charging', ({ durationMs }) => this.begin(durationMs / 1000)));
+    // o flash sai no mesmo evento do som: sincronia exata
+    this.offs.push(bus.on('experience:charged', () => this.complete()));
+    // o 3D chegou com o usuário já parado no final (deep link): o evento passou, começa assentado
+    if (anchor >= 0 && Math.abs(progress.value - anchor) < 0.25) {
+      this.state = 'charged';
+      this.afterglow = 1;
+    }
   }
 
   update(delta: number): void {
     const away = Math.abs(this.progress.value - this.anchor) > AWAY;
     if (away) {
-      this.charging = false;
-      this.charge = this.instant ? 0 : damp(this.charge, 0, 1.4, delta);
-      if (this.charge < 0.001) this.charge = 0;
-    } else if (this.charging) {
+      this.state = 'idle';
+      this.charge = this.settle(this.charge, 0, 1.4, delta);
+      this.afterglow = this.settle(this.afterglow, 0, 1.4, delta);
+    } else if (this.state === 'charging') {
       this.elapsed += delta;
       const k = this.duration > 0 ? Math.min(1, this.elapsed / this.duration) : 1;
+      // segura no topo até o evento chegar (o timer do SceneHoldWatcher manda)
       this.charge = this.from + (1 - this.from) * k * k * k;
-      if (k >= 1) this.complete();
+    } else if (this.state === 'charged') {
+      this.charge = this.settle(this.charge, 0, 1.6, delta);
+      this.afterglow = this.settle(this.afterglow, 1, 2.5, delta);
     }
-    this.updatePulse(delta);
+    this.updateBurst(delta);
   }
 
   dispose(): void {
-    this.off();
+    this.offs.forEach((off) => off());
   }
 
   private begin(durationS: number): void {
     this.from = this.charge;
     this.elapsed = 0;
     this.duration = durationS;
-    this.charging = true;
-    if (this.instant || durationS <= 0) this.complete();
+    this.state = 'charging';
   }
 
   private complete(): void {
-    this.charging = false;
-    this.charge = 1;
-    if (!this.instant) this.pulseAge = 0;
-  }
-
-  // envelope do pulso: sobe rápido nos primeiros 12% e cai em curva
-  private updatePulse(delta: number): void {
-    if (this.pulseAge < 0) return;
-    this.pulseAge += delta;
-    const phase = this.pulseAge / PULSE_S;
-    if (phase >= 1) {
-      this.pulseAge = -1;
-      this.pulse = 0;
+    if (this.state !== 'charging') return;
+    this.state = 'charged';
+    if (this.instant) {
+      this.charge = 0;
+      this.afterglow = 1;
       return;
     }
+    this.charge = 1;
+    this.burstAge = 0;
+  }
+
+  private settle(value: number, target: number, lambda: number, delta: number): number {
+    if (this.instant) return target;
+    const next = damp(value, target, lambda, delta);
+    return Math.abs(next - target) < 0.001 ? target : next;
+  }
+
+  // envelopes do estouro: flash com ataque curto, pulso em curva e anel abrindo
+  private updateBurst(delta: number): void {
+    if (this.burstAge < 0) return;
+    this.burstAge += delta;
+    const age = this.burstAge;
+    if (age >= BURST_S) {
+      this.burstAge = -1;
+      this.pulse = 0;
+      this.flash = 0;
+      this.shock = -1;
+      return;
+    }
+    this.flash =
+      age < FLASH_ATTACK_S ? age / FLASH_ATTACK_S : Math.exp(-(age - FLASH_ATTACK_S) * FLASH_DECAY);
+    const phase = Math.min(1, age / PULSE_S);
     this.pulse = smoothstep(0, 0.12, phase) * (1 - phase) * (1 - phase);
+    this.shock = age < SHOCK_S ? age / SHOCK_S : -1;
   }
 }

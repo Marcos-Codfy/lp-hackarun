@@ -4,6 +4,9 @@ const SOFTWARE_GPU = /swiftshader|llvmpipe|softpipe|software|basic render/i;
 const WEAK_GPU =
   /intel.*(hd|uhd) graphics|mali-(4|t)|mali-g(5|7)[0-2]|adreno( \(tm\))? [1-5]\d\d|powervr|sgx|vivante|videocore/i;
 const STRONG_GPU = /nvidia|geforce|quadro|rtx|radeon (rx|pro)|apple m\d/i;
+// celulares que aguentam bloom em meia resolução (iPhone recente, Adreno 640+, Mali G76+/G6xx+, Immortalis, Xclipse)
+const CAPABLE_MOBILE_GPU =
+  /apple gpu|adreno( \(tm\))? (6[4-9]\d|[7-9]\d\d)|mali-g(7[6-9]|[6-9]\d\d)|immortalis|xclipse/i;
 const GENERIC_NAME = /^(webkit webgl|mozilla|angle)$/i;
 
 interface DeviceHints {
@@ -13,16 +16,23 @@ interface DeviceHints {
   smallScreen: boolean;
 }
 
-// tier inicial pelo aparelho; ?quality=low|medium|high força um tier (útil pra QA)
+const forcedTier = (): QualityTier | null => {
+  const forced = new URLSearchParams(location.search).get('quality');
+  return forced === 'low' || forced === 'medium' || forced === 'high' ? forced : null;
+};
+
+// tier inicial pelo aparelho; ?quality=low|medium|high força um tier e trava o ajuste por FPS (QA)
 export class QualityDetector {
+  readonly forced = forcedTier() !== null;
+
   constructor(
     private readonly gl: WebGLRenderingContext | WebGL2RenderingContext,
     private readonly coarsePointer: boolean,
   ) {}
 
   detect(): QualityTier {
-    const forced = new URLSearchParams(location.search).get('quality');
-    if (forced === 'low' || forced === 'medium' || forced === 'high') return forced;
+    const forced = forcedTier();
+    if (forced) return forced;
 
     const gpu = this.gpuName();
     if (SOFTWARE_GPU.test(gpu)) return 'low';
@@ -30,7 +40,7 @@ export class QualityDetector {
     const weak = WEAK_GPU.test(gpu);
 
     if (hints.coarse || hints.smallScreen) {
-      const capable = hints.cores >= 8 && (hints.memory ?? 4) >= 6 && !weak;
+      const capable = CAPABLE_MOBILE_GPU.test(gpu) || (hints.cores >= 8 && (hints.memory ?? 4) >= 6 && !weak);
       return capable ? 'medium' : 'low';
     }
     if (weak || hints.cores <= 2 || (hints.memory !== undefined && hints.memory < 4)) return 'medium';

@@ -1,13 +1,14 @@
 ---
 import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
-import Wordmark from '@presentation/components/ui/Wordmark.astro';
 import SoundToggle from '@presentation/components/sound/SoundToggle.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
-import MenuToggle from './MenuToggle.astro';
-import MobileMenu from './MobileMenu.astro';
-import { NAV_LINKS } from './navLinks';
+import HeaderBrand from './header/HeaderBrand.astro';
+import HeaderNav from './header/HeaderNav.astro';
+import MenuToggle from './header/MenuToggle.astro';
+import MobileMenu from './header/MobileMenu.astro';
 
+// barra de vidro flutuante: transparente no topo, vidro depois de rolar (HeaderScrollController)
 interface Props {
   registration: RegistrationDTO;
 }
@@ -19,27 +20,14 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-na
 ---
 
 <header class="site-header" data-site-header>
-  <div class="site-header__inner">
-    <a class="site-header__brand" href="#inicio" data-nav-link aria-label="HackaRun 2026, voltar ao início">
-      <Wordmark size="sm" />
-    </a>
-
-    <nav class="site-header__nav" aria-label="Principal">
-      <ul role="list">
-        {NAV_LINKS.map((link) => (
-          <li>
-            <a class="site-header__link" href={link.href} data-nav-link>
-              {link.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-
+  {/* o vidro (backdrop-filter) fica na barra, nunca no <header>: senão o menu fixed perderia a tela */}
+  <div class="site-header__bar">
+    <HeaderBrand />
+    <HeaderNav />
     <div class="site-header__actions">
       <SoundToggle />
       <span class="site-header__cta">
-        <Button href={cta.href} {...ctaAttrs}>
+        <Button size="sm" href={cta.href} {...ctaAttrs}>
           {copy.headerLabel(registration.status)}
         </Button>
       </span>
@@ -55,121 +43,120 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-na
     position: fixed;
     inset: 0 0 auto;
     z-index: var(--z-header);
-  }
-
-  /* vidro no pseudo (e não no header): backdrop-filter no pai quebraria o menu fixed */
-  .site-header::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: var(--header-h);
-    z-index: 1;
     pointer-events: none;
-    background: linear-gradient(180deg, rgb(4 11 24 / 0.7), transparent);
-    border-bottom: 1px solid transparent;
-    transition:
-      background var(--dur) var(--ease-out),
-      border-color var(--dur) var(--ease-out);
   }
 
-  .site-header.is-scrolled::before,
-  .site-header.is-menu-open::before {
-    background: rgb(4 11 24 / 0.78);
-    border-bottom-color: var(--surface-line);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
-
-  .site-header__inner {
+  .site-header__bar {
     position: relative;
     z-index: 2;
     display: flex;
     align-items: center;
-    gap: var(--space-4);
-    width: min(100% - 2 * var(--gutter), 90rem);
-    height: var(--header-h);
-    margin-inline: auto;
+    gap: var(--space-3);
+    width: min(100% - 2 * var(--gutter), 84rem);
+    height: 56px;
+    margin: var(--header-top) auto 0;
+    padding: 0 6px 0 var(--space-4);
+    border-radius: var(--radius-lg);
+    pointer-events: auto;
+    transition: transform 0.5s var(--ease-out);
   }
 
-  .site-header__brand {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    margin-right: auto;
-    text-decoration: none;
-  }
-
-  .site-header__nav {
-    display: none;
-  }
-
-  .site-header__nav ul {
-    display: flex;
-    gap: var(--space-1);
-  }
-
-  .site-header__link {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding-inline: var(--space-3);
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: var(--fs-hud);
-    font-weight: 500;
-    letter-spacing: var(--tracking-hud);
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color var(--dur-fast) var(--ease-out);
-  }
-
-  .site-header__link::after {
+  /* camadas do vidro: fundo + blur no ::before, fio degradê no ::after; aparecem depois do scroll */
+  .site-header__bar::before,
+  .site-header__bar::after {
     content: '';
     position: absolute;
-    inset: auto var(--space-3) 8px;
-    height: 1px;
-    background: var(--c-cyan);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--dur) var(--ease-out);
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
   }
 
-  .site-header__link:hover,
-  .site-header__link[aria-current='true'] {
-    color: var(--text);
+  .site-header__bar::before {
+    background: linear-gradient(180deg, rgb(14 20 64 / 0.62), rgb(4 6 22 / 0.72));
+    box-shadow:
+      var(--shadow-float),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
   }
 
-  .site-header__link:hover::after,
-  .site-header__link[aria-current='true']::after {
-    transform: none;
+  .site-header__bar::after {
+    padding: 1px;
+    background: linear-gradient(
+      100deg,
+      rgb(0 229 255 / 0.55),
+      rgb(18 100 255 / 0.18) 30%,
+      rgb(150 175 255 / 0.1) 60%,
+      rgb(237 40 232 / 0.45)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .site-header:global(.is-scrolled) .site-header__bar::before,
+  .site-header:global(.is-scrolled) .site-header__bar::after,
+  .site-header:global(.is-menu-open) .site-header__bar::before,
+  .site-header:global(.is-menu-open) .site-header__bar::after {
+    opacity: 1;
+  }
+
+  /* rolando pra baixo a barra recolhe; qualquer rolagem pra cima (ou foco nela) traz de volta */
+  .site-header:global(.is-tucked):not(:focus-within) .site-header__bar {
+    transform: translateY(calc(-100% - var(--header-top) - 8px));
   }
 
   .site-header__actions {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    margin-left: auto;
   }
 
   .site-header__cta {
     display: none;
+    margin-inline: var(--space-2) var(--space-1);
   }
 
-  .site-header__cta :global(.btn) {
-    min-height: 44px;
-    padding-inline: var(--space-4);
-    font-size: var(--fs-base);
-  }
-
-  @media (min-width: 400px) {
+  @media (min-width: 640px) {
     .site-header__cta {
       display: inline-flex;
     }
   }
 
+  /* desktop: grade de 3 colunas pra nav ficar no centro exato da barra */
   @media (min-width: 1024px) {
-    .site-header__nav {
-      display: block;
+    .site-header__bar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      height: 60px;
+      padding: 0 8px 0 var(--space-5);
+    }
+
+    .site-header__bar > :global(.header-brand) {
+      justify-self: start;
+    }
+
+    .site-header__actions {
+      justify-self: end;
+    }
+
+    .site-header__cta {
+      margin-right: var(--space-2);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header:global(.is-tucked):not(:focus-within) .site-header__bar {
+      transform: none;
     }
   }
 </style>

@@ -1,50 +1,49 @@
-import { gsap, ScrollTrigger } from '@presentation/motion/core/gsap';
-import { qs } from '@shared/utils/dom';
+import { gsap } from '@presentation/motion/core/gsap';
+import type { AppContext } from '@presentation/app/AppContext';
+import { qs, qsa } from '@shared/utils/dom';
+import { LogoLightning } from './hero/lightning/LogoLightning';
 import { SectionAnimator } from './SectionAnimator';
 
-// a montagem do wordmark, o traço do sublinhado e as linhas de HUD rodam em CSS no 1º paint
-// (o H1 é o LCP e não pode esperar JS). Aqui fica só o que depende de JS:
-// a faísca elétrica correndo o sublinhado e a saída do conteúdo quando o scroll começa
+// a entrada do logo e das linhas do hero roda em CSS no 1º paint (o logo é o LCP e não espera JS).
+// Aqui fica o que depende de JS: os raios em volta do logo e a saída do conteúdo no scroll.
+// Reduced motion: nada disso roda (setupReduced padrão), o hero fica estático e completo
 export class HeroIntroAnimator extends SectionAnimator {
   protected readonly selector = '[data-hero]';
+  private lightning: LogoLightning | null = null;
 
-  protected override setup(hero: HTMLElement): void {
+  protected override setup(hero: HTMLElement, ctx: AppContext): void {
     this.exitOnScroll(hero);
-    this.spark(hero);
+    this.mountLightning(hero, ctx);
+  }
+
+  override teardown(): void {
+    super.teardown();
+    this.lightning?.destroy();
+    this.lightning = null;
   }
 
   private exitOnScroll(hero: HTMLElement): void {
-    const content = qs('[data-hero-content]', hero);
-    if (!content) return;
-    gsap.to(content, {
-      yPercent: -10,
-      opacity: 0.2,
-      ease: 'none',
-      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
-    });
+    const layers = qsa('[data-hero-fade]', hero);
+    const logo = qs('[data-hero-logo-wrap]', hero);
+    const scrub = { trigger: hero, start: 'top top', end: 'bottom top', scrub: true };
+    // fromTo: o valor inicial é sempre 1, mesmo se a entrada em CSS ainda estiver no meio
+    if (layers.length > 0) {
+      gsap.fromTo(
+        layers,
+        { yPercent: 0, opacity: 1 },
+        { yPercent: -8, opacity: 0, ease: 'none', scrollTrigger: scrub },
+      );
+    }
+    // o logo sai um pouco mais devagar e cresce: sensação de câmera passando por ele
+    if (logo) gsap.to(logo, { scale: 1.08, ease: 'none', scrollTrigger: scrub });
   }
 
-  private spark(hero: HTMLElement): void {
-    const spark = qs<SVGPathElement>('[data-hero-spark]', hero);
-    const bolt = qs<SVGPathElement>('[data-hero-bolt]', hero);
-    if (!spark) return;
-
-    // pathLength=1: traço de 0.08 entra antes do começo e sai depois do fim
-    const loop = gsap
-      .timeline({ repeat: -1, repeatDelay: 2.8, delay: 1.8 })
-      .fromTo(
-        spark,
-        { strokeDashoffset: 0.08 },
-        { strokeDashoffset: -1, duration: 1.1, ease: 'power2.inOut' },
-      );
-    if (bolt) loop.to(bolt, { opacity: 0.45, duration: 0.05, repeat: 3, yoyo: true }, '<0.85');
-
-    // fora da tela não roda
-    ScrollTrigger.create({
-      trigger: hero,
-      start: 'top bottom',
-      end: 'bottom top',
-      onToggle: (self) => (self.isActive ? loop.resume() : loop.pause()),
-    });
+  private mountLightning(hero: HTMLElement, ctx: AppContext): void {
+    const canvas = qs<HTMLCanvasElement>('[data-hero-lightning]', hero);
+    const logo = qs<HTMLImageElement>('[data-hero-logo]', hero);
+    const host = qs('[data-hero-logo-wrap]', hero);
+    if (!canvas || !logo || !host) return;
+    this.lightning = new LogoLightning({ canvas, logo, host, lite: ctx.coarsePointer });
+    this.lightning.mount().catch((error: unknown) => console.error('[hero] lightning failed', error));
   }
 }

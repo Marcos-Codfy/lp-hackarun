@@ -10,6 +10,7 @@ import RegistrationNotice from './RegistrationNotice.astro';
 import RegistrationSuccess from './RegistrationSuccess.astro';
 // css global com prefixo .regform (as linhas de integrante são clonadas em runtime)
 import './registration-form.css';
+import './registration-states.css';
 
 interface Props {
   registration: RegistrationDTO;
@@ -41,7 +42,9 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
   {status !== 'closed' && (
     <div class="regform__panel">
       <div class="regform__squad" aria-hidden="true">
-        <span>// formação</span>
+        <span class="regform__squad-live">
+          Lobby online<span class="regform__squad-extra"> · formação</span>
+        </span>
         <span data-reg-squad>Esquadrão 1/{max}</span>
       </div>
       <noscript>

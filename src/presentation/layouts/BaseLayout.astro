@@ -1,5 +1,6 @@
 ---
-import displayFont from '@fontsource-variable/orbitron/files/orbitron-latin-wght-normal.woff2?url';
+// orbitron com o til redesenhado (scripts/fonts/patch_orbitron_tilde.py): a original lê "NÀO"
+import displayFont from '../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
 import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
 import monoFont from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 import Seo, { type SeoProps } from '@presentation/components/seo/Seo.astro';
@@ -44,11 +45,12 @@ const fontFaces = [
       Pular para o conteúdo
     </a>
 
-    <!-- aurora de fundo: cores mudam por cena (variáveis --aurora-*) -->
+    <!-- aurora de fundo: cores mudam por cena (--aurora-* via SceneThemeController) -->
     <div class="aurora" data-aurora aria-hidden="true">
       <span class="aurora__blob aurora__blob--a"></span>
       <span class="aurora__blob aurora__blob--b"></span>
       <span class="aurora__blob aurora__blob--c"></span>
+      <span class="aurora__vignette"></span>
       <span class="aurora__grain"></span>
     </div>
 
@@ -75,8 +77,9 @@ const fontFaces = [
     left: var(--space-3);
     z-index: var(--z-skip);
     padding: var(--space-3) var(--space-4);
-    background: var(--c-amber);
-    color: var(--c-deep);
+    border-radius: 6px;
+    background: var(--c-gold);
+    color: var(--c-void);
     font-weight: 700;
     text-decoration: none;
     transform: translateY(-200%);
@@ -87,51 +90,79 @@ const fontFaces = [
     transform: none;
   }
 
+  /* as --aurora-* são @property <color> (base.css): a troca de cena interpola em vez de pular */
   .aurora {
-    --aurora-a: rgb(18 100 255 / 0.34);
-    --aurora-b: rgb(148 27 255 / 0.22);
-    --aurora-c: rgb(0 229 255 / 0.12);
     position: fixed;
     inset: 0;
     z-index: var(--z-aurora);
     overflow: hidden;
     pointer-events: none;
-    background: radial-gradient(130% 90% at 50% 0%, var(--c-indigo) 0%, var(--c-void) 62%);
+    background:
+      radial-gradient(120% 70% at 50% -10%, rgb(11 18 66 / 0.9) 0%, transparent 60%),
+      radial-gradient(90% 60% at 50% 110%, rgb(10 8 40 / 0.8) 0%, transparent 70%), var(--c-void);
+    transition:
+      --aurora-a 1.8s var(--ease-in-out),
+      --aurora-b 1.8s var(--ease-in-out),
+      --aurora-c 1.8s var(--ease-in-out);
   }
 
+  /* manchas sem filter: blur(): o próprio degradê (closest-side) já é macio e custa bem menos GPU */
   .aurora__blob {
     position: absolute;
-    width: 70vmax;
-    height: 70vmax;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.9;
-    transition: background 1.6s var(--ease-in-out);
     will-change: transform;
   }
 
   .aurora__blob--a {
-    top: -35vmax;
-    left: 15vw;
-    background: radial-gradient(circle, var(--aurora-a), transparent 65%);
-    animation: aurora-drift 26s ease-in-out infinite alternate;
+    top: -38vmax;
+    left: calc(50% - 45vmax);
+    width: 90vmax;
+    height: 70vmax;
+    background: radial-gradient(
+      closest-side,
+      var(--aurora-a) 0%,
+      color-mix(in srgb, var(--aurora-a) 50%, transparent) 42%,
+      transparent 100%
+    );
+    animation: aurora-drift 28s ease-in-out infinite alternate;
   }
 
   .aurora__blob--b {
-    bottom: -40vmax;
-    left: -20vmax;
-    background: radial-gradient(circle, var(--aurora-b), transparent 65%);
-    animation: aurora-drift 32s ease-in-out infinite alternate-reverse;
+    bottom: -42vmax;
+    left: -30vmax;
+    width: 80vmax;
+    height: 80vmax;
+    background: radial-gradient(
+      closest-side,
+      var(--aurora-b) 0%,
+      color-mix(in srgb, var(--aurora-b) 45%, transparent) 45%,
+      transparent 100%
+    );
+    animation: aurora-drift 34s ease-in-out infinite alternate-reverse;
   }
 
   .aurora__blob--c {
-    bottom: -30vmax;
-    right: -25vmax;
-    background: radial-gradient(circle, var(--aurora-c), transparent 65%);
-    animation: aurora-drift 38s ease-in-out infinite alternate;
+    bottom: -36vmax;
+    right: -32vmax;
+    width: 76vmax;
+    height: 76vmax;
+    background: radial-gradient(
+      closest-side,
+      var(--aurora-c) 0%,
+      color-mix(in srgb, var(--aurora-c) 45%, transparent) 45%,
+      transparent 100%
+    );
+    animation: aurora-drift 40s ease-in-out infinite alternate;
   }
 
-  /* granulação de filme bem leve (svg inline, sem request) */
+  /* vinheta: bordas mais escuras puxam o olho pro centro */
+  .aurora__vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 120% 90% at 50% 45%, transparent 50%, rgb(0 0 4 / 0.7) 100%);
+  }
+
+  /* granulação de filme bem leve (svg inline, sem request); também quebra o banding dos degradês */
   .aurora__grain {
     position: absolute;
     inset: -50%;
@@ -154,12 +185,13 @@ const fontFaces = [
     }
   }
 
+  /* canvas opaco (preto) somado à aurora por screen; nada de opacity/filter/transform aqui ou a mistura isola */
   .experience-layer {
     position: fixed;
     inset: 0;
     z-index: var(--z-canvas);
     pointer-events: none;
-    contain: strict;
+    mix-blend-mode: screen;
   }
 
   .experience-canvas {
@@ -178,13 +210,8 @@ const fontFaces = [
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(
-        circle at 50% 42%,
-        rgb(0 207 255 / 0.22) 0,
-        rgb(30 123 255 / 0.12) 18%,
-        transparent 42%
-      ),
-      radial-gradient(circle at 50% 42%, transparent 23%, rgb(0 207 255 / 0.18) 24.5%, transparent 27%);
+      radial-gradient(circle at 50% 42%, rgb(0 229 255 / 0.2) 0, rgb(18 100 255 / 0.14) 18%, transparent 42%),
+      radial-gradient(circle at 50% 42%, transparent 23%, rgb(31 53 255 / 0.28) 24.5%, transparent 27.5%);
     transition: opacity 1.2s var(--ease-out);
   }
 

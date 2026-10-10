@@ -12,7 +12,7 @@ import {
 
 const SECRET_VISIBLE_MS = 14_000;
 
-// [data-hud]: checkpoint via IntersectionObserver, barra via scroll passivo + rAF, NPCs pelo VM
+// [data-hud]: checkpoint e barra via scroll passivo + rAF, NPCs pelo VM
 export class HudView {
   private readonly root: HTMLElement;
   private readonly vm: HudViewModel;
@@ -33,7 +33,6 @@ export class HudView {
   mount(): void {
     if (this.sections.length > 0) {
       this.vm.state.subscribe((state) => this.render(state));
-      this.watchCheckpoints();
       this.watchScroll();
     }
     this.npc.state.subscribe((state, prev) => this.renderNpc(state, prev));
@@ -47,17 +46,14 @@ export class HudView {
     qs('[data-hud-fill]', this.root)?.style.setProperty('transform', `scaleX(${state.progress})`);
   }
 
-  // linha no meio da tela: a seção que cruza ela é o checkpoint atual
-  private watchCheckpoints(): void {
-    if (!('IntersectionObserver' in window)) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.find((e) => e.isIntersecting);
-        if (hit) this.vm.enter(this.sections.indexOf(hit.target as HTMLElement));
-      },
-      { rootMargin: '-48% 0px -48% 0px' },
-    );
-    this.sections.forEach((s) => observer.observe(s));
+  // checkpoint = última seção cujo topo já passou do meio da tela (funciona com salto por âncora e no rodapé)
+  private currentIndex(): number {
+    const middle = window.innerHeight / 2;
+    let index = 0;
+    this.sections.forEach((section, i) => {
+      if (section.getBoundingClientRect().top <= middle) index = i;
+    });
+    return index;
   }
 
   private watchScroll(): void {
@@ -65,6 +61,7 @@ export class HudView {
       this.frame = 0;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       this.vm.setProgress(max > 0 ? window.scrollY / max : 0);
+      this.vm.enter(this.currentIndex());
     };
     const schedule = () => {
       if (!this.frame) this.frame = requestAnimationFrame(measure);

@@ -1,0 +1,60 @@
+---
+// ">>" do manual da marca: duas setas cheias que "correm" no hover do botão pai (.btn)
+---
+
+<span class="chevrons" aria-hidden="true">
+  <svg class="chevrons__svg" viewBox="0 0 18 14" width="18" height="14" focusable="false">
+    <path class="chevrons__a" d="M0 0h4.2L10 7l-5.8 7H0l5.8-7z"></path>
+    <path class="chevrons__b" d="M7.4 0h4.2L17.4 7l-5.8 7H7.4l5.8-7z"></path>
+  </svg>
+</span>
+
+<style>
+  .chevrons {
+    position: relative;
+    display: inline-flex;
+    width: 1.15em;
+    overflow: hidden;
+  }
+
+  .chevrons__svg {
+    width: 100%;
+    height: auto;
+    fill: currentColor;
+  }
+
+  .chevrons__a {
+    opacity: 0.55;
+  }
+
+  :global(.btn:hover) .chevrons__svg,
+  :global(.btn:focus-visible) .chevrons__svg {
+    animation: chevrons-run 0.7s var(--ease-out);
+  }
+
+  /* sai pela direita e volta pela esquerda: parece um loop contínuo */
+  @keyframes chevrons-run {
+    0% {
+      transform: none;
+    }
+    42% {
+      transform: translateX(110%);
+      opacity: 0;
+    }
+    43% {
+      transform: translateX(-110%);
+      opacity: 0;
+    }
+    100% {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.btn:hover) .chevrons__svg,
+    :global(.btn:focus-visible) .chevrons__svg {
+      animation: none;
+    }
+  }
+</style>

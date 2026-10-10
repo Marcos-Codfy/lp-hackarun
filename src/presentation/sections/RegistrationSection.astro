@@ -1,8 +1,8 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
 import { EventStampFormatter } from '@presentation/formatters/EventStampFormatter';
+import SectionHeader from './shared/SectionHeader.astro';
 import ChargeCta from './registration/ChargeCta.astro';
 import LobbyPanel from './registration/LobbyPanel.astro';
 import './sections.css';
@@ -19,7 +19,7 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
 
 <section
   id="inscricao"
-  class="section registration"
+  class="section registration tone-cyan"
   data-scene="core"
   data-scene-hold="1500"
   data-checkpoint="Inscrição"
@@ -30,13 +30,13 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
     <div class="registration__sticky">
       <div class="registration__scrim" aria-hidden="true"></div>
       <div class="container registration__center">
-        <SectionHeading
+        <SectionHeader
           id="inscricao-title"
           code="10"
-          eyebrow="Inscrição"
-          hud="// Checkpoint final"
+          eyebrow="Checkpoint final"
           title="Sua vaga na <em>corrida</em>"
           align="center"
+          size="lg"
         />
         <div class="registration__countdown">
           <Countdown milestones={event.milestones} variant="compact" />
@@ -69,15 +69,16 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
     padding-block: calc(var(--header-h) + var(--space-5)) var(--space-6);
   }
 
+  /* véu só no miolo: o globo continua aparecendo em volta */
   .registration__scrim {
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
     background: radial-gradient(
-      ellipse 58% 44% at 50% 50%,
-      rgb(4 11 24 / 0.62) 0%,
-      rgb(4 11 24 / 0.3) 60%,
+      ellipse 46% 40% at 50% 50%,
+      rgb(2 3 11 / 0.66) 0%,
+      rgb(2 3 11 / 0.32) 60%,
       transparent 100%
     );
   }

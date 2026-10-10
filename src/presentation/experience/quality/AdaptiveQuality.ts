@@ -7,11 +7,13 @@ const SUSTAIN_S = 2;
 const GRACE_S = 2;
 
 export interface QualityTarget {
+  // corta um degrau do pós (bloom inteiro → meia resolução → nenhum); false quando não há mais o que cortar
+  degradeEffects(): boolean;
   setPixelRatioCap(cap: number): void;
   setProfile(profile: QualityProfile): void;
 }
 
-// monitor de FPS: abaixo de 45 por ~2s, baixa o DPR; no piso de DPR, baixa o tier. Nunca sobe.
+// monitor de FPS: abaixo de 45 por ~2s corta primeiro o bloom, depois o DPR, depois o tier. Nunca sobe.
 export class AdaptiveQuality {
   private elapsed = 0;
   private frames = 0;
@@ -58,6 +60,7 @@ export class AdaptiveQuality {
   }
 
   private degrade(): void {
+    if (this.target.degradeEffects()) return;
     if (this.dpr > 1) {
       this.dpr = Math.max(1, this.dpr - 0.5);
       this.target.setPixelRatioCap(this.dpr);

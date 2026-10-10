@@ -1,0 +1,57 @@
+---
+import Chip from '@presentation/components/ui/Chip.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+
+// chips de data e local logo abaixo do slogan
+interface Props {
+  // "11–14 NOV 2026"
+  dates: string;
+  // versão por extenso pro leitor de tela
+  datesLong: string;
+  host: string;
+  finalVenue: string;
+}
+
+const { dates, datesLong, host, finalVenue } = Astro.props;
+---
+
+<ul class="hero-meta" role="list">
+  <Chip as="li" tone="accent">
+    <Icon name="calendar" size={14} />
+    <span aria-hidden="true">{dates}</span>
+    <span class="sr-only">{datesLong}</span>
+  </Chip>
+  {/* espaços explícitos: o compressHTML some com quebra de linha e o leitor de tela grudaria as palavras */}
+  <Chip as="li">
+    <Icon name="map-pin" size={14} />
+    <span>{host}</span>{' '}
+    <span class="hero-meta__arrow" aria-hidden="true">
+      →
+    </span>
+    <span class="sr-only">, com a</span> <span>Final no {finalVenue}</span>
+  </Chip>
+</ul>
+
+<style>
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3) var(--space-4);
+    padding: 0;
+    list-style: none;
+  }
+
+  .hero-meta__arrow {
+    color: var(--c-cyan);
+  }
+
+  /* celular estreito: o chip do local precisa caber numa linha só */
+  @media (max-width: 420px) {
+    .hero-meta :global(li.chip) {
+      font-size: 0.625rem;
+      letter-spacing: 0.08em;
+      padding-inline: 0.75rem;
+    }
+  }
+</style>

@@ -17,6 +17,7 @@ import { RegistrationCtaController } from './RegistrationCtaController';
 import { ChargeRevealView } from './ChargeRevealView';
 import { HudView } from './HudView';
 import { NpcTokenView } from './NpcTokenView';
+import { SoundBusBinder } from './SoundBusBinder';
 
 // uma View quebrada não pode derrubar as outras
 function safely(name: string, fn: () => void): void {
@@ -67,7 +68,13 @@ function createContainer(ctx: AppContext): ClientContainer | null {
 export function mountViews(ctx: AppContext): void {
   const c = createContainer(ctx);
   if (!c) return;
-  const sound = new SoundViewModel({ store: c.preferences, engine: c.audio, cue: c.cue, bus: ctx.bus });
+  const sound = new SoundViewModel({
+    store: c.preferences,
+    engine: c.audio,
+    cue: c.cue,
+    typing: c.typing,
+    bus: ctx.bus,
+  });
   const npc = new NpcHuntViewModel({ store: c.preferences, bus: ctx.bus });
 
   safely('countdown', () =>
@@ -81,13 +88,14 @@ export function mountViews(ctx: AppContext): void {
       new SoundToggleView(button, sound).mount(),
     );
     SoundToggleView.unlockOnFirstGesture(sound);
+    new SoundBusBinder(ctx.bus, sound).mount();
   });
   safely('teams', () => mountTeams(c, ctx.config.registration.slots));
   safely('registration', () => {
     const form = mountRegistration(ctx, c);
     new RegistrationCtaController(ctx, () => form?.focusEntry() ?? false).mount();
     const section = qs('#inscricao');
-    if (section) new ChargeRevealView(ctx, sound, section).mount();
+    if (section) new ChargeRevealView(ctx, section).mount();
   });
   safely('npc', () =>
     qsa<HTMLButtonElement>('[data-npc-token]').forEach((b) => new NpcTokenView(b, npc).mount()),

@@ -1,8 +1,8 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import TeamRoster from '@presentation/components/teams/TeamRoster.astro';
+import SectionHeader from './shared/SectionHeader.astro';
 import './sections.css';
 
 interface Props {
@@ -14,13 +14,13 @@ const { teams, event } = Astro.props.data;
 
 <section
   id="equipes"
-  class="section teams"
+  class="section teams tone-cyan"
   data-scene="dust"
   data-checkpoint="Equipes"
   aria-labelledby="equipes-title"
 >
   <div class="container section-stack">
-    <SectionHeading
+    <SectionHeader
       id="equipes-title"
       code="08"
       eyebrow="Equipes"

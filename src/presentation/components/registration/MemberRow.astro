@@ -5,8 +5,9 @@ import TextField from './TextField.astro';
 
 <li class="member" data-member-row>
   <div class="member__head">
-    <p class="member__title" data-member-title>
-      Integrante
+    <p class="member__title">
+      <span class="member__slot" aria-hidden="true"></span>
+      <span data-member-title>Integrante</span>
     </p>
     <button type="button" class="member__remove" data-member-remove aria-label="Remover integrante">
       <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
@@ -47,11 +48,15 @@ import TextField from './TextField.astro';
 
 <style>
   .member {
+    position: relative;
     display: grid;
     gap: var(--space-4);
-    padding: var(--space-4);
-    border-left: 2px solid var(--line-strong);
-    background: rgb(0 207 255 / 0.03);
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    border: 1px solid rgb(140 160 255 / 0.14);
+    border-left: 2px solid var(--c-cyan);
+    border-radius: 3px;
+    background: radial-gradient(90% 60% at 0% 0%, rgb(0 229 255 / 0.07), transparent 60%), rgb(4 6 22 / 0.55);
+    animation: member-in 420ms var(--ease-out);
   }
 
   .member__head {
@@ -62,11 +67,22 @@ import TextField from './TextField.astro';
   }
 
   .member__title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: #8ff3ff;
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
-    color: var(--accent);
+  }
+
+  .member__slot {
+    width: 8px;
+    height: 8px;
+    background: var(--c-cyan);
+    box-shadow: 0 0 10px var(--c-cyan);
+    transform: rotate(45deg);
   }
 
   .member__remove {
@@ -75,8 +91,12 @@ import TextField from './TextField.astro';
     gap: var(--space-2);
     min-height: 44px;
     padding: 0 var(--space-3);
+    border-radius: 3px;
     color: var(--text-muted);
     font-size: var(--fs-sm);
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out);
   }
 
   .member__remove svg {
@@ -88,7 +108,8 @@ import TextField from './TextField.astro';
   }
 
   .member__remove:hover {
-    color: var(--c-danger);
+    background: rgb(255 77 141 / 0.1);
+    color: #ff8ab3;
   }
 
   .member__remove:disabled {
@@ -100,9 +121,22 @@ import TextField from './TextField.astro';
     gap: var(--space-4);
   }
 
+  @keyframes member-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
   @media (min-width: 48rem) {
     .member__grid {
       grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .member {
+      animation: none;
     }
   }
 </style>

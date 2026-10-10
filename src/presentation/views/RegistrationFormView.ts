@@ -10,6 +10,7 @@ import type {
 import { ErrorPresenter } from './registration/ErrorPresenter';
 import { MemberRows } from './registration/MemberRows';
 import { controlFor } from './registration/fieldLookup';
+import { ProtocolReveal } from './registration/ProtocolReveal';
 
 // [data-registration-form]: liga o DOM ao VM; valores moram nos inputs, o VM só espelha
 export class RegistrationFormView {
@@ -163,12 +164,15 @@ export class RegistrationFormView {
     const form = qs('[data-reg-form]', this.root);
     const success = qs('[data-reg-success]', this.root);
     if (!form || !success) return;
+    // cópia fiel pro leitor de tela; a visível "decodifica" com clique de tecla
     const code = qs('[data-reg-protocol]', success);
     if (code) code.textContent = protocol;
+    const typed = qs('[data-reg-protocol-typed]', success);
     form.hidden = true;
     success.hidden = false;
     this.announce(`Inscrição recebida. Protocolo ${protocol}.`);
     qs('[data-reg-success-title]', success)?.focus();
+    if (typed) new ProtocolReveal(typed, this.bus).play(protocol);
     this.bus.emit('registration:submitted', { protocol });
   }
 

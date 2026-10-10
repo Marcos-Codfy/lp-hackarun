@@ -57,9 +57,12 @@
 }
 
 @layer base {
+  /* clip no html também: no celular, conteúdo vazando pro lado faria o navegador "abrir" o viewport
+     (e o header fixo ficaria mais largo que a tela) */
   html {
     background: var(--bg);
     scroll-padding-top: calc(var(--header-h) + var(--space-4));
+    overflow-x: clip;
   }
 
   /* lenis cuida do smooth; sem ele (reduced motion) o scroll é nativo e instantâneo */
@@ -83,6 +86,7 @@
     color: var(--text);
     font-family: var(--font-body);
     font-size: var(--fs-base);
+    font-weight: 400;
     line-height: var(--lh-body);
     font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
@@ -91,9 +95,11 @@
     overflow-x: clip;
   }
 
+  /* Orbitron é larga: caixa alta, entrelinha curta e tracking quase neutro */
   h1,
   h2,
-  h3 {
+  h3,
+  h4 {
     font-family: var(--font-display);
     font-weight: 800;
     font-optical-sizing: none;
@@ -103,8 +109,35 @@
     text-wrap: balance;
   }
 
+  h1 {
+    font-weight: 900;
+  }
+
+  h3,
+  h4 {
+    font-weight: 700;
+    line-height: var(--lh-snug);
+    letter-spacing: 0.04em;
+  }
+
+  /* <em> no título = palavra de energia: degradê da marca + brilho suave */
+  :is(h1, h2, h3, h4) em {
+    font-style: normal;
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 18px rgb(0 229 255 / 0.32)) drop-shadow(0 0 2px rgb(148 27 255 / 0.4));
+  }
+
   p {
     text-wrap: pretty;
+  }
+
+  strong {
+    font-weight: 700;
   }
 
   a {
@@ -112,9 +145,15 @@
     text-underline-offset: 0.2em;
   }
 
+  code,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+  }
+
   ::selection {
     background: var(--c-cyan);
-    color: var(--c-deep);
+    color: var(--c-void);
   }
 
   :focus-visible {
@@ -168,6 +207,7 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 
   .text-time {

@@ -1,0 +1,42 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../../../assets/brand/hackarun-logo.png';
+
+// logo oficial (nunca redesenhar). O PNG tem ~21% de respiro transparente em cima e ~19% embaixo
+// (≈ 7,5% e 6,6% da largura): quem usa compensa com margem negativa se precisar
+interface Props {
+  // vazio = decorativo (o link ou o título em volta dá o nome)
+  alt?: string;
+  sizes: string;
+  widths: number[];
+  priority?: boolean;
+  class?: string;
+  [key: `data-${string}`]: string | boolean | undefined;
+}
+
+const { alt = '', sizes, widths, priority = false, class: className, ...data } = Astro.props;
+---
+
+<Image
+  src={logo}
+  alt={alt}
+  widths={widths}
+  sizes={sizes}
+  format="webp"
+  quality={90}
+  priority={priority}
+  class:list={['brand-logo', className]}
+  {...data}
+/>
+
+<style>
+  /* global: o <img> é renderizado pelo <Image>, fora do escopo deste componente */
+  :global(.brand-logo) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2156 / 749;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+</style>

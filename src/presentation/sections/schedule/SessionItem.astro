@@ -1,6 +1,5 @@
 ---
 import type { SessionDTO } from '@application/index';
-import Chip from '@presentation/components/ui/Chip.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { SessionTimeFormatter } from '@presentation/formatters/SessionTimeFormatter';
 
@@ -12,7 +11,8 @@ const { session } = Astro.props;
 const time = new SessionTimeFormatter();
 const isDeadline = session.kind === 'deadline';
 const isFinalStage = session.kind === 'ceremony' || session.venue.role === 'final';
-// prazo e palco final ganham âmbar: é o que ninguém pode perder
+const isHot = isDeadline || isFinalStage;
+// prazo e palco final ganham laranja: é o que ninguém pode perder
 const flag =
   isDeadline && session.end
     ? `Entrega até ${time.hour(session.end)}`
@@ -21,7 +21,7 @@ const flag =
       : null;
 ---
 
-<li class:list={['session', (isDeadline || isFinalStage) && 'session--hot']}>
+<li class:list={['session sx-glass sx-glass--solid sx-hover', isHot && 'session--hot']}>
   <div class="session__meta">
     <span class="session__time">
       <Icon name="clock" size={16} />
@@ -39,9 +39,7 @@ const flag =
   {session.topics.length > 0 && (
     <ul class="session__topics" role="list" aria-label="Tópicos">
       {session.topics.map((topic) => (
-        <Chip as="li" tone={isDeadline || isFinalStage ? 'time' : 'default'}>
-          {topic}
-        </Chip>
+        <li class="sx-tag">{topic}</li>
       ))}
     </ul>
   )}
@@ -51,14 +49,19 @@ const flag =
   .session {
     display: grid;
     gap: var(--space-3);
-    padding: var(--space-4) var(--space-4) var(--space-5);
-    background: rgb(4 11 24 / 0.62);
-    border-left: 2px solid var(--line-strong);
+    padding: var(--space-5);
+    border-left: 2px solid var(--sx-accent);
   }
 
+  /* laranja (tempo) troca o tom do card inteiro: borda, tags e brilho */
   .session--hot {
-    border-left-color: var(--time);
-    background: linear-gradient(90deg, rgb(255 181 71 / 0.08), rgb(4 11 24 / 0.62) 60%);
+    --sx-accent: var(--c-orange);
+    --sx-accent-2: var(--c-gold);
+    --sx-ink: #ffb27a;
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgb(255 133 47 / 0.18), transparent 60%),
+      linear-gradient(170deg, rgb(26 14 30 / 0.88), rgb(6 5 16 / 0.94));
+    box-shadow: 0 0 50px -18px rgb(255 133 47 / 0.55);
   }
 
   .session__meta {
@@ -79,11 +82,8 @@ const flag =
   }
 
   .session__time {
-    color: var(--c-cyan-soft);
-  }
-
-  .session--hot .session__time {
-    color: var(--time);
+    color: var(--sx-ink);
+    font-weight: 600;
   }
 
   .session__venue {
@@ -91,31 +91,41 @@ const flag =
   }
 
   .session__flag {
-    padding: 0.2em 0.6em;
-    clip-path: var(--clip-btn);
-    background: var(--time);
-    color: var(--c-deep);
+    margin-left: auto;
+    padding: 0.25em 0.7em;
+    background: linear-gradient(100deg, var(--c-gold), var(--c-orange));
+    box-shadow: 0 0 22px rgb(255 133 47 / 0.55);
+    color: var(--c-void);
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+    transform: skewX(var(--skew));
   }
 
   .session__title {
     font-family: var(--font-display);
-    font-size: var(--fs-xl);
+    font-size: var(--fs-lg);
     font-weight: 800;
-    line-height: 1.05;
+    line-height: 1.12;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
   }
 
   .session__desc {
     color: var(--text-muted);
     font-size: var(--fs-sm);
+    line-height: 1.6;
   }
 
   .session__topics {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+  }
+
+  @media (max-width: 639px) {
+    .session__flag {
+      margin-left: 0;
+    }
   }
 </style>

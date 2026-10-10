@@ -13,7 +13,9 @@ const { min, max } = Astro.props;
 <fieldset class="members" data-mode-only="team" aria-describedby="reg-members-hint reg-members-error">
   <legend class="members__legend">Integrantes</legend>
   <p class="members__hint" id="reg-members-hint">
-    Você já conta como 1. A equipe tem de {min} a {max} pessoas.
+    <span>
+      Você já conta como 1. A equipe tem de {min} a {max} pessoas.
+    </span>
     <span class="members__count" data-member-count>
       1/{max}
     </span>
@@ -21,9 +23,11 @@ const { min, max } = Astro.props;
   <ol role="list" class="members__list" data-members-list></ol>
   <p class="members__error" id="reg-members-error" data-error-for="members" hidden></p>
   <button type="button" class="members__add" data-member-add>
-    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-      <path d="M8 2v12M2 8h12"></path>
-    </svg>
+    <span class="members__add-icon" aria-hidden="true">
+      <svg viewBox="0 0 16 16" focusable="false">
+        <path d="M8 2v12M2 8h12"></path>
+      </svg>
+    </span>
     <span data-member-add-label>Adicionar integrante</span>
   </button>
   <template data-member-template>
@@ -35,22 +39,24 @@ const { min, max } = Astro.props;
   .members {
     display: grid;
     gap: var(--space-4);
+    min-width: 0;
     padding: 0;
     border: 0;
-    min-width: 0;
   }
 
   .members__legend {
     margin-bottom: var(--space-2);
     font-family: var(--font-display);
-    font-size: var(--fs-xl);
+    font-size: var(--fs-lg);
     font-weight: 800;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
   .members__hint {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
     gap: var(--space-2);
     color: var(--text-muted);
@@ -58,10 +64,13 @@ const { min, max } = Astro.props;
   }
 
   .members__count {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid rgb(0 229 255 / 0.4);
+    background: rgb(0 229 255 / 0.08);
+    color: #8ff3ff;
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
-    color: var(--accent);
   }
 
   .members__list {
@@ -70,40 +79,73 @@ const { min, max } = Astro.props;
   }
 
   .members__error {
-    color: var(--c-danger);
+    color: #ff8ab3;
     font-size: var(--fs-xs);
     font-weight: 600;
   }
 
+  /* slot vazio tracejado: "cabe mais um" */
   .members__add {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    justify-self: start;
-    gap: var(--space-2);
-    min-height: 48px;
+    justify-content: center;
+    gap: var(--space-3);
+    min-height: 56px;
     padding: 0 var(--space-5);
-    clip-path: var(--clip-btn);
-    background: rgb(0 207 255 / 0.08);
-    box-shadow: inset 0 0 0 1px var(--line-strong);
+    border: 1px dashed rgb(0 229 255 / 0.45);
+    border-radius: 3px;
+    background: repeating-linear-gradient(135deg, rgb(0 229 255 / 0.04) 0 10px, transparent 10px 20px);
     color: var(--text);
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  .members__add:hover:not(:disabled) {
+    border-color: var(--c-cyan);
+    box-shadow: 0 0 26px rgb(0 229 255 / 0.2);
+  }
+
+  .members__add-icon {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid var(--c-cyan);
+    color: var(--c-cyan);
+    transform: rotate(45deg);
   }
 
   .members__add svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.5;
+    stroke-width: 1.75;
+    transform: rotate(-45deg);
+  }
+
+  @media (max-width: 479px) {
+    .members__add {
+      padding-inline: var(--space-3);
+      font-size: var(--fs-xs);
+      letter-spacing: 0.04em;
+    }
   }
 
   .members__add:focus-visible {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--focus);
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
   }
 
   .members__add:disabled {
     cursor: not-allowed;
+    border-style: solid;
     opacity: 0.55;
   }
 </style>

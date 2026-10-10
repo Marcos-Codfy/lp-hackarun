@@ -29,6 +29,9 @@ const countText = memberCount ? `${memberCount} ${memberCount === 1 ? 'integrant
     <span data-team-count>{countText}</span>
   </p>
   <span class="team-card__badge" aria-hidden="true">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="m3.5 8.5 3 3 6-7"></path>
+    </svg>
     Confirmada
   </span>
 </li>
@@ -39,13 +42,21 @@ const countText = memberCount ? `${memberCount} ${memberCount === 1 ? 'integrant
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
-    gap: var(--space-2) var(--space-4);
+    gap: var(--space-2) var(--space-5);
     padding: var(--space-4) var(--space-5);
-    background: var(--surface);
-    box-shadow: inset 0 0 0 1px var(--surface-line);
-    clip-path: var(--clip-card);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgb(0 229 255 / 0.18);
+    border-left: 2px solid var(--c-cyan);
+    border-radius: 3px;
+    background:
+      radial-gradient(80% 120% at 0% 50%, rgb(0 229 255 / 0.1), transparent 60%), rgb(6 9 30 / 0.82);
+    transition:
+      translate var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .team-card:hover {
+    translate: 4px 0;
+    box-shadow: 0 0 40px -12px rgb(0 229 255 / 0.5);
   }
 
   .team-card__rank {
@@ -53,15 +64,16 @@ const countText = memberCount ? `${memberCount} ${memberCount === 1 ? 'integrant
     align-self: start;
     font-family: var(--font-display);
     font-size: var(--fs-2xl);
-    font-weight: 800;
+    font-weight: 900;
     line-height: 1;
-    color: rgb(0 207 255 / 0.55);
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(0 229 255 / 0.7);
     font-variant-numeric: tabular-nums;
   }
 
   .team-card__name {
     font-family: var(--font-display);
-    font-size: var(--fs-xl);
+    font-size: var(--fs-lg);
     font-weight: 800;
     line-height: var(--lh-snug);
     text-transform: uppercase;
@@ -76,27 +88,40 @@ const countText = memberCount ? `${memberCount} ${memberCount === 1 ? 'integrant
   .team-card__members {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
+    color: var(--text-dim);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
-    color: var(--text-dim);
   }
 
-  /* um quadradinho por integrante, sem gerar DOM extra */
+  /* um bloquinho por integrante, sem gerar DOM extra */
   .team-card__pips {
-    width: calc(var(--count, 0) * 9px);
-    height: 6px;
-    background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 9px);
+    width: calc(var(--count, 0) * 10px);
+    height: 8px;
+    background: repeating-linear-gradient(90deg, var(--c-cyan) 0 7px, transparent 7px 10px);
+    filter: drop-shadow(0 0 4px rgb(0 229 255 / 0.6));
   }
 
   .team-card__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: var(--space-2);
+    padding: 0.25rem 0.6rem;
+    border: 1px solid rgb(44 245 180 / 0.45);
+    background: rgb(44 245 180 / 0.08);
+    color: var(--c-success);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
-    color: var(--c-success);
+  }
+
+  .team-card__badge svg {
+    width: 12px;
+    height: 12px;
   }
 
   .team-card__body,
@@ -112,6 +137,7 @@ const countText = memberCount ? `${memberCount} ${memberCount === 1 ? 'integrant
 
     .team-card__rank {
       grid-row: auto;
+      align-self: center;
     }
 
     .team-card__members {
@@ -120,6 +146,12 @@ const countText = memberCount ? `${memberCount} ${memberCount === 1 ? 'integrant
 
     .team-card__badge {
       grid-column: 4;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .team-card:hover {
+      translate: none;
     }
   }
 </style>

@@ -18,10 +18,14 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
 ---
 
 <div class="charge" data-charge-reveal>
-  <span class="charge__bar" aria-hidden="true">
-    <span class="charge__fill"></span>
-  </span>
+  <div class="charge__meter" aria-hidden="true">
+    <span class="charge__label">Carregando energia</span>
+    <span class="charge__bar">
+      <span class="charge__fill"></span>
+    </span>
+  </div>
   <div class="charge__button">
+    <span class="charge__ring" aria-hidden="true"></span>
     <Button size="lg" href={href} {...ctaAttrs}>
       {cta.label}
       <Icon slot="icon" name="arrow-down" />
@@ -36,62 +40,99 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
   .charge {
     display: grid;
     justify-items: center;
-    gap: var(--space-4);
+    gap: var(--space-5);
     transition:
       opacity var(--dur-slow) var(--ease-out),
       transform var(--dur-slow) var(--ease-out),
       filter var(--dur-slow) var(--ease-out);
   }
 
-  /* barra de energia: invisível até a carga começar */
-  .charge__bar {
-    position: relative;
-    width: min(16rem, 70vw);
-    height: 2px;
-    overflow: hidden;
-    background: rgb(127 231 255 / 0.12);
+  /* medidor de energia: invisível até a carga começar */
+  .charge__meter {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
     opacity: 0;
     transition: opacity var(--dur) var(--ease-out);
+  }
+
+  .charge__label {
+    color: #8ff3ff;
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .charge__bar {
+    position: relative;
+    width: min(18rem, 70vw);
+    height: 4px;
+    overflow: hidden;
+    background: rgb(143 243 255 / 0.12);
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
+    mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
   }
 
   .charge__fill {
     position: absolute;
     inset: 0;
     background: var(--grad-energy);
-    box-shadow: 0 0 12px var(--c-cyan);
     transform: scaleX(0);
     transform-origin: left center;
+  }
+
+  .charge__button {
+    position: relative;
+  }
+
+  /* onda de choque quando carrega */
+  .charge__ring {
+    position: absolute;
+    inset: -12px -20px;
+    border: 1px solid rgb(0 229 255 / 0.7);
+    border-radius: 4px;
+    opacity: 0;
+    pointer-events: none;
   }
 
   .charge__status {
     color: var(--text-muted);
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+    text-shadow: 0 1px 12px rgb(2 3 11 / 0.95);
   }
 
   .charge__status--urgent {
-    color: var(--time);
+    color: #ffb27a;
   }
 
   /* aguardando a carga: CTA apagado e a barra enchendo em 1,5s */
-  :global(.is-awaiting-charge) .charge {
-    opacity: 0.5;
+  :global(.is-awaiting-charge) .charge__button {
+    opacity: 0.45;
     transform: scale(0.96);
-    filter: saturate(0.4);
+    filter: saturate(0.3);
   }
 
-  :global(.is-awaiting-charge) .charge__bar {
+  :global(.is-awaiting-charge) .charge__meter {
     opacity: 1;
   }
 
   :global(.is-awaiting-charge) .charge__fill {
-    animation: charge-fill 1500ms linear forwards;
+    animation: charge-fill 1500ms cubic-bezier(0.55, 0, 0.9, 0.6) forwards;
   }
 
-  /* carregou: estouro de brilho no botão */
-  :global(.is-charged) .charge__bar {
+  .charge__button {
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out),
+      filter var(--dur-slow) var(--ease-out);
+  }
+
+  /* carregou: estouro de brilho no botão + anel que expande */
+  :global(.is-charged) .charge__meter {
     opacity: 0;
   }
 
@@ -103,6 +144,10 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
     animation: charge-burst 1.2s var(--ease-out) both;
   }
 
+  :global(.is-charged) .charge__ring {
+    animation: charge-ring 1.1s var(--ease-out) both;
+  }
+
   @keyframes charge-fill {
     to {
       transform: none;
@@ -111,21 +156,32 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
 
   @keyframes charge-burst {
     0% {
-      filter: drop-shadow(0 0 0 rgb(0 207 255 / 0));
+      filter: drop-shadow(0 0 0 rgb(0 229 255 / 0));
       transform: scale(1);
     }
     30% {
-      filter: drop-shadow(0 0 36px rgb(0 207 255 / 0.95)) brightness(1.25);
-      transform: scale(1.06);
+      filter: drop-shadow(0 0 40px rgb(0 229 255 / 0.95)) brightness(1.3);
+      transform: scale(1.07);
     }
     100% {
-      filter: drop-shadow(0 0 18px rgb(0 207 255 / 0.45));
+      filter: drop-shadow(0 0 22px rgb(0 229 255 / 0.45));
       transform: scale(1);
     }
   }
 
+  @keyframes charge-ring {
+    0% {
+      opacity: 0.9;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.35, 1.9);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    :global(.is-awaiting-charge) .charge {
+    :global(.is-awaiting-charge) .charge__button {
       transform: none;
     }
 
@@ -134,9 +190,13 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
       transform: scaleX(0.5);
     }
 
-    :global(.is-charged) .charge__button {
+    :global(.is-charged) .charge__button,
+    :global(.is-charged) .charge__ring {
       animation: none;
-      filter: drop-shadow(0 0 18px rgb(0 207 255 / 0.45));
+    }
+
+    :global(.is-charged) .charge__button {
+      filter: drop-shadow(0 0 22px rgb(0 229 255 / 0.45));
     }
   }
 </style>

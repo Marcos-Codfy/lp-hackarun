@@ -1,52 +1,45 @@
 ---
-// logotipo em texto: HACKA branco + RUN com o degradê de energia, inclinado como o logo oficial
-// decorativo: quem usa dá o nome acessível (aria-label no link ou texto sr-only)
+import BrandLogo from './BrandLogo.astro';
+
+// logo oficial em tamanhos fixos (header, rodapé, 404). Decorativo: quem usa dá o nome acessível
 interface Props {
   size?: 'sm' | 'md' | 'xl';
   class?: string;
 }
 
 const { size = 'sm', class: className } = Astro.props;
+
+const SOURCES = {
+  sm: { widths: [160, 320], sizes: '160px' },
+  md: { widths: [280, 560], sizes: '280px' },
+  xl: { widths: [480, 760, 1120], sizes: '(min-width: 1024px) 560px, 80vw' },
+} as const;
+const source = SOURCES[size];
 ---
 
 <span class:list={['wordmark', `wordmark--${size}`, className]} aria-hidden="true">
-  <span class="wordmark__hacka">HACKA</span>
-  <span class="wordmark__run">RUN</span>
+  <BrandLogo widths={[...source.widths]} sizes={source.sizes} />
 </span>
 
 <style>
   .wordmark {
-    display: inline-flex;
-    font-family: var(--font-display);
-    font-weight: 900;
-    line-height: 0.86;
-    letter-spacing: 0.005em;
-    text-transform: uppercase;
-    transform: skewX(-8deg);
-    white-space: nowrap;
+    display: inline-block;
+    line-height: 0;
+    /* o PNG tem respiro transparente: puxa as margens pra alinhar com o texto em volta */
+    margin-block: calc(var(--wm-w) * -0.07) calc(var(--wm-w) * -0.06);
+    width: var(--wm-w);
+    filter: drop-shadow(0 0 14px rgb(18 100 255 / 0.35));
   }
 
   .wordmark--sm {
-    font-size: 1.625rem;
+    --wm-w: 8.5rem;
   }
 
   .wordmark--md {
-    font-size: var(--fs-2xl);
+    --wm-w: 14rem;
   }
 
   .wordmark--xl {
-    font-size: clamp(3.5rem, 1rem + 13vw, 13rem);
-  }
-
-  .wordmark__hacka {
-    color: var(--c-white);
-  }
-
-  .wordmark__run {
-    padding-right: 0.06em;
-    background: var(--grad-energy);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    --wm-w: clamp(16rem, 8rem + 30vw, 35rem);
   }
 </style>

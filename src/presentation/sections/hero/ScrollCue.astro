@@ -1,10 +1,12 @@
 ---
-// "role para largar": dica visual de scroll, decorativa
+// "role para largar": trilho fino com um cometa descendo; decorativo
 ---
 
 <div class="scroll-cue" aria-hidden="true">
-  <span class="hud-label">Role para largar</span>
-  <span class="scroll-cue__line"></span>
+  <span class="scroll-cue__label">Role para largar</span>
+  <span class="scroll-cue__rail">
+    <span class="scroll-cue__comet"></span>
+  </span>
 </div>
 
 <style>
@@ -14,45 +16,46 @@
     gap: var(--space-2);
   }
 
-  .scroll-cue .hud-label {
+  .scroll-cue__label {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
     color: var(--text-dim);
   }
 
-  .scroll-cue__line {
+  .scroll-cue__rail {
     position: relative;
     width: 1px;
-    height: 2.75rem;
+    height: 2.5rem;
     overflow: hidden;
-    background: var(--surface-line);
+    background: linear-gradient(180deg, rgb(150 175 255 / 0.3), rgb(150 175 255 / 0.05));
   }
 
-  .scroll-cue__line::after {
-    content: '';
+  .scroll-cue__comet {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent, var(--c-cyan));
-    animation: cue-run 1.8s var(--ease-in-out) infinite;
+    left: 0;
+    width: 1px;
+    height: 45%;
+    background: linear-gradient(180deg, transparent, var(--c-cyan) 80%, #fff);
+    box-shadow: 0 0 8px var(--c-cyan);
+    animation: cue-run 2s var(--ease-in-out) infinite;
   }
 
   @keyframes cue-run {
     from {
-      transform: translateY(-100%);
+      transform: translateY(-110%);
     }
     to {
-      transform: translateY(100%);
-    }
-  }
-
-  /* tela baixa (celular deitado, notebook pequeno): sai pra não apertar o hero */
-  @media (max-height: 720px) {
-    .scroll-cue {
-      display: none;
+      transform: translateY(240%);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .scroll-cue__line::after {
+    .scroll-cue__comet {
       animation: none;
+      top: 30%;
     }
   }
 </style>

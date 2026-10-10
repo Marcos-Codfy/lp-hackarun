@@ -1,22 +1,20 @@
 import type { AppContext } from '@presentation/app/AppContext';
-import type { SoundViewModel } from '@presentation/view-models/sound/SoundViewModel';
 
 const AFTER_CHARGING_MS = 4000;
 const AFTER_IN_VIEW_MS = 6000;
 
 // pico-fim no #inscricao: o lobby fica apagado até o globo carregar; timers garantem que nunca fica preso
+// (o som do pico é do SoundBusBinder: toca no 'charged' de verdade, nunca num timer de segurança)
 export class ChargeRevealView {
   private readonly ctx: AppContext;
-  private readonly sound: SoundViewModel;
   private readonly section: HTMLElement;
   private readonly timers: ReturnType<typeof setTimeout>[] = [];
   private readonly offs: (() => void)[] = [];
   private observer: IntersectionObserver | null = null;
   private done = false;
 
-  constructor(ctx: AppContext, sound: SoundViewModel, section: HTMLElement) {
+  constructor(ctx: AppContext, section: HTMLElement) {
     this.ctx = ctx;
-    this.sound = sound;
     this.section = section;
   }
 
@@ -54,6 +52,5 @@ export class ChargeRevealView {
     this.observer?.disconnect();
     this.section.classList.remove('is-awaiting-charge');
     this.section.classList.add('is-charged');
-    this.sound.playCue();
   }
 }

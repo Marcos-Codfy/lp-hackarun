@@ -3,6 +3,7 @@ export const ICONS = {
   'arrow-right': 'M5 12h14M13 6l6 6-6 6',
   'arrow-up': 'M12 19V5M6 11l6-6 6 6',
   'arrow-down': 'M12 5v14M6 13l6 6 6-6',
+  chevrons: 'M5 6l5 6-5 6M12 6l5 6-5 6',
   external: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
   calendar: 'M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16M8 3v4M16 3v4',
   'map-pin':

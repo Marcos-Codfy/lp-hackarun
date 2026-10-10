@@ -20,6 +20,17 @@ import type { AudioCue } from '@infrastructure/audio/AudioCue';
 import { FileAudioCue } from '@infrastructure/audio/FileAudioCue';
 import { SynthAudioCue } from '@infrastructure/audio/SynthAudioCue';
 import { NullAudioCue } from '@infrastructure/audio/NullAudioCue';
+import { AudioSprite } from '@infrastructure/audio/AudioSprite';
+import { MinIntervalGate } from '@infrastructure/audio/MinIntervalGate';
+import { NullTickSound, type TickSound } from '@infrastructure/audio/TickSound';
+import { TypingSound } from '@infrastructure/audio/TypingSound';
+
+// sprite com 6 cliques de tecla de 0,09s colados a partir do zero (22050 Hz mono)
+const TYPING_SPRITE_URL = '/audio/ui-typing.wav';
+const TYPING_SLOTS = 6;
+const TYPING_SLOT_S = 0.09;
+const TYPING_GAIN = 0.18;
+const TYPING_MIN_GAP_MS = 35;
 
 export interface ClientContainer {
   clock: Clock;
@@ -30,6 +41,7 @@ export interface ClientContainer {
   preferences: PreferenceStore;
   audio: AudioEngine;
   cue: AudioCue;
+  typing: TickSound;
 }
 
 // ?now=2026-11-14T16:00:00-03:00 desloca o relógio pra conferir a troca de marcos do contador
@@ -72,6 +84,15 @@ function createCue(audio: AudioEngine, url: string | null): AudioCue {
   return url ? new FileAudioCue(audio, url, synth) : synth;
 }
 
+function createTyping(audio: AudioEngine): TickSound {
+  if (!audio.isSupported) return new NullTickSound();
+  return new TypingSound(audio, TYPING_SPRITE_URL, {
+    sprite: AudioSprite.uniform(TYPING_SLOTS, TYPING_SLOT_S, { min: 0.92, max: 1.08 }),
+    gate: new MinIntervalGate(TYPING_MIN_GAP_MS),
+    gain: TYPING_GAIN,
+  });
+}
+
 export function createClientContainer(config: AppConfig, options: { dev: boolean }): ClientContainer {
   const clock = createClock();
   const audio = new AudioEngine();
@@ -87,5 +108,6 @@ export function createClientContainer(config: AppConfig, options: { dev: boolean
     preferences: new LocalPreferenceStore(),
     audio,
     cue: createCue(audio, config.audioCueUrl),
+    typing: createTyping(audio),
   };
 }

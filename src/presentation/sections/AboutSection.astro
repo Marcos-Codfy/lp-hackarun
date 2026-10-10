@@ -1,11 +1,11 @@
 ---
 import type { LandingPageDTO } from '@application/index';
 import type { IconName } from '@presentation/components/ui/icons';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
-import StatCounter from '@presentation/components/ui/StatCounter.astro';
-import Marquee from '@presentation/components/ui/Marquee.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
+import SectionHeader from './shared/SectionHeader.astro';
 import PillarCard from './about/PillarCard.astro';
+import AboutTicker from './about/AboutTicker.astro';
+import AboutStats from './about/AboutStats.astro';
 import './sections.css';
 
 interface Props {
@@ -38,7 +38,7 @@ const pillars: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-const marquee = [
+const ticker = [
   'Minicursos',
   'Mentoria',
   `${stats.stations} missões`,
@@ -47,46 +47,42 @@ const marquee = [
   'Final no telão',
   'Palmas–TO',
 ];
+
+const readout = [
+  { value: stats.days, label: 'dias de evento' },
+  { value: stats.stations, label: 'missões' },
+  { value: stats.workshops, label: 'minicursos' },
+  { value: 1, label: 'final no telão' },
+];
 ---
 
 <section
   id="sobre"
-  class="section about"
+  class="section section--split about tone-blue"
   data-scene="orbit"
   data-checkpoint="O evento"
   aria-labelledby="sobre-title"
 >
-  <Marquee items={marquee} />
+  <AboutTicker items={ticker} />
 
-  <div class="container section-stack about__body">
-    <SectionHeading
-      id="sobre-title"
-      code="01"
-      eyebrow="O evento"
-      title="Não é só um hackathon. É uma <em>corrida</em>."
-      lead="Aprendizado na prática: minicursos, mentoria de egressos e uma corrida de missões técnicas por salas e laboratórios, até entregar uma solução final no prazo. Estudantes, professores, egressos e empresas no mesmo lugar."
-    />
+  <div class="container">
+    <div class="section-split__content section-stack about__body">
+      <SectionHeader
+        id="sobre-title"
+        code="01"
+        eyebrow="O evento"
+        title="Não é só um hackathon. É uma <em>corrida</em>."
+        lead="Aprendizado na prática: minicursos, mentoria de egressos e uma corrida de missões técnicas por salas e laboratórios, até entregar uma solução final no prazo. Estudantes, professores, egressos e empresas no mesmo lugar."
+      />
 
-    <ul class="about__pillars" role="list" data-reveal-group>
-      {pillars.map((pillar, index) => (
-        <PillarCard index={index} {...pillar} />
-      ))}
-    </ul>
+      <ul class="about__pillars" role="list" data-reveal-group>
+        {pillars.map((pillar, index) => (
+          <PillarCard index={index} {...pillar} />
+        ))}
+      </ul>
 
-    <ul class="about__stats" role="list" data-reveal-group>
-      <li>
-        <StatCounter value={stats.days} label="dias de evento" />
-      </li>
-      <li>
-        <StatCounter value={stats.stations} label="missões" />
-      </li>
-      <li>
-        <StatCounter value={stats.workshops} label="minicursos" />
-      </li>
-      <li>
-        <StatCounter value={1} label="final no telão" />
-      </li>
-    </ul>
+      <AboutStats stats={readout} />
+    </div>
   </div>
 </section>
 
@@ -96,40 +92,17 @@ const marquee = [
   }
 
   .about__body {
-    padding-top: var(--space-9);
+    padding-top: clamp(4rem, 2rem + 6vw, 8rem);
   }
 
   .about__pillars {
     display: grid;
-    gap: var(--space-4);
-  }
-
-  .about__stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-6) var(--space-4);
-    padding-top: var(--space-6);
-    border-top: 1px solid var(--surface-line);
+    gap: var(--space-5);
   }
 
   @media (min-width: 640px) {
     .about__pillars {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .about__pillars {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    .about__stats {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    .about__stats > li + li {
-      padding-left: var(--space-5);
-      border-left: 1px solid var(--surface-line);
     }
   }
 </style>

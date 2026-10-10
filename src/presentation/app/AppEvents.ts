@@ -19,4 +19,6 @@ export interface AppEvents extends Record<string, unknown> {
   // alguém clicou num CTA de inscrição
   'registration:intent': { source: string };
   'registration:submitted': { protocol: string };
+  // um caractere "digitado" na tela (terminal do NPC, protocolo da inscrição): clique de tecla se o som estiver ligado
+  'ui:type': undefined;
 }

@@ -1,0 +1,83 @@
+---
+// leitura de HUD com os números do evento; CounterAnimator conta de 0 até o valor (sem JS já mostra o final)
+interface Stat {
+  value: number;
+  label: string;
+}
+
+interface Props {
+  stats: Stat[];
+}
+
+const { stats } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<ul class="readout" role="list" data-reveal-group>
+  {stats.map((stat) => (
+    <li class="readout__item">
+      <p class="readout__value">
+        <span class="sx-grad-text" aria-hidden="true" data-count-to={stat.value} data-count-pad="2">
+          {pad(stat.value)}
+        </span>
+        <span class="sr-only">
+          {stat.value} {stat.label}
+        </span>
+      </p>
+      <p class="readout__label" aria-hidden="true">
+        {stat.label}
+      </p>
+      <span class="readout__bar" aria-hidden="true"></span>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-4);
+  }
+
+  .readout__item {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4) 0 var(--space-4) var(--space-4);
+    border-left: 1px solid var(--sx-line);
+  }
+
+  .readout__value {
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem);
+    font-weight: 900;
+    line-height: 0.9;
+    font-variant-numeric: tabular-nums;
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--sx-accent) 40%, transparent));
+  }
+
+  .readout__label {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  /* traço aceso no topo da régua */
+  .readout__bar {
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 1px;
+    height: 1.75rem;
+    background: var(--sx-accent);
+    box-shadow: 0 0 10px var(--sx-accent);
+  }
+
+  @media (min-width: 640px) {
+    .readout {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,37 @@
+---
+import BrandLogo from '@presentation/components/ui/BrandLogo.astro';
+
+// logo oficial no header (~30px de altura visível); o link dá o nome acessível
+---
+
+<a class="header-brand" href="#inicio" data-nav-link aria-label="HackaRun 2026, voltar ao início">
+  <BrandLogo widths={[160, 320]} sizes="140px" class="header-brand__logo" />
+</a>
+
+<style>
+  .header-brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 2px;
+    border-radius: 6px;
+    flex: none;
+    transition: filter var(--dur) var(--ease-out);
+  }
+
+  .header-brand :global(.header-brand__logo) {
+    width: 124px;
+    /* recorta o respiro transparente do PNG pra centralizar na barra */
+    margin-block: -10px -8px;
+  }
+
+  .header-brand:hover {
+    filter: drop-shadow(0 0 12px rgb(0 229 255 / 0.45));
+  }
+
+  @media (min-width: 1024px) {
+    .header-brand :global(.header-brand__logo) {
+      width: 140px;
+    }
+  }
+</style>

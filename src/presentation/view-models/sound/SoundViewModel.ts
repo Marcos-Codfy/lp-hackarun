@@ -3,6 +3,7 @@ import type { EventBus } from '@shared/core/EventBus';
 import type { AppEvents } from '@presentation/app/AppEvents';
 import type { PreferenceStore } from '@infrastructure/storage/PreferenceStore';
 import type { AudioCue } from '@infrastructure/audio/AudioCue';
+import type { TickSound } from '@infrastructure/audio/TickSound';
 
 // o que o VM precisa do AudioEngine (facilita o teste)
 export interface AudioUnlocker {
@@ -16,6 +17,8 @@ export interface SoundDeps {
   engine: AudioUnlocker;
   cue: AudioCue;
   bus: EventBus<AppEvents>;
+  // cliques de digitação (opcional: sem ele, playTyping não faz nada)
+  typing?: TickSound;
 }
 
 const KEY = 'sound';
@@ -59,11 +62,17 @@ export class SoundViewModel {
     this.deps.cue.play().catch(() => undefined);
   }
 
+  playTyping(): void {
+    if (this.enabled.value) this.deps.typing?.play();
+  }
+
   private unlock(): void {
     this.deps.engine
       .unlock()
       .then((ok) => {
-        if (ok) this.deps.cue.preload?.();
+        if (!ok) return;
+        this.deps.cue.preload?.();
+        this.deps.typing?.preload?.();
       })
       .catch(() => undefined);
   }

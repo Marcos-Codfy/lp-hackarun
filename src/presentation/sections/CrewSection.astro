@@ -1,11 +1,10 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
-import LockedCard from '@presentation/components/ui/LockedCard.astro';
-import HudFrame from '@presentation/components/ui/HudFrame.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
+import SectionHeader from './shared/SectionHeader.astro';
 import CrewCard from './crew/CrewCard.astro';
+import LockedMentorCard from './crew/LockedMentorCard.astro';
 import './sections.css';
 
 interface Props {
@@ -18,13 +17,13 @@ const roles = new SpeakerRoleLabel();
 
 <section
   id="mentores"
-  class="section crew"
+  class="section crew tone-violet"
   data-scene="terrain"
   data-checkpoint="Mentores"
   aria-labelledby="mentores-title"
 >
   <div class="container section-stack">
-    <SectionHeading
+    <SectionHeader
       id="mentores-title"
       code="05"
       eyebrow="Mentores"
@@ -33,35 +32,40 @@ const roles = new SpeakerRoleLabel();
     />
 
     <ul class="crew__grid" role="list" data-reveal-group>
-      {speakers.map((speaker) =>
+      {speakers.map((speaker, index) =>
         speaker.revealed ? (
           <CrewCard speaker={speaker} role={roles.of(speaker.role)} />
         ) : (
-          <LockedCard label={roles.of(speaker.role)} hint={speaker.topic} />
+          <LockedMentorCard label={roles.of(speaker.role)} index={index} hint={speaker.topic} />
         ),
       )}
     </ul>
 
-    <HudFrame label="// Regras da mentoria" class="crew__rules" data-reveal="up">
+    <div class="crew__rules sx-glass sx-corners" data-reveal="up">
+      <p class="sx-hud">// Regras da mentoria</p>
       <ul class="crew__rules-list" role="list">
         <li>
-          <Icon name="chat" size={22} />
+          <span class="sx-icon">
+            <Icon name="chat" size={20} />
+          </span>
           <p>
             <strong>
               O mentor orienta arquitetura, planejamento e boas práticas, mas não escreve a solução.
-            </strong>{' '}
+            </strong>
             Presencial ou por vídeo, sem gabarito.
           </p>
         </li>
         <li>
-          <Icon name="trophy" size={22} />
+          <span class="sx-icon">
+            <Icon name="trophy" size={20} />
+          </span>
           <p>
-            <strong>O mentor da equipe campeã também é premiado.</strong> Escolha bem quem vai correr com
-            vocês.
+            <strong>O mentor da equipe campeã também é premiado.</strong>
+            Escolha bem quem vai correr com vocês.
           </p>
         </li>
       </ul>
-    </HudFrame>
+    </div>
   </div>
 </section>
 
@@ -69,23 +73,25 @@ const roles = new SpeakerRoleLabel();
   .crew__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
+    gap: var(--space-4) var(--space-3);
+  }
+
+  .crew__rules {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6) var(--space-5);
   }
 
   .crew__rules-list {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-6);
   }
 
   .crew__rules-list li {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: var(--space-4);
+    gap: var(--space-5);
     align-items: start;
-  }
-
-  .crew__rules-list :global(.icon) {
-    color: var(--c-cyan);
   }
 
   .crew__rules-list p {
@@ -102,7 +108,11 @@ const roles = new SpeakerRoleLabel();
   @media (min-width: 640px) {
     .crew__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--space-4);
+      gap: var(--space-5) var(--space-4);
+    }
+
+    .crew__rules {
+      padding: var(--space-7);
     }
   }
 

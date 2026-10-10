@@ -1,4 +1,24 @@
 /* design tokens v2: paleta do manual oficial levada ao limite (vazio quase preto + neon saturado) */
+
+/* cores da aurora registradas como <color>: assim a troca de cena faz transição suave */
+@property --aurora-a {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(18 100 255 / 0.36);
+}
+
+@property --aurora-b {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(0 229 255 / 0.16);
+}
+
+@property --aurora-c {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(148 27 255 / 0.18);
+}
+
 :root {
   color-scheme: dark;
 
@@ -23,12 +43,13 @@
   /* papéis semânticos (use estes nos componentes) */
   --bg: var(--c-void);
   --bg-elevated: var(--c-night);
-  --surface: linear-gradient(160deg, rgb(28 44 140 / 0.32) 0%, rgb(8 10 34 / 0.62) 100%);
-  --surface-solid: rgb(8 12 38 / 0.86);
-  --surface-line: rgb(120 150 255 / 0.16);
+  --surface: linear-gradient(160deg, rgb(30 48 150 / 0.26) 0%, rgb(6 9 30 / 0.66) 100%);
+  --surface-solid: rgb(7 11 34 / 0.9);
+  --surface-strong: rgb(5 8 26 / 0.78);
+  --surface-line: rgb(130 160 255 / 0.16);
   --line-strong: rgb(0 229 255 / 0.5);
   --text: var(--c-ice);
-  --text-muted: rgb(222 230 255 / 0.74);
+  --text-muted: rgb(222 230 255 / 0.76);
   --text-dim: rgb(222 230 255 / 0.6);
   --accent: var(--c-cyan);
   --accent-2: var(--c-electric);
@@ -42,12 +63,26 @@
   --grad-blue: linear-gradient(100deg, #00e5ff 0%, #1264ff 100%);
   --grad-mystic: linear-gradient(100deg, #941bff 0%, #ed28e8 100%);
   --grad-prize: linear-gradient(100deg, #ffc24a 0%, #ff852f 55%, #ed28e8 100%);
+  --grad-time: linear-gradient(180deg, #ffe0a3 0%, #ffc24a 38%, #ff852f 100%);
   --grad-line: linear-gradient(90deg, transparent, rgb(0 229 255 / 0.7), rgb(148 27 255 / 0.7), transparent);
+  /* fio de 1px das bordas de vidro (aplicar com máscara xor: padding-box vs border-box) */
+  --grad-hairline: linear-gradient(
+    135deg,
+    rgb(0 229 255 / 0.7) 0%,
+    rgb(18 100 255 / 0.28) 34%,
+    rgb(148 27 255 / 0.18) 66%,
+    rgb(237 40 232 / 0.55) 100%
+  );
 
   /* brilhos */
   --glow-cyan: 0 0 18px rgb(0 229 255 / 0.55), 0 0 48px rgb(18 100 255 / 0.35);
   --glow-violet: 0 0 18px rgb(148 27 255 / 0.55), 0 0 48px rgb(237 40 232 / 0.25);
   --glow-orange: 0 0 18px rgb(255 133 47 / 0.55), 0 0 44px rgb(255 194 74 / 0.25);
+  --shadow-float: 0 18px 50px -18px rgb(0 0 0 / 0.9), 0 2px 10px rgb(0 0 0 / 0.35);
+
+  /* vidro */
+  --glass-bg: rgb(8 12 40 / 0.46);
+  --glass-blur: blur(16px) saturate(150%);
 
   /* tipografia oficial: Orbitron nos títulos, Montserrat no texto */
   --font-display: 'Orbitron Variable', 'Orbitron', 'Segoe UI', sans-serif;
@@ -61,15 +96,16 @@
   --fs-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
   --fs-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
   --fs-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
-  --fs-2xl: clamp(1.625rem, 1.3rem + 1.5vw, 2.5rem);
-  --fs-3xl: clamp(2rem, 1.3rem + 3vw, 4rem);
+  --fs-2xl: clamp(1.5rem, 1.2rem + 1.4vw, 2.375rem);
+  --fs-3xl: clamp(1.875rem, 1.2rem + 2.9vw, 3.75rem);
   --fs-hero: clamp(2.5rem, 1.2rem + 6vw, 7rem);
 
   --lh-tight: 1.04;
   --lh-snug: 1.2;
   --lh-body: 1.65;
   --tracking-hud: 0.22em;
-  --tracking-display: 0.02em;
+  --tracking-display: 0.01em;
+  --tracking-btn: 0.12em;
 
   /* espaço */
   --space-1: 0.25rem;
@@ -84,12 +120,15 @@
   --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
   --container: 76rem;
   --container-narrow: 46rem;
+  /* altura reservada pro header flutuante (12px de topo + barra de 56–60px) */
   --header-h: 4.5rem;
+  --header-top: 12px;
 
   /* forma */
   --cut: 14px;
   --cut-sm: 8px;
   --radius: 6px;
+  --radius-lg: 14px;
   --skew: -12deg;
   --clip-card: polygon(
     var(--cut) 0,
@@ -111,6 +150,7 @@
   /* movimento */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --dur-fast: 160ms;
   --dur: 320ms;
   --dur-slow: 700ms;

@@ -39,8 +39,8 @@ export class MissionsTrackAnimator extends SectionAnimator {
         scrub: 0.6,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        // tela baixa: prende pelo topo pra não cortar os cards
-        start: () => (pin.offsetHeight > window.innerHeight * 0.85 ? 'top top+=64' : 'center center'),
+        // tela baixa: prende pelo topo pra não cortar os cards; senão encosta embaixo e deixa o alto livre pro mapa 3D
+        start: () => (pin.offsetHeight > window.innerHeight * 0.85 ? 'top top+=64' : 'bottom bottom-=40'),
         end: () => `+=${distance()}`,
         onUpdate: (st) => {
           if (bar) bar.style.transform = `scaleX(${st.progress.toFixed(3)})`;

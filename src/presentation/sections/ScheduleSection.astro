@@ -1,8 +1,8 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
+import SectionHeader from './shared/SectionHeader.astro';
 import DayRound from './schedule/DayRound.astro';
 import './sections.css';
 
@@ -16,14 +16,14 @@ const days = schedule.length;
 
 <section
   id="programacao"
-  class="section schedule"
+  class="section schedule tone-blue"
   data-scene="terrain"
   data-checkpoint="Programação"
   aria-labelledby="programacao-title"
 >
   <div class="container section-stack">
     <div class="schedule__head">
-      <SectionHeading
+      <SectionHeader
         id="programacao-title"
         code="04"
         eyebrow="Programação"
@@ -66,34 +66,38 @@ const days = schedule.length;
 
   .schedule__agenda-hint {
     color: var(--text-dim);
-    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .timeline {
     position: relative;
   }
 
-  /* trilho da linha do tempo; o preenchimento "desenha" com o scroll */
+  /* trilho da linha do tempo; o preenchimento "desenha" com o scroll e termina em laranja (a final) */
   .timeline__rail {
     position: absolute;
-    top: 0.5rem;
+    top: 0.75rem;
     bottom: 0;
     left: 0;
     width: 1px;
-    background: var(--surface-line);
+    background: rgb(157 188 255 / 0.16);
   }
 
   .timeline__fill {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, var(--c-cyan), var(--c-royal) 70%, var(--time));
-    box-shadow: 0 0 10px rgb(0 207 255 / 0.6);
+    background: linear-gradient(180deg, var(--c-cyan), var(--c-electric) 62%, var(--c-orange));
+    box-shadow: 0 0 12px rgb(0 229 255 / 0.7);
     transform-origin: top center;
   }
 
   .timeline__list {
     display: grid;
-    gap: var(--space-8);
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(4rem, 3rem + 3vw, 6.5rem);
   }
 
   @media (min-width: 1024px) {

@@ -27,7 +27,8 @@ const { id, label } = Astro.props;
     place-items: center;
     width: 44px;
     height: 44px;
-    color: var(--accent);
+    /* segue o tom da seção onde está escondido */
+    color: var(--sx-ink, var(--accent));
     /* discreto, mas ainda ~3:1 sobre o fundo (WCAG 1.4.11) */
     opacity: 0.5;
     transition:
@@ -39,7 +40,7 @@ const { id, label } = Astro.props;
   .npc-token:hover,
   .npc-token:focus-visible {
     opacity: 1;
-    filter: drop-shadow(0 0 8px rgb(0 207 255 / 0.85));
+    filter: drop-shadow(0 0 8px var(--sx-accent, var(--c-cyan)));
     transform: scale(1.08);
   }
 

@@ -1,20 +1,15 @@
-import {
-  AddEquation,
-  CustomBlending,
-  OneFactor,
-  OneMinusSrcAlphaFactor,
-  ShaderMaterial,
-  Vector2,
-  Vector3,
-  type IUniform,
-} from 'three';
+import { ShaderMaterial, Vector2, Vector3, type IUniform, type Vector4 } from 'three';
 import type { SceneKey } from '@presentation/app/AppEvents';
+import { CORE_CODE_LEVELS, CORE_CODE_SPAN, CORE_VEIL_RIBBON } from '../shapes/CoreShape';
+import { SHAPE_RADIUS } from '../shapes/ShapeStrategy';
 import commonGlsl from '../shaders/common.glsl?raw';
 import noiseGlsl from '../shaders/noise.glsl?raw';
 import coreGlsl from '../shaders/core.glsl?raw';
 import shapesGlsl from '../shaders/shapes.glsl?raw';
 import vertexGlsl from '../shaders/particles.vert.glsl?raw';
 import fragmentGlsl from '../shaders/particles.frag.glsl?raw';
+import { ADDITIVE_LIGHT } from '../layers/additiveLight';
+import { CHARGE_TINT, paletteFor, rgb } from './ColorGrade';
 
 export type ParticleUniforms = {
   uTime: IUniform<number>;
@@ -25,16 +20,17 @@ export type ParticleUniforms = {
   uVelocity: IUniform<number>;
   uCharge: IUniform<number>;
   uPulse: IUniform<number>;
+  uAfterglow: IUniform<number>;
   uSpin: IUniform<Vector2>;
   uPointer: IUniform<Vector3>;
   uPointerStrength: IUniform<number>;
   uPixelRatio: IUniform<number>;
   uSize: IUniform<number>;
   uOpacity: IUniform<number>;
-  uColorCyan: IUniform<Vector3>;
-  uColorRoyal: IUniform<Vector3>;
-  uColorHot: IUniform<Vector3>;
-  uColorAmber: IUniform<Vector3>;
+  uHalo: IUniform<number>;
+  uPalette: IUniform<Vector3[]>;
+  uGrade: IUniform<Vector4[]>;
+  uChargeTint: IUniform<Vector3>;
 };
 
 const ALL_KEYS: readonly SceneKey[] = [
@@ -48,13 +44,17 @@ const ALL_KEYS: readonly SceneKey[] = [
   'dust',
 ];
 
-// cores da paleta em sRGB direto (o shader não converte espaço de cor)
-const rgb = (hex: number): Vector3 =>
-  new Vector3(((hex >> 16) & 255) / 255, ((hex >> 8) & 255) / 255, (hex & 255) / 255);
+const float = (value: number): string => (Number.isInteger(value) ? `${value}.0` : `${value}`);
 
 // cena ausente nem declara atributo: o compilador some com o ramo inteiro
 function definesFor(keys: readonly SceneKey[]): Record<string, string | number> {
-  const defines: Record<string, string | number> = {};
+  const defines: Record<string, string | number> = {
+    SHAPE_COUNT: Math.max(1, keys.length),
+    CORE_RADIUS: float(SHAPE_RADIUS),
+    CORE_CODE_SPAN: float(CORE_CODE_SPAN),
+    CORE_CODE_LEVELS: float(CORE_CODE_LEVELS),
+    CORE_VEIL_RIBBON: float(CORE_VEIL_RIBBON),
+  };
   ALL_KEYS.forEach((key) => {
     const index = keys.indexOf(key);
     if (index < 0) return;
@@ -69,6 +69,7 @@ export function createParticleMaterial(keys: readonly SceneKey[]): {
   material: ShaderMaterial;
   uniforms: ParticleUniforms;
 } {
+  const { palette, grade } = paletteFor(keys);
   const uniforms: ParticleUniforms = {
     uTime: { value: 0 },
     uFrom: { value: 0 },
@@ -77,16 +78,17 @@ export function createParticleMaterial(keys: readonly SceneKey[]): {
     uVelocity: { value: 0 },
     uCharge: { value: 0 },
     uPulse: { value: 0 },
+    uAfterglow: { value: 0 },
     uSpin: { value: new Vector2() },
     uPointer: { value: new Vector3(0, 0, 100) },
     uPointerStrength: { value: 0 },
     uPixelRatio: { value: 1 },
     uSize: { value: 5 },
     uOpacity: { value: 1 },
-    uColorCyan: { value: rgb(0x00cfff) },
-    uColorRoyal: { value: rgb(0x1e7bff) },
-    uColorHot: { value: rgb(0xffffff) },
-    uColorAmber: { value: rgb(0xffb547) },
+    uHalo: { value: 1 },
+    uPalette: { value: palette },
+    uGrade: { value: grade },
+    uChargeTint: { value: rgb(CHARGE_TINT) },
   };
 
   const material = new ShaderMaterial({
@@ -94,16 +96,7 @@ export function createParticleMaterial(keys: readonly SceneKey[]): {
     defines: definesFor(keys),
     vertexShader: [commonGlsl, noiseGlsl, coreGlsl, shapesGlsl, vertexGlsl].join('\n'),
     fragmentShader: fragmentGlsl,
-    transparent: true,
-    depthWrite: false,
-    depthTest: false,
-    // aditivo na cor, alpha "over": brilha somando sem estourar o alpha do canvas transparente
-    blending: CustomBlending,
-    blendEquation: AddEquation,
-    blendSrc: OneFactor,
-    blendDst: OneFactor,
-    blendSrcAlpha: OneFactor,
-    blendDstAlpha: OneMinusSrcAlphaFactor,
+    ...ADDITIVE_LIGHT,
   });
 
   return { material, uniforms };

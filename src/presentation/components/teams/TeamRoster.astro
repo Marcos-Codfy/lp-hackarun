@@ -2,8 +2,10 @@
 // lista de equipes confirmadas: SSR do build + atualização ao vivo da planilha (TeamsView + TeamsViewModel)
 import type { SlotsDTO, TeamDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
 import { toPublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
 import TeamCard from './TeamCard.astro';
+import LineupSlots from './LineupSlots.astro';
 
 interface Props {
   teams: TeamDTO[];
@@ -14,7 +16,6 @@ const { teams, slots } = Astro.props;
 // só o que é público vai pro HTML (nada de nome de integrante)
 const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam);
 const countLabel = confirmed.length === 1 ? 'equipe confirmada' : 'equipes confirmadas';
-const LINEUP = ['01', '02', '03', '04', '05'];
 ---
 
 <div
@@ -29,25 +30,30 @@ const LINEUP = ['01', '02', '03', '04', '05'];
       <span class="roster__count" data-teams-count>
         {confirmed.length}
       </span>
-      <span data-teams-count-label>{countLabel}</span>
-      <span class="roster__slots" data-teams-slots-text hidden={slots.remaining === null}>
-        · <span data-teams-remaining>{slots.remaining}</span> vagas restantes
+      <span class="roster__count-text">
+        <span data-teams-count-label>{countLabel}</span>
+        <span class="roster__slots" data-teams-slots-text hidden={slots.remaining === null}>
+          <span data-teams-remaining>{slots.remaining}</span> vagas restantes
+        </span>
       </span>
     </p>
     <div class="roster__search" data-teams-search-wrap hidden>
       <label class="roster__search-label" for="team-search">
         Buscar equipe
       </label>
-      <input
-        id="team-search"
-        class="roster__search-input"
-        type="search"
-        autocomplete="off"
-        spellcheck="false"
-        enterkeyhint="search"
-        placeholder="Nome da equipe ou curso"
-        data-teams-search
-      />
+      <span class="roster__search-field">
+        <Icon name="search" size={18} />
+        <input
+          id="team-search"
+          class="roster__search-input"
+          type="search"
+          autocomplete="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          placeholder="Nome da equipe ou curso"
+          data-teams-search
+        />
+      </span>
     </div>
   </div>
 
@@ -64,20 +70,15 @@ const LINEUP = ['01', '02', '03', '04', '05'];
   </p>
 
   <div class="roster__empty" data-teams-empty hidden={confirmed.length > 0}>
-    <ol role="list" class="lineup" aria-hidden="true">
-      {LINEUP.map((code) => (
-        <li class="lineup__slot">
-          <span class="lineup__code">#{code}</span>
-          <span class="lineup__label">Vaga aberta</span>
-        </li>
-      ))}
-    </ol>
-    <p class="roster__empty-text">
-      As primeiras equipes confirmadas aparecem aqui. A sua pode ser a primeira.
-    </p>
-    <Button href="#inscricao" variant="ghost" registrationCta="teams-empty">
-      Inscrever minha equipe
-    </Button>
+    <LineupSlots />
+    <div class="roster__empty-cta">
+      <p class="roster__empty-text">
+        As primeiras equipes confirmadas aparecem aqui. <strong>A sua pode ser a primeira.</strong>
+      </p>
+      <Button href="#inscricao" variant="ghost" registrationCta="teams-empty">
+        Inscrever minha equipe
+      </Button>
+    </div>
   </div>
 
   <template data-teams-template>
@@ -88,7 +89,7 @@ const LINEUP = ['01', '02', '03', '04', '05'];
 <style>
   .roster {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-6);
   }
 
   .roster__bar {
@@ -96,24 +97,47 @@ const LINEUP = ['01', '02', '03', '04', '05'];
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
 
   .roster__counter {
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
   }
 
+  /* montserrat aqui: o zero cortado da orbitron parecia ícone com o contador vazio */
   .roster__count {
-    color: var(--accent);
-    font-weight: 700;
+    font-family: var(--font-body);
+    font-size: clamp(2.75rem, 2.2rem + 2vw, 3.75rem);
+    font-weight: 800;
+    line-height: 0.85;
+    font-variant-numeric: tabular-nums;
+    background: var(--grad-blue);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 18px rgb(0 229 255 / 0.5));
+  }
+
+  .roster__count-text {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: var(--space-4);
+    border-left: 1px solid rgb(0 229 255 / 0.3);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .roster__slots {
+    color: #8ff3ff;
   }
 
   .roster[data-slots-level='last'] .roster__slots {
-    color: var(--time);
+    color: var(--c-orange);
   }
 
   .roster__search {
@@ -123,26 +147,46 @@ const LINEUP = ['01', '02', '03', '04', '05'];
   }
 
   .roster__search-label {
+    color: #8ff3ff;
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
-    color: var(--accent);
+  }
+
+  .roster__search-field {
+    position: relative;
+    display: block;
+    color: var(--text-dim);
+  }
+
+  .roster__search-field :global(.icon) {
+    position: absolute;
+    top: 50%;
+    left: var(--space-4);
+    transform: translateY(-50%);
+    pointer-events: none;
   }
 
   .roster__search-input {
+    width: 100%;
     min-height: 48px;
-    padding: 0 var(--space-4);
-    background: var(--surface-strong);
-    border: 0;
-    box-shadow: inset 0 0 0 1px var(--surface-line);
-    clip-path: var(--clip-btn);
+    padding: 0 var(--space-4) 0 calc(var(--space-4) * 2 + 18px);
+    border: 1px solid rgb(140 160 255 / 0.2);
+    border-radius: 3px;
+    background: rgb(6 9 30 / 0.8);
     font-size: max(16px, var(--fs-base));
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
   }
 
   .roster__search-input:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 2px var(--focus);
+    border-color: var(--c-cyan);
+    box-shadow:
+      0 0 0 3px rgb(0 229 255 / 0.18),
+      0 0 24px rgb(0 229 255 / 0.25);
   }
 
   .roster__list {
@@ -154,47 +198,30 @@ const LINEUP = ['01', '02', '03', '04', '05'];
     opacity: 0.7;
   }
 
-  .roster__noresults,
-  .roster__empty-text {
+  .roster__noresults {
     color: var(--text-muted);
   }
 
   .roster__empty {
     display: grid;
-    justify-items: start;
-    gap: var(--space-5);
+    gap: var(--space-6);
   }
 
-  /* lineup vazio estilo e-sports: os slots esperando as equipes */
-  .lineup {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-    gap: var(--space-3);
-    width: 100%;
+  .roster__empty-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-6);
   }
 
-  .lineup__slot {
-    display: grid;
-    gap: var(--space-2);
-    padding: var(--space-5) var(--space-4);
-    border: 1px dashed rgb(127 231 255 / 0.28);
-    clip-path: var(--clip-card);
-    background: repeating-linear-gradient(135deg, rgb(0 207 255 / 0.04) 0 10px, transparent 10px 20px);
+  .roster__empty-text {
+    max-width: 34rem;
+    color: var(--text-muted);
   }
 
-  .lineup__code {
-    font-family: var(--font-display);
-    font-size: var(--fs-2xl);
-    font-weight: 800;
-    line-height: 1;
-    color: rgb(0 207 255 / 0.35);
-  }
-
-  .lineup__label {
-    font-family: var(--font-mono);
-    font-size: var(--fs-hud);
-    letter-spacing: var(--tracking-hud);
-    text-transform: uppercase;
-    color: var(--text-dim);
+  .roster__empty-text strong {
+    color: var(--text);
+    font-weight: 600;
   }
 </style>

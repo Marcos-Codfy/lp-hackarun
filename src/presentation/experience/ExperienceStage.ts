@@ -1,81 +1,52 @@
-import { PerspectiveCamera, Scene, type WebGLRenderer } from 'three';
+import type { WebGLRenderer } from 'three';
 import type { AppContext } from '@presentation/app/AppContext';
-import type { QualityTier, SceneKey } from '@presentation/app/AppEvents';
-import { CameraRig } from './camera/CameraRig';
+import type { QualityTier } from '@presentation/app/AppEvents';
 import { CanvasResizer } from './CanvasResizer';
 import { FrameLoop } from './FrameLoop';
-import { PointerTracker } from './input/PointerTracker';
-import type { ParticleField } from './particles/ParticleField';
+import { StageRenderer } from './post/StageRenderer';
 import { AdaptiveQuality, type QualityTarget } from './quality/AdaptiveQuality';
-import type { QualityProfile } from './quality/QualityProfile';
-import { ChargeController } from './scene/ChargeController';
-import { SceneLayout } from './scene/SceneLayout';
-import type { SceneMixer } from './scene/SceneMixer';
-import { ShapeSpin } from './scene/ShapeSpin';
+import type { EffectsLevel, QualityProfile } from './quality/QualityProfile';
 import { StageStatus } from './StageStatus';
+import { StageWorld, type WorldParts } from './StageWorld';
 
-const FOV = 40;
-const CAMERA_Z = 6;
-const POINT_SIZE = 5.6;
-
-export interface StageParts {
+export interface StageParts extends WorldParts {
   renderer: WebGLRenderer;
-  field: ParticleField;
-  mixer: SceneMixer;
-  keys: readonly SceneKey[];
-  profile: QualityProfile;
-  holdIndex: number;
+  // tier forçado na URL (QA) não se rebaixa sozinho
+  adaptive: boolean;
 }
 
-// Facade: o resto do app só enxerga start/dispose; three.js fica todo aqui dentro (montado pelo StageBuilder)
+// Facade: o resto do app só enxerga start/dispose; aqui fica o ciclo de vida (loop, tamanho, qualidade, contexto)
 export class ExperienceStage implements QualityTarget {
   readonly tier: QualityTier;
   private readonly renderer: WebGLRenderer;
-  private readonly field: ParticleField;
-  private readonly mixer: SceneMixer;
-  private readonly scene = new Scene();
-  private readonly camera = new PerspectiveCamera(FOV, 1, 0.1, 60);
+  private readonly world: StageWorld;
+  private readonly output: StageRenderer;
   private readonly status = new StageStatus();
-  private readonly spin = new ShapeSpin();
-  private readonly layout: SceneLayout;
-  private readonly rig: CameraRig;
-  private readonly pointer: PointerTracker | null;
-  private readonly charge: ChargeController;
   private readonly adaptive: AdaptiveQuality | null;
   private readonly loop: FrameLoop;
   private readonly resizer: CanvasResizer;
   private readonly reduced: boolean;
-  private readonly coreIndex: number;
   private readonly offs: (() => void)[] = [];
-  private profile: QualityProfile;
   private dprCap: number;
   private size = { width: 1, height: 1 };
   private startTime = -1;
   private shaderError = false;
+  private disposed = false;
 
-  constructor(
-    parts: StageParts,
-    private readonly ctx: AppContext,
-  ) {
+  constructor(parts: StageParts, ctx: AppContext) {
     this.renderer = parts.renderer;
-    this.field = parts.field;
-    this.mixer = parts.mixer;
-    this.profile = parts.profile;
     this.tier = parts.profile.tier;
     this.reduced = ctx.reducedMotion;
     this.dprCap = parts.profile.maxDpr;
-    this.coreIndex = this.mixer.indexOf('core');
 
-    this.camera.position.set(0, 0, CAMERA_Z);
-    this.scene.add(this.field.points);
-    this.field.uniforms.uSpin.value = this.spin.angles;
-    this.layout = new SceneLayout(parts.keys);
-    this.rig = new CameraRig(this.camera, parts.keys, CAMERA_Z, !this.reduced);
-    this.pointer = this.reduced || ctx.coarsePointer ? null : new PointerTracker(this.camera);
-    this.charge = new ChargeController(ctx.bus, ctx.scenes.progress, parts.holdIndex, this.reduced);
-    this.adaptive = this.reduced
-      ? null
-      : new AdaptiveQuality(parts.profile, this, window.devicePixelRatio || 1);
+    this.world = new StageWorld(parts, ctx);
+    const { scene, camera } = this.world;
+    this.output = new StageRenderer(this.renderer, scene, camera, parts.profile.effects, this.onEffects);
+    this.world.setEffects(this.output.level);
+    this.adaptive =
+      this.reduced || !parts.adaptive
+        ? null
+        : new AdaptiveQuality(parts.profile, this, window.devicePixelRatio || 1);
     this.loop = new FrameLoop(this.frame, !this.reduced, () => this.adaptive?.reset());
     this.resizer = new CanvasResizer(this.renderer.domElement, this.applySize);
 
@@ -101,7 +72,19 @@ export class ExperienceStage implements QualityTarget {
   start(onReady: () => void, onFail: (reason: string) => void): void {
     this.status.listen(onReady, onFail);
     this.resizer.measureNow();
-    this.loop.start();
+    // o shader das partículas é grande: compila em paralelo (KHR_parallel_shader_compile) sem congelar a página
+    this.world.setCompiling(true);
+    void this.output
+      .compile()
+      .catch(() => undefined)
+      .then(() => {
+        this.world.setCompiling(false);
+        if (!this.disposed) this.loop.start();
+      });
+  }
+
+  degradeEffects(): boolean {
+    return this.output.degrade();
   }
 
   setPixelRatioCap(cap: number): void {
@@ -110,53 +93,29 @@ export class ExperienceStage implements QualityTarget {
   }
 
   setProfile(profile: QualityProfile): void {
-    this.profile = profile;
-    this.field.setVisibleCount(profile.count);
+    this.world.setProfile(profile);
+    this.output.limit(profile.effects);
   }
 
   dispose(): void {
+    this.disposed = true;
     this.loop.dispose();
     this.resizer.dispose();
-    this.pointer?.dispose();
-    this.charge.dispose();
     this.offs.forEach((off) => off());
     this.renderer.domElement.removeEventListener('webglcontextlost', this.onContextLost);
     this.renderer.domElement.removeEventListener('webglcontextrestored', this.onContextRestored);
-    this.field.dispose();
+    this.world.dispose();
+    this.output.dispose();
     this.renderer.dispose();
     this.status.hide();
   }
 
   private readonly frame = (time: number, delta: number): void => {
     if (this.startTime < 0) this.startTime = time;
-    const { progress, velocity } = this.ctx.scenes;
+    const elapsed = this.reduced ? 0 : time - this.startTime;
     // primeiro frame entra direto na cena atual (recarregar no meio da página não morfa do zero)
-    this.mixer.update(progress.value, delta, this.reduced || !this.status.ready);
-    this.charge.update(delta);
-    if (!this.reduced) this.spin.update(delta, this.charge.charge);
-
-    const weights = this.mixer.weights;
-    const opacity = this.layout.apply(weights, this.field.points);
-    this.pointer?.update(delta);
-    this.rig.update(weights, this.pointer, this.charge.charge, time, delta);
-
-    const u = this.field.uniforms;
-    u.uFrom.value = this.mixer.from;
-    u.uTo.value = this.mixer.to;
-    u.uT.value = this.mixer.t;
-    u.uTime.value = this.reduced ? 0 : time - this.startTime;
-    u.uVelocity.value = this.reduced ? 0 : velocity.value;
-    u.uCharge.value = this.charge.charge;
-    u.uPulse.value = this.charge.pulse;
-    u.uOpacity.value = opacity * this.profile.alpha;
-    u.uSize.value = POINT_SIZE * this.profile.pointScale;
-    if (this.pointer) {
-      u.uPointer.value.copy(this.pointer.world);
-      // repulsão forte no globo, quase nada nas outras formas
-      u.uPointerStrength.value = this.pointer.active * (0.15 + 0.85 * (weights[this.coreIndex] ?? 0));
-    }
-
-    this.renderer.render(this.scene, this.camera);
+    this.world.update(elapsed, delta, this.reduced || !this.status.ready);
+    this.output.render(this.world.post, delta);
     if (this.shaderError) {
       this.loop.setEnabled(false);
       this.status.fail('shader-error');
@@ -166,16 +125,16 @@ export class ExperienceStage implements QualityTarget {
     this.status.markReady();
   };
 
+  private readonly onEffects = (level: EffectsLevel): void => {
+    this.world.setEffects(level);
+    this.loop.invalidate();
+  };
+
   private readonly applySize = (width: number, height: number): void => {
     this.size = { width, height };
     const dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
-    this.renderer.setPixelRatio(dpr);
-    this.renderer.setSize(width, height, false);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    const halfHeight = CAMERA_Z * Math.tan((FOV * Math.PI) / 360);
-    this.layout.resize(halfHeight * this.camera.aspect, halfHeight);
-    this.field.uniforms.uPixelRatio.value = dpr;
+    this.output.setSize(width, height, dpr);
+    this.world.resize(width, height, dpr);
     this.loop.invalidate();
   };
 

@@ -1,7 +1,7 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import SectionHeading from '@presentation/components/ui/SectionHeading.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
+import SectionHeader from './shared/SectionHeader.astro';
 import QuestLog from './npc/QuestLog.astro';
 import NpcTerminal from './npc/NpcTerminal.astro';
 import './sections.css';
@@ -16,14 +16,15 @@ const { data: _data } = Astro.props;
 
 <section
   id="npcs"
-  class="section section--split npcs"
+  class="section section--split npcs tone-violet"
   data-scene="enigma"
   data-checkpoint="NPCs"
   aria-labelledby="npcs-title"
 >
+  <span class="npcs__haze" aria-hidden="true"></span>
   <div class="container">
-    <div class="section-split__content section-stack">
-      <SectionHeading
+    <div class="section-split__content section-stack npcs__content">
+      <SectionHeader
         id="npcs-title"
         code="02"
         eyebrow="NPCs"
@@ -31,11 +32,11 @@ const { data: _data } = Astro.props;
         lead="Espalhados pela corrida, eles guardam as pistas do desafio. Ache, converse, decifre. Onde eles estão? Isso também é uma pista."
       />
 
-      <QuestLog />
-
       <div data-reveal="up">
         <NpcTerminal />
       </div>
+
+      <QuestLog />
 
       <p class="section-note section-note--time" data-reveal="up">
         <Icon name="shield" />
@@ -51,5 +52,23 @@ const { data: _data } = Astro.props;
 <style>
   .npcs {
     min-height: 100svh;
+    overflow: clip;
+  }
+
+  .npcs__content {
+    gap: clamp(2.5rem, 1.5rem + 2.5vw, 4rem);
+  }
+
+  /* névoa violeta atrás do texto: amarra a seção à cor do enigma */
+  .npcs__haze {
+    position: absolute;
+    top: 10%;
+    left: -10%;
+    z-index: -1;
+    width: 60vw;
+    height: 70%;
+    background: radial-gradient(closest-side, rgb(148 27 255 / 0.18), transparent);
+    filter: blur(20px);
+    pointer-events: none;
   }
 </style>

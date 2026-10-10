@@ -98,20 +98,20 @@ export function coherentOrder(data: Float32Array, permutation: Uint32Array): Flo
   }
   const sx = 1023 / (maxX - minX || 1);
   const sy = 1023 / (maxY - minY || 1);
-  const codes = new Float64Array(count);
-  const ranks = new Uint32Array(count);
+  // chave = código × M + índice: o sort numérico nativo do Float64Array (sem comparador) é bem mais rápido
+  const slots = 2 ** Math.ceil(Math.log2(count + 1));
+  const keys = new Float64Array(count);
   for (let i = 0; i < count; i++) {
     const gx = Math.round(((data[i * 3] ?? 0) - minX) * sx);
     // y cresce pra cima no 3D: inverte pra ordem de leitura (cima → baixo)
     const gy = Math.round((maxY - (data[i * 3 + 1] ?? 0)) * sy);
-    codes[i] = spread10(gx) | (spread10(gy) << 1);
-    ranks[i] = i;
+    keys[i] = ((spread10(gx) | (spread10(gy) << 1)) >>> 0) * slots + i;
   }
-  ranks.sort((a, b) => (codes[a] ?? 0) - (codes[b] ?? 0));
+  keys.sort();
 
   const out = new Float32Array(data.length);
   for (let k = 0; k < count; k++) {
-    const src = (ranks[permutation[k] ?? k] ?? k) * 3;
+    const src = ((keys[permutation[k] ?? k] ?? k) % slots) * 3;
     out[k * 3] = data[src] ?? 0;
     out[k * 3 + 1] = data[src + 1] ?? 0;
     out[k * 3 + 2] = data[src + 2] ?? 0;

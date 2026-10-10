@@ -1,0 +1,110 @@
+---
+import { Image } from 'astro:assets';
+import type { VenueDTO } from '@application/index';
+import Icon from '@presentation/components/ui/Icon.astro';
+import capimLogo from '../../../assets/brand/capim-dourado-white.png';
+
+// cartão do local da final: logo oficial (branca) + nome + mapa
+interface Props {
+  venue: VenueDTO;
+}
+
+const { venue } = Astro.props;
+---
+
+<div class="venue sx-glass sx-corners" data-reveal="up">
+  <Image
+    class="venue__logo"
+    src={capimLogo}
+    alt=""
+    widths={[240, 480]}
+    sizes="(min-width: 640px) 13rem, 10rem"
+    loading="lazy"
+  />
+  <span class="venue__divider" aria-hidden="true"></span>
+  <div class="venue__info">
+    <p class="sx-hud">
+      <Icon name="map-pin" size={14} />
+      Local da final
+    </p>
+    <p class="venue__name">{venue.name}</p>
+    {venue.mapUrl && (
+      <a class="venue__map" href={venue.mapUrl} target="_blank" rel="noopener noreferrer">
+        Ver no mapa
+        <Icon name="external" size={16} />
+        <span class="sr-only"> (abre em nova aba)</span>
+      </a>
+    )}
+  </div>
+</div>
+
+<style>
+  .venue {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+    padding: var(--space-5);
+    box-shadow:
+      0 0 70px -20px rgb(255 133 47 / 0.45),
+      0 30px 60px -36px rgb(0 0 0 / 0.9);
+  }
+
+  .venue__logo {
+    width: clamp(8.5rem, 7rem + 5vw, 12rem);
+    height: auto;
+    filter: drop-shadow(0 0 18px rgb(255 194 74 / 0.45));
+  }
+
+  .venue__divider {
+    display: none;
+  }
+
+  .venue__info {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .venue__info .sx-hud {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .venue__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+
+  .venue__map {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    justify-self: start;
+    min-height: 44px;
+    color: var(--sx-ink);
+    font-weight: 600;
+    text-decoration-color: rgb(255 194 74 / 0.5);
+  }
+
+  .venue__map:hover {
+    color: var(--text);
+  }
+
+  @media (min-width: 640px) {
+    .venue {
+      grid-template-columns: auto auto 1fr;
+      gap: var(--space-6);
+      padding: var(--space-5) var(--space-6);
+    }
+
+    .venue__divider {
+      display: block;
+      width: 1px;
+      height: 4.5rem;
+      background: linear-gradient(180deg, transparent, rgb(255 194 74 / 0.5), transparent);
+    }
+  }
+</style>

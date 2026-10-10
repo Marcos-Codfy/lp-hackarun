@@ -1,8 +1,12 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
+import ButtonChevrons from './ButtonChevrons.astro';
+// css global (prefixo .btn): quem usa consegue ajustar sem brigar com o escopo do Astro
+import './button/button.css';
+import './button/button-variants.css';
 
-type Variant = 'primary' | 'ghost' | 'time';
-type Size = 'md' | 'lg';
+type Variant = 'primary' | 'ghost' | 'time' | 'mystic';
+type Size = 'sm' | 'md' | 'lg';
 
 type Props = Omit<HTMLAttributes<'a'>, 'type'> & {
   href?: string;
@@ -12,132 +16,50 @@ type Props = Omit<HTMLAttributes<'a'>, 'type'> & {
   size?: Size;
   // CTA de inscrição: o front intercepta e leva até o formulário
   registrationCta?: string;
+  // ">>" do manual; o slot "icon" tem prioridade. Padrão: só nos botões cheios
+  chevrons?: boolean;
 };
 
 const {
   href,
   type = 'button',
+  disabled = false,
   variant = 'primary',
   size = 'md',
   registrationCta,
+  chevrons = variant !== 'ghost',
   class: className,
   ...rest
 } = Astro.props;
 const Tag = href ? 'a' : 'button';
-const classes = ['btn', `btn--${variant}`, `btn--${size}`, className];
 const hasIcon = Astro.slots.has('icon');
+// <a> não tem disabled de verdade: vira aria-disabled
+const disabledAttrs: Record<string, string | boolean> = !disabled
+  ? {}
+  : href
+    ? { 'aria-disabled': 'true' }
+    : { disabled: true };
 ---
 
 <Tag
-  class:list={classes}
+  class:list={['btn', `btn--${variant}`, `btn--${size}`, className]}
   href={href}
   type={href ? undefined : type}
   data-registration-cta={registrationCta}
+  {...disabledAttrs}
   {...rest}
 >
+  <span class="btn__shell" aria-hidden="true">
+    <span class="btn__sheen"></span>
+  </span>
   <span class="btn__label">
     <slot />
   </span>
-  {hasIcon && (
+  {hasIcon ? (
     <span class="btn__icon" aria-hidden="true">
       <slot name="icon" />
     </span>
+  ) : (
+    chevrons && <ButtonChevrons />
   )}
-  <span class="btn__shine" aria-hidden="true"></span>
 </Tag>
-
-<style>
-  .btn {
-    --btn-bg: var(--grad-energy);
-    --btn-fg: var(--c-deep);
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-height: 48px;
-    padding: 0 var(--space-5);
-    overflow: hidden;
-    clip-path: var(--clip-btn);
-    background: var(--btn-bg);
-    color: var(--btn-fg);
-    font-family: var(--font-display);
-    font-size: var(--fs-lg);
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    line-height: 1;
-    text-transform: uppercase;
-    text-decoration: none;
-    white-space: nowrap;
-    transition:
-      transform var(--dur) var(--ease-out),
-      filter var(--dur) var(--ease-out);
-  }
-
-  .btn--lg {
-    min-height: 58px;
-    padding: 0 var(--space-6);
-    font-size: var(--fs-xl);
-  }
-
-  .btn--ghost {
-    --btn-bg: rgb(0 207 255 / 0.08);
-    --btn-fg: var(--c-white);
-    box-shadow: inset 0 0 0 1px var(--line-strong);
-  }
-
-  .btn--time {
-    --btn-bg: var(--c-amber);
-    --btn-fg: var(--c-deep);
-  }
-
-  .btn__label,
-  .btn__icon {
-    position: relative;
-    z-index: 1;
-  }
-
-  .btn__icon {
-    display: inline-flex;
-    transition: transform var(--dur) var(--ease-out);
-  }
-
-  .btn:hover .btn__icon {
-    transform: translateX(3px);
-  }
-
-  /* reflexo que atravessa o botão no hover */
-  .btn__shine {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
-    transform: translateX(-120%);
-    transition: transform var(--dur-slow) var(--ease-out);
-  }
-
-  .btn:hover {
-    filter: brightness(1.08) drop-shadow(0 0 18px rgb(0 207 255 / 0.45));
-  }
-
-  .btn:hover .btn__shine {
-    transform: translateX(120%);
-  }
-
-  .btn:active {
-    transform: scale(0.98);
-  }
-
-  /* clip-path corta o outline: o foco vira um anel âmbar por dentro do corte */
-  .btn:focus-visible {
-    outline: none;
-    box-shadow:
-      inset 0 0 0 2px var(--focus),
-      inset 0 0 0 4px var(--c-deep);
-  }
-
-  .btn[aria-disabled='true'],
-  .btn:disabled {
-    cursor: not-allowed;
-    filter: grayscale(0.6) brightness(0.8);
-  }
-</style>

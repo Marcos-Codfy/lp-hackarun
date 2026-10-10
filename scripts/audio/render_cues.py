@@ -74,10 +74,10 @@ def flash_low() -> np.ndarray:
     zap_f = sweep(t, 4200, 180, hit, 0.22)
     phase = 2 * np.pi * np.cumsum(zap_f * (1 + 0.35 * np.sin(2 * np.pi * 63 * t))) / SR
     zap = np.sign(np.sin(phase)) * 0.35 + np.sin(phase) * 0.5
-    zap = biquad(zap, np.full(t.size, 900.0), 0.7, "hp") * env(t, hit, 0.002, 0.075) * 0.55
+    zap = biquad(zap, np.full(t.size, 900.0), 0.7, "hp") * env(t, hit, 0.002, 0.075) * 0.45
 
     # 3) estalo do flash: ruído agudo bem curto
-    crack = biquad(noise, np.full(t.size, 2500.0), 0.8, "hp") * env(t, hit, 0.001, 0.035) * 1.1
+    crack = biquad(noise, np.full(t.size, 2500.0), 0.8, "hp") * env(t, hit, 0.001, 0.03) * 0.55
 
     # 4) faíscas espalhadas que vão rareando
     sparks = np.zeros(t.size)
@@ -89,13 +89,14 @@ def flash_low() -> np.ndarray:
         n = int(SR * rng.uniform(0.002, 0.008))
         burst = rng.standard_normal(n) * np.exp(-np.linspace(0, 6, n)) * rng.uniform(0.12, 0.4)
         sparks[i : i + n] += burst[: max(0, sparks.size - i)]
-    sparks = biquad(sparks, np.full(t.size, 3800.0), 1.2, "bp") * 1.6
+    sparks = biquad(sparks, np.full(t.size, 3800.0), 1.2, "bp") * 0.9
 
     # 5) grave: seno com queda de pitch e saturação leve (o "low")
     boom_f = sweep(t, 96, 36, hit, 0.35)
     boom_phase = 2 * np.pi * np.cumsum(boom_f) / SR
-    boom = np.sin(boom_phase) + 0.25 * np.sin(2 * boom_phase)
-    boom = np.tanh(boom * 1.8) * env(t, hit, 0.006, 0.32) * 0.95
+    # 2º e 3º harmônicos: o grave aparece até em caixinha de notebook/celular
+    boom = np.sin(boom_phase) + 0.35 * np.sin(2 * boom_phase) + 0.15 * np.sin(3 * boom_phase)
+    boom = np.tanh(boom * 2.2) * env(t, hit, 0.006, 0.36) * 2.4
 
     mix = air + zap + crack + sparks + boom
     mix = reverb(mix, 0.9, 0.22)

@@ -1,7 +1,7 @@
 ---
 import type { SpeakerDTO } from '@application/index';
 
-// convidado já revelado; o bloqueado usa o LockedCard
+// convidado já revelado; o bloqueado usa o LockedMentorCard
 interface Props {
   speaker: SpeakerDTO;
   role: string;
@@ -17,17 +17,17 @@ const initials = name
   .join('');
 ---
 
-<li class="crew-card">
+<li class="crew-card sx-glass sx-glass--solid sx-corners sx-hover">
   <div class="crew-card__portrait">
     {speaker.avatarUrl ? (
-      <img src={speaker.avatarUrl} alt="" width="320" height="320" loading="lazy" decoding="async" />
+      <img src={speaker.avatarUrl} alt="" width="320" height="400" loading="lazy" decoding="async" />
     ) : (
-      <span class="crew-card__initials" aria-hidden="true">
+      <span class="crew-card__initials sx-grad-text" aria-hidden="true">
         {initials}
       </span>
     )}
   </div>
-  <p class="hud-label crew-card__role">{role}</p>
+  <p class="sx-hud crew-card__role">{role}</p>
   <h3 class="crew-card__name">{name}</h3>
   <p class="crew-card__headline">{speaker.headline}</p>
   {speaker.topic && <p class="crew-card__topic">{speaker.topic}</p>}
@@ -36,21 +36,19 @@ const initials = name
 <style>
   .crew-card {
     display: grid;
+    align-content: start;
     gap: var(--space-2);
-    padding: var(--space-4);
-    clip-path: var(--clip-card);
-    background: linear-gradient(170deg, rgb(13 52 110 / 0.75), rgb(4 11 24 / 0.88));
-    box-shadow: inset 0 0 0 1px var(--line-strong);
+    padding: var(--space-3) var(--space-3) var(--space-4);
   }
 
   .crew-card__portrait {
     display: grid;
     place-items: center;
-    aspect-ratio: 1;
-    margin-bottom: var(--space-2);
+    aspect-ratio: 4 / 5;
+    margin-bottom: var(--space-3);
     overflow: hidden;
-    clip-path: var(--clip-btn);
-    background: radial-gradient(circle at 50% 35%, rgb(0 207 255 / 0.3), rgb(4 11 24 / 0.9) 70%);
+    border-radius: 2px;
+    background: radial-gradient(circle at 50% 35%, rgb(148 27 255 / 0.4), rgb(4 3 16 / 0.95) 75%);
   }
 
   .crew-card__portrait img {
@@ -66,7 +64,8 @@ const initials = name
   }
 
   .crew-card__name {
-    font-size: var(--fs-xl);
+    font-size: var(--fs-base);
+    letter-spacing: 0.04em;
   }
 
   .crew-card__headline,
@@ -76,6 +75,6 @@ const initials = name
   }
 
   .crew-card__topic {
-    color: var(--c-cyan-soft);
+    color: var(--sx-ink);
   }
 </style>

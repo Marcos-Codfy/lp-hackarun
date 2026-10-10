@@ -1,4 +1,4 @@
-/* lobby de inscrição: global de propósito, tudo com prefixo .regform */
+/* lobby de inscrição: global de propósito, tudo com prefixo .regform (as linhas de integrante são clonadas em runtime) */
 .regform {
   position: relative;
   isolation: isolate;
@@ -13,41 +13,70 @@
 .regform::before {
   content: '';
   position: absolute;
-  inset: 8% 4%;
+  inset: 4% 0;
   z-index: -1;
-  background: radial-gradient(closest-side, rgb(0 207 255 / 0.35), transparent);
-  filter: blur(40px);
+  background: radial-gradient(closest-side, rgb(0 229 255 / 0.3), rgb(148 27 255 / 0.12) 60%, transparent);
+  filter: blur(50px);
   opacity: 0;
   transition: opacity 1.2s var(--ease-out);
   pointer-events: none;
 }
 
-/* sem vidro próprio: a moldura (HudFrame do LobbyPanel) é de quem hospeda */
+/* sem vidro próprio: a moldura (LobbyPanel) é de quem hospeda */
 .regform__panel {
   display: grid;
   gap: var(--space-6);
 }
 
+/* barra de status do esquadrão, estilo lobby de jogo */
 .regform__squad {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--surface-line);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid rgb(0 229 255 / 0.2);
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgb(0 229 255 / 0.1), rgb(4 6 22 / 0.4));
+  color: #8ff3ff;
   font-family: var(--font-mono);
   font-size: var(--fs-hud);
   letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
-  color: var(--accent);
+}
+
+.regform__squad-live {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.regform__squad-live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--c-success);
+  box-shadow: 0 0 10px var(--c-success);
+}
+
+@media (max-width: 479px) {
+  .regform__squad-extra {
+    display: none;
+  }
+}
+
+.regform__squad [data-reg-squad] {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .regform__noscript {
-  color: var(--time);
+  color: var(--c-orange);
 }
 
 .regform__fields {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-7);
   min-width: 0;
   padding: 0;
   border: 0;
@@ -64,40 +93,42 @@
 .regform__legend {
   margin-bottom: var(--space-4);
   font-family: var(--font-display);
-  font-size: var(--fs-xl);
+  font-size: var(--fs-lg);
   font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .regform__grid {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5) var(--space-4);
 }
 
-.regform__summary {
+.regform__actions {
   display: grid;
+  justify-items: stretch;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.regform__privacy {
+  display: flex;
+  align-items: center;
   gap: var(--space-2);
-  padding: var(--space-4);
-  border-left: 3px solid var(--c-danger);
-  background: rgb(255 92 122 / 0.08);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
 }
 
-.regform__summary:focus {
-  outline: none;
-}
-
-.regform__summary-title {
-  font-weight: 700;
-}
-
-.regform__summary-list {
-  display: grid;
-  gap: var(--space-1);
-  padding-left: 1.1rem;
-}
-
-.regform__summary-list a {
-  color: var(--text);
+.regform__privacy::before {
+  content: '';
+  width: 10px;
+  height: 12px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpath d='M5 0 10 2v4c0 3-2.2 5.4-5 6-2.8-.6-5-3-5-6V2z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpath d='M5 0 10 2v4c0 3-2.2 5.4-5 6-2.8-.6-5-3-5-6V2z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
 }
 
 /* honeypot: fora da tela, não display:none (alguns robôs pulam campos escondidos) */
@@ -109,93 +140,17 @@
   overflow: hidden;
 }
 
-.regform__failure {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: start;
-  padding: var(--space-4);
-  border-left: 3px solid var(--time);
-  background: rgb(255 181 71 / 0.08);
-}
-
-.regform__retry {
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  clip-path: var(--clip-btn);
-  background: var(--c-amber);
-  color: var(--c-deep);
-  font-weight: 700;
-}
-
-.regform__retry:focus-visible {
-  outline-offset: -4px;
-  outline-color: var(--c-deep);
-}
-
-.regform__actions {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-3);
-}
-
-.regform__privacy {
-  color: var(--text-dim);
-  font-size: var(--fs-xs);
-}
-
-/* botão enviando: spinner no lugar do brilho */
-.regform.is-submitting [data-reg-submit] {
-  cursor: progress;
-}
-
-.regform.is-submitting [data-reg-submit] .btn__label::after {
-  content: '';
-  display: inline-block;
-  width: 0.8em;
-  height: 0.8em;
-  margin-left: 0.5em;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  vertical-align: -0.05em;
-  animation: regform-spin 0.8s linear infinite;
-}
-
-/* "em breve": prévia apagada do formulário */
-.regform[data-status='soon'] .regform__form {
-  opacity: 0.4;
-  filter: grayscale(0.5);
-  user-select: none;
-}
-
-/* pico-fim: o globo carrega e o lobby acende */
-.is-awaiting-charge .regform:not(:focus-within) {
-  opacity: 0.55;
-  transform: translateY(12px);
-}
-
-.is-charged .regform::before {
-  opacity: 0.55;
-}
-
-@keyframes regform-spin {
-  to {
-    transform: rotate(360deg);
+@media (min-width: 40rem) {
+  .regform__actions {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    justify-items: start;
+    gap: var(--space-5);
   }
 }
 
 @media (min-width: 48rem) {
   .regform__grid {
     grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .regform.is-submitting [data-reg-submit] .btn__label::after {
-    animation-duration: 2.4s;
-  }
-
-  .is-awaiting-charge .regform:not(:focus-within) {
-    transform: none;
   }
 }

@@ -1,0 +1,121 @@
+---
+// duas fitas de transmissão cruzadas (estilo e-sports) na virada hero -> sobre; decorativas
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+const loop = [...items, ...items];
+---
+
+<div class="tapes" aria-hidden="true">
+  <div class="tape tape--back">
+    <div class="tape__track tape__track--reverse">
+      {loop.map((item) => (
+        <span class="tape__item">
+          {item}
+          <span class="tape__sep">//</span>
+        </span>
+      ))}
+    </div>
+  </div>
+  <div class="tape tape--front">
+    <div class="tape__track">
+      {loop.map((item) => (
+        <span class="tape__item">
+          {item}
+          <span class="tape__sep">&raquo;</span>
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .tapes {
+    position: relative;
+    height: clamp(6.5rem, 5rem + 5vw, 9rem);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .tape {
+    position: absolute;
+    left: -5%;
+    width: 110%;
+    top: 50%;
+    overflow: hidden;
+    padding-block: 0.7rem;
+  }
+
+  .tape--front {
+    background: var(--grad-energy);
+    box-shadow:
+      0 0 40px rgb(18 100 255 / 0.45),
+      0 0 90px rgb(148 27 255 / 0.25);
+    transform: translateY(-50%) rotate(-2.4deg);
+  }
+
+  .tape--back {
+    background: rgb(6 8 28 / 0.86);
+    border-block: 1px solid rgb(0 229 255 / 0.28);
+    transform: translateY(-50%) rotate(1.8deg);
+  }
+
+  .tape__track {
+    display: flex;
+    width: max-content;
+    animation: tape-run 46s linear infinite;
+  }
+
+  .tape__track--reverse {
+    animation-direction: reverse;
+    animation-duration: 60s;
+  }
+
+  .tape__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding-right: 1.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.35rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tape--front .tape__item {
+    color: var(--c-void);
+  }
+
+  .tape--back .tape__item {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(143 243 255 / 0.55);
+  }
+
+  .tape__sep {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    opacity: 0.6;
+  }
+
+  .tape--back .tape__sep {
+    color: var(--c-cyan);
+    -webkit-text-stroke: 0;
+  }
+
+  @keyframes tape-run {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tape__track {
+      animation: none;
+    }
+  }
+</style>

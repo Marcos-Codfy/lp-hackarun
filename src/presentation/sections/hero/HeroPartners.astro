@@ -1,5 +1,9 @@
 ---
-// linha de autoridade: quem realiza e quem é parceiro
+import { Image } from 'astro:assets';
+import organizerLogo from '../../../assets/brand/unicatolica-white.png';
+import partnerLogo from '../../../assets/brand/capim-dourado-white.png';
+
+// autoridade discreta: logos oficiais brancos a ~60% de opacidade, acendem no hover
 interface Props {
   organizer: string;
   partner: string;
@@ -8,36 +12,88 @@ interface Props {
 const { organizer, partner } = Astro.props;
 ---
 
-<p class="hero-partners">
-  <span>
-    <span class="hud-label">Realização</span> {organizer}
-  </span>{' '}
-  <span class="hero-partners__sep" aria-hidden="true"></span>
-  <span class="sr-only">·</span>{' '}
-  <span>
-    <span class="hud-label">Parceria</span> {partner}
-  </span>
-</p>
+<ul class="hero-partners" role="list">
+  <li class="hero-partners__item">
+    <span class="hero-partners__role">
+      Realização<span class="sr-only">:</span>
+    </span>
+    <Image
+      src={organizerLogo}
+      alt={organizer}
+      width={52}
+      densities={[1, 2]}
+      class="hero-partners__logo hero-partners__logo--organizer"
+    />
+  </li>
+  <li class="hero-partners__item">
+    <span class="hero-partners__role">
+      Parceria<span class="sr-only">:</span>
+    </span>
+    <Image
+      src={partnerLogo}
+      alt={partner}
+      width={76}
+      densities={[1, 2]}
+      class="hero-partners__logo hero-partners__logo--partner"
+    />
+  </li>
+</ul>
 
 <style>
   .hero-partners {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
-    gap: var(--space-2) var(--space-4);
+    gap: var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+
+  .hero-partners__item {
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+    opacity: 0.62;
+    transition: opacity var(--dur) var(--ease-out);
+  }
+
+  .hero-partners__item:hover {
+    opacity: 0.95;
+  }
+
+  /* fio vertical entre os dois */
+  .hero-partners__item + .hero-partners__item {
+    padding-left: var(--space-5);
+    border-left: 1px solid rgb(150 175 255 / 0.22);
+  }
+
+  .hero-partners__role {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    line-height: 1.2;
+    text-transform: uppercase;
     color: var(--text-muted);
-    font-size: var(--fs-sm);
   }
 
-  .hero-partners .hud-label {
-    margin-right: var(--space-2);
-    color: var(--text-dim);
+  .hero-partners :global(.hero-partners__logo) {
+    width: auto;
+    height: 2.25rem;
   }
 
-  .hero-partners__sep {
-    width: 1px;
-    height: 1rem;
-    background: var(--surface-line);
+  .hero-partners :global(.hero-partners__logo--partner) {
+    height: 1.9rem;
+    margin-block: 0.175rem;
+  }
+
+  @media (min-width: 1440px) {
+    .hero-partners :global(.hero-partners__logo) {
+      height: 2.6rem;
+    }
+
+    .hero-partners :global(.hero-partners__logo--partner) {
+      height: 2.2rem;
+      margin-block: 0.2rem;
+    }
   }
 </style>

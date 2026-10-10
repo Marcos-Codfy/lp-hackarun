@@ -25,6 +25,10 @@
   .consent {
     display: grid;
     gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid rgb(140 160 255 / 0.14);
+    border-radius: 3px;
+    background: rgb(4 6 22 / 0.5);
   }
 
   .consent__label {
@@ -32,17 +36,18 @@
     display: grid;
     grid-template-columns: 24px 1fr;
     align-items: start;
-    gap: var(--space-3);
+    gap: var(--space-4);
     min-height: 44px;
-    padding-block: var(--space-2);
+    padding-block: var(--space-1);
     cursor: pointer;
-    font-size: var(--fs-sm);
     color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
   }
 
   .consent__input {
     position: absolute;
-    top: var(--space-2);
+    top: var(--space-1);
     left: 0;
     width: 24px;
     height: 24px;
@@ -54,29 +59,39 @@
   .consent__box {
     width: 24px;
     height: 24px;
-    box-shadow: inset 0 0 0 1.5px var(--line-strong);
-    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
-    background: var(--surface-strong);
+    border: 1.5px solid rgb(0 229 255 / 0.6);
+    border-radius: 3px;
+    background: rgb(6 9 30 / 0.9);
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
   }
 
   .consent__input:checked + .consent__box {
+    border-color: var(--c-cyan);
     background:
       no-repeat center / 14px
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.5 3.2 3L13 4.5' fill='none' stroke='%2307152c' stroke-width='2.2'/%3E%3C/svg%3E"),
-      var(--accent);
-    box-shadow: none;
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.5 3.2 3L13 4.5' fill='none' stroke='%2302030b' stroke-width='2.4'/%3E%3C/svg%3E"),
+      var(--grad-blue);
+    box-shadow: 0 0 18px rgb(0 229 255 / 0.5);
+  }
+
+  .consent__label:hover .consent__box {
+    box-shadow: 0 0 14px rgb(0 229 255 / 0.3);
   }
 
   .consent__input:focus-visible + .consent__box {
-    box-shadow: inset 0 0 0 2px var(--focus);
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
   }
 
   .consent__input[aria-invalid='true'] + .consent__box {
-    box-shadow: inset 0 0 0 2px var(--c-danger);
+    border-color: var(--c-danger);
+    box-shadow: 0 0 16px rgb(255 77 141 / 0.35);
   }
 
   .consent__error {
-    color: var(--c-danger);
+    color: #ff8ab3;
     font-size: var(--fs-xs);
     font-weight: 600;
   }

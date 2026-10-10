@@ -1,79 +1,90 @@
 import type { ShapeStrategy } from './ShapeStrategy';
-import { PointWriter, TAU, gaussian, split, type Random } from './sampling';
+import { PLANE_XZ, at } from './PointBrush';
+import { PolylinePath } from './PolylinePath';
+import { TROPHY_EDGES, sampleProfile, trophyProfile } from './TrophyProfile';
+import { TAU, type Random, type Vec3 } from './sampling';
+import { arc, blob, polyline, trail, type Stroke, paint } from './strokes';
 
-// perfil de torno (raio, altura): base, pé, nó da haste, taça abrindo até a borda
-const PROFILE: readonly (readonly [number, number])[] = [
-  [0, -1.3],
-  [0.62, -1.3],
-  [0.62, -1.13],
-  [0.48, -1.07],
-  [0.36, -0.97],
-  [0.16, -0.87],
-  [0.12, -0.55],
-  [0.2, -0.43],
-  [0.12, -0.31],
-  [0.12, -0.17],
-  [0.22, -0.07],
-  [0.5, 0.13],
-  [0.72, 0.45],
-  [0.82, 0.8],
-  [0.86, 1.2],
-  [0.9, 1.3],
-];
-const RIM = PROFILE[PROFILE.length - 1] ?? [0.9, 1.3];
+const MERIDIANS = 20;
+const STAR_Y = 1.5;
+const STAR_OUTER = 0.21;
+const STAR_INNER = 0.088;
 
-// troféu: superfície de revolução amostrada por área + borda acesa + duas alças
+// taça de torno em linhas finas: anéis de latitude, meridianos, arestas acesas, alças em tubo e estrela no topo
 export class TrophyShape implements ShapeStrategy {
   readonly key = 'trophy';
 
   generate(count: number, random: Random): Float32Array {
-    const w = new PointWriter(count);
-    const [surface = 0, rim = 0, handles = 0] = split(count, [0.8, 0.07, 0.13]);
-    const weights = segmentWeights();
-    const total = weights[weights.length - 1] ?? 1;
-
-    for (let i = 0; i < surface; i++) {
-      const s = pickSegment(weights, random() * total);
-      const [r0, y0] = PROFILE[s] ?? RIM;
-      const [r1, y1] = PROFILE[s + 1] ?? RIM;
-      const t = random();
-      const r = r0 + (r1 - r0) * t;
-      const angle = random() * TAU;
-      w.push(Math.cos(angle) * r, y0 + (y1 - y0) * t, Math.sin(angle) * r);
-    }
-    for (let i = 0; i < rim; i++) {
-      const angle = random() * TAU;
-      w.push(Math.cos(angle) * RIM[0], RIM[1] + gaussian(random) * 0.008, Math.sin(angle) * RIM[0]);
-    }
-    for (let i = 0; i < handles; i++) {
-      // meia-volta pra fora, presa na parede da taça
-      const side = i % 2 === 0 ? 1 : -1;
-      const a = (random() - 0.5) * Math.PI;
-      const tube = 0.04;
-      w.push(
-        side * (0.84 + Math.cos(a) * 0.4) + gaussian(random) * tube,
-        0.7 + Math.sin(a) * 0.4 + gaussian(random) * tube,
-        gaussian(random) * tube,
-      );
-    }
-    return w.finish();
+    return paint([...cup(), ...handles(), ...star()], count, random);
   }
 }
 
-// área de cada faixa ~ comprimento × raio médio (acumulada pra busca)
-function segmentWeights(): Float32Array {
-  const acc = new Float32Array(PROFILE.length - 1);
-  let sum = 0;
-  for (let i = 0; i < acc.length; i++) {
-    const [r0, y0] = PROFILE[i] ?? RIM;
-    const [r1, y1] = PROFILE[i + 1] ?? RIM;
-    sum += Math.hypot(r1 - r0, y1 - y0) * ((r0 + r1) / 2 + 0.04);
-    acc[i] = sum;
+function cup(): Stroke[] {
+  const ring = (r: number, y: number, density: number): Stroke =>
+    arc(at(0, y, 0), r, density, { plane: PLANE_XZ });
+  const strokes: Stroke[] = sampleProfile(0.075)
+    .filter((p) => p.r > 0.02)
+    .map((p) => ring(p.r, p.y, 300));
+  const profile = trophyProfile();
+  TROPHY_EDGES.forEach((i) => {
+    const p = profile[i];
+    if (p) strokes.push(ring(p.r, p.y, i >= 19 ? 1500 : 900));
+  });
+  // borda virada: dois anéis colados por fora
+  strokes.push(ring(1.02, 0.955, 900), ring(0.985, 0.97, 500));
+  for (let j = 0; j < MERIDIANS; j++) {
+    const a = (j * TAU) / MERIDIANS;
+    const line = profile.filter((p) => p.r > 0).map((p) => at(Math.cos(a) * p.r, p.y, Math.sin(a) * p.r));
+    strokes.push(...polyline(line, 210));
   }
-  return acc;
+  return strokes;
 }
 
-function pickSegment(acc: Float32Array, value: number): number {
-  for (let i = 0; i < acc.length; i++) if (value <= (acc[i] ?? 0)) return i;
-  return acc.length - 1;
+// alça "orelha": bézier presa no bojo, tubo de 4 fios em volta da linha de centro
+function handles(): Stroke[] {
+  return [1, -1].flatMap((side) => {
+    const center: Vec3[] = [];
+    const p0 = { x: 0.85, y: 0.62 };
+    const p1 = { x: 1.42, y: 0.78 };
+    const p2 = { x: 1.34, y: -0.08 };
+    const p3 = { x: 0.7, y: -0.1 };
+    for (let i = 0; i <= 48; i++) {
+      const t = i / 48;
+      const s = 1 - t;
+      const x = s * s * s * p0.x + 3 * s * s * t * p1.x + 3 * s * t * t * p2.x + t * t * t * p3.x;
+      const y = s * s * s * p0.y + 3 * s * s * t * p1.y + 3 * s * t * t * p2.y + t * t * t * p3.y;
+      center.push(at(x * side, y, 0));
+    }
+    const lanes: readonly (readonly [number, number])[] = [
+      [0.03, 0],
+      [-0.03, 0],
+      [0, 0.03],
+      [0, -0.03],
+    ];
+    return lanes.map(([dn, dz]) => trail(new PolylinePath(offset(center, dn, dz)), 1000));
+  });
+}
+
+function offset(pts: readonly Vec3[], dn: number, dz: number): Vec3[] {
+  return pts.map((p, i) => {
+    const a = pts[Math.max(0, i - 1)] ?? p;
+    const b = pts[Math.min(pts.length - 1, i + 1)] ?? p;
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    return at(p.x - ((b.y - a.y) / len) * dn, p.y + ((b.x - a.x) / len) * dn, p.z + dz);
+  });
+}
+
+// estrela de 5 pontas de frente pra câmera (o shader não gira), com aro fino e miolo aceso
+function star(): Stroke[] {
+  const pts: Vec3[] = [];
+  for (let i = 0; i <= 10; i++) {
+    const a = Math.PI / 2 + (i * Math.PI) / 5;
+    const r = i % 2 === 0 ? STAR_OUTER : STAR_INNER;
+    pts.push(at(Math.cos(a) * r, STAR_Y + Math.sin(a) * r, 0));
+  }
+  return [
+    ...polyline(pts, 1500),
+    arc(at(0, STAR_Y, 0), 0.3, 500),
+    blob(160, (b, n) => b.cluster(at(0, STAR_Y, 0), 0.03, n)),
+  ];
 }

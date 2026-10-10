@@ -1,9 +1,10 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import Wordmark from '@presentation/components/ui/Wordmark.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
+import PartnersBand from '@presentation/components/partners/PartnersBand.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
-import { NAV_LINKS } from './navLinks';
+import FooterBrand from './footer/FooterBrand.astro';
+import FooterNav from './footer/FooterNav.astro';
 
 interface Props {
   data: LandingPageDTO;
@@ -11,69 +12,25 @@ interface Props {
 
 const { event, partners } = Astro.props.data;
 const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
-const organizer = partners.find((p) => p.role === 'organizer')?.name ?? 'Unicatólica';
-const partner = partners.find((p) => p.role === 'partner')?.name ?? 'Capim Dourado Shopping';
 const REPO_URL = 'https://github.com/Marcos-Codfy/lp-hackarun';
 ---
 
 <footer class="site-footer">
-  <div class="container site-footer__inner">
-    <div class="site-footer__brand">
-      <a
-        class="site-footer__wordmark"
-        href="#inicio"
-        data-nav-link
-        aria-label="HackaRun 2026, voltar ao início"
-      >
-        <Wordmark size="xl" />
-      </a>
-      <p class="hud-label site-footer__tagline">
-        {event.tagline} · {dates} · {event.city}
-      </p>
-    </div>
+  <PartnersBand partners={partners} />
 
-    <div class="site-footer__grid">
-      <div class="site-footer__credits">
-        <p>
-          <span class="hud-label">
-            Realização<span class="sr-only">:</span>
-          </span>{' '}
-          {organizer} · cursos de Engenharia de Software e Inteligência Artificial
-        </p>
-        <p>
-          <span class="hud-label">
-            Parceria<span class="sr-only">:</span>
-          </span>{' '}
-          {partner}
-        </p>
-      </div>
+  <div class="container site-footer__main">
+    <FooterBrand meta={`${dates} · ${event.city} · Hackathon de Engenharia de Software e IA`} />
+    <FooterNav repoUrl={REPO_URL} />
+  </div>
 
-      <nav aria-label="Rodapé">
-        <ul class="site-footer__nav" role="list">
-          {NAV_LINKS.map((link) => (
-            <li>
-              <a href={link.href} data-nav-link>
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <a class="site-footer__repo" href={REPO_URL} target="_blank" rel="noopener noreferrer">
-        <Icon name="code" />
-        Código aberto no GitHub
-        <span class="sr-only"> (abre em nova aba)</span>
-      </a>
-    </div>
-
-    <div class="site-footer__bottom">
-      <p>© 2026 HackaRun</p>
-      <a class="site-footer__top" href="#inicio" data-nav-link>
-        Voltar ao topo
-        <Icon name="arrow-up" size={18} />
-      </a>
-    </div>
+  <div class="container site-footer__bottom">
+    <p>© 2026 HackaRun · Unicatólica</p>
+    <a class="site-footer__top" href="#inicio" data-nav-link>
+      Voltar ao topo
+      <span class="site-footer__top-icon" aria-hidden="true">
+        <Icon name="arrow-up" size={16} />
+      </span>
+    </a>
   </div>
 </footer>
 
@@ -81,73 +38,25 @@ const REPO_URL = 'https://github.com/Marcos-Codfy/lp-hackarun';
   .site-footer {
     position: relative;
     z-index: var(--z-content);
-    padding-block: var(--space-9) var(--space-6);
-    border-top: 1px solid var(--surface-line);
-    background: linear-gradient(180deg, rgb(4 11 24 / 0.55), var(--bg-deep) 40%);
+    overflow: clip;
+    background: linear-gradient(180deg, transparent, rgb(2 3 11 / 0.92) 22%, var(--c-void) 60%);
   }
 
-  .site-footer__inner {
+  /* filete de energia no topo do rodapé */
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 10%;
+    left: 10%;
+    height: 1px;
+    background: var(--grad-line);
+  }
+
+  .site-footer__main {
     display: grid;
     gap: var(--space-8);
-  }
-
-  .site-footer__brand {
-    display: grid;
-    gap: var(--space-4);
-  }
-
-  .site-footer__wordmark {
-    justify-self: start;
-    text-decoration: none;
-  }
-
-  .site-footer__tagline {
-    color: var(--text-dim);
-  }
-
-  .site-footer__grid {
-    display: grid;
-    gap: var(--space-7);
-  }
-
-  .site-footer__credits {
-    display: grid;
-    gap: var(--space-4);
-    max-width: 30rem;
-    color: var(--text-muted);
-  }
-
-  .site-footer__credits .hud-label {
-    display: block;
-    margin-bottom: var(--space-1);
-  }
-
-  .site-footer__nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 var(--space-5);
-  }
-
-  .site-footer__nav a,
-  .site-footer__repo,
-  .site-footer__top {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    min-height: 44px;
-    color: var(--text);
-    text-decoration: none;
-  }
-
-  .site-footer__nav a:hover,
-  .site-footer__repo:hover,
-  .site-footer__top:hover {
-    color: var(--c-cyan);
-  }
-
-  .site-footer__repo {
-    align-self: start;
-    font-weight: 600;
+    padding-block: clamp(4rem, 3rem + 4vw, 6.5rem);
   }
 
   .site-footer__bottom {
@@ -156,24 +65,54 @@ const REPO_URL = 'https://github.com/Marcos-Codfy/lp-hackarun';
     align-items: center;
     justify-content: space-between;
     gap: var(--space-4);
-    padding-top: var(--space-5);
-    border-top: 1px solid var(--surface-line);
+    /* celular: sobra espaço pro HUD fixo de progresso que fica no rodapé da tela */
+    padding-block: var(--space-5) calc(var(--space-6) + 3.5rem);
+    border-top: 1px solid rgb(140 160 255 / 0.12);
     color: var(--text-dim);
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
   }
 
   .site-footer__top {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 44px;
+    color: var(--text);
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
+    text-decoration: none;
     text-transform: uppercase;
   }
 
+  .site-footer__top-icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid rgb(0 229 255 / 0.45);
+    border-radius: 3px;
+    color: var(--c-cyan);
+    transition:
+      translate var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .site-footer__top:hover .site-footer__top-icon {
+    translate: 0 -3px;
+    box-shadow: 0 0 20px rgb(0 229 255 / 0.45);
+  }
+
   @media (min-width: 1024px) {
-    .site-footer__grid {
-      grid-template-columns: 1.4fr 1fr auto;
+    .site-footer__bottom {
+      padding-bottom: var(--space-6);
+    }
+
+    .site-footer__main {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
       align-items: start;
+      gap: var(--space-9);
     }
   }
 </style>

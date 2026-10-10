@@ -37,7 +37,11 @@
         "History API",
         "Canvas 2D (amostragem de texto)",
         "<details>/<summary> nativos",
-        "iCalendar (.ics, RFC 5545)"
+        "iCalendar (.ics, RFC 5545)",
+        "Web Audio API (sprites e síntese)",
+        "Canvas 2D (raios procedurais)",
+        "CSS mix-blend-mode (screen)",
+        "backdrop-filter"
       ]
     },
     {
@@ -64,7 +68,10 @@
         "Conventional Commits",
         "Semantic Versioning",
         "EditorConfig",
-        "PDFKit (geração deste documento)"
+        "PDFKit (geração deste documento)",
+        "Playwright + Brave (QA visual por captura)",
+        "Python + NumPy + LAME (design sonoro sintetizado)",
+        "Pillow (tratamento de logos)"
       ]
     },
     {
@@ -116,7 +123,9 @@
         "Null Object",
         "Proxy (carregamento sob demanda)",
         "Repository",
-        "Result / Either"
+        "Result / Either",
+        "Builder",
+        "Composite"
       ]
     },
     {
@@ -153,7 +162,17 @@
         "Gamificação (easter egg NPC)",
         "Estética e-sports",
         "Glassmorphism",
-        "Qualidade adaptativa por dispositivo e FPS"
+        "Qualidade adaptativa por dispositivo e FPS",
+        "Post-processing (bloom, vinheta, grão, aberração cromática)",
+        "Câmera cinematográfica coreografada",
+        "Campo de estrelas e bokeh (profundidade)",
+        "Color grading por cena",
+        "Aurora animada em CSS",
+        "Raios procedurais (midpoint displacement)",
+        "Curva de Morton (correspondência entre formas)",
+        "Transição escalonada por partícula",
+        "Tipografia oficial: Orbitron + Montserrat",
+        "Paleta oficial do manual HackaRun 2026"
       ]
     },
     {

@@ -52,7 +52,7 @@ const common = {
 };
 ---
 
-<div class:list={['field', { 'field--wide': wide }]}>
+<div class:list={['field', { 'field--wide': wide, 'field--select': as === 'select' }]}>
   <label class="field__label" for={id}>
     {label}
     {optional && <span class="field__optional">(opcional)</span>}
@@ -62,27 +62,29 @@ const common = {
       {hint}
     </p>
   )}
-  {as === 'select' ? (
-    <select {...common}>
-      <option value="">Selecione</option>
-      {options.map((o) => (
-        <option value={o}>{o}</option>
-      ))}
-    </select>
-  ) : as === 'textarea' ? (
-    <textarea {...common} rows={3} maxlength={maxlength} placeholder={placeholder} />
-  ) : (
-    <input
-      {...common}
-      type={type}
-      autocomplete={autocomplete}
-      inputmode={inputmode}
-      maxlength={maxlength}
-      placeholder={placeholder}
-      list={list}
-      spellcheck={type === 'text' ? undefined : 'false'}
-    />
-  )}
+  <div class="field__box">
+    {as === 'select' ? (
+      <select {...common}>
+        <option value="">Selecione</option>
+        {options.map((o) => (
+          <option value={o}>{o}</option>
+        ))}
+      </select>
+    ) : as === 'textarea' ? (
+      <textarea {...common} rows={3} maxlength={maxlength} placeholder={placeholder} />
+    ) : (
+      <input
+        {...common}
+        type={type}
+        autocomplete={autocomplete}
+        inputmode={inputmode}
+        maxlength={maxlength}
+        placeholder={placeholder}
+        list={list}
+        spellcheck={type === 'text' ? undefined : 'false'}
+      />
+    )}
+  </div>
   <p
     class="field__error"
     id={`${id}-error`}
@@ -100,14 +102,15 @@ const common = {
   }
 
   .field__label {
-    font-weight: 600;
+    color: var(--text);
     font-size: var(--fs-sm);
+    font-weight: 600;
   }
 
   .field__optional {
     margin-left: var(--space-1);
-    font-weight: 400;
     color: var(--text-dim);
+    font-weight: 400;
   }
 
   .field__hint {
@@ -115,21 +118,53 @@ const common = {
     font-size: var(--fs-xs);
   }
 
+  .field__box {
+    position: relative;
+  }
+
   .field__control {
     width: 100%;
-    min-height: 48px;
+    min-height: 52px;
     padding: var(--space-3) var(--space-4);
-    background: var(--surface-strong);
-    border: 0;
-    box-shadow: inset 0 0 0 1px var(--surface-line);
-    clip-path: var(--clip-btn);
+    border: 1px solid rgb(140 160 255 / 0.22);
+    border-radius: 3px;
+    background: linear-gradient(180deg, rgb(10 14 42 / 0.9), rgb(5 7 24 / 0.92));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
     /* 16px+ evita o zoom automático do iOS */
     font-size: max(16px, var(--fs-base));
-    transition: box-shadow var(--dur-fast) var(--ease-out);
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out);
+  }
+
+  select.field__control {
+    padding-right: 2.75rem;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  /* seta do select desenhada no CSS */
+  .field--select .field__box::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 1.1rem;
+    width: 8px;
+    height: 8px;
+    border-right: 1.5px solid var(--c-cyan);
+    border-bottom: 1.5px solid var(--c-cyan);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  select.field__control option {
+    background: var(--c-night);
+    color: var(--text);
   }
 
   textarea.field__control {
-    min-height: 6rem;
+    min-height: 6.5rem;
     resize: vertical;
   }
 
@@ -139,17 +174,33 @@ const common = {
   }
 
   .field__control:hover {
-    box-shadow: inset 0 0 0 1px var(--line-strong);
+    border-color: rgb(0 229 255 / 0.45);
   }
 
-  /* clip-path corta outline: o foco vira borda interna âmbar */
+  /* foco com brilho: anel ciano de 2px + halo */
   .field__control:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 2px var(--focus);
+    border-color: var(--c-cyan);
+    background: linear-gradient(180deg, rgb(10 20 56 / 0.95), rgb(6 10 32 / 0.95));
+    box-shadow:
+      0 0 0 1px var(--c-cyan),
+      0 0 0 5px rgb(0 229 255 / 0.14),
+      0 0 30px rgb(0 229 255 / 0.22);
   }
 
   .field__control[aria-invalid='true'] {
-    box-shadow: inset 0 0 0 2px var(--c-danger);
+    border-color: var(--c-danger);
+    box-shadow:
+      0 0 0 1px var(--c-danger),
+      0 0 24px rgb(255 77 141 / 0.18);
+  }
+
+  /* com erro e em foco: halo mais largo, pra o foco nunca sumir */
+  .field__control[aria-invalid='true']:focus-visible {
+    box-shadow:
+      0 0 0 1px var(--c-danger),
+      0 0 0 5px rgb(255 77 141 / 0.2),
+      0 0 30px rgb(255 77 141 / 0.25);
   }
 
   .field__control:disabled {
@@ -158,13 +209,27 @@ const common = {
   }
 
   .field__error {
-    color: var(--c-danger);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: #ff8ab3;
     font-size: var(--fs-xs);
     font-weight: 600;
   }
 
   .field__error::before {
-    content: '! ';
+    content: '!';
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 2px;
+    background: var(--c-danger);
+    color: var(--c-void);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 800;
   }
 
   @media (min-width: 48rem) {

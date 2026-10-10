@@ -1,0 +1,90 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../../../../assets/brand/hackarun-logo.png';
+
+// marca do rodapé: logo oficial (imagem, nunca redesenhada) + slogan + data/local
+interface Props {
+  meta: string;
+}
+
+const { meta } = Astro.props;
+---
+
+<div class="fbrand">
+  <a class="fbrand__logo" href="#inicio" data-nav-link aria-label="HackaRun 2026, voltar ao início">
+    <Image src={logo} alt="" widths={[320, 640]} sizes="(min-width: 640px) 20rem, 15rem" loading="lazy" />
+  </a>
+  <p class="fbrand__slogan">
+    <span class="fbrand__w fbrand__w--a">Desvende.</span>
+    <span class="fbrand__w fbrand__w--b">Programe.</span>
+    <span class="fbrand__w fbrand__w--c">Conquiste.</span>
+  </p>
+  <p class="fbrand__meta">{meta}</p>
+</div>
+
+<style>
+  .fbrand {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+  }
+
+  .fbrand__logo {
+    display: block;
+    width: clamp(15rem, 12rem + 8vw, 20rem);
+    border-radius: 4px;
+    transition: filter var(--dur) var(--ease-out);
+  }
+
+  .fbrand__logo :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .fbrand__logo:hover {
+    filter: drop-shadow(0 0 24px rgb(18 100 255 / 0.6));
+  }
+
+  .fbrand__logo:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 6px;
+  }
+
+  .fbrand__slogan {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.45em;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1rem + 1.2vw, 1.875rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .fbrand__w {
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .fbrand__w--a {
+    background-image: linear-gradient(100deg, #b26bff, #ed28e8);
+  }
+
+  .fbrand__w--b {
+    background-image: linear-gradient(100deg, #00e5ff, #1264ff);
+  }
+
+  .fbrand__w--c {
+    background-image: linear-gradient(100deg, #ffe7a3, #ff852f);
+  }
+
+  .fbrand__meta {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+</style>

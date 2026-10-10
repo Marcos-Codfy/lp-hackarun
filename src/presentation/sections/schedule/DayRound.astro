@@ -16,17 +16,28 @@ const isFinal = day.stage === 'final';
 
 <li class:list={['round', isFinal && 'round--final']} data-timeline-node>
   <span class="round__node" aria-hidden="true"></span>
-  <div class="round__head">
-    <p class="hud-label round__code">Round {round}</p>
-    <p class="round__date">
-      <time datetime={day.date}>
-        <span aria-hidden="true">{label.short}</span>
-        <span class="sr-only">{label.long}</span>
-      </time>
-    </p>
+  <div class="round__aside">
+    <div class="round__head">
+      <p class="round__tag">
+        Round {round}
+        {isFinal && <span class="round__tag-final">Final</span>}
+      </p>
+      <p class="round__date">
+        <time datetime={day.date}>
+          <span aria-hidden="true">
+            <span class="round__day">{label.day}</span>
+            <span class="round__month">
+              {label.month}
+              <span class="round__weekday">{label.weekday}</span>
+            </span>
+          </span>
+          <span class="sr-only">{label.long}</span>
+        </time>
+      </p>
+    </div>
+    <h3 class="round__title">{day.title}</h3>
+    <p class="round__summary">{day.summary}</p>
   </div>
-  <h3 class="round__title">{day.title}</h3>
-  <p class="round__summary">{day.summary}</p>
   <ul class="round__sessions" role="list">
     {day.sessions.map((session) => (
       <SessionItem session={session} />
@@ -38,20 +49,21 @@ const isFinal = day.stage === 'final';
   .round {
     position: relative;
     display: grid;
-    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
     padding-left: var(--space-6);
   }
 
   /* nó na linha do tempo; acende quando o scroll chega (classe vem do TimelineAnimator) */
   .round__node {
     position: absolute;
-    top: 0.35rem;
+    top: 0.45rem;
     left: 0;
-    width: 13px;
-    height: 13px;
-    transform: translateX(-6px) rotate(45deg);
-    background: var(--c-deep);
-    border: 1px solid var(--line-strong);
+    width: 15px;
+    height: 15px;
+    transform: translateX(-7px) rotate(45deg);
+    background: var(--c-void);
+    border: 1px solid color-mix(in srgb, var(--sx-accent) 70%, transparent);
     transition:
       background var(--dur) var(--ease-out),
       box-shadow var(--dur) var(--ease-out);
@@ -59,66 +71,127 @@ const isFinal = day.stage === 'final';
 
   .round.is-reached .round__node {
     background: var(--c-cyan);
-    box-shadow: var(--glow-cyan);
+    border-color: var(--c-cyan);
+    box-shadow:
+      0 0 14px var(--c-cyan),
+      0 0 34px rgb(18 100 255 / 0.7);
   }
 
   .round--final.is-reached .round__node {
-    background: var(--time);
-    border-color: var(--time);
-    box-shadow: var(--glow-amber);
+    background: var(--c-orange);
+    border-color: var(--c-orange);
+    box-shadow:
+      0 0 14px var(--c-orange),
+      0 0 34px rgb(255 194 74 / 0.5);
+  }
+
+  .round__aside {
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
   }
 
   .round__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-2) var(--space-4);
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
   }
 
-  .round__date {
+  .round__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.3rem 0.75rem;
+    background: color-mix(in srgb, var(--sx-accent) 22%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sx-accent) 60%, transparent);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    transform: skewX(var(--skew));
+  }
+
+  .round__tag-final {
+    padding: 0.05rem 0.4rem;
+    background: var(--c-orange);
+    color: var(--c-void);
+  }
+
+  .round--final .round__tag {
+    background: rgb(255 133 47 / 0.16);
+    box-shadow: inset 0 0 0 1px rgb(255 133 47 / 0.6);
+  }
+
+  .round__date time > span[aria-hidden] {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .round__day {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 2.2rem + 2.8vw, 4.5rem);
+    font-weight: 900;
+    line-height: 0.85;
+    font-variant-numeric: tabular-nums;
+    background: var(--sx-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 22px color-mix(in srgb, var(--sx-accent) 50%, transparent));
+  }
+
+  .round--final .round__day {
+    background: linear-gradient(100deg, #ffd27a, #ff852f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 22px rgb(255 133 47 / 0.5));
+  }
+
+  .round__month {
+    display: grid;
     font-family: var(--font-display);
     font-size: var(--fs-lg);
     font-weight: 800;
+    line-height: 1.05;
     letter-spacing: 0.08em;
-    color: var(--text);
   }
 
-  .round--final .round__code {
-    color: var(--time);
+  .round__weekday {
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+  }
+
+  .round--final .round__weekday {
+    color: #ffb27a;
   }
 
   .round__title {
     font-size: var(--fs-2xl);
+    text-shadow: 0 2px 22px rgb(2 3 11 / 0.9);
   }
 
   .round__summary {
-    max-width: 38rem;
+    max-width: 30rem;
     color: var(--text-muted);
+    text-shadow: 0 1px 14px rgb(2 3 11 / 0.95);
   }
 
   .round__sessions {
     display: grid;
-    gap: var(--space-3);
-    margin-top: var(--space-3);
+    gap: var(--space-4);
   }
 
   @media (min-width: 1024px) {
     .round {
-      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-      column-gap: var(--space-7);
+      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+      column-gap: var(--space-8);
       padding-left: var(--space-7);
-    }
-
-    .round__head,
-    .round__title,
-    .round__summary {
-      grid-column: 1;
-    }
-
-    .round__sessions {
-      grid-column: 2;
-      grid-row: 1 / span 3;
-      margin-top: 0;
     }
   }
 </style>
