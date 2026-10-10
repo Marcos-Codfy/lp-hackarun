@@ -5,7 +5,14 @@ import { SHAPE_RADIUS } from '../shapes/ShapeStrategy';
 import commonGlsl from '../shaders/common.glsl?raw';
 import noiseGlsl from '../shaders/noise.glsl?raw';
 import coreGlsl from '../shaders/core.glsl?raw';
-import shapesGlsl from '../shaders/shapes.glsl?raw';
+import shapeHelpersGlsl from '../shaders/shapes/helpers.glsl?raw';
+import orbitGlsl from '../shaders/shapes/orbit.glsl?raw';
+import enigmaGlsl from '../shaders/shapes/enigma.glsl?raw';
+import mapGlsl from '../shaders/shapes/map.glsl?raw';
+import terrainGlsl from '../shaders/shapes/terrain.glsl?raw';
+import stageGlsl from '../shaders/shapes/stage.glsl?raw';
+import trophyGlsl from '../shaders/shapes/trophy.glsl?raw';
+import dustGlsl from '../shaders/shapes/dust.glsl?raw';
 import vertexGlsl from '../shaders/particles.vert.glsl?raw';
 import fragmentGlsl from '../shaders/particles.frag.glsl?raw';
 import { ADDITIVE_LIGHT } from '../layers/additiveLight';
@@ -94,7 +101,21 @@ export function createParticleMaterial(keys: readonly SceneKey[]): {
   const material = new ShaderMaterial({
     uniforms,
     defines: definesFor(keys),
-    vertexShader: [commonGlsl, noiseGlsl, coreGlsl, shapesGlsl, vertexGlsl].join('\n'),
+    vertexShader: [
+      commonGlsl,
+      noiseGlsl,
+      coreGlsl,
+      // um arquivo por objeto, na mesma ordem de sempre (helpers primeiro)
+      shapeHelpersGlsl,
+      orbitGlsl,
+      enigmaGlsl,
+      mapGlsl,
+      terrainGlsl,
+      stageGlsl,
+      trophyGlsl,
+      dustGlsl,
+      vertexGlsl,
+    ].join('\n'),
     fragmentShader: fragmentGlsl,
     ...ADDITIVE_LIGHT,
   });

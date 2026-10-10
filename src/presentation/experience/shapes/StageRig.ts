@@ -8,17 +8,14 @@ export const PITCH = 0.052;
 export const FLOOR = -0.56;
 const TOP = SCREEN.y + SCREEN.halfH;
 export const TRUSS = { low: TOP + 0.1, high: TOP + 0.19, halfW: 1.66 };
-// canhões no topo da treliça: x da base e ângulo a partir da vertical (positivo abre pra direita)
-export const BEAMS: readonly (readonly [number, number])[] = [
-  [-1.62, -0.78],
-  [-1.15, -0.42],
-  [-0.68, -0.2],
-  [-0.22, -0.06],
-  [0.22, 0.06],
-  [0.68, 0.2],
-  [1.15, 0.42],
-  [1.62, 0.78],
-];
+// canhões no topo da treliça: x da base e ângulo a partir da vertical (positivo abre pra direita).
+// fórmula espelhada em shapes/stage.glsl (stageBeamX): mudou aqui, muda lá
+export const BEAMS: readonly (readonly [number, number])[] = Array.from({ length: 8 }, (_, k) => {
+  const u = k - 3.5;
+  return [0.4629 * u, Math.sign(u) * (0.06 * u * u + 0.045)] as const;
+});
+// z de cada canhão leva o índice dele pro shader (sem precisar procurar o feixe mais perto)
+const beamZ = (k: number): number => -0.05 - k * 0.02;
 const BEAM_LENGTH = 1.7;
 
 const rect = (hw: number, hh: number, cy: number, density: number): Stroke[] =>
@@ -68,7 +65,7 @@ export function truss(): Stroke[] {
 
 // feixe: cone de 3 fios (bordas + eixo) saindo do canhão; denso na boca e abrindo pra cima
 export function beams(): Stroke[] {
-  return BEAMS.flatMap(([x, angle]) => {
+  return BEAMS.flatMap(([x, angle], k) => {
     const dir = { x: Math.sin(angle), y: Math.cos(angle) };
     const normal = { x: dir.y, y: -dir.x };
     const origin = at(x, TRUSS.high + 0.02);
@@ -80,7 +77,7 @@ export function beams(): Stroke[] {
           b.dot(
             origin.x + dir.x * s + normal.x * spread,
             origin.y + dir.y * s + normal.y * spread,
-            -0.05,
+            beamZ(k),
             0.003,
           );
         }
