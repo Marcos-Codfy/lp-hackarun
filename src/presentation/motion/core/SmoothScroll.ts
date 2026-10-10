@@ -23,13 +23,24 @@ export class SmoothScroll implements ScrollDriver {
 
   scrollTo(target: string | HTMLElement, options: ScrollRequest = {}): void {
     const el = resolveTarget(target);
-    if (!el) return;
-    const { onComplete } = options;
+    if (el) this.travel(el, options, false);
+  }
+
+  // seções com render adiado (content-visibility) montam no caminho e empurram o destino:
+  // ao chegar confere onde o alvo está de fato e faz uma 2ª passada curta se precisar
+  private travel(el: HTMLElement, options: ScrollRequest, correcting: boolean): void {
     this.lenis.scrollTo(targetY(el, this.lenis.animatedScroll, options.offset), {
       immediate: options.immediate ?? false,
       // clique explícito do usuário vale mesmo com o scroll parado (ex.: menu fechando)
       force: true,
-      ...(onComplete ? { onComplete: () => onComplete() } : {}),
+      ...(correcting ? { duration: 0.45 } : {}),
+      onComplete: () => {
+        const drift = Math.abs(
+          targetY(el, this.lenis.animatedScroll, options.offset) - this.lenis.animatedScroll,
+        );
+        if (!correcting && drift > 6) this.travel(el, options, true);
+        else options.onComplete?.();
+      },
     });
   }
 

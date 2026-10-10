@@ -7,8 +7,16 @@ export class NativeScroll implements ScrollDriver {
   scrollTo(target: string | HTMLElement, options: ScrollRequest = {}): void {
     const el = resolveTarget(target);
     if (!el) return;
-    window.scrollTo({ top: targetY(el, window.scrollY, options.offset), behavior: 'instant' });
-    options.onComplete?.();
+    const jump = () =>
+      window.scrollTo({ top: targetY(el, window.scrollY, options.offset), behavior: 'instant' });
+    jump();
+    // seções com render adiado montam no frame seguinte e mudam a altura: corrige uma vez
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        jump();
+        options.onComplete?.();
+      }),
+    );
   }
 
   stop(): void {
