@@ -1,0 +1,28 @@
+/* "Pausar animações" (WCAG 2.2.2): congela os loops infinitos onde estão. Lista explícita de propósito: um
+   "pausa tudo" travaria no quadro zero as entradas de uma vez só (hero, menu mobile) e o conteúdo sumiria.
+   Loop novo em CSS entra aqui. O spinner de envio do formulário fica de fora: é status, não enfeite.
+   !important na layer: ganha do shorthand "animation" dos componentes (que zera o play-state) */
+@layer utilities {
+  .is-motion-paused
+    :is(
+      .aurora__blob,
+      .tape__track,
+      .beams__beam,
+      .locked__q,
+      .locked__beam,
+      .locked__status i,
+      .sound-toggle__eq span,
+      .btn__sheen,
+      .scroll-cue__comet,
+      .countdown__pulse,
+      .notice-badge__dot,
+      .lineup__label i,
+      .lineup__scan,
+      .terminal__signal i,
+      .terminal__caret
+    ),
+  .is-motion-paused .countdown__unit::before,
+  .is-motion-paused .prize__redacted::after {
+    animation-play-state: paused !important;
+  }
+}

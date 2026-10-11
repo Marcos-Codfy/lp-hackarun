@@ -2,6 +2,7 @@
 import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import ButtonChevrons from '@presentation/components/ui/ButtonChevrons.astro';
+import PauseMotionSwitch from '@presentation/components/motion/PauseMotionSwitch.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import { NAV_LINKS } from '../navLinks';
 
@@ -42,6 +43,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </ol>
     </nav>
     <div class="mobile-menu__foot">
+      <PauseMotionSwitch />
       <Button size="lg" href={cta.href} class="mobile-menu__cta" {...ctaAttrs}>
         {cta.label}
       </Button>

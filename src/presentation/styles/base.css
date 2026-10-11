@@ -3,6 +3,7 @@
 
 /* o Vite junta no mesmo arquivo no build (não vira request extra) */
 @import './deferred-sections.css';
+@import './motion-pause.css';
 
 @layer reset {
   *,
@@ -166,7 +167,7 @@
   }
 
   :focus:not(:focus-visible) {
-    outline: none;
+    outline-color: transparent;
   }
 
   /* alto contraste do Windows zera box-shadow, e vários anéis de foco são box-shadow. !important porque o CSS

@@ -1,0 +1,178 @@
+---
+import MotionGlyph from './MotionGlyph.astro';
+
+// versão com texto do "Pausar animações" pro menu mobile: rótulo visível = nome acessível, estado no
+// aria-pressed e na chavinha. Mesmo [data-motion-toggle] do header, então os dois andam juntos
+---
+
+<button class="motion-switch" type="button" data-motion-toggle aria-pressed="false" hidden>
+  <span class="motion-switch__icon">
+    <MotionGlyph morph={false} />
+  </span>
+  <span class="motion-switch__text">
+    <span class="motion-switch__label">Pausar animações</span>
+    <span class="motion-switch__note motion-switch__note--idle" aria-hidden="true">
+      3D, raios e loops
+    </span>
+    <span class="motion-switch__note motion-switch__note--locked" aria-hidden="true">
+      Reduzidas pelo sistema
+    </span>
+  </span>
+  <span class="motion-switch__track" aria-hidden="true">
+    <span class="motion-switch__knob"></span>
+  </span>
+</button>
+
+<style>
+  .motion-switch {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    min-height: 60px;
+    padding: var(--space-2) var(--space-4) var(--space-2) var(--space-2);
+    border-radius: var(--radius);
+    background: var(--surface-well);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+    color: var(--text);
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: box-shadow var(--dur) var(--ease-out);
+  }
+
+  .motion-switch[aria-pressed='true'] {
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--c-cyan) 45%, transparent),
+      0 0 24px -6px color-mix(in srgb, var(--c-cyan) 40%, transparent);
+  }
+
+  .motion-switch:focus-visible {
+    outline-offset: 3px;
+  }
+
+  /* placa do ícone: mesmo paralelogramo dos botões do header */
+  .motion-switch__icon {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--text-muted);
+    transition: color var(--dur) var(--ease-out);
+  }
+
+  .motion-switch__icon::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    z-index: -1;
+    border-radius: 3px;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c-ultra) 16%, transparent),
+      color-mix(in srgb, var(--c-night) 55%, transparent)
+    );
+    box-shadow: inset 0 0 0 1px var(--control-line);
+    transform: skewX(var(--skew));
+  }
+
+  .motion-switch[aria-pressed='true'] .motion-switch__icon {
+    color: var(--c-cyan);
+  }
+
+  .motion-switch__text {
+    display: grid;
+    gap: 2px;
+  }
+
+  .motion-switch__label {
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .motion-switch__note {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .motion-switch__note--locked,
+  .motion-switch[aria-disabled='true'] .motion-switch__note--idle {
+    display: none;
+  }
+
+  .motion-switch[aria-disabled='true'] .motion-switch__note--locked {
+    display: inline;
+  }
+
+  /* chavinha em paralelogramo: desligada à esquerda, pausado = ciano à direita */
+  .motion-switch__track {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--c-night) 80%, transparent);
+    box-shadow: inset 0 0 0 1px var(--control-line);
+    transform: skewX(var(--skew));
+    transition:
+      background-color var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .motion-switch__knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--text-dim);
+    transition:
+      transform var(--dur) var(--ease-spring),
+      background-color var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .motion-switch[aria-pressed='true'] .motion-switch__track {
+    background: color-mix(in srgb, var(--c-cyan) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-cyan) 70%, transparent);
+  }
+
+  .motion-switch[aria-pressed='true'] .motion-switch__knob {
+    background: var(--c-cyan);
+    box-shadow: 0 0 10px var(--c-cyan);
+    transform: translateX(20px);
+  }
+
+  .motion-switch[aria-disabled='true'] {
+    cursor: default;
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+  }
+
+  .motion-switch[aria-disabled='true'] :is(.motion-switch__icon, .motion-switch__track) {
+    opacity: 0.55;
+  }
+
+  @media (forced-colors: active) {
+    .motion-switch,
+    .motion-switch__track {
+      border: 1px solid ButtonText;
+    }
+
+    .motion-switch__knob {
+      forced-color-adjust: none;
+      background: ButtonText;
+    }
+
+    .motion-switch[aria-pressed='true'] .motion-switch__knob,
+    .motion-switch[aria-pressed='true'] .motion-switch__icon::before {
+      forced-color-adjust: none;
+      background: Highlight;
+    }
+  }
+</style>

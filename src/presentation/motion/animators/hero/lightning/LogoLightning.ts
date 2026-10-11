@@ -24,7 +24,7 @@ const SPAWN_PER_FRAME = 3;
 const MAX_QUEUED = 12;
 
 // raios procedurais em volta do logo: um canvas 2D pequeno por cima da imagem
-// (só roda com o hero na tela e a aba visível)
+// (só roda com o hero na tela, a aba visível e as animações não pausadas)
 export class LogoLightning {
   private readonly painter: BoltPainter | null;
   private readonly scheduler: StrikeScheduler;

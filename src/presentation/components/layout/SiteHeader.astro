@@ -2,6 +2,7 @@
 import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import SoundToggle from '@presentation/components/sound/SoundToggle.astro';
+import PauseMotionToggle from '@presentation/components/motion/PauseMotionToggle.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import HeaderBrand from './header/HeaderBrand.astro';
 import HeaderNav from './header/HeaderNav.astro';
@@ -26,6 +27,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-na
     <HeaderNav />
     <div class="site-header__actions">
       <SoundToggle />
+      <PauseMotionToggle />
       <span class="site-header__cta">
         <Button size="sm" href={cta.href} {...ctaAttrs}>
           {copy.headerLabel(registration.status)}

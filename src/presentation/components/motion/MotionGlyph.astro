@@ -1,0 +1,57 @@
+---
+// ícone pausa ↔ play desenhado em clip-path: as duas barras viram o triângulo quando o botão pai fica
+// aria-pressed (os dois polígonos têm 8 pontos, então a transição interpola). Decorativo.
+// morph={false}: fica sempre nas barras (na chavinha do menu o estado já aparece no trilho)
+interface Props {
+  morph?: boolean;
+}
+
+const { morph = true } = Astro.props;
+---
+
+<span class:list={['motion-glyph', { 'motion-glyph--morph': morph }]} aria-hidden="true">
+  <span class="motion-glyph__shape"></span>
+</span>
+
+<style>
+  /* o brilho fica no pai: o clip-path cortaria o drop-shadow do próprio elemento */
+  .motion-glyph {
+    display: inline-grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    transition: filter var(--dur) var(--ease-out);
+  }
+
+  /* duas barras ligadas por uma ponte de área zero embaixo (um polígono só, 8 pontos) */
+  .motion-glyph__shape {
+    width: 10px;
+    height: 12px;
+    background: currentColor;
+    clip-path: polygon(0 0, 32% 0, 32% 100%, 68% 100%, 68% 0, 100% 0, 100% 100%, 0 100%);
+    transition:
+      clip-path var(--dur) var(--ease-out),
+      transform var(--dur) var(--ease-out);
+  }
+
+  :global([aria-pressed='true']) .motion-glyph {
+    filter: drop-shadow(0 0 5px currentColor);
+  }
+
+  /* triângulo de play: a ponte vira um traço dentro dele; 1px pra direita compensa o centro óptico */
+  :global([aria-pressed='true']) .motion-glyph--morph .motion-glyph__shape {
+    clip-path: polygon(0 0, 50% 25%, 50% 75%, 50% 75%, 50% 25%, 100% 50%, 100% 50%, 0 100%);
+    transform: translateX(1px);
+  }
+
+  @media (forced-colors: active) {
+    .motion-glyph__shape {
+      forced-color-adjust: none;
+      background: ButtonText;
+    }
+
+    :global([aria-pressed='true']) .motion-glyph__shape {
+      background: HighlightText;
+    }
+  }
+</style>
