@@ -1,10 +1,11 @@
-import { clamp } from '@shared/utils/math';
+import { nextPaint, yieldToMain } from '@presentation/app/BootQueue';
 import { BoltFactory, type StageFrame } from './BoltFactory';
 import { BoltPainter } from './BoltPainter';
-import { LogoContour } from './LogoContour';
+import { ContourSource } from './ContourSource';
+import { measureStage } from './measureStage';
 import { StrikeScheduler } from './StrikeScheduler';
 import { VisibilityGate } from './VisibilityGate';
-import type { Bolt } from './types';
+import type { Bolt, BoltKind } from './types';
 
 export interface LightningDeps {
   canvas: HTMLCanvasElement;
@@ -17,6 +18,10 @@ export interface LightningDeps {
 const MAX_DPR = 2;
 const MAX_BOLTS = 40;
 const ZAP_MS = 110;
+// raios novos por frame: a rajada de largada (~10 de uma vez) se espalha por alguns frames
+const SPAWN_PER_FRAME = 3;
+// fila curta: em frame lento os mais velhos caem em vez de acumular
+const MAX_QUEUED = 12;
 
 // raios procedurais em volta do logo: um canvas 2D pequeno por cima da imagem
 // (só roda com o hero na tela e a aba visível)
@@ -28,7 +33,9 @@ export class LogoLightning {
   private resizer: ResizeObserver | null = null;
   private frame: StageFrame | null = null;
   private bolts: Bolt[] = [];
+  private queued: BoltKind[] = [];
   private raf = 0;
+  private destroyed = false;
   private zapTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(private readonly deps: LightningDeps) {
@@ -40,11 +47,18 @@ export class LogoLightning {
   async mount(): Promise<void> {
     if (!this.painter) return;
     await this.whenDecoded(this.deps.logo);
-    const contour = LogoContour.sample(this.deps.logo);
+    const contour = await ContourSource.sample(this.deps.logo);
     if (contour.length === 0) return;
 
-    this.frame = this.measure();
+    // cada etapa numa tarefa: a medida logo depois de um frame (layout limpo), o resto em seguida
+    await nextPaint();
+    if (this.destroyed) return;
+    this.frame = measureStage(this.deps.canvas, this.deps.logo, MAX_DPR);
     this.factory = new BoltFactory(contour, this.frame);
+    // o 1º desenho aloca o canvas na GPU (pode travar): aqui, e não no 1º frame da animação
+    this.painter.clear(this.frame.width, this.frame.height);
+    await yieldToMain();
+    if (this.destroyed) return;
     this.resizer = new ResizeObserver(() => this.onResize());
     this.resizer.observe(this.deps.canvas);
     this.gate = new VisibilityGate(this.deps.host, (running) => (running ? this.start() : this.stop()));
@@ -52,6 +66,7 @@ export class LogoLightning {
   }
 
   destroy(): void {
+    this.destroyed = true;
     this.gate?.destroy();
     this.resizer?.disconnect();
     this.stop();
@@ -68,6 +83,7 @@ export class LogoLightning {
     cancelAnimationFrame(this.raf);
     this.raf = 0;
     this.bolts = [];
+    this.queued = [];
     if (this.frame) this.painter?.clear(this.frame.width, this.frame.height);
   }
 
@@ -76,7 +92,9 @@ export class LogoLightning {
     const { painter, factory, frame } = this;
     if (!painter || !factory || !frame) return;
 
-    for (const kind of this.scheduler.due(now)) {
+    this.queued.push(...this.scheduler.due(now));
+    if (this.queued.length > MAX_QUEUED) this.queued.splice(0, this.queued.length - MAX_QUEUED);
+    for (const kind of this.queued.splice(0, SPAWN_PER_FRAME)) {
       const bolt = this.bolts.length < MAX_BOLTS ? factory.create(kind, now) : null;
       if (!bolt) continue;
       this.bolts.push(bolt);
@@ -99,27 +117,10 @@ export class LogoLightning {
   }
 
   private onResize(): void {
-    this.frame = this.measure();
+    this.frame = measureStage(this.deps.canvas, this.deps.logo, MAX_DPR);
     this.factory?.resize(this.frame);
     // geometria antiga ficaria torta no tamanho novo
     this.bolts = [];
-  }
-
-  // medidas de layout (offset*), não getBoundingClientRect: as animações de entrada não distorcem
-  private measure(): StageFrame {
-    const { canvas, logo } = this.deps;
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
-    canvas.width = Math.max(1, Math.round(canvas.offsetWidth * dpr));
-    canvas.height = Math.max(1, Math.round(canvas.offsetHeight * dpr));
-    return {
-      ox: (logo.offsetLeft - canvas.offsetLeft) * dpr,
-      oy: (logo.offsetTop - canvas.offsetTop) * dpr,
-      w: logo.offsetWidth * dpr,
-      h: logo.offsetHeight * dpr,
-      width: canvas.width,
-      height: canvas.height,
-      scale: dpr * clamp(logo.offsetWidth / 760, 0.8, 1.35),
-    };
   }
 
   private whenDecoded(img: HTMLImageElement): Promise<void> {

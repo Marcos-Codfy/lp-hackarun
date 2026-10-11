@@ -33,34 +33,41 @@ export class HudRailController {
     });
     window.addEventListener('scroll', this.schedule, { passive: true });
     window.addEventListener('resize', this.remeasure, { passive: true });
-    // pins e conteúdo carregado depois mudam a altura da página
+    // pins e conteúdo carregado depois mudam a altura da página. A 1ª medida também vem daqui
+    // (o observer avisa logo depois do próximo layout): ler agora forçaria um layout no boot
     new ResizeObserver(this.remeasure).observe(document.body);
-    this.remeasure();
   }
 
+  // tudo que mede antes de qualquer escrita: ler e escrever alternado recalculava o estilo a cada tique
   private readonly remeasure = (): void => {
+    const scrollY = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const half = window.innerHeight / 2;
+    const tops = this.sections.map((section) => section.getBoundingClientRect().top + scrollY);
     this.ticks.forEach((tick, index) => {
-      const section = this.sections[index];
-      if (!section) return;
-      const top = section.getBoundingClientRect().top + window.scrollY;
-      tick.at = max > 0 ? Math.min(1, Math.max(0, (top - half) / max)) : 0;
-      tick.el.style.setProperty('--p', tick.at.toFixed(4));
+      const top = tops[index];
+      if (top === undefined) return;
+      const at = max > 0 ? Math.min(1, Math.max(0, (top - half) / max)) : 0;
+      if (at === tick.at && tick.el.style.getPropertyValue('--p')) return;
+      tick.at = at;
+      tick.el.style.setProperty('--p', at.toFixed(4));
     });
     this.current = -2;
-    this.update();
+    this.render(scrollY, max);
   };
 
   private readonly schedule = (): void => {
-    if (!this.frame) this.frame = requestAnimationFrame(() => this.update());
+    if (!this.frame) {
+      this.frame = requestAnimationFrame(() => {
+        this.frame = 0;
+        this.render(window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
+      });
+    }
   };
 
-  private update(): void {
-    this.frame = 0;
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = max > 0 ? window.scrollY / max : 0;
-    this.root.classList.toggle('is-start', window.scrollY < window.innerHeight * START_RATIO);
+  private render(scrollY: number, max: number): void {
+    const progress = max > 0 ? scrollY / max : 0;
+    this.root.classList.toggle('is-start', scrollY < window.innerHeight * START_RATIO);
 
     let current = -1;
     this.ticks.forEach((tick, index) => {

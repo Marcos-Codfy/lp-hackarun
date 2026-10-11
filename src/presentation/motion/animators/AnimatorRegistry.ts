@@ -1,7 +1,9 @@
 import type { AppContext } from '@presentation/app/AppContext';
+import type { BootSteps } from '@presentation/app/BootQueue';
 import type { SectionAnimator } from './SectionAnimator';
 
-// Registry: lista ordenada de animadores; um animador que quebra não derruba os outros
+// Registry: lista ordenada de animadores; cada um monta num passo próprio do boot
+// e um animador que quebra não derruba os outros
 export class AnimatorRegistry {
   private readonly animators: SectionAnimator[] = [];
 
@@ -10,17 +12,21 @@ export class AnimatorRegistry {
     return this;
   }
 
-  mountAll(ctx: AppContext): void {
+  schedule(ctx: AppContext, boot: BootSteps): void {
     for (const animator of this.animators) {
-      try {
-        animator.mount(ctx);
-      } catch (error) {
-        console.error(`[animators] ${animator.constructor.name} failed`, error);
-      }
+      boot.add(`animate ${animator.label}`, () => AnimatorRegistry.mountOne(animator, ctx));
     }
   }
 
   teardownAll(): void {
     this.animators.forEach((animator) => animator.teardown());
+  }
+
+  private static mountOne(animator: SectionAnimator, ctx: AppContext): void {
+    try {
+      animator.mount(ctx);
+    } catch (error) {
+      console.error(`[animators] ${animator.label} failed`, error);
+    }
   }
 }

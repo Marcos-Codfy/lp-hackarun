@@ -1,3 +1,5 @@
+import { afterNextPaint } from '@presentation/app/BootQueue';
+
 // estados do header pelo scroll (rAF, só mexe no DOM quando muda):
 // is-scrolled = vidro aparece; is-tucked = rolando pra baixo longe do topo, a barra recolhe
 const SCROLLED_PX = 24;
@@ -16,9 +18,12 @@ export class HeaderScrollController {
   }
 
   mount(): void {
-    this.lastY = window.scrollY;
     window.addEventListener('scroll', this.onScroll, { passive: true });
-    this.update();
+    // ler scrollY força layout: a 1ª leitura espera um frame (no boot o layout está sujo dos outros passos)
+    afterNextPaint(() => {
+      this.lastY = window.scrollY;
+      this.update();
+    });
   }
 
   destroy(): void {

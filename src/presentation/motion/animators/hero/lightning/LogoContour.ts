@@ -8,20 +8,26 @@ const NEIGHBORS = [
   [0, -1],
 ] as const;
 
-// lê o alfa do PNG do logo e devolve só a silhueta externa (buracos das letras ficam de fora),
-// com a normal apontando pra fora: é de onde os raios nascem
+// a partir do RGBA do logo devolve só a silhueta externa (buracos das letras ficam de fora),
+// com a normal apontando pra fora: é de onde os raios nascem. Sem DOM: roda no worker e na thread principal
 export class LogoContour {
-  static sample(img: HTMLImageElement, sampleWidth = 300): ContourPoint[] {
-    const width = sampleWidth;
-    const height = Math.max(1, Math.round((sampleWidth * img.naturalHeight) / (img.naturalWidth || 1)));
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return [];
-    ctx.drawImage(img, 0, 0, width, height);
-    const alpha = LogoContour.alphaOf(ctx.getImageData(0, 0, width, height).data);
-    return new LogoContour(alpha, width, height).collect();
+  static fromRgba(rgba: Uint8ClampedArray, width: number, height: number): ContourPoint[] {
+    return new LogoContour(LogoContour.alphaOf(rgba), width, height).collect();
+  }
+
+  // 4 floats por ponto (x, y, nx, ny): atravessa o postMessage por transferência
+  static flatten(points: readonly ContourPoint[]): Float32Array {
+    const out = new Float32Array(points.length * 4);
+    points.forEach((p, i) => out.set([p.x, p.y, p.nx, p.ny], i * 4));
+    return out;
+  }
+
+  static unflatten(flat: Float32Array): ContourPoint[] {
+    const points: ContourPoint[] = [];
+    for (let i = 0; i + 3 < flat.length; i += 4) {
+      points.push({ x: flat[i] ?? 0, y: flat[i + 1] ?? 0, nx: flat[i + 2] ?? 0, ny: flat[i + 3] ?? 0 });
+    }
+    return points;
   }
 
   private static alphaOf(rgba: Uint8ClampedArray): Uint8Array {

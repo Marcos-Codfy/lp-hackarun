@@ -57,18 +57,22 @@ export class HudView {
   }
 
   private watchScroll(): void {
+    // lê tudo antes de o VM renderizar: medir depois das escritas forçava outro layout
     const measure = () => {
       this.frame = 0;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      this.vm.setProgress(max > 0 ? window.scrollY / max : 0);
-      this.vm.enter(this.currentIndex());
+      const progress = max > 0 ? window.scrollY / max : 0;
+      const index = this.currentIndex();
+      this.vm.setProgress(progress);
+      this.vm.enter(index);
     };
     const schedule = () => {
       if (!this.frame) this.frame = requestAnimationFrame(measure);
     };
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
-    measure();
+    // 1ª medida no próximo frame: no boot o layout ainda está sujo dos outros passos
+    schedule();
   }
 
   private renderNpc(state: NpcHuntState, prev: NpcHuntState): void {

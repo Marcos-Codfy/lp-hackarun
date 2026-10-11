@@ -1,5 +1,5 @@
-import { ScrollTrigger } from '@presentation/motion/core/gsap';
 import type { AppContext } from '@presentation/app/AppContext';
+import type { BootSteps } from '@presentation/app/BootQueue';
 import { mountControllers } from '@presentation/controllers/mountControllers';
 import { AnimatorRegistry } from './AnimatorRegistry';
 import { BarGrowAnimator } from './BarGrowAnimator';
@@ -12,11 +12,13 @@ import { SpotlightAnimator } from './SpotlightAnimator';
 import { TerminalTypeAnimator } from './TerminalTypeAnimator';
 import { TimelineAnimator } from './TimelineAnimator';
 
-// entradas das seções + controladores de layout (header, menu, âncoras)
-export function mountAnimators(ctx: AppContext): void {
-  mountControllers(ctx);
+// controladores de layout (header, menu, âncoras) + entradas das seções, um passo do boot cada
+export function mountAnimators(ctx: AppContext, boot: BootSteps): void {
+  mountControllers(ctx, boot);
 
-  // o pin das missões vem primeiro: ele empurra o layout de tudo que está abaixo
+  // o pin das missões vem primeiro (e faz o refresh global): ele empurra o layout de tudo abaixo.
+  // Os outros só velam no boot; os gatilhos deles nascem perto da tela, já com o pin no lugar
+  // (e o refreshPriority do pin mantém a ordem certa em qualquer refresh depois)
   new AnimatorRegistry()
     .register(
       new MissionsTrackAnimator(),
@@ -29,10 +31,5 @@ export function mountAnimators(ctx: AppContext): void {
       new TerminalTypeAnimator(),
       new SpotlightAnimator(),
     )
-    .mountAll(ctx);
-
-  // triggers criados antes do pin (ex.: cenas do motion) recalculam na ordem da página
-  ScrollTrigger.sort();
-  ScrollTrigger.refresh();
-  void document.fonts.ready.then(() => ScrollTrigger.refresh());
+    .schedule(ctx, boot);
 }

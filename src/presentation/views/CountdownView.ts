@@ -40,13 +40,16 @@ export class CountdownView {
   }
 
   private renderMilestone(state: CountdownDTO, key: string): void {
+    const first = this.lastKey === undefined;
+    this.lastKey = key;
+    // 1º render no mesmo marco do SSR: os textos já estão certos (pula o Intl, caro no boot do celular)
+    if (first && this.root.dataset['milestone'] === key) return;
     const label = state.isOver ? 'Corrida encerrada' : state.label;
     this.setText('[data-countdown-label]', label);
     this.setText('[data-countdown-sr]', milestoneSentence(label, state.target));
     this.setText('[data-countdown-tag]', milestoneTag(state.target));
     this.root.dataset['milestone'] = key;
-    if (this.lastKey !== undefined && !this.calm) this.flash();
-    this.lastKey = key;
+    if (!first && !this.calm) this.flash();
   }
 
   private flash(): void {

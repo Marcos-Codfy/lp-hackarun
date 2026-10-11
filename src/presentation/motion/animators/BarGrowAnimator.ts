@@ -9,13 +9,18 @@ export class BarGrowAnimator extends SectionAnimator {
   protected override setup(el: HTMLElement): void {
     const fills = qsa('[data-bar-fill]', el);
     if (fills.length === 0) return;
-    gsap.from(fills, {
-      scaleX: 0,
-      duration: 1.2,
-      ease: 'expo.out',
-      stagger: 0.12,
-      delay: 0.2,
-      scrollTrigger: this.entrance(el, 'top 80%'),
-    });
+    this.whenNear(
+      el,
+      () =>
+        gsap.from(fills, {
+          scaleX: 0,
+          duration: 1.2,
+          ease: 'expo.out',
+          stagger: 0.12,
+          delay: 0.2,
+          scrollTrigger: this.entrance(el, 'top 80%'),
+        }),
+      fills,
+    );
   }
 }

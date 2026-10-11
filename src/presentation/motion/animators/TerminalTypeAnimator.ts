@@ -7,7 +7,8 @@ const SECONDS_PER_CHAR = 0.045;
 const BOOT_STAGGER = 0.32;
 
 // terminal do NPC: as linhas de conexão sobem uma a uma e a dica é "digitada" de novo quando entra na tela
-// (o leitor de tela lê a cópia sr-only, então digitar não gera ruído); cada caractere avisa o bus pro clique
+// (o leitor de tela lê a cópia sr-only, então digitar não gera ruído); cada caractere avisa o bus pro clique.
+// No boot só limpa o texto e vela as linhas; a timeline nasce quando o terminal chega perto da tela
 export class TerminalTypeAnimator extends SectionAnimator {
   protected readonly selector = '[data-terminal]';
 
@@ -18,6 +19,16 @@ export class TerminalTypeAnimator extends SectionAnimator {
 
     const boot = qsa('[data-terminal-boot]', el);
     output.textContent = '';
+    this.whenNear(el, () => this.type(el, output, chars, boot, ctx), boot);
+  }
+
+  private type(
+    el: HTMLElement,
+    output: HTMLElement,
+    chars: string[],
+    boot: HTMLElement[],
+    ctx: AppContext,
+  ): void {
     const state = { count: 0 };
     let shown = 0;
 

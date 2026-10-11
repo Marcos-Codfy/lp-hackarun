@@ -1,6 +1,7 @@
 import { gsap } from '@presentation/motion/core/gsap';
-import { clamp } from '@shared/utils/math';
-import { qs, qsa } from '@shared/utils/dom';
+import { afterNextPaint } from '@presentation/app/BootQueue';
+import { qs } from '@shared/utils/dom';
+import { MissionsPin } from './missions/MissionsPin';
 import { SectionAnimator } from './SectionAnimator';
 
 // só no desktop e com movimento liberado; abaixo disso fica a grade/lista do CSS
@@ -14,58 +15,26 @@ export class MissionsTrackAnimator extends SectionAnimator {
     const pin = qs('[data-missions-pin]', section);
     const track = qs('[data-missions-track]', section);
     if (!pin || !track) return;
-    gsap.matchMedia().add(HORIZONTAL_QUERY, () => this.horizontal(section, pin, track));
+    gsap
+      .matchMedia()
+      .add(HORIZONTAL_QUERY, (context) =>
+        this.horizontal(section, new MissionsPin(section, pin, track), context),
+      );
   }
 
-  private horizontal(section: HTMLElement, pin: HTMLElement, track: HTMLElement): () => void {
+  private horizontal(section: HTMLElement, pin: MissionsPin, context: gsap.Context): () => void {
     section.classList.add('is-horizontal');
-    const cards = qsa('[data-station]', track);
-    const current = qs('[data-missions-current]', section);
-    const bar = qs('[data-missions-bar]', section);
-    let shown = -1;
-
-    // quanto o trilho precisa andar pra o último card encostar na margem direita
-    const distance = () => {
-      const gutter = parseFloat(getComputedStyle(pin).paddingLeft) || 0;
-      return Math.max(0, track.scrollWidth - (pin.clientWidth - gutter * 2));
-    };
-
-    const tween = gsap.to(track, {
-      x: () => -distance(),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: pin,
-        pin: true,
-        scrub: 0.6,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        // tela baixa: prende pelo topo pra não cortar os cards; senão encosta embaixo e deixa o alto livre pro mapa 3D
-        start: () => (pin.offsetHeight > window.innerHeight * 0.85 ? 'top top+=64' : 'bottom bottom-=40'),
-        end: () => `+=${distance()}`,
-        onUpdate: (st) => {
-          if (bar) bar.style.transform = `scaleX(${st.progress.toFixed(3)})`;
-          const index = Math.round(st.progress * Math.max(0, cards.length - 1));
-          if (index === shown || !current) return;
-          shown = index;
-          current.textContent = String(index + 1).padStart(2, '0');
-        },
-      },
+    pin.wrap();
+    // o layout horizontal entra no próximo frame e o pin nasce depois dele, lendo a página já pronta
+    // (criar junto forçava esse layout inteiro dentro da mesma tarefa)
+    let active = true;
+    afterNextPaint(() => {
+      if (active) context.add(() => pin.create());
     });
-
-    // foco por teclado num card fora da vista: rola até o ponto em que ele aparece
-    const onFocusIn = (event: FocusEvent) => {
-      const st = tween.scrollTrigger;
-      const card = (event.target as Element | null)?.closest<HTMLElement>('[data-station]');
-      if (!st || !card) return;
-      const ratio = clamp(cards.indexOf(card) / Math.max(1, cards.length - 1));
-      window.scrollTo({ top: st.start + ratio * (st.end - st.start), behavior: 'auto' });
-    };
-    track.addEventListener('focusin', onFocusIn);
-
     return () => {
-      track.removeEventListener('focusin', onFocusIn);
+      active = false;
+      pin.destroy();
       section.classList.remove('is-horizontal');
-      if (bar) bar.style.removeProperty('transform');
     };
   }
 }

@@ -8,14 +8,17 @@ export class SpotlightAnimator extends SectionAnimator {
 
   protected override setup(el: HTMLElement): void {
     el.classList.add('is-idle');
+    const beams = qsa('[data-beam]', el);
+    this.whenNear(el, () => this.light(el, beams), beams);
+  }
+
+  private light(el: HTMLElement, beams: HTMLElement[]): void {
     ScrollTrigger.create({
       trigger: el,
       start: 'top bottom',
       end: 'bottom top',
       onToggle: (self) => el.classList.toggle('is-idle', !self.isActive),
     });
-
-    const beams = qsa('[data-beam]', el);
     if (beams.length === 0) return;
     gsap.from(beams, {
       opacity: 0,

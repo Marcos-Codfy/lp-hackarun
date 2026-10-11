@@ -45,7 +45,11 @@ export class SceneDirector {
       progress: this.progress,
       velocity: this.velocity.value,
     };
+  }
 
+  // a trilha já existe pra quem assina; o gatilho e a 1ª medida vêm depois, num passo do boot
+  // (com o pin das missões no lugar e as Views ouvindo o bus)
+  start(): void {
     ScrollTrigger.create({
       start: 0,
       end: 'max',
