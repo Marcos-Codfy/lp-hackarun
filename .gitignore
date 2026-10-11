@@ -29,3 +29,4 @@ npm-debug.log*
 
 # claude local
 .claude/
+scripts/qa/out/

@@ -1,0 +1,24 @@
+{
+  "name": "hackarun-qa",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scripts de QA da landing page do HackaRun 2026 (Playwright + Lighthouse), instalados à parte do projeto.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "shots": "node shots.mjs",
+    "vitals": "node vitals.mjs",
+    "longtasks": "node longtasks.mjs",
+    "trace": "node trace.mjs",
+    "anchors": "node anchorcheck.mjs",
+    "overflow": "node overflow.mjs",
+    "lighthouse": "node lighthouse.mjs",
+    "lighthouse:summary": "node lighthouse-summary.mjs"
+  },
+  "dependencies": {
+    "lighthouse": "^13.5.0",
+    "playwright": "^1.64.0"
+  }
+}
