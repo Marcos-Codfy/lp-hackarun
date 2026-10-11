@@ -74,9 +74,9 @@ export class StageWorld {
     return this.director.state;
   }
 
-  // o anel fica escondido até o clímax: na compilação adiantada ele precisa entrar na fila
-  setCompiling(compiling: boolean): void {
-    this.atmosphere.setCompiling(compiling);
+  // o anel fica escondido até o clímax: no aquecimento ele precisa aparecer (o compile já pega tudo)
+  setPriming(priming: boolean): void {
+    this.atmosphere.setPriming(priming);
   }
 
   setEffects(level: EffectsLevel): void {

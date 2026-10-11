@@ -1,6 +1,7 @@
 import type { Camera, Material, Scene, WebGLRenderer, WebGLRenderTarget } from 'three';
 import type { EffectsLevel } from '../quality/QualityProfile';
 import type { PostState } from './PostState';
+import { scenePrimeSteps } from './scenePrime';
 
 // Strategy de render: direto (tier baixo) ou com composer (bloom + passe de lente)
 export interface RenderPipeline {
@@ -9,6 +10,9 @@ export interface RenderPipeline {
   readonly sceneTarget: WebGLRenderTarget | null;
   // materiais de tela cheia do pós (fora da cena): por alvo de render, pra compilar adiantado também
   passMaterials(): { offscreen: Material[]; screen: Material[] };
+  // o 1º frame em passos curtos (o palco cede a vez entre eles): aloca os alvos e sobe os buffers da cena
+  // antes de o canvas aparecer
+  primeSteps(): (() => void)[];
   setSize(width: number, height: number, dpr: number): void;
   render(state: PostState, delta: number): void;
   dispose(): void;
@@ -23,6 +27,10 @@ export class DirectPipeline implements RenderPipeline {
     return { offscreen: [], screen: [] };
   }
 
+  primeSteps(): (() => void)[] {
+    return scenePrimeSteps(this.renderer, this.scene, this.camera, null);
+  }
+
   constructor(
     private readonly renderer: WebGLRenderer,
     private readonly scene: Scene,
@@ -30,8 +38,7 @@ export class DirectPipeline implements RenderPipeline {
   ) {}
 
   setSize(width: number, height: number, dpr: number): void {
-    this.renderer.setPixelRatio(dpr);
-    this.renderer.setSize(width, height, false);
+    this.renderer.setDrawingBufferSize(width, height, dpr);
   }
 
   render(): void {

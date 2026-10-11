@@ -1,21 +1,27 @@
 import type { WebGLRenderer } from 'three';
 import type { AppContext } from '@presentation/app/AppContext';
 import type { QualityTier } from '@presentation/app/AppEvents';
-import { CanvasResizer } from './CanvasResizer';
+import { CanvasResizer, pixelRatioFor } from './CanvasResizer';
 import { FrameLoop } from './FrameLoop';
-import { StageRenderer } from './post/StageRenderer';
+import { logShaderError } from './post/shaderError';
+import type { StageRenderer } from './post/StageRenderer';
 import { AdaptiveQuality, type QualityTarget } from './quality/AdaptiveQuality';
 import type { EffectsLevel, QualityProfile } from './quality/QualityProfile';
 import { StageStatus } from './StageStatus';
-import { StageWorld, type WorldParts } from './StageWorld';
+import type { StageWorld } from './StageWorld';
+import { yieldToMain } from './yieldToMain';
 
-export interface StageParts extends WorldParts {
+export interface StageParts {
   renderer: WebGLRenderer;
+  world: StageWorld;
+  output: StageRenderer;
+  profile: QualityProfile;
   // tier forçado na URL (QA) não se rebaixa sozinho
   adaptive: boolean;
 }
 
-// Facade: o resto do app só enxerga start/dispose; aqui fica o ciclo de vida (loop, tamanho, qualidade, contexto)
+// Facade: o resto do app só enxerga start/dispose; aqui fica o ciclo de vida (loop, tamanho, qualidade, contexto).
+// O boot (compile → warm → start) vem em passos curtos, cada um na sua tarefa
 export class ExperienceStage implements QualityTarget {
   readonly tier: QualityTier;
   private readonly renderer: WebGLRenderer;
@@ -39,9 +45,9 @@ export class ExperienceStage implements QualityTarget {
     this.reduced = ctx.reducedMotion;
     this.dprCap = parts.profile.maxDpr;
 
-    this.world = new StageWorld(parts, ctx);
-    const { scene, camera } = this.world;
-    this.output = new StageRenderer(this.renderer, scene, camera, parts.profile.effects, this.onEffects);
+    this.world = parts.world;
+    this.output = parts.output;
+    this.output.onLevelChange(this.onEffects);
     this.world.setEffects(this.output.level);
     this.adaptive =
       this.reduced || !parts.adaptive
@@ -58,29 +64,34 @@ export class ExperienceStage implements QualityTarget {
     // shader que não compila não lança erro: sem isso o canvas ficaria vazio e o fallback sumiria
     this.renderer.debug.onShaderError = (gl, program, vertex, fragment) => {
       this.shaderError = true;
-      console.error(
-        '[experience] shader error',
-        gl.getProgramInfoLog(program),
-        gl.getShaderInfoLog(vertex),
-        gl.getShaderInfoLog(fragment),
-      );
+      logShaderError(gl, program, vertex, fragment);
     };
     this.renderer.domElement.addEventListener('webglcontextlost', this.onContextLost);
     this.renderer.domElement.addEventListener('webglcontextrestored', this.onContextRestored);
   }
 
+  // tamanho real + programas na fila da GPU (em paralelo, KHR_parallel_shader_compile); resolve quando
+  // todos estão linkados
+  async compile(): Promise<void> {
+    this.resizer.measureNow();
+    await yieldToMain();
+    await this.output.compile();
+  }
+
+  // já com as formas no lugar: 1º uso dos programas, upload dos buffers e 1º desenho, fora do 1º frame.
+  // programa que não linkou vira o mesmo shader-error do 1º frame
+  async warm(): Promise<void> {
+    this.world.setPriming(true);
+    try {
+      if (!(await this.output.warm())) this.shaderError = true;
+    } finally {
+      this.world.setPriming(false);
+    }
+  }
+
   start(onReady: () => void, onFail: (reason: string) => void): void {
     this.status.listen(onReady, onFail);
-    this.resizer.measureNow();
-    // o shader das partículas é grande: compila em paralelo (KHR_parallel_shader_compile) sem congelar a página
-    this.world.setCompiling(true);
-    void this.output
-      .compile()
-      .catch(() => undefined)
-      .then(() => {
-        this.world.setCompiling(false);
-        if (!this.disposed) this.loop.start();
-      });
+    if (!this.disposed) this.loop.start();
   }
 
   degradeEffects(): boolean {
@@ -132,7 +143,7 @@ export class ExperienceStage implements QualityTarget {
 
   private readonly applySize = (width: number, height: number): void => {
     this.size = { width, height };
-    const dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
+    const dpr = pixelRatioFor(this.dprCap);
     this.output.setSize(width, height, dpr);
     this.world.resize(width, height, dpr);
     this.loop.invalidate();

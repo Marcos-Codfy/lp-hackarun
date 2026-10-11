@@ -28,9 +28,9 @@ export class Atmosphere {
     scene.add(this.stars.points, this.bokeh.points, this.ring.mesh);
   }
 
-  // o anel fica invisível até o clímax: na compilação adiantada ele precisa aparecer pra entrar na fila
-  setCompiling(compiling: boolean): void {
-    this.ring.mesh.visible = compiling;
+  // o anel fica invisível até o clímax: no aquecimento ele aparece pra fazer o 1º desenho fora do clímax
+  setPriming(priming: boolean): void {
+    this.ring.mesh.visible = priming;
   }
 
   resize(heightPx: number, dpr: number): void {

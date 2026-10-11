@@ -1,7 +1,7 @@
-import { BufferAttribute, BufferGeometry, Points, type ShaderMaterial } from 'three';
+import { BufferAttribute, BufferGeometry, Points, Sphere, Vector3, type ShaderMaterial } from 'three';
 import type { SceneKey } from '@presentation/app/AppEvents';
-import { seededRandom } from '@shared/utils/math';
-import type { ShapeFactory } from '../shapes/ShapeFactory';
+import { SHAPE_RADIUS } from '../shapes/ShapeStrategy';
+import type { ParticleBuffers } from './ParticleBuffers';
 import { createParticleMaterial, type ParticleUniforms } from './ParticleMaterial';
 
 const ATTRIBUTE: Record<SceneKey, string> = {
@@ -29,52 +29,48 @@ export interface ParticleFrame {
   size: number;
 }
 
-// devolve a thread pro navegador entre uma forma e outra (sem travar input)
-const yieldToMain = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
-
 // um único THREE.Points com um alvo por cena; o morph inteiro acontece no vertex shader
 export class ParticleField {
   readonly points: Points<BufferGeometry, ShaderMaterial>;
 
+  // "position" provisório: o three põe a presença dele na chave do programa, e o compile vem antes dos dados
+  private readonly geometry = new BufferGeometry().setAttribute(
+    'position',
+    new BufferAttribute(new Float32Array(3), 3),
+  );
+
   private constructor(
-    private readonly geometry: BufferGeometry,
+    private readonly keys: readonly SceneKey[],
     readonly uniforms: ParticleUniforms,
     material: ShaderMaterial,
   ) {
-    this.points = new Points(geometry, material);
+    this.points = new Points(this.geometry, material);
     // as posições reais saem do shader: o bounding box do CPU não serve pra culling
     this.points.frustumCulled = false;
+    // a esfera só entra na ordenação da cena, e aqui nem decide (renderOrder único): fixa, o three não
+    // varre as dezenas de milhares de pontos no 1º frame
+    this.geometry.boundingSphere = new Sphere(new Vector3(), SHAPE_RADIUS);
   }
 
-  static async create(
-    keys: readonly SceneKey[],
-    count: number,
-    factory: ShapeFactory,
-  ): Promise<ParticleField> {
-    const geometry = new BufferGeometry();
-    for (const key of keys) {
-      const target = new BufferAttribute(factory.build(key, count), 3);
+  // nasce sem dados: o programa depende só do material, então compila enquanto o worker gera as formas
+  static create(keys: readonly SceneKey[]): ParticleField {
+    const { material, uniforms } = createParticleMaterial(keys);
+    return new ParticleField(keys, uniforms, material);
+  }
+
+  fill(buffers: ParticleBuffers): void {
+    const geometry = this.geometry;
+    this.keys.forEach((key, i) => {
+      const data = buffers.targets[i];
+      // alvo faltando deixaria a forma colapsada na origem: melhor cair no fallback
+      if (!data) throw new Error(`missing particle target: ${key}`);
+      const target = new BufferAttribute(data, 3);
       geometry.setAttribute(ATTRIBUTE[key], target);
       // o three conta vértices pelo "position": reaproveita o primeiro alvo (mesmo buffer, sem upload extra)
-      if (!geometry.hasAttribute('position')) geometry.setAttribute('position', target);
-      await yieldToMain();
-    }
-
-    const random = seededRandom(20261111);
-    const seeds = new Float32Array(count * 3);
-    const scales = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      seeds[i * 3] = random() * 2 - 1;
-      seeds[i * 3 + 1] = random() * 2 - 1;
-      seeds[i * 3 + 2] = random() * 2 - 1;
-      // maioria pequena, umas poucas grandes que viram "estrelas"
-      scales[i] = 0.75 + Math.pow(random(), 6) * 1.25;
-    }
-    geometry.setAttribute('aSeed', new BufferAttribute(seeds, 3));
-    geometry.setAttribute('aScale', new BufferAttribute(scales, 1));
-
-    const { material, uniforms } = createParticleMaterial(keys);
-    return new ParticleField(geometry, uniforms, material);
+      if (i === 0) geometry.setAttribute('position', target);
+    });
+    geometry.setAttribute('aSeed', new BufferAttribute(buffers.seeds, 3));
+    geometry.setAttribute('aScale', new BufferAttribute(buffers.scales, 1));
   }
 
   update(frame: ParticleFrame): void {

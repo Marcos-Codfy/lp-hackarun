@@ -1,63 +1,121 @@
 import { WebGLRenderer } from 'three';
 import type { AppContext } from '@presentation/app/AppContext';
 import type { SceneKey } from '@presentation/app/AppEvents';
-import { ExperienceStage, type StageParts } from './ExperienceStage';
+import { ExperienceStage } from './ExperienceStage';
+import { answering } from './GpuContext';
+import type { ParticleBuffers } from './particles/ParticleBuffers';
 import { ParticleField } from './particles/ParticleField';
+import { StageCompiler } from './post/StageCompiler';
+import { StageRenderer } from './post/StageRenderer';
 import { QualityDetector } from './quality/QualityDetector';
 import { profileFor } from './quality/QualityProfile';
 import { SceneMixer } from './scene/SceneMixer';
-import { ShapeFactory } from './shapes/ShapeFactory';
+import { holdIndexOf } from './scene/SceneTrack';
+import type { Prelude, ShapeOrder } from './StagePrelude';
+import { StageWorld } from './StageWorld';
+import { yieldToMain } from './yieldToMain';
 
-// índice da seção que segura a carga (data-scene-hold); sem ela, o último core
-function holdIndexOf(sequence: readonly SceneKey[]): number {
-  // mesmo filtro do SceneDirector, pra o índice bater com a trilha
-  const known = new Set<string>(sequence);
-  const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).filter((el) =>
-    known.has(el.dataset['scene'] ?? ''),
-  );
-  const index = sections.findIndex((el) => el.hasAttribute('data-scene-hold'));
-  return index >= 0 ? index : sequence.lastIndexOf('core');
+interface Assembly {
+  stage: ExperienceStage;
+  field: ParticleField;
+  shapes: Promise<ParticleBuffers>;
 }
 
 // maior gl_PointSize que a GPU aceita (o bokeh grande respeita esse teto)
-function maxPointSizeOf(renderer: WebGLRenderer): number {
-  const gl = renderer.getContext();
+function maxPointSizeOf(gl: WebGL2RenderingContext): number {
   const range = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE) as Float32Array | null;
   return Math.max(16, range?.[1] ?? 64);
 }
 
-// Builder: renderer → tier → formas (assíncrono, uma por vez) → palco pronto pra start()
-export async function buildStage(canvas: HTMLCanvasElement, ctx: AppContext): Promise<ExperienceStage> {
-  // sem WebGL2 (three r163+) o construtor lança: quem chama cai no fallback em CSS.
-  // canvas opaco e preto: a luz compõe sobre a aurora em "screen" (sem briga de alpha pré-multiplicado)
-  const renderer = new WebGLRenderer({
-    canvas,
-    alpha: false,
-    antialias: false,
-    powerPreference: 'high-performance',
-  });
+// o palpite de tier (sem o nome da GPU) errou: refaz com a contagem certa
+function shapesFor(order: ShapeOrder, keys: readonly SceneKey[], count: number): Promise<ParticleBuffers> {
+  if (count === order.count) return order.buffers;
+  order.source.cancel();
+  return order.source.request(keys, count);
+}
+
+// fase 1: renderer → tier → peças do palco, cada uma numa tarefa própria. As consultas síncronas que o
+// construtor e o detector fariam já vieram respondidas do prelúdio.
+// Canvas opaco e preto: a luz compõe sobre a aurora em "screen" (sem briga de alpha pré-multiplicado)
+async function assemble(canvas: HTMLCanvasElement, ctx: AppContext, prelude: Prelude): Promise<Assembly> {
+  const { context, answers, track, shapes: order } = prelude;
+  const renderer = answering(
+    context,
+    answers,
+    () =>
+      new WebGLRenderer({
+        canvas,
+        context,
+        alpha: false,
+        antialias: false,
+        powerPreference: 'high-performance',
+      }),
+  );
   try {
+    await yieldToMain();
     renderer.setClearColor(0x000000, 1);
-    const detector = new QualityDetector(renderer.getContext(), ctx.coarsePointer);
-    const profile = profileFor(detector.detect());
-    const sequence: readonly SceneKey[] = ctx.scenes.keys.length > 0 ? ctx.scenes.keys : ['core'];
-    // core aparece no começo e no fim, mas vira um atributo só
-    const keys = [...new Set(sequence)];
+    const detector = new QualityDetector(context, ctx.coarsePointer);
+    const { tier, maxPointSize } = answering(context, answers, () => ({
+      tier: detector.detect(),
+      maxPointSize: maxPointSizeOf(context),
+    }));
+    const profile = profileFor(tier);
+    const { sequence, keys } = track;
+    const shapes = shapesFor(order, keys, profile.count);
+    await yieldToMain();
+
+    const field = ParticleField.create(keys);
+    await yieldToMain();
+    // o programa das partículas leva segundos na GPU: entra na fila já, antes do resto do palco existir
+    StageCompiler.queueAhead(renderer, field.points, profile.effects !== 'off');
+    await yieldToMain();
     const mixer = new SceneMixer(sequence, keys);
-    const field = await ParticleField.create(keys, profile.count, ShapeFactory.createDefault());
-    const parts: StageParts = {
-      renderer,
-      field,
-      mixer,
-      keys,
-      profile,
-      adaptive: !detector.forced,
-      holdIndex: holdIndexOf(sequence),
-      maxPointSize: maxPointSizeOf(renderer),
-    };
-    return new ExperienceStage(parts, ctx);
+    const world = new StageWorld(
+      { field, mixer, keys, profile, holdIndex: holdIndexOf(sequence), maxPointSize },
+      ctx,
+    );
+    await yieldToMain();
+    const output = new StageRenderer(renderer, world.scene, world.camera, profile.effects);
+    await yieldToMain();
+    const stage = new ExperienceStage({ renderer, world, output, profile, adaptive: !detector.forced }, ctx);
+    return { stage, field, shapes };
   } catch (error) {
     renderer.dispose();
+    throw error;
+  }
+}
+
+// fase 2: o resto dos programas compila enquanto o worker termina as formas.
+// Compilar mal não trava o boot (o erro de shader aparece no 1º frame e cai no fallback)
+async function prepare({ stage, field, shapes }: Assembly): Promise<void> {
+  const compiled = stage.compile().catch(() => undefined);
+  field.fill(await shapes);
+  await compiled;
+  await yieldToMain();
+  await stage.warm();
+}
+
+export async function buildStage(
+  canvas: HTMLCanvasElement,
+  ctx: AppContext,
+  prelude: Prelude,
+): Promise<ExperienceStage> {
+  // avaliar o chunk do three acabou de ocupar uma tarefa inteira
+  await yieldToMain();
+  let assembly: Assembly;
+  try {
+    assembly = await assemble(canvas, ctx, prelude);
+  } catch (error) {
+    prelude.shapes.source.cancel();
+    throw error;
+  }
+  try {
+    await prepare(assembly);
+    return assembly.stage;
+  } catch (error) {
+    // daqui em diante o palco é dono do renderer
+    prelude.shapes.source.cancel();
+    assembly.stage.dispose();
     throw error;
   }
 }

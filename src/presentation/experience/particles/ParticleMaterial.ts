@@ -1,6 +1,6 @@
 import { ShaderMaterial, Vector2, Vector3, type IUniform, type Vector4 } from 'three';
 import type { SceneKey } from '@presentation/app/AppEvents';
-import { CORE_CODE_LEVELS, CORE_CODE_SPAN, CORE_VEIL_RIBBON } from '../shapes/CoreShape';
+import { CORE_CODE_LEVELS, CORE_CODE_SPAN, CORE_VEIL_RIBBON } from '../shapes/CoreCode';
 import { SHAPE_RADIUS } from '../shapes/ShapeStrategy';
 import commonGlsl from '../shaders/common.glsl?raw';
 import noiseGlsl from '../shaders/noise.glsl?raw';

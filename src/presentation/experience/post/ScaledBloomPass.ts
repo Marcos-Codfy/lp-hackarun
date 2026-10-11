@@ -1,4 +1,4 @@
-import { Vector2, type Color } from 'three';
+import { Vector2, type Color, type WebGLRenderTarget } from 'three';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import type { PostState } from './PostState';
 
@@ -18,6 +18,10 @@ export class ScaledBloomPass extends UnrealBloomPass {
     this.width = width;
     this.height = height;
     super.setSize(Math.max(2, Math.round(width * this.scale)), Math.max(2, Math.round(height * this.scale)));
+  }
+
+  get renderTargets(): WebGLRenderTarget[] {
+    return [this.renderTargetBright, ...this.renderTargetsHorizontal, ...this.renderTargetsVertical];
   }
 
   setScale(scale: number): void {

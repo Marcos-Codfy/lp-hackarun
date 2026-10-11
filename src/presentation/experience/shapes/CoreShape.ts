@@ -1,11 +1,6 @@
+import { CORE_CODE_LEVELS, CORE_CODE_SPAN, CORE_VEIL_RIBBON } from './CoreCode';
 import { SHAPE_RADIUS, type ShapeStrategy } from './ShapeStrategy';
 import { PointWriter, TAU, type Random, type Vec3 } from './sampling';
-
-// faixa do raio que guarda o código da fita (core.glsl decodifica e recalcula a casca)
-export const CORE_CODE_SPAN = 0.25;
-// código = fita * 16 + linha na largura (0..15) + posição ao longo do arco (fração)
-export const CORE_CODE_LEVELS = 1024;
-export const CORE_VEIL_RIBBON = 63;
 
 const RIBBONS = 10;
 // pontos soltos que desenham a silhueta inteira (o fresnel do shader acende só a borda)

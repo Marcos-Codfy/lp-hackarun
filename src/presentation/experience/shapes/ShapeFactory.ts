@@ -43,9 +43,17 @@ export class ShapeFactory {
   }
 
   build(key: SceneKey, count: number): Float32Array {
+    return this.order(this.generate(key, count), count);
+  }
+
+  // os dois passos separados deixam quem chama respirar entre eles (fallback sem worker)
+  generate(key: SceneKey, count: number): Float32Array {
     const strategy = this.registry.get(key) ?? this.registry.get('dust');
     if (!strategy) return new Float32Array(count * 3);
-    const points = strategy.generate(count, seededRandom(seedOf(key)));
+    return strategy.generate(count, seededRandom(seedOf(key)));
+  }
+
+  order(points: Float32Array, count: number): Float32Array {
     return coherentOrder(points, this.permutationFor(count));
   }
 

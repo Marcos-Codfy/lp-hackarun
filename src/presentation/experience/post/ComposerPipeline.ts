@@ -2,6 +2,7 @@ import type { Camera, Material, Scene, WebGLRenderer, WebGLRenderTarget } from '
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import type { RenderPipeline } from './RenderPipeline';
+import { scenePrimeSteps } from './scenePrime';
 import { CinematicPass } from './CinematicPass';
 import type { PostState } from './PostState';
 import { ScaledBloomPass } from './ScaledBloomPass';
@@ -15,9 +16,9 @@ export class ComposerPipeline implements RenderPipeline {
   private readonly lens = new CinematicPass();
 
   constructor(
-    renderer: WebGLRenderer,
-    scene: Scene,
-    camera: Camera,
+    private readonly renderer: WebGLRenderer,
+    private readonly scene: Scene,
+    private readonly camera: Camera,
     public level: 'full' | 'half',
   ) {
     this.composer = new EffectComposer(renderer);
@@ -44,6 +45,27 @@ export class ComposerPipeline implements RenderPipeline {
     };
   }
 
+  // os alvos alocados vazios, cada objeto da cena no buffer de leitura e o pós em duas passadas (só a
+  // lente, depois com o bloom): o 1º uso de cada coisa numa tarefa. Nada aparece, o canvas está invisível
+  primeSteps(): (() => void)[] {
+    const renderer = this.renderer;
+    const { readBuffer, writeBuffer } = this.composer;
+    const targets = [readBuffer, writeBuffer, ...this.bloom.renderTargets];
+    return [
+      () => targets.forEach((target) => renderer.initRenderTarget(target)),
+      ...scenePrimeSteps(renderer, this.scene, this.camera, readBuffer),
+      () => {
+        this.bloom.enabled = false;
+        try {
+          this.composer.render(0);
+        } finally {
+          this.bloom.enabled = true;
+        }
+      },
+      () => this.composer.render(0),
+    ];
+  }
+
   // full → half; devolve false quando já está no mínimo do composer
   reduce(): boolean {
     if (this.level !== 'full') return false;
@@ -53,9 +75,8 @@ export class ComposerPipeline implements RenderPipeline {
   }
 
   setSize(width: number, height: number, dpr: number): void {
-    const renderer = this.composer.renderer;
-    renderer.setPixelRatio(dpr);
-    renderer.setSize(width, height, false);
+    // um ajuste só no canvas (setPixelRatio + setSize realocavam o buffer de desenho duas vezes)
+    this.renderer.setDrawingBufferSize(width, height, dpr);
     this.composer.setPixelRatio(dpr);
     this.composer.setSize(width, height);
   }

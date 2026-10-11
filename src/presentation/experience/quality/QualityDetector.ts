@@ -21,6 +21,25 @@ const forcedTier = (): QualityTier | null => {
   return forced === 'low' || forced === 'medium' || forced === 'high' ? forced : null;
 };
 
+function deviceHints(coarse: boolean): DeviceHints {
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  return {
+    cores: nav.hardwareConcurrency || 4,
+    memory: nav.deviceMemory,
+    coarse,
+    smallScreen: Math.min(screen.width, screen.height) < 600,
+  };
+}
+
+const capableByHints = (hints: DeviceHints): boolean => hints.cores >= 8 && (hints.memory ?? 4) >= 6;
+
+const lowSpec = (hints: DeviceHints): boolean =>
+  hints.cores <= 2 || (hints.memory !== undefined && hints.memory < 4);
+
+// desktop com GPU comum (nem fraca nem forte): decide pelos núcleos
+const desktopByHints = (hints: DeviceHints): QualityTier =>
+  !lowSpec(hints) && hints.cores >= 8 ? 'high' : 'medium';
+
 // tier inicial pelo aparelho; ?quality=low|medium|high força um tier e trava o ajuste por FPS (QA)
 export class QualityDetector {
   readonly forced = forcedTier() !== null;
@@ -30,32 +49,32 @@ export class QualityDetector {
     private readonly coarsePointer: boolean,
   ) {}
 
+  // palpite antes de existir contexto (sem o nome da GPU): tamanho do canvas e contagem das formas no worker.
+  // Segue o detect no caso de GPU comum; errar só custa refazer as formas
+  static guess(coarsePointer: boolean): QualityTier {
+    const forced = forcedTier();
+    if (forced) return forced;
+    const hints = deviceHints(coarsePointer);
+    if (hints.coarse || hints.smallScreen) return capableByHints(hints) ? 'medium' : 'low';
+    return desktopByHints(hints);
+  }
+
   detect(): QualityTier {
     const forced = forcedTier();
     if (forced) return forced;
 
     const gpu = this.gpuName();
     if (SOFTWARE_GPU.test(gpu)) return 'low';
-    const hints = this.hints();
+    const hints = deviceHints(this.coarsePointer);
     const weak = WEAK_GPU.test(gpu);
 
     if (hints.coarse || hints.smallScreen) {
-      const capable = CAPABLE_MOBILE_GPU.test(gpu) || (hints.cores >= 8 && (hints.memory ?? 4) >= 6 && !weak);
+      const capable = CAPABLE_MOBILE_GPU.test(gpu) || (capableByHints(hints) && !weak);
       return capable ? 'medium' : 'low';
     }
-    if (weak || hints.cores <= 2 || (hints.memory !== undefined && hints.memory < 4)) return 'medium';
+    if (weak || lowSpec(hints)) return 'medium';
     if (STRONG_GPU.test(gpu)) return 'high';
-    return hints.cores >= 8 ? 'high' : 'medium';
-  }
-
-  private hints(): DeviceHints {
-    const nav = navigator as Navigator & { deviceMemory?: number };
-    return {
-      cores: nav.hardwareConcurrency || 4,
-      memory: nav.deviceMemory,
-      coarse: this.coarsePointer,
-      smallScreen: Math.min(screen.width, screen.height) < 600,
-    };
+    return desktopByHints(hints);
   }
 
   // o RENDERER puro já vem desmascarado no Firefox; a extensão só se o nome for genérico
