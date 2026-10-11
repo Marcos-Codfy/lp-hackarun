@@ -7,30 +7,35 @@ import type {
   RegistrationFormState,
   RegistrationFormViewModel,
 } from '@presentation/view-models/registration/RegistrationFormViewModel';
+import { ClosedLobby } from './registration/ClosedLobby';
 import { ErrorPresenter } from './registration/ErrorPresenter';
 import { MemberRows } from './registration/MemberRows';
+import { SubmitStatusPresenter } from './registration/SubmitStatusPresenter';
 import { controlFor } from './registration/fieldLookup';
-import { ProtocolReveal } from './registration/ProtocolReveal';
 
 // [data-registration-form]: liga o DOM ao VM; valores moram nos inputs, o VM só espelha
 export class RegistrationFormView {
   private readonly root: HTMLElement;
   private readonly vm: RegistrationFormViewModel;
-  private readonly bus: EventBus<AppEvents>;
   private readonly errors: ErrorPresenter;
+  private readonly status: SubmitStatusPresenter;
+  private readonly lobby: ClosedLobby;
   private rows: MemberRows | null = null;
   private lastFocusSeq = 0;
 
   constructor(root: HTMLElement, vm: RegistrationFormViewModel, bus: EventBus<AppEvents>) {
     this.root = root;
     this.vm = vm;
-    this.bus = bus;
     this.errors = new ErrorPresenter(root);
+    this.status = new SubmitStatusPresenter(root, bus);
+    this.lobby = new ClosedLobby(root);
   }
 
   mount(): void {
     const form = qs<HTMLFormElement>('[data-reg-form]', this.root);
+    // o build já fechou (ou ainda não abriu): o HTML estático basta
     if (!form || !this.vm.isOpen) return;
+    this.vm.refreshAvailability();
     const list = qs('[data-members-list]', this.root);
     const template = qs<HTMLTemplateElement>('template[data-member-template]', this.root);
     if (list && template) {
@@ -115,6 +120,10 @@ export class RegistrationFormView {
   }
 
   private render(state: RegistrationFormState, prev: RegistrationFormState | null): void {
+    if (!state.open) {
+      if (!prev || prev.open) this.lobby.show();
+      return;
+    }
     const { fields } = state;
     if (!prev || prev.fields.members !== fields.members || prev.canRemoveMember !== state.canRemoveMember) {
       this.rows?.sync(fields.members, state.canRemoveMember);
@@ -125,7 +134,7 @@ export class RegistrationFormView {
     this.renderCounters(state);
     this.errors.render(state.errors);
     this.errors.renderSummary(state.attempted, state.orderedErrors);
-    if (!prev || prev.status !== state.status) this.renderStatus(state);
+    if (!prev || prev.status !== state.status) this.status.render(state);
     if (state.focus && state.focus.seq !== this.lastFocusSeq) {
       this.lastFocusSeq = state.focus.seq;
       this.focusPath(state.focus.path, state.focus.reason === 'invalid');
@@ -145,47 +154,13 @@ export class RegistrationFormView {
     if (addLabel) addLabel.textContent = state.canAddMember ? 'Adicionar integrante' : 'Equipe completa';
   }
 
-  private renderStatus(state: RegistrationFormState): void {
-    const submitting = state.status === 'submitting';
-    this.root.classList.toggle('is-submitting', submitting);
-    const submit = qs('[data-reg-submit]', this.root);
-    submit?.setAttribute('aria-disabled', String(submitting));
-    const label = submit ? qs('.btn__label', submit) : null;
-    if (label) label.textContent = submitting ? 'Enviando' : 'Confirmar inscrição';
-    const failure = qs('[data-reg-failure]', this.root);
-    if (failure) failure.hidden = state.status !== 'error';
-    const failureText = qs('[data-reg-failure-text]', this.root);
-    if (failureText) failureText.textContent = state.failure ?? '';
-    if (submitting) this.announce('Enviando inscrição…');
-    if (state.status === 'success') this.showSuccess(state.protocol ?? '');
-  }
-
-  private showSuccess(protocol: string): void {
-    const form = qs('[data-reg-form]', this.root);
-    const success = qs('[data-reg-success]', this.root);
-    if (!form || !success) return;
-    // cópia fiel pro leitor de tela; a visível "decodifica" com clique de tecla
-    const code = qs('[data-reg-protocol]', success);
-    if (code) code.textContent = protocol;
-    const typed = qs('[data-reg-protocol-typed]', success);
-    form.hidden = true;
-    success.hidden = false;
-    this.announce(`Inscrição recebida. Protocolo ${protocol}.`);
-    qs('[data-reg-success-title]', success)?.focus();
-    if (typed) new ProtocolReveal(typed, this.bus).play(protocol);
-    this.bus.emit('registration:submitted', { protocol });
-  }
-
   private focusPath(path: string, announceErrors: boolean): void {
     controlFor(this.root, path)?.focus();
     const count = this.vm.state.value.orderedErrors.length;
     if (announceErrors && count > 0) {
-      this.announce(count === 1 ? '1 campo precisa de ajuste.' : `${count} campos precisam de ajuste.`);
+      this.status.announce(
+        count === 1 ? '1 campo precisa de ajuste.' : `${count} campos precisam de ajuste.`,
+      );
     }
-  }
-
-  private announce(text: string): void {
-    const live = qs('[data-reg-live]', this.root);
-    if (live) live.textContent = text;
   }
 }

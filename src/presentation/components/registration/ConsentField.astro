@@ -31,9 +31,9 @@
     display: grid;
     gap: var(--space-2);
     padding: var(--space-4);
-    border: 1px solid rgb(140 160 255 / 0.14);
+    border: 1px solid var(--surface-line);
     border-radius: 3px;
-    background: rgb(4 6 22 / 0.5);
+    background: var(--surface-well);
   }
 
   .consent__label {
@@ -62,27 +62,42 @@
   }
 
   .consent__box {
+    position: relative;
     width: 24px;
     height: 24px;
-    border: 1.5px solid rgb(0 229 255 / 0.6);
+    border: 1.5px solid color-mix(in srgb, var(--c-cyan) 60%, transparent);
     border-radius: 3px;
-    background: rgb(6 9 30 / 0.9);
+    background: var(--surface-solid);
     transition:
       background var(--dur-fast) var(--ease-out),
       box-shadow var(--dur-fast) var(--ease-out);
   }
 
+  /* o check é uma máscara pintada com cor (token aqui, cor do sistema no alto contraste) */
+  .consent__box::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--c-void);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.5 3.2 3L13 4.5' fill='none' stroke='%23000' stroke-width='2.4'/%3E%3C/svg%3E")
+      center / 14px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.5 3.2 3L13 4.5' fill='none' stroke='%23000' stroke-width='2.4'/%3E%3C/svg%3E")
+      center / 14px no-repeat;
+    opacity: 0;
+  }
+
   .consent__input:checked + .consent__box {
     border-color: var(--c-cyan);
-    background:
-      no-repeat center / 14px
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.5 3.2 3L13 4.5' fill='none' stroke='%2302030b' stroke-width='2.4'/%3E%3C/svg%3E"),
-      var(--grad-blue);
-    box-shadow: 0 0 18px rgb(0 229 255 / 0.5);
+    background: var(--grad-blue);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--c-cyan) 50%, transparent);
+  }
+
+  .consent__input:checked + .consent__box::after {
+    opacity: 1;
   }
 
   .consent__label:hover .consent__box {
-    box-shadow: 0 0 14px rgb(0 229 255 / 0.3);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--c-cyan) 30%, transparent);
   }
 
   .consent__input:focus-visible + .consent__box {
@@ -92,7 +107,7 @@
 
   .consent__input[aria-invalid='true'] + .consent__box {
     border-color: var(--c-danger);
-    box-shadow: 0 0 16px rgb(255 77 141 / 0.35);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--c-danger) 35%, transparent);
   }
 
   .consent__link {
@@ -112,8 +127,34 @@
   }
 
   .consent__error {
-    color: #ff8ab3;
+    color: var(--ink-danger);
     font-size: var(--fs-xs);
     font-weight: 600;
+  }
+
+  /* alto contraste do Windows: degradê e sombra somem e o input é invisível (opacity 0), então
+     marcado e foco precisam de cor do sistema na caixa */
+  @media (forced-colors: active) {
+    .consent__box {
+      border-color: CanvasText;
+    }
+
+    .consent__box::after {
+      background: HighlightText;
+    }
+
+    .consent__input:checked + .consent__box {
+      border-color: Highlight;
+      background: Highlight;
+    }
+
+    .consent__input:focus-visible + .consent__box {
+      outline: 2px solid CanvasText;
+      outline-offset: 3px;
+    }
+
+    .consent__input[aria-invalid='true'] + .consent__box {
+      border-width: 3px;
+    }
   }
 </style>

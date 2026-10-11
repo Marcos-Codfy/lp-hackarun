@@ -1,4 +1,4 @@
-// monta as Views MVVM (contador, som, equipes, inscrição, HUD, NPCs) em cima do container do cliente
+// monta as Views MVVM (pausa das animações, contador, som, equipes, inscrição, HUD, NPCs) sobre o container
 import type { SlotsDTO } from '@application/index';
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { qs, qsa, readJsonAttr } from '@shared/utils/dom';
@@ -10,6 +10,7 @@ import { TeamsViewModel, type PublicTeam } from '@presentation/view-models/teams
 import { RegistrationFormViewModel } from '@presentation/view-models/registration/RegistrationFormViewModel';
 import { HudViewModel } from '@presentation/view-models/hud/HudViewModel';
 import { NpcHuntViewModel } from '@presentation/view-models/npc/NpcHuntViewModel';
+import { MotionPreferenceViewModel } from '@presentation/view-models/motion/MotionPreferenceViewModel';
 import { CountdownView } from './CountdownView';
 import { SoundToggleView } from './SoundToggleView';
 import { TeamsView } from './TeamsView';
@@ -19,12 +20,15 @@ import { ChargeRevealView } from './ChargeRevealView';
 import { HudView } from './HudView';
 import { NpcTokenView } from './NpcTokenView';
 import { SoundBusBinder } from './SoundBusBinder';
+import { MotionPreferenceView } from './motion/MotionPreferenceView';
 
 // guarda o container e os VMs que mais de uma View usa (som, NPC) entre os passos do boot
 class ViewMounter {
   private c: ClientContainer | null = null;
   private npc: NpcHuntViewModel | null = null;
   private form: RegistrationFormView | null = null;
+  // lista ao vivo das equipes: vagas esgotadas na planilha fecham o formulário
+  private teamsVm: TeamsViewModel | null = null;
 
   constructor(private readonly ctx: AppContext) {}
 
@@ -37,6 +41,13 @@ class ViewMounter {
       return;
     }
     this.npc = new NpcHuntViewModel({ store: this.c.preferences, bus: this.ctx.bus });
+  }
+
+  // logo no começo: quem pausou na visita anterior não vê os loops rodando enquanto o resto monta
+  motion(c: ClientContainer): void {
+    const { bus, reducedMotion } = this.ctx;
+    const vm = new MotionPreferenceViewModel({ store: c.preferences, bus, reducedMotion });
+    new MotionPreferenceView(vm, qsa<HTMLButtonElement>('[data-motion-toggle]')).mount();
   }
 
   countdown(c: ClientContainer): void {
@@ -97,6 +108,9 @@ class ViewMounter {
     const view = new RegistrationFormView(root, vm, this.ctx.bus);
     view.mount();
     this.form = view;
+    this.teamsVm?.state.subscribe((state) => {
+      if (state.status === 'ready') vm.refreshAvailability(state.slots.taken);
+    });
   }
 
   teams(c: ClientContainer): void {
@@ -107,6 +121,7 @@ class ViewMounter {
         slots: readJsonAttr<SlotsDTO>(root, 'data-teams-slots', fallbackSlots),
         listTeams: c.listTeams,
       });
+      this.teamsVm ??= vm;
       new TeamsView(root, vm).mount();
     });
   }
@@ -123,6 +138,10 @@ class ViewMounter {
 export function mountViews(ctx: AppContext, boot: BootSteps): void {
   const views = new ViewMounter(ctx);
   boot.add('views container', () => views.container());
+  boot.add(
+    'motion',
+    views.withContainer((c) => views.motion(c)),
+  );
   boot.add(
     'countdown',
     views.withContainer((c) => views.countdown(c)),

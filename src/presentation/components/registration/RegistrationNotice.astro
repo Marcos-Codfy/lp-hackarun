@@ -12,7 +12,7 @@ const { status, simulated } = Astro.props;
 ---
 
 {status === 'closing' && (
-  <p class="notice-badge">
+  <p class="notice-badge" data-reg-closing-badge>
     <span class="notice-badge__dot" aria-hidden="true" />
     Últimas horas · as inscrições estão quase fechando
   </p>

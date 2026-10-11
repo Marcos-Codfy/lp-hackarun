@@ -1,6 +1,6 @@
 import {
+  RETRYABLE_FAILURES,
   RegistrationGatewayError,
-  type GatewayFailure,
   type RegistrationGateway,
   type RegistrationPayload,
   type RegistrationReceipt,
@@ -14,9 +14,8 @@ export interface RetryOptions {
   random?: () => number;
 }
 
-const RETRYABLE: ReadonlySet<GatewayFailure> = new Set(['network', 'rate-limited']);
-
-// decorator: tenta de novo só o que é passageiro (rede, fila cheia), com backoff exponencial + jitter
+// decorator: tenta de novo só o que é passageiro (rede, servidor, fila cheia), com backoff exponencial + jitter.
+// o payload é o mesmo (mesma chave de idempotência), então o servidor nunca grava duas vezes
 export class RetryingRegistrationGateway implements RegistrationGateway {
   private readonly inner: RegistrationGateway;
   private readonly attempts: number;
@@ -49,6 +48,6 @@ export class RetryingRegistrationGateway implements RegistrationGateway {
   }
 
   private static isRetryable(error: unknown): boolean {
-    return error instanceof RegistrationGatewayError && RETRYABLE.has(error.kind);
+    return error instanceof RegistrationGatewayError && RETRYABLE_FAILURES.has(error.kind);
   }
 }

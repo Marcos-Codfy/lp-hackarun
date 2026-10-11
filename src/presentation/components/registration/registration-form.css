@@ -3,6 +3,8 @@
   position: relative;
   isolation: isolate;
   display: grid;
+  /* minmax(0): botão nowrap não pode alargar a trilha e vazar a tela em 360px */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
   transition: transform var(--dur-slow) var(--ease-out);
 }
@@ -28,7 +30,19 @@
 /* sem vidro próprio: a moldura (LobbyPanel) é de quem hospeda */
 .regform__panel {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
+}
+
+/* no form o rótulo do botão quebra linha em vez de empurrar o layout */
+.regform .btn {
+  max-width: 100%;
+}
+
+.regform .btn__label {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
 }
 
 /* barra de status do esquadrão, estilo lobby de jogo */

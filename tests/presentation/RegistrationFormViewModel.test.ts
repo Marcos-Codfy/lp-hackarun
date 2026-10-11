@@ -1,31 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { RegistrationGatewayError, SubmitRegistration } from '@application/index';
-import { RegistrationFormViewModel } from '@presentation/view-models/registration/RegistrationFormViewModel';
-import { FakeGateway, ManualClock, TEAM_SIZE } from '../helpers/fixtures';
-
-function setup(options: { isOpen?: boolean } = {}) {
-  const clock = new ManualClock('2026-11-01T12:00:00Z');
-  const gateway = new FakeGateway();
-  const submit = new SubmitRegistration({ gateway, clock, teamSize: TEAM_SIZE });
-  const vm = new RegistrationFormViewModel({
-    submit,
-    teamSize: TEAM_SIZE,
-    isOpen: options.isOpen ?? true,
-    clock,
-  });
-  return { vm, gateway, clock };
-}
-
-function fillValidTeam(vm: RegistrationFormViewModel): void {
-  vm.setText('teamName', 'Bug Busters');
-  vm.setText('leader.name', 'Ana Souza');
-  vm.setText('leader.email', 'ana@exemplo.com');
-  vm.setText('leader.phone', '63999991234');
-  vm.setText('leader.course', 'Engenharia de Software');
-  vm.setText('members.0.name', 'Bruno Lima');
-  vm.setText('members.0.email', 'bruno@exemplo.com');
-  vm.setAcceptedTerms(true);
-}
+import { MIN_FILL_MS, RegistrationGatewayError } from '@application/index';
+import { TEAM_SIZE } from '../helpers/fixtures';
+import { fillValidTeam, setupForm as setup } from './registration/formSetup';
 
 describe('RegistrationFormViewModel · integrantes', () => {
   it('começa com o mínimo de linhas (o líder conta como 1)', () => {
@@ -129,10 +105,41 @@ describe('RegistrationFormViewModel · envio', () => {
     fillValidTeam(vm);
     gateway.willThrow(new RegistrationGatewayError('network', 'offline')).willReturn('HR26-RETRY2');
     await vm.submit();
-    expect(vm.state.value.status).toBe('error');
+    expect(vm.state.value).toMatchObject({ status: 'error', retryable: true });
     expect(vm.state.value.failure).toContain('conexão');
     await vm.retry();
     expect(vm.state.value).toMatchObject({ status: 'success', protocol: 'HR26-RETRY2', failure: null });
+  });
+
+  it('o "Tentar de novo" manda a mesma chave; depois do sucesso a chave troca', async () => {
+    const { vm, gateway, newKey } = setup();
+    fillValidTeam(vm);
+    gateway
+      .willThrow(new RegistrationGatewayError('server', 'x'))
+      .willThrow(new RegistrationGatewayError('network', 'x'));
+    await vm.submit();
+    await vm.retry();
+    await vm.retry();
+    expect(gateway.calls.map((c) => c.idempotencyKey)).toEqual(['chave-0001', 'chave-0001', 'chave-0001']);
+    expect(vm.state.value.status).toBe('success');
+    expect(newKey).toHaveBeenCalledTimes(2);
+  });
+
+  it('erro do servidor é passageiro: mensagem própria, com "Tentar de novo"', async () => {
+    const { vm, gateway } = setup();
+    fillValidTeam(vm);
+    gateway.willThrow(new RegistrationGatewayError('server', 'x'));
+    await vm.submit();
+    expect(vm.state.value).toMatchObject({ status: 'error', retryable: true });
+    expect(vm.state.value.failure).not.toMatch(/recusad/i);
+  });
+
+  it('e-mail repetido não oferece "Tentar de novo" (o caminho é corrigir)', async () => {
+    const { vm, gateway } = setup();
+    fillValidTeam(vm);
+    gateway.willThrow(new RegistrationGatewayError('duplicate', 'x'));
+    await vm.submit();
+    expect(vm.state.value).toMatchObject({ status: 'error', retryable: false });
   });
 
   it('honeypot preenchido vai junto pro servidor decidir', async () => {
@@ -141,6 +148,25 @@ describe('RegistrationFormViewModel · envio', () => {
     vm.setText('honeypot', 'http://spam.example');
     await vm.submit();
     expect(gateway.calls[0]?.honeypot).toBe('http://spam.example');
+  });
+
+  it('tempo do anti-robô conta desde que o formulário montou, não do primeiro toque', async () => {
+    const { vm, gateway, clock, sleep } = setup();
+    clock.advance(5_000);
+    fillValidTeam(vm);
+    await vm.submit();
+    expect(gateway.calls[0]?.elapsedMs).toBe(5_000);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it('autofill + enviar na hora: espera o mínimo e envia, em vez de ser barrado', async () => {
+    const { vm, gateway, clock, sleep } = setup();
+    fillValidTeam(vm);
+    clock.advance(800);
+    await vm.submit();
+    expect(sleep).toHaveBeenCalledWith(MIN_FILL_MS - 800);
+    expect(gateway.calls[0]?.elapsedMs).toBe(MIN_FILL_MS);
+    expect(vm.state.value.status).toBe('success');
   });
 
   it('inscrição fechada não envia nada', async () => {

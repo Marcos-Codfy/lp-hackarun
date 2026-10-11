@@ -2,12 +2,14 @@
 // Cole no editor do Apps Script da planilha (Extensões > Apps Script) junto com Validation.gs e Limits.gs.
 
 const SHEET_NAME = 'Inscricoes';
+// prettier-ignore
 const HEADERS = [
   'Protocolo', 'Data/hora', 'Modalidade', 'Equipe', 'Lider', 'E-mail', 'WhatsApp',
   'Curso', 'Periodo', 'Integrantes', 'Qtde', 'Acessibilidade', 'Status', 'Origem', 'Consentimento',
+  'Chave de envio',
 ];
 // posição (base 0) de cada coluna no array de HEADERS
-const COL = { protocol: 0, mode: 2, team: 3, email: 5, course: 7, size: 10, status: 12 };
+const COL = { protocol: 0, mode: 2, team: 3, email: 5, course: 7, size: 10, status: 12, key: 15 };
 const STATUS_OPTIONS = ['pendente', 'confirmado', 'recusado'];
 const TEAMS_CACHE_KEY = 'teams:v1';
 const TEAMS_CACHE_SECONDS = 60;
@@ -29,8 +31,8 @@ function doPost(e) {
   }
   try {
     const cache = CacheService.getScriptCache();
-    // retry do mesmo envio (mesmo e-mail + mesmo horário do cliente) recebe o mesmo protocolo
-    const retryKey = 'sub:' + digest_(data.leader.email + '|' + String(body.submittedAt || ''));
+    // retry do mesmo envio recebe o mesmo protocolo (caminho rápido, sem ler a planilha)
+    const retryKey = 'sub:' + digest_(submissionId_(data, body));
     const previous = cache.get(retryKey);
     if (previous) return json_({ ok: true, protocol: previous });
     if (rateLimited_(cache, digest_(data.leader.email), Date.now())) {
@@ -39,12 +41,19 @@ function doPost(e) {
 
     const sheet = getSheet_();
     const rows = readRows_(sheet);
-    if (leaderEmailExists_(rows, data.leader.email)) return json_({ ok: false, error: 'duplicate' });
+    const existing = leaderRow_(rows, data.leader.email);
+    if (existing) {
+      // a resposta do primeiro envio se perdeu e o cache já foi: a chave gravada na linha reconhece o envio
+      if (!data.idempotencyKey || String(existing[COL.key]) !== data.idempotencyKey) {
+        return json_({ ok: false, error: 'duplicate' });
+      }
+      return accepted_(cache, retryKey, String(existing[COL.protocol]));
+    }
     if (capacityReached_(config, rows)) return json_({ ok: false, error: 'closed' });
     const protocol = newProtocol_(rows);
+    ensureHeaders_(sheet);
     sheet.appendRow(toRow_(protocol, data));
-    cache.put(retryKey, protocol, 600);
-    return json_({ ok: true, protocol: protocol });
+    return accepted_(cache, retryKey, protocol);
   } catch (err) {
     console.error(err);
     return json_({ ok: false, error: 'server' });
@@ -111,8 +120,26 @@ function readRows_(sheet) {
   return last > 1 ? sheet.getRange(2, 1, last - 1, HEADERS.length).getValues() : [];
 }
 
-function leaderEmailExists_(rows, email) {
-  return rows.some((r) => String(r[COL.email]).trim().toLowerCase() === email);
+// mesmo envio = mesma chave do formulário + mesmo e-mail; site antigo sem chave: e-mail + horário do cliente
+function submissionId_(data, body) {
+  if (data.idempotencyKey) return 'key|' + data.idempotencyKey + '|' + data.leader.email;
+  return data.leader.email + '|' + String(body.submittedAt || '');
+}
+
+function accepted_(cache, retryKey, protocol) {
+  cache.put(retryKey, protocol, 600);
+  return json_({ ok: true, protocol: protocol });
+}
+
+function leaderRow_(rows, email) {
+  return rows.find((r) => String(r[COL.email]).trim().toLowerCase() === email) || null;
+}
+
+// planilha criada antes de uma coluna nova: completa o título dela na primeira gravação
+function ensureHeaders_(sheet) {
+  const last = HEADERS.length;
+  const title = sheet.getRange(1, last).getValues()[0][0];
+  if (title === '' || title == null) sheet.getRange(1, last).setValues([[HEADERS[last - 1]]]);
 }
 
 // sem 0/O/1/I pra ninguém confundir ao ditar
@@ -146,6 +173,7 @@ function toRow_(protocol, data) {
     'pendente',
     sheetSafe_(data.source),
     sheetSafe_(data.consent),
+    data.idempotencyKey,
   ];
 }
 

@@ -14,6 +14,8 @@ export interface RegistrationPayload {
   // anti-spam: honeypot preenchido ou envio rápido demais = robô (o servidor decide)
   honeypot: string;
   elapsedMs: number;
+  // a mesma em todo reenvio do formulário: o servidor devolve o protocolo já gravado em vez de duplicar
+  idempotencyKey: string;
 }
 
 // metadados do envio que não fazem parte da inscrição em si
@@ -21,13 +23,15 @@ export interface SubmissionMeta {
   honeypot: string;
   elapsedMs: number;
   source?: string;
+  idempotencyKey?: string;
 }
 
 export interface RegistrationReceipt {
   protocol: string;
 }
 
-export type GatewayFailure = 'network' | 'rejected' | 'closed' | 'duplicate' | 'rate-limited';
+// server = o Apps Script quebrou no meio (planilha, cota): passageiro, diferente de "recusada"
+export type GatewayFailure = 'network' | 'server' | 'rejected' | 'closed' | 'duplicate' | 'rate-limited';
 
 export class RegistrationGatewayError extends Error {
   readonly kind: GatewayFailure;

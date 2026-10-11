@@ -3,6 +3,9 @@ import teamsData from '@infrastructure/content/teams.json';
 import type { RawTeam } from '@infrastructure/content/schema';
 import { GetCountdown, ListTeams, SubmitRegistration } from '@application/index';
 import type { Clock, RegistrationGateway } from '@application/index';
+import type { AudioCue } from '@application/ports/AudioCue';
+import type { PreferenceStore } from '@application/ports/PreferenceStore';
+import type { TickSound } from '@application/ports/TickSound';
 import type { AppConfig } from '@presentation/app/AppConfig';
 import { SystemClock } from '@infrastructure/clock/SystemClock';
 import { AppsScriptClient } from '@infrastructure/registration/AppsScriptClient';
@@ -14,15 +17,13 @@ import { AppsScriptTeamRepository } from '@infrastructure/repositories/AppsScrip
 import { FallbackTeamRepository } from '@infrastructure/repositories/FallbackTeamRepository';
 import { StaticTeamRepository } from '@infrastructure/repositories/StaticContentRepositories';
 import { LocalPreferenceStore } from '@infrastructure/storage/LocalPreferenceStore';
-import type { PreferenceStore } from '@infrastructure/storage/PreferenceStore';
 import { AudioEngine } from '@infrastructure/audio/AudioEngine';
-import type { AudioCue } from '@infrastructure/audio/AudioCue';
 import { FileAudioCue } from '@infrastructure/audio/FileAudioCue';
 import { SynthAudioCue } from '@infrastructure/audio/SynthAudioCue';
 import { NullAudioCue } from '@infrastructure/audio/NullAudioCue';
 import { AudioSprite } from '@infrastructure/audio/AudioSprite';
 import { MinIntervalGate } from '@infrastructure/audio/MinIntervalGate';
-import { NullTickSound, type TickSound } from '@infrastructure/audio/TickSound';
+import { NullTickSound } from '@infrastructure/audio/NullTickSound';
 import { TypingSound } from '@infrastructure/audio/TypingSound';
 
 // sprite com 6 cliques de tecla de 0,09s colados a partir do zero (22050 Hz mono)
@@ -103,6 +104,8 @@ export function createClientContainer(config: AppConfig, options: { dev: boolean
       gateway: createGateway(config.registration.endpoint, options.dev),
       clock,
       teamSize: config.registration.teamSize,
+      // prazo e vagas reavaliados no navegador: página gerada antes do prazo fecha o form depois dele
+      window: config.registration,
     }),
     listTeams: createListTeams(config.teamsEndpoint),
     preferences: new LocalPreferenceStore(),

@@ -12,14 +12,18 @@ import {
   type TextPath,
 } from './RegistrationFields';
 import { orderErrors, type RegistrationFormState } from './RegistrationFormState';
+import { SubmissionSession } from './SubmissionSession';
 
 export type { FieldError, FormStatus, RegistrationFormState } from './RegistrationFormState';
 
 export interface RegistrationFormDeps {
-  submit: Pick<SubmitRegistration, 'validate' | 'execute'>;
+  submit: Pick<SubmitRegistration, 'validate' | 'execute' | 'currentStatus'>;
   teamSize: { min: number; max: number };
+  // status do build (SSR): o estado inicial
   isOpen: boolean;
   clock: Clock;
+  // testes fixam a chave de idempotência
+  newKey?: () => string;
 }
 
 export class RegistrationFormViewModel {
@@ -30,9 +34,7 @@ export class RegistrationFormViewModel {
   private touched = new Set<string>();
   private nextKey: number;
   private focusSeq = 0;
-  private source = 'landing-page';
-  private readonly createdAt: number;
-  private startedAt: number | null = null;
+  private readonly session: SubmissionSession;
 
   constructor(deps: RegistrationFormDeps) {
     this.deps = deps;
@@ -40,7 +42,7 @@ export class RegistrationFormViewModel {
     this.minRows = Math.max(0, deps.teamSize.min - 1);
     this.maxRows = Math.max(0, deps.teamSize.max - 1);
     this.nextKey = this.minRows;
-    this.createdAt = deps.clock.now().getTime();
+    this.session = new SubmissionSession(deps.clock, deps.newKey);
     const fields = emptyFields(this.minRows);
     this.state = new Observable<RegistrationFormState>({
       fields,
@@ -50,13 +52,15 @@ export class RegistrationFormViewModel {
       attempted: false,
       protocol: null,
       failure: null,
+      retryable: false,
+      open: deps.isOpen,
       focus: null,
       ...this.bounds(fields),
     });
   }
 
   get isOpen(): boolean {
-    return this.deps.isOpen;
+    return this.state.value.open;
   }
 
   get fields(): RegistrationFields {
@@ -64,7 +68,16 @@ export class RegistrationFormViewModel {
   }
 
   setSource(source: string): void {
-    this.source = source;
+    this.session.setSource(source);
+  }
+
+  // a página pode ter sido gerada antes do prazo: confere de novo no navegador. Só fecha, nunca reabre
+  // (o dev simulado e o "em breve" dependem do build); envio em andamento ou feito não é interrompido
+  refreshAvailability(liveTaken?: number): void {
+    const { open, status } = this.state.value;
+    if (!open || status === 'submitting' || status === 'success') return;
+    if (this.deps.submit.currentStatus(liveTaken) !== 'closed') return;
+    this.state.update((s) => ({ ...s, open: false, focus: null }));
   }
 
   setMode(mode: RegistrationMode): void {
@@ -103,7 +116,7 @@ export class RegistrationFormViewModel {
 
   async submit(): Promise<void> {
     const current = this.state.value;
-    if (!this.deps.isOpen || current.status === 'submitting' || current.status === 'success') return;
+    if (!current.open || current.status === 'submitting' || current.status === 'success') return;
     const { input, indexMap } = toInput(current.fields);
     const errors = remapErrors(this.deps.submit.validate(input), indexMap);
     if (Object.keys(errors).length > 0) return this.showErrors(errors);
@@ -113,23 +126,23 @@ export class RegistrationFormViewModel {
       status: 'submitting',
       attempted: true,
       failure: null,
+      retryable: false,
       errors: {},
       orderedErrors: [],
     }));
-    const result = await this.deps.submit.execute(input, {
-      honeypot: current.fields.honeypot,
-      elapsedMs: this.deps.clock.now().getTime() - (this.startedAt ?? this.createdAt),
-      source: this.source,
-    });
+    const result = await this.deps.submit.execute(input, this.session.meta(current.fields.honeypot));
     if (result.status === 'success') {
+      this.session.complete();
       this.state.update((s) => ({ ...s, status: 'success', protocol: result.protocol, focus: null }));
     } else if (result.status === 'invalid') {
       this.showErrors(remapErrors(result.errors, indexMap));
     } else {
-      this.state.update((s) => ({ ...s, status: 'error', failure: result.message }));
+      const { message, retryable } = result;
+      this.state.update((s) => ({ ...s, status: 'error', failure: message, retryable }));
     }
   }
 
+  // "Tentar de novo": mesmo envio, mesma chave (o servidor não duplica se o primeiro já tinha entrado)
   retry(): Promise<void> {
     return this.submit();
   }
@@ -148,7 +161,6 @@ export class RegistrationFormViewModel {
   }
 
   private patch(fields: RegistrationFields, focusPath?: string): void {
-    this.startedAt ??= this.deps.clock.now().getTime();
     const errors = this.visibleErrors(fields);
     this.state.update((s) => ({
       ...s,

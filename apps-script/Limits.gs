@@ -10,7 +10,10 @@ const GLOBAL_MAX_PER_MINUTE = 120;
 function readConfig_() {
   const props = PropertiesService.getScriptProperties().getProperties();
   return {
-    forcedClosed: String(props.INSCRICOES_FECHADAS || '').trim().toLowerCase() === 'sim',
+    forcedClosed:
+      String(props.INSCRICOES_FECHADAS || '')
+        .trim()
+        .toLowerCase() === 'sim',
     closesAt: parseLimit_(props.CLOSES_AT, 'CLOSES_AT', (text) => Date.parse(text)),
     capacity: parseLimit_(props.CAPACITY, 'CAPACITY', (text) => (/^\d+$/.test(text) ? Number(text) : NaN)),
   };

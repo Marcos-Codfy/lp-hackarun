@@ -32,12 +32,20 @@ describe('AppsScriptRegistrationGateway', () => {
     expect(JSON.parse(String(init?.body))).toMatchObject({ action: 'register', mode: 'solo' });
   });
 
+  it('a chave de idempotência vai no corpo', async () => {
+    const { spy, gateway } = gatewayWith(async () => jsonResponse({ ok: true, protocol: 'HR26-AB12CD' }));
+    await gateway.submit({ ...payload, idempotencyKey: 'chave-0001' });
+    const [, init] = spy.mock.calls[0] ?? [];
+    expect(JSON.parse(String(init?.body))).toMatchObject({ idempotencyKey: 'chave-0001' });
+  });
+
   it.each([
     ['duplicate', 'duplicate'],
     ['closed', 'closed'],
     ['invalid', 'rejected'],
     ['rate-limited', 'rate-limited'],
-    ['server', 'rejected'],
+    ['server', 'server'],
+    ['quebrou', 'rejected'],
   ])('erro "%s" do servidor vira "%s"', async (error, kind) => {
     const { gateway } = gatewayWith(async () => jsonResponse({ ok: false, error }));
     await expect(gateway.submit(payload)).rejects.toMatchObject({ kind });
@@ -53,7 +61,7 @@ describe('AppsScriptRegistrationGateway', () => {
     await expect(gateway.submit(payload)).rejects.toMatchObject({ kind: 'network' });
   });
 
-  it('HTTP 429 vira "rate-limited" e 500 vira "network"', async () => {
+  it('HTTP 429 vira "rate-limited" e 500 vira "server"', async () => {
     await expect(
       gatewayWith(async () => jsonResponse({}, 429)).gateway.submit(payload),
     ).rejects.toMatchObject({
@@ -62,7 +70,7 @@ describe('AppsScriptRegistrationGateway', () => {
     await expect(
       gatewayWith(async () => jsonResponse({}, 500)).gateway.submit(payload),
     ).rejects.toMatchObject({
-      kind: 'network',
+      kind: 'server',
     });
   });
 

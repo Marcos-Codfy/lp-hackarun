@@ -22,11 +22,15 @@ describe('RetryingRegistrationGateway', () => {
     expect(sleep.mock.calls.map(([ms]) => ms)).toEqual([150, 250]);
   });
 
-  it('tenta de novo "rate-limited"', async () => {
-    const inner = new FakeGateway()
-      .willThrow(new RegistrationGatewayError('rate-limited', 'x'))
-      .willReturn('HR26-OK');
+  it.each(['rate-limited', 'server'] as const)('tenta de novo "%s"', async (kind) => {
+    const inner = new FakeGateway().willThrow(new RegistrationGatewayError(kind, 'x')).willReturn('HR26-OK');
     await expect(setup(inner).gateway.submit(payload)).resolves.toEqual({ protocol: 'HR26-OK' });
+  });
+
+  it('repete o mesmo payload (mesma chave de idempotência)', async () => {
+    const inner = new FakeGateway().willThrow(network()).willReturn('HR26-OK');
+    await setup(inner).gateway.submit({ idempotencyKey: 'chave-0001' } as RegistrationPayload);
+    expect(inner.calls.map((c) => c.idempotencyKey)).toEqual(['chave-0001', 'chave-0001']);
   });
 
   it('desiste depois de 3 tentativas', async () => {

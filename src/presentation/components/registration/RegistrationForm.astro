@@ -39,8 +39,13 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
 
 <div class="regform" data-registration-form data-status={status} data-team-min={min} data-team-max={max}>
   <RegistrationNotice status={status} simulated={simulated} />
+  {isOpen && (
+    <div data-reg-closed hidden>
+      <RegistrationNotice status="closed" simulated={false} />
+    </div>
+  )}
   {status !== 'closed' && (
-    <div class="regform__panel">
+    <div class="regform__panel" data-reg-panel>
       <div class="regform__squad" aria-hidden="true">
         <span class="regform__squad-live">
           Lobby online<span class="regform__squad-extra"> · formação</span>

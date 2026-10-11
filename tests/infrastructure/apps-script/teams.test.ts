@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { SubmitRegistration, type RegistrationPayload } from '@application/index';
+import { MIN_FILL_MS, SubmitRegistration, type RegistrationPayload } from '@application/index';
 import { FixedClock } from '@infrastructure/clock/SystemClock';
 import { FakeGateway, teamInput } from '../../helpers/fixtures';
 import { AppsScriptSandbox } from '../../helpers/apps-script/sandbox';
@@ -73,17 +73,31 @@ describe('Apps Script · contrato com o site', () => {
     expect({ min: teamSize.min, max: teamSize.max }).toEqual(eventJson.registration.teamSize);
   });
 
-  it('o payload real do SubmitRegistration passa na validação do servidor', async () => {
-    const gateway = new FakeGateway();
-    const useCase = new SubmitRegistration({
-      gateway,
-      clock: new FixedClock(new Date('2026-10-20T15:00:00Z')),
-      teamSize: eventJson.registration.teamSize,
-    });
-    await useCase.execute(teamInput(), { honeypot: '', elapsedMs: 8000 });
-    const payload = gateway.calls[0] as RegistrationPayload;
-    const script = new AppsScriptSandbox();
-    expect(script.post({ action: 'register', ...payload }).ok).toBe(true);
-    expect(script.sheet.data[0]).toContain(`${payload.consentVersion} · ${payload.consentAt}`);
+  it('MIN_ELAPSED_MS do Validation.gs é igual ao MIN_FILL_MS do SubmitRegistration', () => {
+    expect(new AppsScriptSandbox().evaluate<number>('MIN_ELAPSED_MS')).toBe(MIN_FILL_MS);
   });
+
+  // o navegador espera o mínimo antes de mandar: envio rápido de gente de verdade passa no filtro de robô
+  it.each([8000, 0])(
+    'o payload real do SubmitRegistration (%i ms) passa na validação do servidor',
+    async (ms) => {
+      const gateway = new FakeGateway();
+      const useCase = new SubmitRegistration({
+        gateway,
+        clock: new FixedClock(new Date('2026-10-20T15:00:00Z')),
+        teamSize: eventJson.registration.teamSize,
+        sleep: () => Promise.resolve(),
+      });
+      await useCase.execute(teamInput(), {
+        honeypot: '',
+        elapsedMs: ms,
+        idempotencyKey: '3f0c9a52-6d1e-4b7a-9c3e-2a5b8d7e1f40',
+      });
+      const payload = gateway.calls[0] as RegistrationPayload;
+      const script = new AppsScriptSandbox();
+      expect(script.post({ action: 'register', ...payload }).ok).toBe(true);
+      expect(script.sheet.data[0]).toContain(`${payload.consentVersion} · ${payload.consentAt}`);
+      expect(script.sheet.data[0]).toContain(payload.idempotencyKey);
+    },
+  );
 });

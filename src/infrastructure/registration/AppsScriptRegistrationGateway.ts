@@ -15,6 +15,7 @@ const SERVER_ERRORS: Record<string, GatewayFailure> = {
   closed: 'closed',
   invalid: 'rejected',
   'rate-limited': 'rate-limited',
+  server: 'server',
 };
 
 interface ServerResponse {
@@ -38,6 +39,10 @@ export class AppsScriptRegistrationGateway implements RegistrationGateway {
     } catch (error) {
       if (error instanceof AppsScriptHttpError && error.status === 429) {
         throw new RegistrationGatewayError('rate-limited', 'Too many requests');
+      }
+      // 5xx = o Google respondeu, mas o script caiu (cota, exceção fora do try): a rede está ok
+      if (error instanceof AppsScriptHttpError && error.status >= 500) {
+        throw new RegistrationGatewayError('server', error.message);
       }
       throw new RegistrationGatewayError('network', AppsScriptRegistrationGateway.describe(error));
     }

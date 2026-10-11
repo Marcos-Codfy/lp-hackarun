@@ -2,9 +2,12 @@
 
 // mantenha igual ao registration.teamSize do src/infrastructure/content/event.json (um teste confere)
 const TEAM_SIZE = { min: 2, max: 5 };
+// mantenha igual ao MIN_FILL_MS do src/application/use-cases/SubmitRegistration.ts (um teste confere)
 const MIN_ELAPSED_MS = 3000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const CONSENT_VERSION_PATTERN = /^[A-Za-z0-9][\w.-]{0,31}$/;
+// UUID do navegador; sem hífen na frente (vai pra planilha) e com teto de tamanho
+const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9-]{7,63}$/;
 
 function parseBody_(e) {
   try {
@@ -32,7 +35,13 @@ function validateRegistration_(body) {
     course: clean_(leaderRaw.course, 80),
     semester: clean_(leaderRaw.semester, 40),
   };
-  if (!mode || !isPersonName_(leader.name) || !EMAIL_PATTERN.test(leader.email) || !leader.phone || !leader.course) {
+  if (
+    !mode ||
+    !isPersonName_(leader.name) ||
+    !EMAIL_PATTERN.test(leader.email) ||
+    !leader.phone ||
+    !leader.course
+  ) {
     return null;
   }
   const team = mode === 'team' ? validateTeam_(body, leader.email) : { teamName: '', members: [] };
@@ -47,6 +56,7 @@ function validateRegistration_(body) {
     accessibilityNeeds: clean_(body.accessibilityNeeds, 500),
     source: clean_(body.source, 40) || 'landing-page',
     consent: consent,
+    idempotencyKey: parseIdempotencyKey_(body.idempotencyKey),
   };
 }
 
@@ -62,7 +72,8 @@ function validateTeam_(body, leaderEmail) {
   const validMembers = members.every((m) => isPersonName_(m.name) && EMAIL_PATTERN.test(m.email));
   const emails = [leaderEmail].concat(members.map((m) => m.email));
   const unique = emails.filter((v, i) => emails.indexOf(v) === i).length === emails.length;
-  if (teamName.length < 2 || size < TEAM_SIZE.min || size > TEAM_SIZE.max || !validMembers || !unique) return null;
+  if (teamName.length < 2 || size < TEAM_SIZE.min || size > TEAM_SIZE.max || !validMembers || !unique)
+    return null;
   return { teamName: teamName, members: members };
 }
 
@@ -74,13 +85,21 @@ function parseConsent_(body) {
   return version + ' · ' + new Date(at).toISOString();
 }
 
+// chave torta ou ausente (versão antiga do site) vira '': o envio cai na regra de e-mail + horário
+function parseIdempotencyKey_(raw) {
+  const key = String(raw == null ? '' : raw).trim();
+  return IDEMPOTENCY_KEY_PATTERN.test(key) ? key : '';
+}
+
 function isPersonName_(name) {
   return name.length >= 5 && name.indexOf(' ') > 0;
 }
 
 // celular BR com DDD; salva no formato (63) 99999-9999
 function formatPhone_(raw) {
-  const digits = String(raw || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '');
+  const digits = String(raw || '')
+    .replace(/\D/g, '')
+    .replace(/^55(?=\d{10,11}$)/, '');
   if (!/^[1-9]{2}9?\d{8}$/.test(digits)) return '';
   return digits.length === 11
     ? '(' + digits.slice(0, 2) + ') ' + digits.slice(2, 7) + '-' + digits.slice(7)

@@ -26,6 +26,10 @@ export interface RegistrationFormState {
   attempted: boolean;
   protocol: string | null;
   failure: string | null;
+  // a falha passa com o mesmo envio (rede, servidor): a View mostra o "Tentar de novo"
+  retryable: boolean;
+  // aceita envio agora; começa com o status do build e o navegador só pode fechar
+  open: boolean;
   focus: FocusRequest | null;
   canAddMember: boolean;
   canRemoveMember: boolean;
