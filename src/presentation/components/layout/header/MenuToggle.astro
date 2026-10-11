@@ -51,8 +51,9 @@ const { controls } = Astro.props;
       0 0 18px rgb(0 229 255 / 0.35);
   }
 
+  /* transparente (e não none): no alto contraste o box-shadow some e o contorno aparece */
   .menu-toggle:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
   }
 
   .menu-toggle:focus-visible::before {

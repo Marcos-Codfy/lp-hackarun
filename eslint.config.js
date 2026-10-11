@@ -2,6 +2,12 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import astro from 'eslint-plugin-astro';
 import globals from 'globals';
+import { builtinRules } from 'eslint/use-at-your-own-risk';
+
+// teto de 250 linhas quebra o lint; a partir de 200 só avisa. A mesma regra não aceita dois limites, então o
+// aviso usa uma cópia da max-lines (builtinRules é API sem garantia: se sumir num major, fica só o teto)
+const LINE_COUNT = { skipBlankLines: true, skipComments: true };
+const softLimit = { rules: { 'max-lines': builtinRules.get('max-lines') } };
 
 export default tseslint.config(
   { ignores: ['dist/', '.astro/', 'node_modules/', 'coverage/', 'docs/dist/'] },
@@ -12,13 +18,15 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
+    plugins: { 'soft-limit': softLimit },
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' },
       ],
-      'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['error', { max: 250, ...LINE_COUNT }],
+      'soft-limit/max-lines': ['warn', { max: 200, ...LINE_COUNT }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { ListTeams, type SlotsDTO } from '@application/index';
-import { Team, TeamName, type TeamRepository } from '@domain/index';
+import { Team, type TeamRepository } from '@domain/index';
 import { TeamsViewModel, type PublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
+import { teamName } from '../helpers/fixtures';
 
 const initial: PublicTeam[] = [
   { id: '1', name: 'Café com Código', course: 'Engenharia de Software', memberCount: 4 },
@@ -12,7 +13,7 @@ const SLOTS: SlotsDTO = { capacity: 10, taken: 2, remaining: 8, level: 'plenty' 
 const team = (id: string, name: string, status: 'confirmed' | 'pending' = 'confirmed') =>
   Team.create({
     id,
-    name: TeamName.create(name),
+    name: teamName(name),
     members: [],
     memberCount: 5,
     course: null,

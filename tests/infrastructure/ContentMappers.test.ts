@@ -18,6 +18,7 @@ import type {
 } from '@infrastructure/content/schema';
 import { EventMapper } from '@infrastructure/mappers/EventMapper';
 import { ContentMapper } from '@infrastructure/mappers/ContentMapper';
+import { DomainError } from '@domain/index';
 
 const unique = (ids: string[]) => new Set(ids).size === ids.length;
 
@@ -70,6 +71,10 @@ describe('ContentMapper (JSONs reais)', () => {
       expect(unique(list.map((item) => item.id))).toBe(true);
     }
     expect(faq.length).toBeGreaterThan(0);
+  });
+
+  it('nome de equipe inválido quebra o mapeamento (fail fast)', () => {
+    expect(() => ContentMapper.toTeam({ id: 't0', name: ' x ' })).toThrow(DomainError);
   });
 
   it('equipe da planilha usa a contagem em vez da lista de nomes', () => {

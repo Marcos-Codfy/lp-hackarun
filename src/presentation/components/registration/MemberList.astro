@@ -65,9 +65,9 @@ const { min, max } = Astro.props;
 
   .members__count {
     padding: 0.2rem 0.6rem;
-    border: 1px solid rgb(0 229 255 / 0.4);
-    background: rgb(0 229 255 / 0.08);
-    color: #8ff3ff;
+    border: 1px solid color-mix(in srgb, var(--c-cyan) 40%, transparent);
+    background: color-mix(in srgb, var(--c-cyan) 8%, transparent);
+    color: var(--ink-cyan);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
@@ -79,7 +79,7 @@ const { min, max } = Astro.props;
   }
 
   .members__error {
-    color: #ff8ab3;
+    color: var(--ink-danger);
     font-size: var(--fs-xs);
     font-weight: 600;
   }
@@ -91,15 +91,19 @@ const { min, max } = Astro.props;
     justify-content: center;
     gap: var(--space-3);
     min-height: 56px;
-    padding: 0 var(--space-5);
-    border: 1px dashed rgb(0 229 255 / 0.45);
+    padding: 0 var(--space-3);
+    border: 1px dashed color-mix(in srgb, var(--c-cyan) 45%, transparent);
     border-radius: 3px;
-    background: repeating-linear-gradient(135deg, rgb(0 229 255 / 0.04) 0 10px, transparent 10px 20px);
+    background: repeating-linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--c-cyan) 4%, transparent) 0 10px,
+      transparent 10px 20px
+    );
     color: var(--text);
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     transition:
       border-color var(--dur-fast) var(--ease-out),
@@ -108,7 +112,7 @@ const { min, max } = Astro.props;
 
   .members__add:hover:not(:disabled) {
     border-color: var(--c-cyan);
-    box-shadow: 0 0 26px rgb(0 229 255 / 0.2);
+    box-shadow: 0 0 26px color-mix(in srgb, var(--c-cyan) 20%, transparent);
   }
 
   .members__add-icon {
@@ -130,11 +134,11 @@ const { min, max } = Astro.props;
     transform: rotate(-45deg);
   }
 
-  @media (max-width: 479px) {
+  @media (min-width: 480px) {
     .members__add {
-      padding-inline: var(--space-3);
-      font-size: var(--fs-xs);
-      letter-spacing: 0.04em;
+      padding-inline: var(--space-5);
+      font-size: var(--fs-sm);
+      letter-spacing: 0.06em;
     }
   }
 

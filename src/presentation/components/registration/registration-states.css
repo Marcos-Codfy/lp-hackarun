@@ -3,15 +3,16 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-5);
-  border: 1px solid rgb(255 77 141 / 0.4);
+  border: 1px solid color-mix(in srgb, var(--c-danger) 40%, transparent);
   border-left: 3px solid var(--c-danger);
   border-radius: 3px;
-  background: rgb(255 77 141 / 0.08);
-  box-shadow: 0 0 30px -10px rgb(255 77 141 / 0.35);
+  background: color-mix(in srgb, var(--c-danger) 8%, transparent);
+  box-shadow: 0 0 30px -10px color-mix(in srgb, var(--c-danger) 35%, transparent);
 }
 
+/* foco programático: transparente (e não none) pra reaparecer no alto contraste */
 .regform__summary:focus {
-  outline: none;
+  outline: 2px solid transparent;
 }
 
 .regform__summary-title {
@@ -25,7 +26,7 @@
 }
 
 .regform__summary-list a {
-  color: #ffc2d7;
+  color: var(--ink-danger-soft);
 }
 
 .regform__failure {
@@ -33,10 +34,10 @@
   gap: var(--space-3);
   justify-items: start;
   padding: var(--space-4) var(--space-5);
-  border: 1px solid rgb(255 133 47 / 0.4);
+  border: 1px solid color-mix(in srgb, var(--c-orange) 40%, transparent);
   border-left: 3px solid var(--c-orange);
   border-radius: 3px;
-  background: rgb(255 133 47 / 0.08);
+  background: color-mix(in srgb, var(--c-orange) 8%, transparent);
 }
 
 .regform__retry {
@@ -82,10 +83,21 @@
   user-select: none;
 }
 
-/* pico-fim: o globo carrega e o lobby acende */
+/* pico-fim: o globo carrega e o lobby acende. Só a decoração apaga (moldura, faixa e brilhos dos controles);
+   o texto fica com opacidade cheia pra não cair abaixo de 4.5:1 */
 .is-awaiting-charge .regform:not(:focus-within) {
-  opacity: 0.55;
   transform: translateY(12px);
+}
+
+.is-awaiting-charge
+  .regform:not(:focus-within)
+  :is(.regform__squad, .mode__track, .member, .members__add, .field__control:not([aria-invalid='true'])) {
+  border-color: var(--surface-line);
+  box-shadow: none;
+}
+
+.is-awaiting-charge .regform:not(:focus-within) :is(.member__slot, .members__add-icon) {
+  opacity: 0.35;
 }
 
 .is-charged .regform::before {

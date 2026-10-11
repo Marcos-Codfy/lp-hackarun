@@ -1,6 +1,7 @@
 ---
 // campo do formulário: label + controle + dica + erro (aria-describedby é ligado pela View)
 import type { HTMLAttributes } from 'astro/types';
+import FieldError from './FieldError.astro';
 
 interface Props {
   id: string;
@@ -85,13 +86,7 @@ const common = {
       />
     )}
   </div>
-  <p
-    class="field__error"
-    id={`${id}-error`}
-    data-error-for={field}
-    data-member-error={memberField}
-    hidden
-  ></p>
+  <FieldError id={`${id}-error`} field={field} memberField={memberField} />
 </div>
 
 <style>
@@ -126,10 +121,10 @@ const common = {
     width: 100%;
     min-height: 52px;
     padding: var(--space-3) var(--space-4);
-    border: 1px solid rgb(140 160 255 / 0.22);
+    border: 1px solid var(--control-line);
     border-radius: 3px;
-    background: linear-gradient(180deg, rgb(10 14 42 / 0.9), rgb(5 7 24 / 0.92));
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+    background: var(--control-bg);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--c-ice) 3%, transparent);
     /* 16px+ evita o zoom automático do iOS */
     font-size: max(16px, var(--fs-base));
     transition:
@@ -174,62 +169,39 @@ const common = {
   }
 
   .field__control:hover {
-    border-color: rgb(0 229 255 / 0.45);
+    border-color: color-mix(in srgb, var(--c-cyan) 45%, transparent);
   }
 
-  /* foco com brilho: anel ciano de 2px + halo */
+  /* foco com brilho: anel ciano de 2px + halo. Contorno transparente (e não none) volta no alto contraste,
+     que zera o box-shadow */
   .field__control:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     border-color: var(--c-cyan);
-    background: linear-gradient(180deg, rgb(10 20 56 / 0.95), rgb(6 10 32 / 0.95));
+    background: var(--control-bg-focus);
     box-shadow:
       0 0 0 1px var(--c-cyan),
-      0 0 0 5px rgb(0 229 255 / 0.14),
-      0 0 30px rgb(0 229 255 / 0.22);
+      0 0 0 5px color-mix(in srgb, var(--c-cyan) 14%, transparent),
+      0 0 30px color-mix(in srgb, var(--c-cyan) 22%, transparent);
   }
 
   .field__control[aria-invalid='true'] {
     border-color: var(--c-danger);
     box-shadow:
       0 0 0 1px var(--c-danger),
-      0 0 24px rgb(255 77 141 / 0.18);
+      0 0 24px color-mix(in srgb, var(--c-danger) 18%, transparent);
   }
 
   /* com erro e em foco: halo mais largo, pra o foco nunca sumir */
   .field__control[aria-invalid='true']:focus-visible {
     box-shadow:
       0 0 0 1px var(--c-danger),
-      0 0 0 5px rgb(255 77 141 / 0.2),
-      0 0 30px rgb(255 77 141 / 0.25);
+      0 0 0 5px color-mix(in srgb, var(--c-danger) 20%, transparent),
+      0 0 30px color-mix(in srgb, var(--c-danger) 25%, transparent);
   }
 
   .field__control:disabled {
     cursor: not-allowed;
     opacity: 0.6;
-  }
-
-  .field__error {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: #ff8ab3;
-    font-size: var(--fs-xs);
-    font-weight: 600;
-  }
-
-  .field__error::before {
-    content: '!';
-    display: inline-grid;
-    flex: none;
-    place-items: center;
-    width: 1.1rem;
-    height: 1.1rem;
-    border-radius: 2px;
-    background: var(--c-danger);
-    color: var(--c-void);
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 800;
   }
 
   @media (min-width: 48rem) {

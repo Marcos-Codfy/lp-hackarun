@@ -1,4 +1,4 @@
-import type { MilestoneDTO, RegistrationDTO } from '@application/index';
+import type { EventOverviewDTO, MilestoneDTO, RegistrationDTO } from '@application/index';
 
 // dados que o build injeta na página (script#app-config) pro código do browser
 export interface AppConfig {
@@ -10,6 +10,18 @@ export interface AppConfig {
 }
 
 export const APP_CONFIG_ID = 'app-config';
+
+const AUDIO_CUE_URL = '/audio/cta-globe.mp3';
+
+// roda no build (index e 404 montam o mesmo config)
+export function buildAppConfig(event: Pick<EventOverviewDTO, 'milestones' | 'registration'>): AppConfig {
+  return {
+    milestones: event.milestones,
+    registration: event.registration,
+    teamsEndpoint: event.registration.endpoint,
+    audioCueUrl: AUDIO_CUE_URL,
+  };
+}
 
 export function readAppConfig(): AppConfig | null {
   const el = document.getElementById(APP_CONFIG_ID);

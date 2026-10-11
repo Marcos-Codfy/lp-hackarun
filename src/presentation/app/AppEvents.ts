@@ -8,7 +8,7 @@ export interface AppEvents extends Record<string, unknown> {
   'scene:enter': { key: SceneKey; index: number; sectionId: string };
   // three.js carregou e já está desenhando
   'experience:ready': { tier: QualityTier };
-  // three.js não vai rodar (sem webgl, save-data, reduced motion)
+  // three.js não vai rodar (sem webgl, save-data, erro de carga ou de shader); reduced motion não cai aqui
   'experience:fallback': { reason: string };
   // seção com data-scene-hold entrou: o globo começa a carregar por durationMs
   'experience:charging': { durationMs: number };

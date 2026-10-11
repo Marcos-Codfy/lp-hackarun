@@ -1,17 +1,18 @@
 import { ValueObject } from '../shared/ValueObject';
-import { DomainError } from '../shared/DomainError';
+import { fail, ok, type Result } from '../shared/Result';
 import { normalizeSearch } from '@shared/utils/text';
 
+// mensagem em pt-BR porque vai direto pro usuário (igual aos campos de contato)
 export class TeamName extends ValueObject<{ value: string }> {
   static readonly MIN = 2;
   static readonly MAX = 40;
 
-  static create(raw: string): TeamName {
+  static create(raw: string): Result<TeamName, string> {
     const value = raw.trim().replace(/\s+/g, ' ');
     if (value.length < TeamName.MIN || value.length > TeamName.MAX) {
-      throw new DomainError(`Team name must have ${TeamName.MIN}-${TeamName.MAX} characters`);
+      return fail(`O nome da equipe precisa ter de ${TeamName.MIN} a ${TeamName.MAX} caracteres.`);
     }
-    return new TeamName({ value });
+    return ok(new TeamName({ value }));
   }
 
   get value(): string {

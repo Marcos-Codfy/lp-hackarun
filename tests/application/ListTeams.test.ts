@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { ListTeams } from '@application/index';
-import { Team, TeamName, type TeamStatus } from '@domain/index';
+import { Team, type TeamStatus } from '@domain/index';
+import { teamName } from '../helpers/fixtures';
 
 const team = (id: string, name: string, status: TeamStatus = 'confirmed') =>
-  Team.create({ id, name: TeamName.create(name), members: ['a', 'b'], course: 'ES', mentor: null, status });
+  Team.create({ id, name: teamName(name), members: ['a', 'b'], course: 'ES', mentor: null, status });
 
 const useCase = new ListTeams({
   list: async () => [

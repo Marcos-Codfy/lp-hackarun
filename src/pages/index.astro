@@ -16,17 +16,12 @@ import FaqSection from '@presentation/sections/FaqSection.astro';
 import RegistrationSection from '@presentation/sections/RegistrationSection.astro';
 import { serverContainer } from '@composition/server';
 import { buildEventJsonLd } from '@presentation/components/seo/eventJsonLd';
-import type { AppConfig } from '@presentation/app/AppConfig';
+import { buildAppConfig } from '@presentation/app/AppConfig';
 
 const data = await serverContainer().getLandingPage.execute();
 const { event } = data;
 
-const appConfig: AppConfig = {
-  milestones: event.milestones,
-  registration: event.registration,
-  teamsEndpoint: event.registration.endpoint,
-  audioCueUrl: '/audio/cta-globe.mp3',
-};
+const appConfig = buildAppConfig(event);
 
 const seo = {
   title: 'HackaRun 2026 · Hackathon de Engenharia de Software e IA · Unicatólica',

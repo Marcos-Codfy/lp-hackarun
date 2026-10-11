@@ -7,17 +7,17 @@ import {
   ScoringRule,
   Station,
   Team,
-  TeamName,
   type StationRepository,
   type TeamRepository,
 } from '@domain/index';
 import { StaticEventRepository } from '@infrastructure/repositories/StaticEventRepository';
 import { FixedClock } from '@infrastructure/clock/SystemClock';
+import { teamName } from '../helpers/fixtures';
 
 const raw = eventData as RawEvent;
 
 const team = (id: string, status: 'confirmed' | 'pending') =>
-  Team.create({ id, name: TeamName.create(`Equipe ${id}`), members: [], course: null, mentor: null, status });
+  Team.create({ id, name: teamName(`Equipe ${id}`), members: [], course: null, mentor: null, status });
 
 const teams = (list: Team[]): TeamRepository => ({ list: async () => list });
 

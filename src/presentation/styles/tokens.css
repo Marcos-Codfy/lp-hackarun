@@ -58,6 +58,19 @@
   --prize: var(--c-gold);
   --focus: var(--c-gold);
 
+  /* tinta clara pra texto miúdo sobre o escuro: o neon puro vibra em letra pequena */
+  --ink-cyan: #8ff3ff;
+  --ink-orange: #ffb27a;
+  --ink-danger: #ff8ab3;
+  --ink-danger-soft: #ffc2d7;
+
+  /* campos e controles de formulário */
+  --control-line: rgb(140 160 255 / 0.22);
+  --control-bg: linear-gradient(180deg, rgb(10 14 42 / 0.9), rgb(5 7 24 / 0.92));
+  --control-bg-focus: linear-gradient(180deg, rgb(10 20 56 / 0.95), rgb(6 10 32 / 0.95));
+  /* fundo rebaixado dentro de um painel (trilho, linha de integrante, faixa de status) */
+  --surface-well: rgb(4 6 22 / 0.55);
+
   /* degradês */
   --grad-energy: linear-gradient(95deg, #00e5ff 0%, #1264ff 42%, #941bff 76%, #ed28e8 100%);
   --grad-blue: linear-gradient(100deg, #00e5ff 0%, #1264ff 100%);
@@ -162,17 +175,6 @@
   --z-hud: 20;
   --z-header: 30;
   --z-skip: 100;
-
-  /* compatibilidade com nomes antigos (componentes ainda não migrados) */
-  --c-deep: var(--c-night);
-  --c-abyss: var(--c-void);
-  --c-navy: var(--c-indigo);
-  --c-royal: var(--c-electric);
-  --c-cyan-soft: #7ff0ff;
-  --c-white: var(--c-ice);
-  --c-amber: var(--c-orange);
-  --bg-deep: var(--c-void);
-  --glow-amber: var(--glow-orange);
 }
 
 @media (prefers-reduced-motion: reduce) {

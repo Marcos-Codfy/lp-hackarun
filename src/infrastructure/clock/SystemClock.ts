@@ -6,7 +6,7 @@ export class SystemClock implements Clock {
   }
 }
 
-// relógio fixo: testes e preview de datas (?now=2026-11-14T16:00:00-03:00)
+// relógio parado, só pros testes (o ?now= do browser usa o ShiftedClock do client.ts, que continua andando)
 export class FixedClock implements Clock {
   private readonly instant: Date;
 

@@ -181,8 +181,9 @@ const countLabel = confirmed.length === 1 ? 'equipe confirmada' : 'equipes confi
       box-shadow var(--dur-fast) var(--ease-out);
   }
 
+  /* transparente (e não none): no alto contraste o box-shadow some e o contorno aparece */
   .roster__search-input:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     border-color: var(--c-cyan);
     box-shadow:
       0 0 0 3px rgb(0 229 255 / 0.18),

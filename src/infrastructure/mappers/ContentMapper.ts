@@ -1,4 +1,14 @@
-import { FaqItem, Partner, Prize, ScoringRule, Speaker, Station, Team, TeamName } from '@domain/index';
+import {
+  DomainError,
+  FaqItem,
+  Partner,
+  Prize,
+  ScoringRule,
+  Speaker,
+  Station,
+  Team,
+  TeamName,
+} from '@domain/index';
 import type { RawFaqItem, RawPartner, RawPrize, RawSpeaker, RawStations, RawTeam } from '../content/schema';
 
 export class ContentMapper {
@@ -10,10 +20,13 @@ export class ContentMapper {
     return ScoringRule.create(raw.scoring.maxPoints, raw.scoring.criteria);
   }
 
+  // nome inválido explode: no build quebra o deploy, na lista ao vivo a linha é descartada
   static toTeam(raw: RawTeam): Team {
+    const name = TeamName.create(raw.name);
+    if (!name.ok) throw new DomainError(`Team ${raw.id}: ${name.error}`);
     return Team.create({
       id: raw.id,
-      name: TeamName.create(raw.name),
+      name: name.value,
       members: raw.members ?? [],
       ...(raw.memberCount !== undefined && { memberCount: raw.memberCount }),
       course: raw.course ?? null,

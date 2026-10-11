@@ -6,16 +6,13 @@ export type RegistrationStatus = 'soon' | 'open' | 'closing' | 'closed';
 export class RegistrationPolicy {
   static readonly CLOSING_WINDOW_MS = 72 * 60 * 60 * 1000;
 
-  statusAt(now: Date, window: RegistrationWindow): RegistrationStatus {
-    if (window.slots.level === 'full') return 'closed';
-    if (window.closesAt && now.getTime() >= window.closesAt.getTime()) return 'closed';
-    if (!window.endpoint) return 'soon';
-    if (
-      window.closesAt &&
-      window.closesAt.getTime() - now.getTime() <= RegistrationPolicy.CLOSING_WINDOW_MS
-    ) {
-      return 'closing';
-    }
+  statusAt(now: Date, registrationWindow: RegistrationWindow): RegistrationStatus {
+    const { slots, closesAt, endpoint } = registrationWindow;
+    // sem prazo definido nunca fecha por data
+    const msLeft = closesAt ? closesAt.getTime() - now.getTime() : Number.POSITIVE_INFINITY;
+    if (slots.level === 'full' || msLeft <= 0) return 'closed';
+    if (!endpoint) return 'soon';
+    if (msLeft <= RegistrationPolicy.CLOSING_WINDOW_MS) return 'closing';
     return 'open';
   }
 }

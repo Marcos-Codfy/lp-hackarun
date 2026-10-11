@@ -1,0 +1,38 @@
+---
+// erro de um TextField: nasce vazio e escondido; a View preenche o texto e liga o aria-describedby
+interface Props {
+  id: string;
+  field?: string | undefined;
+  memberField?: string | undefined;
+}
+
+const { id, field, memberField } = Astro.props;
+---
+
+<p class="field-error" id={id} data-error-for={field} data-member-error={memberField} hidden></p>
+
+<style>
+  .field-error {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-danger);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+  }
+
+  .field-error::before {
+    content: '!';
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 2px;
+    background: var(--c-danger);
+    color: var(--c-void);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+</style>

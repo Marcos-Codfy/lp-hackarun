@@ -67,13 +67,16 @@ describe('ScoringRule', () => {
 describe('TeamName', () => {
   it('limpa espaços e gera chave de busca sem acento', () => {
     const name = TeamName.create('  Café   Com   Código ');
-    expect(name.value).toBe('Café Com Código');
-    expect(name.searchKey).toBe('cafe com codigo');
+    expect(name.ok && name.value.value).toBe('Café Com Código');
+    expect(name.ok && name.value.searchKey).toBe('cafe com codigo');
   });
 
   it('respeita os limites de tamanho', () => {
-    expect(() => TeamName.create('A')).toThrow(DomainError);
-    expect(() => TeamName.create('x'.repeat(41))).toThrow(DomainError);
-    expect(TeamName.create('x'.repeat(40)).value).toHaveLength(40);
+    const short = TeamName.create('A');
+    expect(short.ok).toBe(false);
+    expect(!short.ok && short.error).toContain('de 2 a 40');
+    expect(TeamName.create('x'.repeat(41)).ok).toBe(false);
+    const max = TeamName.create('x'.repeat(40));
+    expect(max.ok && max.value.value).toHaveLength(40);
   });
 });

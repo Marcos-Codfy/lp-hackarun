@@ -1,6 +1,9 @@
 /* reset enxuto + estilos globais de base */
 @layer reset, base, utilities;
 
+/* o Vite junta no mesmo arquivo no build (não vira request extra) */
+@import './deferred-sections.css';
+
 @layer reset {
   *,
   *::before,
@@ -129,7 +132,8 @@
     color: transparent;
     -webkit-text-fill-color: transparent;
     text-shadow: none;
-    filter: drop-shadow(0 0 18px rgb(0 229 255 / 0.32)) drop-shadow(0 0 2px rgb(148 27 255 / 0.4));
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--c-cyan) 32%, transparent))
+      drop-shadow(0 0 2px color-mix(in srgb, var(--c-violet) 40%, transparent));
   }
 
   p {
@@ -163,6 +167,15 @@
 
   :focus:not(:focus-visible) {
     outline: none;
+  }
+
+  /* alto contraste do Windows zera box-shadow, e vários anéis de foco são box-shadow. !important porque o CSS
+     dos componentes fica fora de layer e ganharia daqui */
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline: 2px solid CanvasText !important;
+      outline-offset: 2px !important;
+    }
   }
 
   [hidden] {
@@ -216,74 +229,5 @@
 
   .tabular {
     font-variant-numeric: tabular-nums;
-  }
-}
-
-/* render adiado: longe do topo, o navegador só monta a seção quando ela chega perto da tela.
-   no celular o 1º layout (e o refeito a cada fonte que chega) fica bem mais leve.
-   contain-intrinsic-size é a altura do CONTEÚDO (o padding da seção soma por cima): medido em 390 e 1440 px.
-   "auto" lembra a altura real depois da 1ª vez; o LayoutRefresher recalcula os gatilhos quando a seção monta */
-@layer base {
-  #programacao,
-  #mentores,
-  #final,
-  #premios,
-  #equipes,
-  #faq,
-  #inscricao,
-  .site-footer {
-    content-visibility: auto;
-  }
-
-  #programacao {
-    contain-intrinsic-size: auto 3432px;
-  }
-  #mentores {
-    contain-intrinsic-size: auto 1645px;
-  }
-  #final {
-    contain-intrinsic-size: auto 860px;
-  }
-  #premios {
-    contain-intrinsic-size: auto 1218px;
-  }
-  #equipes {
-    contain-intrinsic-size: auto 1042px;
-  }
-  #faq {
-    contain-intrinsic-size: auto 1250px;
-  }
-  #inscricao {
-    contain-intrinsic-size: auto 3930px;
-  }
-  .site-footer {
-    contain-intrinsic-size: auto 1721px;
-  }
-
-  @media (min-width: 1024px) {
-    #programacao {
-      contain-intrinsic-size: auto 1762px;
-    }
-    #mentores {
-      contain-intrinsic-size: auto 982px;
-    }
-    #final {
-      contain-intrinsic-size: auto 891px;
-    }
-    #premios {
-      contain-intrinsic-size: auto 1142px;
-    }
-    #equipes {
-      contain-intrinsic-size: auto 917px;
-    }
-    #faq {
-      contain-intrinsic-size: auto 903px;
-    }
-    #inscricao {
-      contain-intrinsic-size: auto 3560px;
-    }
-    .site-footer {
-      contain-intrinsic-size: auto 1103px;
-    }
   }
 }

@@ -1,4 +1,4 @@
-import type { RegistrationInput } from '@domain/index';
+import { TeamName, type RegistrationInput } from '@domain/index';
 import type {
   MilestoneDTO,
   RegistrationGateway,
@@ -8,6 +8,13 @@ import type {
 import type { Clock } from '@application/index';
 
 export const TEAM_SIZE = { min: 2, max: 5 };
+
+// nome de equipe válido sem desembrulhar o Result em todo teste
+export function teamName(raw: string): TeamName {
+  const name = TeamName.create(raw);
+  if (!name.ok) throw new Error(name.error);
+  return name.value;
+}
 
 export const MILESTONES: MilestoneDTO[] = [
   { key: 'kickoff', label: 'O HackaRun começa em', at: '2026-11-11T19:00:00-03:00' },

@@ -4,9 +4,7 @@
   isolation: isolate;
   display: grid;
   gap: var(--space-5);
-  transition:
-    opacity var(--dur-slow) var(--ease-out),
-    transform var(--dur-slow) var(--ease-out);
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
 /* brilho atrás do painel: pseudo-elemento, porque filter no pai quebraria o vidro */
@@ -15,7 +13,12 @@
   position: absolute;
   inset: 4% 0;
   z-index: -1;
-  background: radial-gradient(closest-side, rgb(0 229 255 / 0.3), rgb(148 27 255 / 0.12) 60%, transparent);
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--c-cyan) 30%, transparent),
+    color-mix(in srgb, var(--c-violet) 12%, transparent) 60%,
+    transparent
+  );
   filter: blur(50px);
   opacity: 0;
   transition: opacity 1.2s var(--ease-out);
@@ -35,10 +38,10 @@
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border: 1px solid rgb(0 229 255 / 0.2);
+  border: 1px solid color-mix(in srgb, var(--c-cyan) 20%, transparent);
   border-radius: 3px;
-  background: linear-gradient(90deg, rgb(0 229 255 / 0.1), rgb(4 6 22 / 0.4));
-  color: #8ff3ff;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c-cyan) 10%, transparent), var(--surface-well));
+  color: var(--ink-cyan);
   font-family: var(--font-mono);
   font-size: var(--fs-hud);
   letter-spacing: var(--tracking-hud);
@@ -59,9 +62,14 @@
   box-shadow: 0 0 10px var(--c-success);
 }
 
-@media (max-width: 479px) {
+/* "· formação" só cabe a partir de 480px */
+.regform__squad-extra {
+  display: none;
+}
+
+@media (min-width: 480px) {
   .regform__squad-extra {
-    display: none;
+    display: inline;
   }
 }
 

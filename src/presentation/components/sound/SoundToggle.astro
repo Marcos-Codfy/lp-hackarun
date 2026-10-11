@@ -65,8 +65,9 @@
       0 0 20px rgb(0 229 255 / 0.35);
   }
 
+  /* transparente (e não none): no alto contraste o box-shadow some e o contorno aparece */
   .sound-toggle:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
   }
 
   .sound-toggle:focus-visible::before {

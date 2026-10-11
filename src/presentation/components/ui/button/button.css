@@ -121,9 +121,10 @@
   transform: translateY(0) scale(0.98);
 }
 
-/* anel de foco acompanha o paralelogramo */
+/* anel de foco acompanha o paralelogramo; o contorno transparente só aparece no alto contraste (sem box-shadow) */
 .btn:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 
 .btn:focus-visible .btn__shell {

@@ -64,7 +64,7 @@ const steps = [
     width: 4.5rem;
     height: 4.5rem;
     color: var(--c-success);
-    filter: drop-shadow(0 0 18px rgb(44 245 180 / 0.6));
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--c-success) 60%, transparent));
   }
 
   .success__emblem svg {
@@ -84,8 +84,9 @@ const steps = [
     font-size: var(--fs-2xl);
   }
 
+  /* foco programático: transparente (e não none) pra reaparecer no alto contraste */
   .success__title:focus {
-    outline: none;
+    outline: 2px solid transparent;
   }
 
   /* protocolo num "ticket" com recortes laterais */
@@ -95,11 +96,16 @@ const steps = [
     gap: var(--space-2);
     width: 100%;
     padding: var(--space-5) var(--space-6);
-    border: 1px solid rgb(44 245 180 / 0.45);
+    border: 1px solid color-mix(in srgb, var(--c-success) 45%, transparent);
     border-radius: 4px;
     background:
-      radial-gradient(80% 120% at 0% 0%, rgb(44 245 180 / 0.12), transparent 60%), rgb(4 10 20 / 0.8);
-    box-shadow: 0 0 40px -10px rgb(44 245 180 / 0.35);
+      radial-gradient(
+        80% 120% at 0% 0%,
+        color-mix(in srgb, var(--c-success) 12%, transparent),
+        transparent 60%
+      ),
+      var(--surface-strong);
+    box-shadow: 0 0 40px -10px color-mix(in srgb, var(--c-success) 35%, transparent);
     -webkit-mask:
       radial-gradient(circle 12px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
       radial-gradient(circle 12px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
@@ -123,7 +129,7 @@ const steps = [
     font-size: clamp(1.25rem, 1rem + 1.4vw, 1.875rem);
     font-weight: 700;
     letter-spacing: 0.1em;
-    text-shadow: 0 0 18px rgb(44 245 180 / 0.55);
+    text-shadow: 0 0 18px color-mix(in srgb, var(--c-success) 55%, transparent);
     user-select: all;
   }
 
@@ -141,7 +147,7 @@ const steps = [
   }
 
   .success__step-num {
-    color: #8ff3ff;
+    color: var(--ink-cyan);
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
     font-weight: 700;

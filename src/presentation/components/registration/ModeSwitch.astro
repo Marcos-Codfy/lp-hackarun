@@ -35,7 +35,7 @@ const options = [
 
   .mode__legend {
     margin-bottom: var(--space-3);
-    color: #8ff3ff;
+    color: var(--ink-cyan);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
@@ -47,9 +47,9 @@ const options = [
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 4px;
-    border: 1px solid rgb(140 160 255 / 0.2);
+    border: 1px solid var(--control-line);
     border-radius: 4px;
-    background: rgb(4 6 22 / 0.8);
+    background: var(--surface-strong);
   }
 
   /* destaque que desliza até a opção marcada */
@@ -59,13 +59,20 @@ const options = [
     bottom: 4px;
     left: 4px;
     width: calc(50% - 4px);
+    /* borda transparente: no alto contraste o fundo e o brilho somem, ela não */
+    border: 1px solid transparent;
     border-radius: 3px;
     background:
-      linear-gradient(160deg, rgb(0 229 255 / 0.22), rgb(18 100 255 / 0.18) 60%, rgb(148 27 255 / 0.18)),
-      rgb(8 14 44 / 0.9);
+      linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--c-cyan) 22%, transparent),
+        color-mix(in srgb, var(--c-electric) 18%, transparent) 60%,
+        color-mix(in srgb, var(--c-violet) 18%, transparent)
+      ),
+      var(--surface-solid);
     box-shadow:
-      inset 0 0 0 1px rgb(0 229 255 / 0.65),
-      0 0 26px rgb(0 229 255 / 0.25);
+      inset 0 0 0 1px color-mix(in srgb, var(--c-cyan) 65%, transparent),
+      0 0 26px color-mix(in srgb, var(--c-cyan) 25%, transparent);
     transition: translate var(--dur) var(--ease-out);
   }
 

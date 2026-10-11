@@ -64,14 +64,7 @@ export class TeamRegistration {
     };
 
     const isTeam = input.mode === 'team';
-    let teamName: string | null = null;
-    if (isTeam) {
-      try {
-        teamName = TeamName.create(input.teamName).value;
-      } catch {
-        errors['teamName'] = `O nome da equipe precisa ter de ${TeamName.MIN} a ${TeamName.MAX} caracteres.`;
-      }
-    }
+    const teamName = isTeam ? (pick('teamName', TeamName.create(input.teamName))?.value ?? null) : null;
 
     const leaderName = pick('leader.name', PersonName.create(input.leader.name));
     const leaderEmail = pick('leader.email', Email.create(input.leader.email));

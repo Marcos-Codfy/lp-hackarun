@@ -38,6 +38,9 @@ describe('RegistrationPolicy', () => {
 
   it('prazo vencido ou vagas esgotadas = encerrada', () => {
     expect(policy.statusAt(NOW, windowWith({ closesAt: new Date(NOW.getTime() - 1) }))).toBe('closed');
+    // no instante exato do prazo já fecha, com ou sem endpoint
+    expect(policy.statusAt(NOW, windowWith({ closesAt: NOW }))).toBe('closed');
+    expect(policy.statusAt(NOW, windowWith({ endpoint: null, closesAt: NOW }))).toBe('closed');
     expect(policy.statusAt(NOW, windowWith({ capacity: 10, taken: 10 }))).toBe('closed');
     // esgotou ganha até de "sem endpoint"
     expect(policy.statusAt(NOW, windowWith({ endpoint: null, capacity: 5, taken: 5 }))).toBe('closed');

@@ -5,17 +5,12 @@ import Icon from '@presentation/components/ui/Icon.astro';
 import Wordmark from '@presentation/components/ui/Wordmark.astro';
 import HudCorners from '@presentation/components/ui/HudCorners.astro';
 import { serverContainer } from '@composition/server';
-import type { AppConfig } from '@presentation/app/AppConfig';
+import { buildAppConfig } from '@presentation/app/AppConfig';
 import '@presentation/sections/sections.css';
 
 const { event } = await serverContainer().getLandingPage.execute();
 
-const appConfig: AppConfig = {
-  milestones: event.milestones,
-  registration: event.registration,
-  teamsEndpoint: event.registration.endpoint,
-  audioCueUrl: '/audio/cta-globe.mp3',
-};
+const appConfig = buildAppConfig(event);
 
 const seo = {
   title: 'Página não encontrada · HackaRun 2026',
@@ -91,7 +86,11 @@ const seo = {
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: radial-gradient(ellipse 60% 45% at 50% 50%, rgb(4 11 24 / 0.65), transparent 100%);
+    background: radial-gradient(
+      ellipse 60% 45% at 50% 50%,
+      color-mix(in srgb, var(--c-void) 65%, transparent),
+      transparent 100%
+    );
   }
 
   .lost__frame {
@@ -110,7 +109,7 @@ const seo = {
     line-height: 0.8;
     color: transparent;
     -webkit-text-stroke: 1.5px var(--c-cyan);
-    text-shadow: 0 0 40px rgb(0 207 255 / 0.35);
+    text-shadow: 0 0 40px color-mix(in srgb, var(--c-cyan) 35%, transparent);
     transform: skewX(-8deg);
   }
 
