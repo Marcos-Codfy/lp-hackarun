@@ -111,10 +111,11 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 
 - **Header:** barra de vidro flutuante (12px do topo), transparente no topo e com vidro + fio degradê depois de rolar;
   recolhe ao rolar pra baixo e volta em qualquer rolagem pra cima ou foco. Logo oficial, links com sublinhado degradê
-  animado, botão de som (ícone de equalizador: barras paradas e riscadas quando desligado, dançando quando ligado) e
-  CTA. Desktop: grade de 3 colunas com a navegação no centro exato.
+  animado, botão de som (ícone de equalizador: barras paradas e riscadas quando desligado, dançando quando ligado),
+  botão **Pausar animações** (mesma placa do som, com tooltip da ação do próximo clique) e CTA. Desktop: grade de 3
+  colunas com a navegação no centro exato.
 - **Menu mobile:** overlay de tela cheia com links grandes numerados ("checkpoints"), entrada em cascata, foco preso,
-  `Esc` fecha e o resto da página fica `inert`.
+  `Esc` fecha e o resto da página fica `inert`. No rodapé do menu, o "Pausar animações" vira uma chave com texto.
 - **HUD desktop:** trilho vertical fino na **borda direita**, com um tique por checkpoint (passados acesos, atual
   destacado), barra de progresso e contador de NPCs achados.
 - **HUD mobile:** **pílula pequena no rodapé**, com checkpoint e progresso; some enquanto o hero está na tela.
@@ -146,6 +147,9 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
   "digitam" caractere a caractere.
 - `prefers-reduced-motion`: sem Lenis, sem pin, sem morph contínuo (a cena troca inteira, render sob demanda),
   entradas viram fade simples, durações dos tokens zeradas.
+- **Pausar animações** (WCAG 2.2.2): congela onde estão o 3D, os raios do logo e os loops infinitos em CSS (lista em
+  `styles/motion-pause.css`); as entradas continuam acontecendo para o conteúdo nunca sumir. A escolha fica salva no
+  navegador; com reduced motion o botão já aparece travado em "pausado".
 
 ## 11. Gatilhos de retenção e conversão (sempre discretos)
 
@@ -164,8 +168,10 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 HTML semântico com landmarks e hierarquia de títulos, skip link, foco visível em ouro, alvos de toque ≥ 44px, canvas
 e aurora `aria-hidden`, contador com texto estático para leitor de tela (os dígitos que mudam são `aria-hidden`),
 formulário com `label`, `aria-describedby`, `aria-invalid` e erros anunciados (`aria-live`), FAQ com `<details>`,
-tokens NPC como botões de verdade, som desligado por padrão e com controle visível, `prefers-reduced-motion`
-respeitado, conteúdo completo sem JS e sem WebGL. Lighthouse mobile: acessibilidade 100 (10/10/2026).
+tokens NPC como botões de verdade, som desligado por padrão e com controle visível, botão para pausar tudo que se
+mexe sozinho (2.2.2), `prefers-reduced-motion` respeitado, foco programático das seções com contorno transparente
+(continua visível em cores forçadas), conteúdo completo sem JS e sem WebGL. Lighthouse mobile: acessibilidade 100
+(10/10/2026).
 
 ## 13. Áudio e copy
 

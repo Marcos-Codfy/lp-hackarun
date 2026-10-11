@@ -74,11 +74,14 @@ coreografada que acompanha o scroll de ponta a ponta.
 - **Rápida por construção:** HTML estático (Astro SSG), JavaScript iniciado só depois do primeiro paint, three.js num
   chunk carregado após o `load`, `content-visibility` nas seções longe do topo e qualidade adaptativa por GPU e FPS.
 - **Acessível:** feita para WCAG 2.2 AA, Lighthouse mobile 100 em acessibilidade, navegação por teclado,
-  `prefers-reduced-motion`, som desligado por padrão e conteúdo completo sem JavaScript e sem WebGL.
-- **Inscrição sem servidor e sem custo:** formulário → Google Apps Script → Google Sheets, com anti-spam, LGPD e
-  equipes confirmadas aparecendo ao vivo no site.
+  `prefers-reduced-motion`, botão de **pausar animações** no header e no menu (3D, raios e loops param), som desligado
+  por padrão e conteúdo completo sem JavaScript e sem WebGL.
+- **Inscrição sem servidor e sem custo:** formulário → Google Apps Script → Google Sheets, com anti-spam, limites de
+  envio, reenvio sem duplicar (idempotência), aviso de privacidade LGPD e equipes confirmadas aparecendo ao vivo no
+  site.
 - **Pronta pra equipe:** Clean Architecture + DDD + MVVM, testes unitários, ESLint com regra de dependência entre
-  camadas, Conventional Commits validados no commit, CI no GitHub Actions e QA visual com Playwright + Lighthouse.
+  camadas, Conventional Commits validados no commit, CI no GitHub Actions e scripts de QA versionados (Playwright +
+  Lighthouse).
 
 ## A corrida em 8 cenas
 
@@ -218,6 +221,9 @@ Scripts de assets (Python 3, rodados só quando o asset muda; a saída fica vers
 | `python scripts/fonts/patch_orbitron_tilde.py` | `fonttools`, `brotli`           | `src/assets/fonts/orbitron-pt-latin-wght.woff2`             |
 | `python scripts/docs/build_pdf_assets.py`      | `fonttools`, `brotli`, `Pillow` | `scripts/docs/assets/` (fontes TTF e logos dos PDFs)        |
 
+Scripts de QA (Playwright + Lighthouse) ficam em [`scripts/qa/`](scripts/qa/README.md), com instalação própria; veja
+[Qualidade](#qualidade).
+
 ## Estrutura do projeto
 
 ```text
@@ -232,19 +238,19 @@ src/
 │   ├── app/             # App.boot, configuração e contrato de eventos (AppEvents)
 │   ├── layouts/         # BaseLayout: head, fontes, SEO, aurora e canvas 3D
 │   ├── sections/        # uma seção por arquivo + subcomponentes por pasta
-│   ├── components/      # ui, header/footer, HUD, contador, inscrição, equipes, parceiros, NPC, som, SEO
-│   ├── controllers/     # header, menu mobile, âncoras, nav spy, trilho do HUD, tema da aurora
+│   ├── components/      # ui, header/footer, HUD, contador, inscrição, equipes, parceiros, NPC, som, pausa, SEO
+│   ├── controllers/     # header, menu mobile, nav spy, trilho do HUD, tema da aurora
 │   ├── view-models/     # MVVM: estado e lógica de tela, sem DOM
 │   ├── views/           # MVVM: ligam DOM e ViewModel
-│   ├── motion/          # scroll (Lenis, ScrollTrigger, SceneDirector) e animações de entrada
+│   ├── motion/          # scroll (Lenis, ScrollTrigger, SceneDirector, âncoras) e animações de entrada
 │   ├── experience/      # 3D (chunk lazy): shapes, shaders, post, camera, layers, particles, quality
-│   └── styles/          # tokens.css (design tokens) e base.css
+│   └── styles/          # tokens.css (design tokens), base.css, render adiado e pausa das animações
 ├── shared/              # Observable, EventBus, Ticker e utilitários
 ├── composition/         # composition roots (build e browser)
-└── pages/               # rotas: index, 404 e calendário .ics
+└── pages/               # rotas: index, privacidade (LGPD), 404 e calendário .ics
 apps-script/             # API de inscrições (Google Apps Script) + guia de instalação
 public/                  # og-image, favicon, _headers, robots e áudio
-scripts/                 # áudio, patch da fonte e gerador dos PDFs
+scripts/                 # áudio, patch da fonte, gerador dos PDFs e qa/ (Playwright + Lighthouse)
 tests/                   # testes unitários por camada
 docs/                    # guia, design spec, asset brief, ADRs, manifesto da stack e PDFs
 design/references/       # referências visuais (não vão pro site)
@@ -255,7 +261,11 @@ design/references/       # referências visuais (não vão pro site)
 - **Conteúdo** (datas, missões, FAQ, prêmios, mentores, parceiros) fica em `src/infrastructure/content/*.json`. Dá pra
   editar sem programar, e os testes validam o conteúdo real. Dado inválido quebra o build.
 - **Inscrições** vão para uma planilha Google via Apps Script. A equipe aparece no site quando a organização marca
-  `confirmado` na coluna Status. Instalação em [`apps-script/README.md`](apps-script/README.md).
+  `confirmado` na coluna Status. O script confere prazo e capacidade a cada envio, limita tentativas por e-mail e no
+  total e devolve o mesmo protocolo num reenvio. Instalação em [`apps-script/README.md`](apps-script/README.md).
+- **Privacidade:** o aviso LGPD fica em `/privacidade` (linkado no consentimento e no rodapé). Cada inscrição guarda a
+  versão do aviso aceita e a hora do aceite; mudou o texto, suba `CONSENT_VERSION` em
+  `src/application/use-cases/SubmitRegistration.ts`.
 - **Agenda:** o build gera `/hackarun-2026.ics` com todas as atividades.
 
 ## Identidade e assets
@@ -302,8 +312,25 @@ Orçamento e técnicas em detalhe no [guia](docs/GUIA_DO_PROJETO.md#12-performan
 | JS inicial (gzip)       | < 70 KB     | three.js fica fora, num chunk lazy       |
 | Conformidade            | WCAG 2.2 AA | meta de projeto, checklist em cada PR    |
 
-A CI (GitHub Actions) roda lint, formatação, testes e build a cada push e PR. O QA visual (capturas em várias larguras
-com Playwright dirigindo o Brave) e o Lighthouse seguem o roteiro do [guia](docs/GUIA_DO_PROJETO.md#13-qa).
+A CI (GitHub Actions) roda lint, formatação, testes e build a cada push e PR.
+
+### QA visual e de performance
+
+Os scripts de QA ficam em [`scripts/qa/`](scripts/qa/README.md), com `package.json` próprio (Playwright e Lighthouse
+não pesam o `npm ci` do projeto). Eles usam o Brave ou o Chrome instalado, com GPU real (`BRAVE_PATH` ou `CHROME_PATH`
+para apontar outro), e recebem a URL como argumento:
+
+```bash
+npm run build && npm run preview                      # deixe rodando (http://localhost:4321/); o resto em outro terminal
+cd scripts/qa && npm install                          # + npx playwright install chromium, se não tiver Brave/Chrome
+node shots.mjs http://localhost:4321/ 390 844 out/m390 "#sobre,#missoes" --mobile
+node anchorcheck.mjs http://localhost:4321/           # âncoras param logo abaixo do header
+node overflow.mjs http://localhost:4321/              # nada passa da tela em 360 e 390 px
+node lighthouse.mjs http://localhost:4321/ --runs=3   # Lighthouse mobile com mediana
+```
+
+Também há `vitals.mjs` (LCP, CLS, tempo até o 3D), `longtasks.mjs` (tarefas longas com CPU 4x e 4G lento) e
+`trace.mjs` (trace até o 1º paint e passos do boot). Roteiro completo no [guia](docs/GUIA_DO_PROJETO.md#13-qa).
 
 ## Deploy
 
@@ -332,10 +359,10 @@ Guia completo: [CONTRIBUTING.md](CONTRIBUTING.md).
 - [x] Inscrições via Google Sheets
 - [x] Logos oficiais, imagem de compartilhamento e sons sintetizados
 - [x] Lighthouse mobile 100 em acessibilidade, boas práticas e SEO
+- [x] Scripts de QA (Playwright + Lighthouse) versionados no repositório
 - [ ] Lighthouse mobile ≥ 90 em performance (em andamento)
 - [ ] Link oficial de inscrições e regulamento
 - [ ] Prêmios, mentores e banca revelados
-- [ ] Scripts de QA (Playwright + Lighthouse) versionados no repositório
 - [ ] Domínio próprio (opcional)
 
 ## Créditos

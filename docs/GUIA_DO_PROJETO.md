@@ -11,7 +11,9 @@
 | Branch de produção      | `main`                                                                                |
 | Hospedagem              | Cloudflare Pages, plano gratuito (`https://lp-hackarun.pages.dev` depois de conectar) |
 | Inscrições              | Formulário do site, Google Apps Script (Web App) e Google Sheets                      |
+| Aviso de privacidade    | `/privacidade` (`src/pages/privacidade.astro`), linkado no consentimento e no rodapé  |
 | Node.js                 | 24 LTS (arquivo `.nvmrc`), mínimo 22.12                                               |
+| Scripts de QA           | `scripts/qa/` (Playwright + Lighthouse, instalados à parte; seção 13)                 |
 | Especificação de design | `docs/design/design-spec.md` (v2, vigente)                                            |
 | Decisões de arquitetura | `docs/adr/` (0001 a 0006)                                                             |
 | Stack e padrões (PDF)   | `docs/pdf/HackaRun_LP_Stack_e_Padroes.pdf`                                            |
@@ -40,7 +42,7 @@ para cada seção. A v1 ficou só no histórico do Git.
 | Hospedagem  | Cloudflare Pages (grátis)                                 | Banda e requisições ilimitadas pra estático, CDN no Brasil       |
 | Inscrições  | Google Sheets via Apps Script                             | Gratuito, a organização já usa Google, planilha vira o painel    |
 | Arquitetura | Clean Architecture + DDD + MVVM                           | Camadas claras, regras testáveis, fácil de dividir entre pessoas |
-| QA          | Playwright + Brave instalado, Lighthouse                  | Captura visual em várias larguras e métricas reais de GPU        |
+| QA          | Playwright + Brave instalado, Lighthouse (`scripts/qa`)   | Captura visual em várias larguras e métricas reais de GPU        |
 
 Detalhes e alternativas descartadas estão em `docs/adr/`.
 
@@ -78,7 +80,8 @@ Parâmetros de URL para testar:
 ```text
 src/
   domain/              regras de negócio puras (entities, value-objects, services, repositories)
-  application/         casos de uso, DTOs e portas (Clock, CalendarExporter, RegistrationGateway)
+  application/         casos de uso, DTOs e portas (Clock, CalendarExporter, RegistrationGateway,
+                       PreferenceStore, AudioCue, TickSound)
   infrastructure/      adaptadores: JSON, repositórios, Apps Script, áudio, storage, calendário
     content/           >>> conteúdo editável do site (event.json, stations.json, faq.json...)
     audio/             AudioEngine, cue do globo (arquivo ou sintetizado), sprite de digitação
@@ -90,12 +93,13 @@ src/
     layouts/           BaseLayout: head, fontes, SEO, aurora de fundo e canvas 3D
     sections/          uma seção por arquivo; subcomponentes em pastas (hero/, missions/...)
     components/        ui/, layout/, hud/, countdown/, registration/, teams/, partners/,
-                       npc/, sound/, seo/
-    controllers/       header, menu mobile, âncoras, nav spy, trilho do HUD, theme/ (aurora)
+                       npc/, sound/, motion/ (pausar animações), seo/
+    controllers/       header, menu mobile, nav spy, trilho do HUD, theme/ (aurora)
     view-models/       ViewModels (MVVM): estado e lógica de tela, sem DOM
     views/             Views (MVVM): ligam DOM e ViewModel
     formatters/        textos e datas da interface
-    motion/            core/ (Lenis, ScrollTrigger, SceneDirector) e animators/ (entradas, raios)
+    motion/            core/ (Lenis, ScrollTrigger, SceneDirector, AnchorNavigator) e animators/
+                       (entradas, raios)
     experience/        3D, carregado sob demanda:
       shapes/          uma ShapeStrategy por objeto + utilitários de traço e amostragem
       shaders/         core.glsl, shapes/*.glsl (um por objeto), partículas, estrelas, bokeh, lente
@@ -106,20 +110,31 @@ src/
       scene/           SceneMixer, SceneLayout, ChargeController e ShapeSpin
       quality/         tiers, detector de GPU e ajuste por FPS
       input/           ponteiro (parallax e repulsão)
-    styles/            tokens.css (design tokens) e base.css
+    styles/            tokens.css (design tokens), base.css, deferred-sections.css (render adiado)
+                       e motion-pause.css (o que para com "Pausar animações")
   shared/              utilitários sem regra de negócio (Observable, EventBus, Ticker, math, dom)
   composition/         composition roots: server.ts (build) e client.ts (browser)
-  pages/               rotas do Astro (index, 404, .ics)
+  pages/               rotas do Astro (index, privacidade, 404, .ics)
 apps-script/           código do Google Apps Script (API de inscrições) + passo a passo
 public/                servido como está: og-image.jpg, favicon, _headers, robots, audio/
 scripts/
   audio/               render_cues.py: sons sintetizados para public/audio
   fonts/               patch_orbitron_tilde.py: til da Orbitron
   docs/                gerador dos PDFs, build_pdf_assets.py e assets/ (fontes TTF e logos)
+  qa/                  QA visual e de performance (Playwright + Lighthouse), com package.json próprio
 tests/                 testes unitários espelhando as camadas
 docs/                  guia, design spec, asset brief, ADRs, manifesto da stack e PDFs gerados
 design/references/     referências visuais e o vídeo teaser (não vão pro site)
 ```
+
+Páginas geradas no build:
+
+| Rota                 | Arquivo                      | O que é                                                            |
+| -------------------- | ---------------------------- | ------------------------------------------------------------------ |
+| `/`                  | `pages/index.astro`          | A landing page                                                     |
+| `/privacidade`       | `pages/privacidade.astro`    | Aviso de privacidade (LGPD) com a versão vigente do aviso          |
+| `/404`               | `pages/404.astro`            | Página de erro, no mesmo visual                                    |
+| `/hackarun-2026.ics` | `pages/hackarun-2026.ics.ts` | Agenda com todas as atividades (botões da programação e inscrição) |
 
 ## 6. Arquitetura
 
@@ -127,7 +142,18 @@ design/references/     referências visuais e o vídeo teaser (não vão pro sit
 
 As dependências sempre apontam para dentro: `presentation` → `application` → `domain`. `infrastructure` implementa as
 interfaces (portas) declaradas em `domain`/`application`. Quem junta tudo são os **composition roots** em
-`src/composition`. O ESLint **bloqueia** imports proibidos (ex.: domínio importando three.js ou infraestrutura).
+`src/composition`. O ESLint **bloqueia** imports proibidos (`eslint.config.js`):
+
+| Camada         | Pode importar                                   | Bloqueado                                                      |
+| -------------- | ----------------------------------------------- | -------------------------------------------------------------- |
+| `domain`       | nada de fora                                    | outras camadas e frameworks (three, gsap, lenis, astro)        |
+| `application`  | `domain`                                        | `infrastructure`, `presentation`, `composition` e frameworks   |
+| `presentation` | `application` (casos de uso, DTOs e **portas**) | `infrastructure`: o adapter concreto é ligado em `composition` |
+| `shared`       | nada                                            | qualquer camada (é utilitário sem regra de negócio)            |
+
+Na prática: uma View ou ViewModel que precisa de armazenamento, som ou rede recebe a **porta** (ex.:
+`PreferenceStore`, `AudioCue`, `RegistrationGateway` em `application/ports`) pelo construtor, e o `client.ts` decide
+qual implementação entra.
 
 ### 6.2 Fluxo no build (SSG)
 
@@ -145,12 +171,15 @@ por uma fila (`app/BootQueue.ts`): um passo curto por tarefa, cedendo a thread e
 `setTimeout` 0 onde não existe). Cada passo aparece na trilha Timings do DevTools como `boot:<nome>`, e um passo que
 quebra não derruba os seguintes. Ordem:
 
-1. `mountMotion`: Lenis (smooth scroll), ScrollTrigger e o **SceneDirector** (acompanha as seções com `data-scene`).
-2. `mountViews`: Views MVVM (contador, som, equipes ao vivo, formulário, HUD, NPCs). Funcionam sem 3D.
-3. `mountAnimators`: controladores de DOM (header e menu primeiro) e o pin das missões. As outras entradas animadas só
-   preparam o setup pesado quando a seção chega perto da tela (`motion/core/ApproachWatcher.ts`), e o SplitText é
-   carregado sob demanda (`motion/core/splitText.ts`).
-4. Segunda fila, com o layout já no lugar: trilha de cenas, `SceneHoldWatcher` (carga do globo final) e, depois do
+1. `mountMotion`: Lenis (smooth scroll), ScrollTrigger, o **SceneDirector** (acompanha as seções com `data-scene`) e
+   o `AnchorNavigator` (links `#secao`). Se GSAP ou Lenis quebrar, a página segue no scroll nativo (`NativeScroll`).
+2. `mountViews`: Views MVVM (contador, som, pausar animações, equipes ao vivo, formulário, HUD, NPCs). Funcionam sem
+   3D.
+3. `mountControllers`: controladores de DOM (header e menu primeiro, nav spy, trilho do HUD, aurora). Não usam GSAP,
+   então um animador quebrado não leva eles junto.
+4. `mountAnimators`: o pin das missões e as entradas animadas, que só preparam o setup pesado quando a seção chega
+   perto da tela (`motion/core/ApproachWatcher.ts`); o SplitText é carregado sob demanda (`motion/core/splitText.ts`).
+5. Segunda fila, com o layout já no lugar: trilha de cenas, `SceneHoldWatcher` (carga do globo final) e, depois do
    `load` com o navegador ocioso, o chunk do 3D (`mountExperience`). Sem WebGL2, com `save-data` ou se algo falhar, ele
    emite `experience:fallback` e o brilho em CSS continua.
 
@@ -164,8 +193,9 @@ quebra não derruba os seguintes. Ordem:
 
 Em `presentation/controllers`, montados por `mountControllers` (não são MVVM e funcionam sem GSAP):
 `HeaderScrollController` (header de vidro que reage ao scroll), `MobileMenuController` + `FocusTrap` + `ScrollLock`
-(overlay do menu no celular), `AnchorNavController` (links internos com o driver de scroll), `NavSpyController`
-(link ativo), `HudRailController` (tiques do trilho do HUD) e `SceneThemeController` (cores da aurora por cena).
+(overlay do menu no celular), `NavSpyController` (link ativo), `HudRailController` (tiques do trilho do HUD) e
+`SceneThemeController` (cores da aurora por cena). Os links internos ficam com o `AnchorNavigator`
+(`motion/core`): rola com o driver de scroll, atualiza o hash sem pulo e leva o foco para a seção.
 
 ### 6.6 Eventos entre módulos
 
@@ -179,10 +209,32 @@ Os módulos conversam pelo `EventBus` tipado (`presentation/app/AppEvents.ts`):
 | `experience:charging`    | A seção com `data-scene-hold` entrou: o globo começa a carregar           |
 | `experience:charged`     | Fim da carga: dispara flash, som e revela o CTA (emitido mesmo sem WebGL) |
 | `sound:changed`          | O usuário ligou ou desligou o som                                         |
+| `motion:paused`          | O usuário pausou ou retomou as animações (seção 6.7)                      |
 | `ui:type`                | Um caractere foi "digitado" na tela (terminal do NPC, protocolo)          |
 | `npc:found`              | Um token NPC foi encontrado                                               |
 | `registration:intent`    | Clique num CTA de inscrição (guarda a origem)                             |
 | `registration:submitted` | Inscrição enviada com sucesso (protocolo)                                 |
+
+### 6.7 Pausar animações (WCAG 2.2.2)
+
+Tudo que se mexe sozinho por mais de 5 s (3D, raios do logo, loops em CSS) para com o botão **Pausar animações**: no
+header ao lado do som (`components/motion/PauseMotionToggle.astro`, ícone com tooltip) e no menu do celular
+(`PauseMotionSwitch.astro`, com texto). Os dois têm `data-motion-toggle`, então andam juntos.
+
+- **Estado:** `MotionPreferenceViewModel` (`view-models/motion`). Começa rodando e a escolha fica salva no navegador
+  (porta `PreferenceStore`, chave `motion`). Com `prefers-reduced-motion` o sistema já parou tudo: o botão fica travado
+  em "pausado" (`aria-disabled`) e não grava nada.
+- **DOM:** `MotionPreferenceView` liga os botões (nome acessível fixo, estado no `aria-pressed`, tooltip com a ação do
+  próximo clique, Esc esconde o tooltip) e põe a classe `is-motion-paused` no `<html>` (`MotionPauseSignal`). O evento
+  `motion:paused` sai a cada troca.
+- **Quem obedece:** o CSS lê a classe direto; o `FrameLoop` do 3D congela o relógio (desenha um frame parado e, ao
+  retomar, segue dali sem salto) e os raios do logo param. Os dois leem o `MotionPauseSignal` ao montar, então já
+  nascem no estado certo.
+- **Loops em CSS:** `styles/motion-pause.css` tem a **lista explícita** de animações infinitas que recebem
+  `animation-play-state: paused`. Um "pausa tudo" travaria no quadro zero as entradas de uma vez só (hero, menu) e o
+  conteúdo sumiria. **Criou um loop infinito novo em CSS? Inclua a classe nessa lista.** Spinner de envio fica de fora
+  (é status, não enfeite).
+- Sem JavaScript os botões continuam `hidden`: não haveria o que pausar além do CSS.
 
 ## 7. Experiência 3D
 
@@ -262,7 +314,8 @@ carga, via `ChargeCueGate`) e o CTA aparece. Sem WebGL o evento sai do mesmo jei
 - O tier inicial vem do `QualityDetector` (nome da GPU, núcleos, memória, tela e tipo de ponteiro).
 - O `AdaptiveQuality` mede o FPS: abaixo de 45 por ~2 s corta um degrau do pós (inteiro → meia → nenhum), depois o
   DPR, depois o tier. Nunca sobe de volta.
-- O render pausa com a aba oculta. Com `prefers-reduced-motion`, a cena troca inteira e o loop desenha sob demanda.
+- O render pausa com a aba oculta e congela com "Pausar animações" (seção 6.7). Com `prefers-reduced-motion`, a cena
+  troca inteira e o loop desenha sob demanda.
 
 ### 7.7 Como adicionar uma cena
 
@@ -305,8 +358,58 @@ aba **Inscricoes** com protocolo `HR26-XXXXXX`. Para a equipe aparecer no site, 
 Passo a passo completo em `apps-script/README.md`. Depois de publicar o Web App, coloque a URL em
 `PUBLIC_REGISTRATION_ENDPOINT` (variável de ambiente na Cloudflare) ou em `registration.endpoint` no `event.json`.
 
-Proteções: honeypot, tempo mínimo de preenchimento, validação no servidor, trava de concorrência (`LockService`),
-cache de 60 s na lista de equipes, novas tentativas com backoff no cliente e consentimento LGPD.
+O Apps Script tem três arquivos: `Code.gs` (rotas `doPost`/`doGet`, planilha e protocolo), `Validation.gs` (regras do
+servidor) e `Limits.gs` (prazo, capacidade e limite de envios). Os testes rodam os três de verdade no Node, com dublês
+dos serviços do Google: `npx vitest run tests/infrastructure/apps-script`.
+
+### 9.1 Prazo e capacidade em tempo de execução
+
+O build fecha o formulário pelo `event.json` (`closesAt`, `capacity`), mas qualquer um pode chamar a URL do Web App
+direto. Por isso o `Limits.gs` confere **a cada envio** as Propriedades do script e responde `closed` quando não dá
+mais:
+
+| Propriedade           | O que faz                                                            |
+| --------------------- | -------------------------------------------------------------------- |
+| `CLOSES_AT`           | Prazo final, data ISO com hora e fuso (`2026-11-08T23:59:00-03:00`)  |
+| `CAPACITY`            | Máximo de equipes: conta as linhas `Equipe` que não estão `recusado` |
+| `INSCRICOES_FECHADAS` | `sim` fecha na hora, sem novo deploy do site                         |
+
+- Lotou, fecha pra todo mundo (equipe e individual), igual ao site. Recusar uma equipe na coluna Status libera a vaga.
+- Valor inválido (`CAPACITY=trinta`) **fecha** as inscrições e grava o erro no log: melhor errar pro lado seguro.
+- `URL/exec?action=health` responde `open: true/false` sem ler a planilha: serve pra conferir a configuração.
+- Mantenha `CLOSES_AT` e `CAPACITY` iguais a `registration.closesAt` e `registration.capacity` do `event.json`.
+
+### 9.2 Limites de envio
+
+- **Por e-mail:** até 10 tentativas a cada 10 min por e-mail do líder (guardado como hash no `CacheService`, nunca em
+  texto). Cobre os reenvios automáticos do site e segura quem fica testando se um e-mail já está inscrito.
+- **Global:** 120 envios por minuto. O e-mail esbarra no próprio limite antes de contar no global, então um script
+  repetindo o mesmo e-mail não tranca a fila de todo mundo.
+- Resposta `rate-limited`: o `RetryingRegistrationGateway` tenta de novo com espera crescente (até 3 tentativas, só
+  para `network`, `server` e `rate-limited`).
+
+### 9.3 Consentimento (LGPD)
+
+- O checkbox do formulário linka o aviso em `/privacidade` (abre em nova aba), que também está no rodapé.
+- O envio leva `consentVersion` (a constante `CONSENT_VERSION` de `application/use-cases/SubmitRegistration.ts`) e
+  `consentAt`. O servidor exige os dois e grava na coluna **Consentimento**: `versão · data/hora ISO do aceite`. Sem
+  isso a inscrição não entra.
+- **Mudou o texto do aviso? Suba o `CONSENT_VERSION`.** A página `/privacidade` mostra a versão vigente.
+
+### 9.4 Idempotência (reenvio sem linha duplicada)
+
+- Cada sessão do formulário gera uma **chave de envio** (UUID, `view-models/registration/idempotencyKey.ts`) que vale
+  para todo reenvio até a inscrição entrar (`SubmissionSession`).
+- No servidor, mesma chave + mesmo e-mail devolve o **mesmo protocolo**: primeiro pelo cache (10 min) e, depois disso,
+  pela coluna **Chave de envio** gravada na linha. Mesmo e-mail com outra chave é `duplicate`.
+- Planilha criada antes da coluna nova: o script completa o título dela na primeira gravação.
+
+### 9.5 Outras proteções
+
+Honeypot e tempo mínimo de preenchimento (3 s: `MIN_FILL_MS` no `SubmitRegistration.ts` e `MIN_ELAPSED_MS` no
+`Validation.gs`, um teste confere), validação completa no servidor (nome, e-mail, WhatsApp, curso, tamanho da equipe,
+e-mails repetidos), trava de concorrência (`LockService`), proteção contra fórmula injetada na planilha (`=`, `+`,
+`-`, `@`) e cache de 60 s na lista de equipes.
 
 ## 10. Identidade e assets
 
@@ -353,15 +456,23 @@ arquivos, os PDFs caem nas fontes padrão (Helvetica/Courier).
 
 - Código, nomes de arquivos e commits em **inglês**. Textos da interface e comentários em **português**.
 - Comentário curto e objetivo, só quando o código não se explica sozinho. Nada de comentar o óbvio.
-- POO: classes pequenas com uma responsabilidade. **Alvo de até 150 linhas por arquivo, teto de 250**: passou, quebre
-  (o ESLint avisa a partir de 300).
+- POO: classes pequenas com uma responsabilidade. **Alvo de até 150 linhas por arquivo, teto de 250**: passou, quebre.
+  O ESLint conta só linhas de código (sem branco nem comentário): **avisa acima de 200 e dá erro acima de 250**,
+  inclusive nos `.astro` (o `<style>` conta). Componente grande vira subcomponentes na pasta da seção (ex.:
+  `sections/npc/NpcTerminal.astro` com `TerminalBar` e `TerminalScreen`).
+- Camadas: respeite a tabela da seção 6.1. A apresentação recebe **portas** da aplicação, nunca importa
+  `@infrastructure/*` (o ESLint bloqueia); quem escolhe o adapter é o `src/composition/client.ts`.
 - Classes e componentes em `PascalCase`, funções e variáveis em `camelCase`, constantes globais em `UPPER_SNAKE_CASE`.
 - Imports por alias de camada: `@domain/*`, `@application/*`, `@infrastructure/*`, `@presentation/*`, `@shared/*`,
   `@composition/*`.
 - `import type` para tipos (obrigatório pelo `verbatimModuleSyntax`). TypeScript no modo mais estrito
   (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`), sem `any`.
-- CSS: use **só** os tokens de `styles/tokens.css`; estilos com escopo dentro do `.astro`; media queries `min-width`
-  (mobile first).
+- CSS: use **só** os tokens de `styles/tokens.css` (cor da paleta é `var(--c-*)`, texto miúdo claro é `--ink-*`,
+  campos usam `--control-*`); estilos com escopo dentro do `.astro`; media queries `min-width` (mobile first: o
+  estilo base é o do celular e as larguras maiores somam por cima).
+- Foco: nunca `outline: none`. Para esconder o contorno de um foco programático use `outline: 2px solid transparent`,
+  que continua visível no modo de alto contraste (cores forçadas).
+- Loop de animação infinito em CSS entra na lista do `styles/motion-pause.css` (seção 6.7).
 - GLSL: um arquivo por objeto; constante espelhada com o `.ts` tem comentário dos dois lados.
 - Acessibilidade e performance não são opcionais (checklist na seção 17).
 
@@ -395,9 +506,11 @@ otimização.
   ocioso. As formas são geradas num Web Worker enquanto os shaders compilam; o `StageCompiler` prepara um programa por
   tarefa com `KHR_parallel_shader_compile` (`compileAsync`), já no alvo de render certo, antes do primeiro frame.
 - **Shader enxuto:** `defines` por cena removem ramos de formas ausentes; índices da paleta são constantes.
-- **Render adiado do layout:** `content-visibility: auto` nas seções longe do topo (`base.css`), com
-  `contain-intrinsic-size` medido em 390 e 1440 px. O `LayoutRefresher` recalcula os gatilhos quando a seção monta, e
-  o scroll por âncora confere o destino de novo ao chegar.
+- **Render adiado do layout:** `content-visibility: auto` nas seções longe do topo, em
+  `styles/deferred-sections.css` (importado pelo `base.css`, na layer `base`), com `contain-intrinsic-size` (altura do
+  conteúdo, sem o padding da seção) medido em 390 e 1440 px. Mudou bastante o conteúdo de uma dessas seções? Meça de
+  novo e atualize o valor. O `LayoutRefresher` recalcula os gatilhos quando a seção monta, e o scroll por âncora
+  confere o destino de novo ao chegar (`scripts/qa/anchorcheck.mjs` testa isso).
 - **Aurora barata:** manchas em `radial-gradient` sem `filter: blur()`; cores interpoladas por `@property`.
 - **Qualidade adaptativa** (seção 7.6), DPR limitado por tier, pausa com a aba oculta, raios do logo só com o hero
   visível e versão leve em telas de toque.
@@ -406,34 +519,51 @@ otimização.
 
 ## 13. QA
 
+Os scripts ficam em `scripts/qa/`, com `package.json` próprio: Playwright e Lighthouse não entram no `npm ci` do
+projeto, só quem faz QA instala. Guia completo de cada script em `scripts/qa/README.md`.
+
+```bash
+cd scripts/qa
+npm install
+npx playwright install chromium   # só se a máquina não tiver Brave nem Chrome
+```
+
+O navegador sai de `BRAVE_PATH`, depois `CHROME_PATH`, depois do caminho padrão do Brave ou do Chrome no sistema e,
+por último, do Chromium do Playwright. O navegador instalado roda com **GPU real** (`--enable-gpu`,
+`--ignore-gpu-blocklist` e `--use-angle=d3d11` no Windows): sem isso o headless renderiza por software e o 3D sempre
+cai no tier `low`. Rode contra o build de produção (`npm run build && npm run preview`), passando a URL como primeiro
+argumento; as saídas vão para `scripts/qa/out/` (fora do Git).
+
 ### 13.1 Visual
 
-O QA visual é feito com **Playwright** dirigindo o **Brave instalado** (Chromium com GPU real: `--enable-gpu`,
-`--use-angle=d3d11` no Windows), contra o build de produção (`npm run build && npm run preview`).
+| Script            | Uso                                                                    |
+| ----------------- | ---------------------------------------------------------------------- |
+| `shots.mjs`       | `node shots.mjs <url> 390 844 out/m390 "#sobre,#missoes@0.5" --mobile` |
+| `anchorcheck.mjs` | `node anchorcheck.mjs <url>`: links do header e CTAs param no alvo     |
+| `overflow.mjs`    | `node overflow.mjs <url> --width=360 --width=390`: nada passa da tela  |
 
-- Capturas por seção em 360/390, 768, 1024, 1366/1440 e 1920 px, com emulação de celular (`isMobile`, toque,
-  DPR 2 a 3) nas larguras pequenas.
-- Antes de capturar, espere a classe `is-experience-ready` no `<html>` (o 3D desenhou) e registre erros do console.
-- Rode também com `?quality=low` e `?quality=high`, com "reduzir movimento" ligado e com o som ligado.
-- Confira as âncoras: clicar nos links do header e nos CTAs precisa parar o destino logo abaixo do header (as seções
-  com render adiado não podem errar o alvo).
+- Capturas por seção em 360/390, 768, 1024, 1366/1440 e 1920 px, com emulação de celular (`--mobile`: `isMobile`,
+  toque, DPR 2) nas larguras pequenas.
+- O `shots.mjs` espera a classe `is-experience-ready` no `<html>` (o 3D desenhou) e lista os erros do console no fim.
+- Rode também com `?quality=low` e `?quality=high` na URL, com "reduzir movimento" ligado, com o som ligado e com
+  "Pausar animações" ligado.
+- Âncoras: o `anchorcheck.mjs` clica nos links e confere se o destino parou na folga do header (`scroll-padding-top`);
+  as seções com render adiado não podem errar o alvo. `anchorcheck` e `overflow` saem com código 1 quando falham.
 
 ### 13.2 Performance
 
-- **Lighthouse CLI** em modo mobile, apontando o Brave por `CHROME_PATH`:
+| Script                   | Uso                                                                                    |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `vitals.mjs`             | `node vitals.mjs <url> --mobile`: LCP, CLS, `load`, tempo até o 3D, em 4G e sem limite |
+| `longtasks.mjs`          | `node longtasks.mjs <url> --runs=3`: tarefas longas com CPU 4x e 4G lento, com mediana |
+| `trace.mjs`              | `node trace.mjs <url>`: trace até o 1º paint, downloads e passos `boot:*`              |
+| `lighthouse.mjs`         | `node lighthouse.mjs <url> --runs=3`: Lighthouse mobile (`--desktop`) com mediana      |
+| `lighthouse-summary.mjs` | `node lighthouse-summary.mjs out/lighthouse/*.json`: resume relatórios já gravados     |
 
-```bash
-CHROME_PATH="C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe" \
-  npx lighthouse http://localhost:4321/ --form-factor=mobile --quiet \
-  --chrome-flags="--headless=new --enable-gpu" --output=html --output-path=lighthouse-mobile.html
-```
-
-- **Tarefas longas:** `PerformanceObserver` de `longtask` com CPU 4x mais lenta e rede 4G emulada via CDP. Conte e
-  atribua as tarefas longas (trace do Chrome) em vez de olhar só o tempo absoluto.
-- As medições oscilam: rode várias vezes e compare medianas.
-
-> Playwright e Lighthouse não estão no `package.json` (são ferramentas de QA, instaladas à parte). Os scripts de
-> captura ainda não estão versionados; ver pendências técnicas (seção 19).
+- Conte e atribua as tarefas longas (trace do Chrome) em vez de olhar só o tempo absoluto.
+- As medições oscilam: rode várias vezes e compare medianas (os scripts de performance já imprimem a mediana).
+- Script novo usa `lib/browser.mjs` e `lib/cli.mjs` (navegador, perfis de rede, argumentos e pasta de saída) e nunca
+  caminho fixo da máquina de alguém.
 
 ## 14. Commits (Conventional Commits)
 
@@ -499,12 +629,14 @@ Cache e headers de segurança ficam em `public/_headers`.
 ## 17. Checklist antes do merge
 
 - [ ] `npm run validate` passou (e `npm run format:check`).
-- [ ] Testei no celular (360 e 390 px) e no desktop (1440 px), com capturas das seções alteradas.
+- [ ] Testei no celular (360 e 390 px) e no desktop (1440 px), com capturas das seções alteradas
+      (`scripts/qa/shots.mjs`), sem scroll horizontal (`overflow.mjs`) e com as âncoras no alvo (`anchorcheck.mjs`).
 - [ ] Mexeu no 3D: conferi com `?quality=low` e `?quality=high`, sem erro no console.
 - [ ] Navegação só por teclado funciona; foco visível.
 - [ ] Ativei "reduzir movimento" no sistema e a página continua utilizável.
+- [ ] "Pausar animações" para tudo o que se mexe sozinho (loop novo em CSS entrou no `motion-pause.css`).
 - [ ] Sem texto com contraste baixo; imagens com `alt`.
-- [ ] Nenhum arquivo passou de 250 linhas; nenhum `console.log` esquecido.
+- [ ] Nenhum arquivo passou de 250 linhas (o ESLint avisa acima de 200); nenhum `console.log` esquecido.
 - [ ] Lighthouse mobile sem regressão (acessibilidade, boas práticas e SEO em 100).
 
 ## 18. Versionamento
@@ -531,8 +663,9 @@ inscrições). As mensagens no padrão Conventional Commits permitem gerar chang
 ### 19.2 Técnicas
 
 - [ ] Lighthouse mobile ≥ 90 em performance (em andamento).
-- [ ] Versionar os scripts de QA (capturas, vitals, tarefas longas, âncoras) numa pasta `qa/` do repositório.
-- [ ] Remover dependências da v1 que não são mais usadas (`@fontsource-variable/big-shoulders` e `inter`).
+- [x] Versionar os scripts de QA (capturas, vitals, tarefas longas, trace, âncoras, overflow e Lighthouse) em
+      `scripts/qa/`.
+- [x] Remover dependências da v1 que não são mais usadas (`@fontsource-variable/big-shoulders` e `inter`).
 
 ## 20. Documentação gerada
 

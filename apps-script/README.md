@@ -15,8 +15,9 @@ site (lista)      --GET ?action=teams--> só equipes com Status "confirmado"
 2. Crie uma planilha nova, por exemplo **HackaRun 2026 · Inscrições**.
 3. Não precisa criar abas nem cabeçalho: na primeira inscrição o script cria a aba `Inscricoes` com as colunas
    `Protocolo, Data/hora, Modalidade, Equipe, Lider, E-mail, WhatsApp, Curso, Periodo, Integrantes, Qtde,
-Acessibilidade, Status, Origem, Consentimento` e um menu suspenso na coluna **Status**.
+Acessibilidade, Status, Origem, Consentimento, Chave de envio` e um menu suspenso na coluna **Status**.
 4. A aba já existia de uma versão anterior? Escreva `Consentimento` no cabeçalho da coluna **O** (a primeira vazia).
+   A coluna **Chave de envio** (P) o script completa sozinho na primeira gravação.
 
 ## 2. Colar o código
 
@@ -43,7 +44,8 @@ Acessibilidade, Status, Origem, Consentimento` e um menu suspenso na coluna **St
    propriedades da seção 6 estão fechando as inscrições).
 
 > Mudou o código? Use **Implantar > Gerenciar implantações > Editar > Nova versão**. Assim a URL continua a mesma.
-> "Nova implantação" gera outra URL e o site para de enviar.
+> "Nova implantação" gera outra URL e o site para de enviar. Colou um `Code.gs` ou `Validation.gs` novo? Publique a
+> nova versão, senão o Web App segue rodando o código antigo.
 
 ## 4. Ligar o site na planilha
 
@@ -98,7 +100,9 @@ Em **Configurações do projeto > Propriedades do script**, crie as que precisar
   mesmo e-mail não consegue travar a fila de todo mundo.
 - `LockService` em volta da gravação: duas inscrições ao mesmo tempo não se atropelam.
 - Bloqueio de inscrição repetida pelo e-mail do líder.
-- Reenvio automático do site (falha de rede) recebe o mesmo protocolo em vez de duplicar a linha.
+- Cada formulário manda uma chave de envio (UUID): reenvio com a mesma chave e o mesmo e-mail (automático ou pelo
+  "Tentar de novo") recebe o mesmo protocolo, mesmo depois de o cache expirar. Erro interno responde `server`, que o
+  site trata como passageiro.
 - Proteção contra fórmulas injetadas na planilha (`=`, `+`, `-`, `@`).
 - Prazo e capacidade conferidos a cada envio (seção 6).
 
