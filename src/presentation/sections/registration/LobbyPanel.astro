@@ -51,10 +51,10 @@ const steps = ['Modalidade', 'Seus dados', 'Integrantes', 'Confirmar'];
   .lobby {
     --sx-border: linear-gradient(
       160deg,
-      #00e5ff 0%,
+      var(--c-cyan) 0%,
       rgb(18 100 255 / 0.35) 30%,
       rgb(148 27 255 / 0.2) 70%,
-      #ed28e8 100%
+      var(--c-magenta) 100%
     );
     padding: var(--space-6) var(--space-5);
     scroll-margin-top: calc(var(--header-h) + var(--space-4));
@@ -71,8 +71,8 @@ const steps = ['Modalidade', 'Seus dados', 'Integrantes', 'Confirmar'];
     left: 12%;
     right: 12%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, #00e5ff, #941bff, transparent);
-    box-shadow: 0 0 18px #00e5ff;
+    background: linear-gradient(90deg, transparent, var(--c-cyan), var(--c-violet), transparent);
+    box-shadow: 0 0 18px var(--c-cyan);
   }
 
   .lobby__head {
@@ -119,7 +119,7 @@ const steps = ['Modalidade', 'Seus dados', 'Integrantes', 'Confirmar'];
   }
 
   .lobby__steps span {
-    color: #8ff3ff;
+    color: var(--ink-cyan);
     font-weight: 700;
   }
 

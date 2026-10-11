@@ -57,7 +57,7 @@ const flag =
   .session--hot {
     --sx-accent: var(--c-orange);
     --sx-accent-2: var(--c-gold);
-    --sx-ink: #ffb27a;
+    --sx-ink: var(--ink-orange);
     background:
       radial-gradient(120% 90% at 0% 0%, rgb(255 133 47 / 0.18), transparent 60%),
       linear-gradient(170deg, rgb(26 14 30 / 0.88), rgb(6 5 16 / 0.94));
@@ -91,7 +91,6 @@ const flag =
   }
 
   .session__flag {
-    margin-left: auto;
     padding: 0.25em 0.7em;
     background: linear-gradient(100deg, var(--c-gold), var(--c-orange));
     box-shadow: 0 0 22px rgb(255 133 47 / 0.55);
@@ -123,9 +122,9 @@ const flag =
     gap: var(--space-2);
   }
 
-  @media (max-width: 639px) {
+  @media (min-width: 640px) {
     .session__flag {
-      margin-left: 0;
+      margin-left: auto;
     }
   }
 </style>

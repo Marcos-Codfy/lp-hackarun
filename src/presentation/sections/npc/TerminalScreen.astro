@@ -1,0 +1,112 @@
+---
+import NpcToken from '@presentation/components/npc/NpcToken.astro';
+
+// o texto completo da dica está no HTML; o TerminalTypeAnimator só digita por cima
+const hint = 'npc_07: "o que você procura está onde tudo termina..."';
+---
+
+<div class="terminal__screen">
+  <p class="terminal__line terminal__line--dim" data-terminal-boot>
+    <span class="terminal__prompt">&gt;</span> conectando ao npc_07...
+    <span class="terminal__ok">ok</span>
+  </p>
+  <p class="terminal__line terminal__line--dim" data-terminal-boot>
+    <span class="terminal__prompt">&gt;</span> sinal instável. pista recebida:
+  </p>
+  <p class="terminal__line terminal__line--hint">
+    <span class="sr-only">{hint}</span>
+    <span aria-hidden="true">
+      <span data-type-text>{hint}</span>
+      <span class="terminal__caret"></span>
+    </span>
+  </p>
+  <p class="terminal__line terminal__line--foot" data-terminal-boot>
+    <span aria-hidden="true">
+      <span class="terminal__prompt">&gt;</span> tokens escondidos na página: <b>3</b>
+    </span>
+    <NpcToken id="npc-1" label="Token NPC escondido no terminal" />
+  </p>
+</div>
+
+<style>
+  .terminal__screen {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5) var(--space-5) var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+  }
+
+  .terminal__prompt {
+    color: var(--c-magenta);
+  }
+
+  .terminal__line--dim {
+    color: rgb(222 210 255 / 0.62);
+  }
+
+  .terminal__ok {
+    margin-left: var(--space-2);
+    color: var(--c-success);
+  }
+
+  .terminal__line--hint {
+    min-height: 3.2em;
+    padding: var(--space-3) var(--space-4);
+    border-left: 2px solid var(--c-magenta);
+    background: linear-gradient(90deg, rgb(237 40 232 / 0.12), transparent 80%);
+    color: #f6e9ff;
+    font-size: var(--fs-sm);
+    text-shadow: 0 0 14px rgb(237 40 232 / 0.55);
+  }
+
+  .terminal__line--foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px dashed rgb(178 107 255 / 0.22);
+    color: rgb(222 210 255 / 0.62);
+  }
+
+  .terminal__line--foot b {
+    color: var(--sx-ink);
+    font-weight: 700;
+  }
+
+  .terminal__caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    margin-left: 3px;
+    vertical-align: text-bottom;
+    background: var(--c-magenta);
+    box-shadow: 0 0 12px var(--c-magenta);
+    animation: caret-blink 1s steps(1) infinite;
+  }
+
+  /* digitando: o cursor fica aceso (pisca só parado); .is-typing vai no figure [data-terminal] */
+  :global(.is-typing) .terminal__caret {
+    animation: none;
+  }
+
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .terminal__screen {
+      padding: var(--space-6) var(--space-6) var(--space-5);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal__caret {
+      animation: none;
+    }
+  }
+</style>

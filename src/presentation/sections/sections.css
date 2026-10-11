@@ -6,8 +6,8 @@
   --sx-accent: var(--c-cyan);
   --sx-accent-2: var(--c-electric);
   /* versão clara do destaque pra texto pequeno (AA sobre o vazio) */
-  --sx-ink: #8ff3ff;
-  --sx-grad: linear-gradient(100deg, #00e5ff 0%, #1264ff 55%, #941bff 100%);
+  --sx-ink: var(--ink-cyan);
+  --sx-grad: linear-gradient(100deg, var(--c-cyan) 0%, var(--c-electric) 55%, var(--c-violet) 100%);
   --sx-line: color-mix(in srgb, var(--sx-accent) 28%, transparent);
   --sx-soft: color-mix(in srgb, var(--sx-accent) 12%, transparent);
   position: relative;
@@ -24,33 +24,33 @@
   --sx-accent: #2f6bff;
   --sx-accent-2: var(--c-cyan);
   --sx-ink: #9dbcff;
-  --sx-grad: linear-gradient(100deg, #00e5ff 0%, #2f6bff 50%, #5b4bff 100%);
+  --sx-grad: linear-gradient(100deg, var(--c-cyan) 0%, #2f6bff 50%, #5b4bff 100%);
 }
 
 .tone-violet {
   --sx-accent: var(--c-violet);
   --sx-accent-2: var(--c-magenta);
   --sx-ink: #d2a8ff;
-  --sx-grad: linear-gradient(100deg, #b26bff 0%, #941bff 45%, #ed28e8 100%);
+  --sx-grad: linear-gradient(100deg, #b26bff 0%, var(--c-violet) 45%, var(--c-magenta) 100%);
 }
 
 .tone-gold {
   --sx-accent: var(--c-gold);
   --sx-accent-2: var(--c-orange);
   --sx-ink: #ffd88a;
-  --sx-grad: linear-gradient(100deg, #ffe7a3 0%, #ffc24a 35%, #ff852f 100%);
+  --sx-grad: linear-gradient(100deg, #ffe7a3 0%, var(--c-gold) 35%, var(--c-orange) 100%);
 }
 
 .tone-orange {
   --sx-accent: var(--c-orange);
   --sx-accent-2: var(--c-gold);
-  --sx-ink: #ffb27a;
-  --sx-grad: linear-gradient(100deg, #ffd27a 0%, #ff852f 55%, #ed28e8 100%);
+  --sx-ink: var(--ink-orange);
+  --sx-grad: linear-gradient(100deg, #ffd27a 0%, var(--c-orange) 55%, var(--c-magenta) 100%);
 }
 
-/* foco programático da navegação por âncora não precisa de contorno na seção inteira */
+/* foco programático da âncora sem contorno na seção; transparent (e não none) aparece em cores forçadas */
 .section:focus {
-  outline: none;
+  outline: 2px solid transparent;
 }
 
 .section-stack {

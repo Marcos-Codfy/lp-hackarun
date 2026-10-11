@@ -47,11 +47,18 @@ const { dates, datesLong, host, finalVenue } = Astro.props;
   }
 
   /* celular estreito: o chip do local precisa caber numa linha só */
-  @media (max-width: 420px) {
+  .hero-meta :global(li.chip) {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    padding-inline: 0.75rem;
+  }
+
+  /* daqui pra cima volta ao tamanho padrão do Chip.astro (mantenha os dois iguais) */
+  @media (min-width: 421px) {
     .hero-meta :global(li.chip) {
-      font-size: 0.625rem;
-      letter-spacing: 0.08em;
-      padding-inline: 0.75rem;
+      font-size: var(--fs-hud);
+      letter-spacing: 0.14em;
+      padding-inline: 0.9rem;
     }
   }
 </style>

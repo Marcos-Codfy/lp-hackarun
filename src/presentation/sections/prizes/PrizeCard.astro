@@ -63,7 +63,13 @@ const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
   }
 
   .prize--featured {
-    --sx-border: linear-gradient(150deg, #ffe7a3 0%, #ffc24a 25%, rgb(255 133 47 / 0.3) 60%, #ff852f 100%);
+    --sx-border: linear-gradient(
+      150deg,
+      #ffe7a3 0%,
+      var(--c-gold) 25%,
+      rgb(255 133 47 / 0.3) 60%,
+      var(--c-orange) 100%
+    );
     box-shadow:
       0 0 80px -20px rgb(255 194 74 / 0.45),
       0 30px 60px -36px rgb(0 0 0 / 0.9);
@@ -89,7 +95,7 @@ const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
     align-items: center;
     gap: var(--space-3);
     padding: 0.45rem 1.4rem 0.45rem 0.9rem;
-    background: linear-gradient(100deg, #ffe7a3, #ffc24a 45%, #ff852f);
+    background: linear-gradient(100deg, #ffe7a3, var(--c-gold) 45%, var(--c-orange));
     clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 50%, calc(100% - 0.8rem) 100%, 0 100%);
     color: var(--c-void);
     filter: drop-shadow(0 0 14px rgb(255 194 74 / 0.5));

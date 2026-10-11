@@ -68,9 +68,9 @@ const { item, number, withToken = false } = Astro.props;
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-3);
     min-height: 60px;
-    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+    padding: var(--space-4);
     cursor: pointer;
     list-style: none;
     border-radius: 3px;
@@ -98,7 +98,7 @@ const { item, number, withToken = false } = Astro.props;
   }
 
   .faq-entry[open] .faq-entry__code {
-    color: #8ff3ff;
+    color: var(--ink-cyan);
   }
 
   .faq-entry__question {
@@ -155,7 +155,7 @@ const { item, number, withToken = false } = Astro.props;
   .faq-entry__answer {
     display: grid;
     gap: var(--space-3);
-    padding: 0 var(--space-6) var(--space-5) calc(var(--space-5) + var(--space-4) + 2.6rem);
+    padding: 0 var(--space-4) var(--space-5);
     color: var(--text-muted);
     line-height: 1.7;
   }
@@ -189,14 +189,16 @@ const { item, number, withToken = false } = Astro.props;
     }
   }
 
-  @media (max-width: 639px) {
+  @media (min-width: 640px) {
     .faq-entry__summary {
-      gap: var(--space-3);
-      padding-left: var(--space-4);
+      gap: var(--space-4);
+      padding-left: var(--space-5);
     }
 
+    /* resposta alinhada com o texto da pergunta, depois do código Q.xx */
     .faq-entry__answer {
-      padding-inline: var(--space-4);
+      padding-right: var(--space-6);
+      padding-left: calc(var(--space-5) + var(--space-4) + 2.6rem);
     }
   }
 </style>
