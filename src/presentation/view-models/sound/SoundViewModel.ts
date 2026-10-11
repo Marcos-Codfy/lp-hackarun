@@ -1,9 +1,9 @@
 import { Observable } from '@shared/core/Observable';
 import type { EventBus } from '@shared/core/EventBus';
 import type { AppEvents } from '@presentation/app/AppEvents';
-import type { PreferenceStore } from '@infrastructure/storage/PreferenceStore';
-import type { AudioCue } from '@infrastructure/audio/AudioCue';
-import type { TickSound } from '@infrastructure/audio/TickSound';
+import type { PreferenceStore } from '@application/ports/PreferenceStore';
+import type { AudioCue } from '@application/ports/AudioCue';
+import type { TickSound } from '@application/ports/TickSound';
 
 // o que o VM precisa do AudioEngine (facilita o teste)
 export interface AudioUnlocker {

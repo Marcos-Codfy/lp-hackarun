@@ -1,4 +1,4 @@
-import type { PreferenceStore } from './PreferenceStore';
+import type { PreferenceStore } from '@application/ports/PreferenceStore';
 
 // guarda só enquanto a página está aberta (testes, SSR, navegador sem storage)
 export class MemoryPreferenceStore implements PreferenceStore {

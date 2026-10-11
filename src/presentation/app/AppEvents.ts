@@ -8,13 +8,15 @@ export interface AppEvents extends Record<string, unknown> {
   'scene:enter': { key: SceneKey; index: number; sectionId: string };
   // three.js carregou e já está desenhando
   'experience:ready': { tier: QualityTier };
-  // three.js não vai rodar (sem webgl, save-data, erro de carga ou de shader); reduced motion não cai aqui
+  // three.js não vai rodar (sem webgl, save-data, erro de carga, de shader ou de frame); reduced motion não cai aqui
   'experience:fallback': { reason: string };
   // seção com data-scene-hold entrou: o globo começa a carregar por durationMs
   'experience:charging': { durationMs: number };
   // globo final terminou a carga (dispara som + revela o CTA); emitido mesmo sem webgl
   'experience:charged': undefined;
   'sound:changed': { enabled: boolean };
+  // pausou ou retomou as animações (WCAG 2.2.2); o estado atual é a classe is-motion-paused do <html>
+  'motion:paused': { paused: boolean };
   'npc:found': { id: string; found: number; total: number };
   // alguém clicou num CTA de inscrição
   'registration:intent': { source: string };

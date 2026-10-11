@@ -56,11 +56,10 @@ export class ExperienceStage implements QualityTarget {
     this.loop = new FrameLoop(this.frame, !this.reduced, () => this.adaptive?.reset());
     this.resizer = new CanvasResizer(this.renderer.domElement, this.applySize);
 
-    // reduced motion: só desenha quando a cena ou a carga mudam
-    if (this.reduced) {
-      this.offs.push(ctx.scenes.progress.subscribe(() => this.loop.invalidate(), { immediate: false }));
-      this.offs.push(ctx.bus.on('experience:charging', () => this.loop.invalidate()));
-    }
+    // loop parado (reduced motion ou "pausar animações"): desenha sob demanda quando a cena ou a carga mudam.
+    // com o loop rodando o invalidate não faz nada
+    this.offs.push(ctx.scenes.progress.subscribe(() => this.loop.invalidate(), { immediate: false }));
+    this.offs.push(ctx.bus.on('experience:charging', () => this.loop.invalidate()));
     // shader que não compila não lança erro: sem isso o canvas ficaria vazio e o fallback sumiria
     this.renderer.debug.onShaderError = (gl, program, vertex, fragment) => {
       this.shaderError = true;
@@ -122,10 +121,21 @@ export class ExperienceStage implements QualityTarget {
   }
 
   private readonly frame = (time: number, delta: number): void => {
+    try {
+      this.draw(time, delta);
+    } catch (error) {
+      // erro de JS no frame: o Ticker isola, mas ficaria o canvas congelado por cima da aurora
+      console.error('[experience] frame failed', error);
+      this.loop.setEnabled(false);
+      this.status.fail('frame-error');
+    }
+  };
+
+  private draw(time: number, delta: number): void {
     if (this.startTime < 0) this.startTime = time;
     const elapsed = this.reduced ? 0 : time - this.startTime;
-    // primeiro frame entra direto na cena atual (recarregar no meio da página não morfa do zero)
-    this.world.update(elapsed, delta, this.reduced || !this.status.ready);
+    // 1º frame e frame avulso (delta 0: reduced/pausado) entram direto na cena atual, sem morfar do zero
+    this.world.update(elapsed, delta, this.reduced || delta === 0 || !this.status.ready);
     this.output.render(this.world.post, delta);
     if (this.shaderError) {
       this.loop.setEnabled(false);
@@ -134,7 +144,7 @@ export class ExperienceStage implements QualityTarget {
     }
     this.adaptive?.sample(delta);
     this.status.markReady();
-  };
+  }
 
   private readonly onEffects = (level: EffectsLevel): void => {
     this.world.setEffects(level);

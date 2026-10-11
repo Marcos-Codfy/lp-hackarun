@@ -1,19 +1,31 @@
 import { EventBus } from '@shared/core/EventBus';
+import { Observable } from '@shared/core/Observable';
 import { isCoarsePointer, prefersReducedMotion } from '@shared/utils/env';
 import { onIdle } from '@shared/utils/dom';
 import { registerMotionPlugins } from '@presentation/motion/core/gsap';
 import { mountMotion } from '@presentation/motion/core/mountMotion';
+import { AnchorNavigator } from '@presentation/motion/core/AnchorNavigator';
+import { NativeScroll } from '@presentation/motion/core/NativeScroll';
 import { mountViews } from '@presentation/views/mountViews';
+import { mountControllers } from '@presentation/controllers/mountControllers';
 import { mountAnimators } from '@presentation/motion/animators/mountAnimators';
 import { readAppConfig } from './AppConfig';
-import type { AppContext } from './AppContext';
+import type { AppContext, MotionHandle, SceneTrack } from './AppContext';
 import type { AppEvents } from './AppEvents';
-import { afterNextPaint, BootQueue, timed, yieldToMain } from './BootQueue';
+import { afterNextPaint, attempt, BootQueue, yieldToMain } from './BootQueue';
 
 const afterLoad = (fn: () => void): void => {
   if (document.readyState === 'complete') fn();
   else window.addEventListener('load', fn, { once: true });
 };
+
+// plano B do mountMotion (GSAP ou Lenis quebrou): scroll nativo e trilha sem cenas; o 3D, se vier, fica no globo.
+// Se o mountMotion chegou a ligar o AnchorNavigator dele, aquele trata o clique primeiro e este nem age
+function nativeMotion(): { motion: MotionHandle; scenes: SceneTrack } {
+  const driver = new NativeScroll();
+  new AnchorNavigator(driver);
+  return { motion: driver, scenes: { keys: [], progress: new Observable(0), velocity: new Observable(0) } };
+}
 
 // bootstrap do browser: monta na ordem do que é mais crítico pro usuário, um passo curto por tarefa
 // (celular fraco travava em ~4s com tudo junto). Trilha "boot:*" no DevTools mostra o custo de cada um
@@ -24,7 +36,9 @@ export class App {
     if (App.booted) return;
     App.booted = true;
     // depois do próximo frame pintado: o hero (LCP) aparece antes de qualquer JS pesado
-    afterNextPaint(() => void new App().start());
+    afterNextPaint(() => {
+      new App().start().catch((error: unknown) => console.error('[app] boot failed', error));
+    });
   }
 
   private async start(): Promise<void> {
@@ -41,16 +55,23 @@ export class App {
     // um passo por frame: cada um lê o layout já calculado em vez de forçar outro
     const settle = new BootQueue('paint');
     // o register do ScrollTrigger força layout da página: tarefa só dele
-    timed('boot:plugins', registerMotionPlugins);
+    attempt('plugins', registerMotionPlugins);
     await yieldToMain();
-    const { motion, scenes } = timed('boot:motion', () => mountMotion({ bus, reducedMotion, later: settle }));
+    // sem movimento a página segue no scroll nativo: contador, formulário e menu não dependem dele
+    const { motion, scenes } = attempt(
+      'motion',
+      () => mountMotion({ bus, reducedMotion, later: settle }),
+      nativeMotion,
+    );
     const ctx: AppContext = { bus, config, reducedMotion, coarsePointer: isCoarsePointer(), motion, scenes };
 
     // 1) contador, formulário, som, equipes: funcionam mesmo sem 3D
-    mountViews(ctx, boot);
-    // 2) header/menu + entradas das seções (o setup pesado espera a seção chegar perto da tela)
-    mountAnimators(ctx, boot);
-    // 3) three.js num chunk separado: só depois do load, quando o navegador respirar
+    attempt('views', () => mountViews(ctx, boot));
+    // 2) header/menu, nav spy, HUD e aurora: não usam GSAP, então animador quebrado não leva eles junto
+    attempt('controllers', () => mountControllers(ctx, boot));
+    // 3) entradas das seções (o setup pesado espera a seção chegar perto da tela)
+    attempt('animators', () => mountAnimators(ctx, boot));
+    // 4) three.js num chunk separado: só depois do load, quando o navegador respirar
     settle.add('experience', () => afterLoad(() => onIdle(() => this.loadExperience(ctx))));
 
     await boot.run();

@@ -1,5 +1,8 @@
 export type * from './dto';
 export type * from './ports/Clock';
+export type * from './ports/TickSound';
+export type * from './ports/AudioCue';
+export type * from './ports/PreferenceStore';
 export type * from './ports/CalendarExporter';
 export * from './ports/RegistrationGateway';
 export * from './use-cases/GetEventOverview';

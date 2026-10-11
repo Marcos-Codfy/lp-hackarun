@@ -1,7 +1,7 @@
+import type { TickSound } from '@application/ports/TickSound';
 import type { AudioEngine } from './AudioEngine';
 import type { AudioSprite } from './AudioSprite';
 import type { MinIntervalGate } from './MinIntervalGate';
-import type { TickSound } from './TickSound';
 
 type FetchFn = (input: string) => Promise<Response>;
 

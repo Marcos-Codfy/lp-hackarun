@@ -1,16 +1,21 @@
 import type { AppContext } from '@presentation/app/AppContext';
 import type { BootSteps } from '@presentation/app/BootQueue';
 import { qs } from '@shared/utils/dom';
-import { AnchorNavController } from './AnchorNavController';
 import { HeaderScrollController } from './HeaderScrollController';
 import { HudRailController } from './HudRailController';
 import { MobileMenuController } from './MobileMenuController';
 import { NavSpyController } from './NavSpyController';
 import { SceneThemeController } from './theme/SceneThemeController';
 
-// controladores de DOM que não são MVVM (header, menu, âncoras, HUD, aurora); funcionam sem GSAP.
-// Header e menu primeiro: são o que a pessoa toca logo de cara
+// o App monta direto; a chamada antiga do mountAnimators na mesma fila vira no-op (sem header em dobro)
+const mounted = new WeakSet<BootSteps>();
+
+// controladores de DOM que não são MVVM (header, menu, nav spy, HUD, aurora); funcionam sem GSAP.
+// Links internos ficam com o AnchorNavigator (motion/core). Header e menu primeiro: são o que a pessoa toca logo
 export function mountControllers(ctx: AppContext, boot: BootSteps): void {
+  if (mounted.has(boot)) return;
+  mounted.add(boot);
+
   boot.add('header', () => {
     const header = qs('[data-site-header]');
     if (!header) return;
@@ -20,10 +25,7 @@ export function mountControllers(ctx: AppContext, boot: BootSteps): void {
     if (toggle && panel) new MobileMenuController({ header, toggle, panel, motion: ctx.motion }).mount();
   });
 
-  boot.add('nav', () => {
-    new AnchorNavController(ctx.motion).mount();
-    new NavSpyController(ctx.bus).mount();
-  });
+  boot.add('nav spy', () => new NavSpyController(ctx.bus).mount());
 
   boot.add('aurora', () => {
     const aurora = qs('[data-aurora]');

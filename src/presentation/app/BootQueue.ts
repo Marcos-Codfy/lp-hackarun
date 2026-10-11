@@ -38,6 +38,18 @@ export function timed<T>(name: string, run: () => T): T {
   }
 }
 
+// passo do boot que não pode derrubar o resto: quebrou, loga e segue (com o plano B, se tiver)
+export function attempt(name: string, run: () => void): void;
+export function attempt<T>(name: string, run: () => T, fallback: () => T): T;
+export function attempt<T>(name: string, run: () => T, fallback?: () => T): T | undefined {
+  try {
+    return timed(`boot:${name}`, run);
+  } catch (error) {
+    console.error(`[boot] ${name} failed`, error);
+    return fallback?.();
+  }
+}
+
 // 'yield': cede a thread e segue; 'paint': espera um frame (passo que mede a página lê o layout limpo)
 export type BootPace = 'yield' | 'paint';
 
@@ -55,11 +67,7 @@ export class BootQueue implements BootSteps {
   async run(): Promise<void> {
     for (let step = this.steps.shift(); step; step = this.steps.shift()) {
       await (this.pace === 'paint' ? nextPaint() : yieldToMain());
-      try {
-        timed(`boot:${step.name}`, step.run);
-      } catch (error) {
-        console.error(`[boot] ${step.name} failed`, error);
-      }
+      attempt(step.name, step.run);
     }
   }
 }

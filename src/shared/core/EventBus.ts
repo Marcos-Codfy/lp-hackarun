@@ -19,8 +19,15 @@ export class EventBus<TEvents extends Record<string, unknown>> {
     return off;
   }
 
+  // handler que quebra não impede os outros de ouvir nem estoura em quem emitiu
   emit<K extends keyof TEvents>(event: K, payload: TEvents[K]): void {
-    this.handlers.get(event)?.forEach((fn) => (fn as Handler<TEvents[K]>)(payload));
+    this.handlers.get(event)?.forEach((fn) => {
+      try {
+        (fn as Handler<TEvents[K]>)(payload);
+      } catch (error) {
+        console.error(`[bus] ${String(event)} handler failed`, error);
+      }
+    });
   }
 
   clear(): void {

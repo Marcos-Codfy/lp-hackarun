@@ -15,11 +15,18 @@ export class Observable<T> {
     return this.current;
   }
 
+  // listener que quebra não impede os outros nem desfaz a escrita do ViewModel
   set(next: T): void {
     if (this.equals(this.current, next)) return;
     const previous = this.current;
     this.current = next;
-    this.listeners.forEach((fn) => fn(next, previous));
+    this.listeners.forEach((fn) => {
+      try {
+        fn(next, previous);
+      } catch (error) {
+        console.error('[observable] listener failed', error);
+      }
+    });
   }
 
   update(fn: (value: T) => T): void {

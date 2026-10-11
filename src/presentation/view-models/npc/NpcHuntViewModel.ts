@@ -1,7 +1,7 @@
 import { Observable } from '@shared/core/Observable';
 import type { EventBus } from '@shared/core/EventBus';
 import type { AppEvents } from '@presentation/app/AppEvents';
-import type { PreferenceStore } from '@infrastructure/storage/PreferenceStore';
+import type { PreferenceStore } from '@application/ports/PreferenceStore';
 
 export interface NpcHuntState {
   found: string[];

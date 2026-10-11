@@ -1,4 +1,4 @@
-import type { AudioCue } from './AudioCue';
+import type { AudioCue } from '@application/ports/AudioCue';
 import type { AudioEngine } from './AudioEngine';
 
 type FetchFn = (input: string) => Promise<Response>;

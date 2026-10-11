@@ -1,4 +1,4 @@
-import type { PreferenceStore } from './PreferenceStore';
+import type { PreferenceStore } from '@application/ports/PreferenceStore';
 import { MemoryPreferenceStore } from './MemoryPreferenceStore';
 
 // localStorage pode lançar exceção (aba anônima, cota, bloqueio de cookies): tudo em try/catch

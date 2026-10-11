@@ -4,8 +4,3 @@ export interface TickSound {
   // baixa/decodifica antes da primeira vez
   preload?(): void;
 }
-
-// null object: sem Web Audio
-export class NullTickSound implements TickSound {
-  play(): void {}
-}

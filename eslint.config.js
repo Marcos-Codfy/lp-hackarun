@@ -71,4 +71,44 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // a apresentação enxerga só as portas da aplicação; adapter concreto quem liga é o src/composition
+    files: ['src/presentation/**/*.{ts,astro}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@infrastructure/*', '**/infrastructure/**'],
+              message: 'Presentation depends on application ports; adapters are wired in src/composition.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // utilitário sem regra de negócio: não conhece camada nenhuma
+    files: ['src/shared/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@domain/*',
+                '@application/*',
+                '@infrastructure/*',
+                '@presentation/*',
+                '@composition/*',
+              ],
+              message: 'Shared must not depend on any layer.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 );
