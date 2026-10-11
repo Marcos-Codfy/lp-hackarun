@@ -48,9 +48,25 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
         <span data-reg-squad>Esquadrão 1/{max}</span>
       </div>
       <noscript>
-        <p class="regform__noscript">Pra se inscrever, ative o JavaScript do navegador.</p>
+        <p class="regform__noscript">
+          A inscrição precisa de JavaScript. Ative no navegador e recarregue a página.
+        </p>
+        <style is:inline>
+          .regform [data-reg-form] {
+            display: none;
+          }
+        </style>
       </noscript>
-      <form class="regform__form" data-reg-form novalidate inert={!isOpen} aria-label="Inscrição no HackaRun">
+      {/* post: se o JS falhar, nada pessoal vai parar na URL (o host estático só responde 405) */}
+      <form
+        class="regform__form"
+        data-reg-form
+        method="post"
+        action="#inscricao"
+        novalidate
+        inert={!isOpen}
+        aria-label="Inscrição no HackaRun"
+      >
         <fieldset class="regform__fields" disabled={!isOpen}>
           <div class="regform__summary" data-error-summary hidden>
             <p class="regform__summary-title" data-error-summary-title></p>
@@ -115,15 +131,18 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
             </div>
           </fieldset>
           <MemberList min={min} max={max} />
-          <TextField
-            id="reg-accessibility"
-            field="accessibilityNeeds"
-            label="Alguma necessidade de acessibilidade?"
-            as="textarea"
-            maxlength={500}
-            hint="Ex.: intérprete de Libras, mesa adaptada, material ampliado."
-            optional
-          />
+          {/* dado sensível (LGPD art. 11): o aviso vai na dica, que o leitor de tela lê junto com o campo */}
+          <div class="regform__sensitive">
+            <TextField
+              id="reg-accessibility"
+              field="accessibilityNeeds"
+              label="Alguma necessidade de acessibilidade?"
+              as="textarea"
+              maxlength={500}
+              hint="Dado sensível: ao preencher, você autoriza o uso só para garantir sua acessibilidade no evento. Ex.: intérprete de Libras, mesa adaptada, material ampliado."
+              optional
+            />
+          </div>
           <ConsentField />
           <div class="regform__hp" aria-hidden="true">
             <label for="reg-website">Website</label>
@@ -162,3 +181,13 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
     </div>
   )}
 </div>
+
+<style>
+  .regform__sensitive :global(.field__hint) {
+    padding: var(--space-2) var(--space-3);
+    border-inline-start: 2px solid var(--c-gold);
+    border-radius: 0 3px 3px 0;
+    background: var(--glass-bg);
+    color: var(--text-muted);
+  }
+</style>

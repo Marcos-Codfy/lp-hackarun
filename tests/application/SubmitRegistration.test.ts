@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RegistrationGatewayError, SubmitRegistration } from '@application/index';
+import { CONSENT_VERSION, RegistrationGatewayError, SubmitRegistration } from '@application/index';
 import { FixedClock } from '@infrastructure/clock/SystemClock';
 import { FakeGateway, TEAM_SIZE, teamInput } from '../helpers/fixtures';
 
@@ -45,6 +45,24 @@ describe('SubmitRegistration', () => {
       honeypot: '',
       elapsedMs: 4322,
     });
+  });
+
+  it('registra o consentimento (versão do aviso + quando) junto com a inscrição', async () => {
+    const { gateway, useCase } = setup();
+    await useCase.execute(teamInput());
+    expect(gateway.calls[0]).toMatchObject({ consentVersion: CONSENT_VERSION, consentAt: NOW.toISOString() });
+  });
+
+  it('aceita outra versão do aviso injetada', async () => {
+    const gateway = new FakeGateway();
+    const useCase = new SubmitRegistration({
+      gateway,
+      clock: new FixedClock(NOW),
+      teamSize: TEAM_SIZE,
+      consentVersion: '2027-01-v2',
+    });
+    await useCase.execute(teamInput());
+    expect(gateway.calls[0]?.consentVersion).toBe('2027-01-v2');
   });
 
   it('sem metadados usa a origem padrão', async () => {

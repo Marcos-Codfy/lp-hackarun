@@ -5,24 +5,23 @@ import {
   type RegistrationPayload,
   type RegistrationReceipt,
 } from '@application/index';
+import { wait, type Sleep } from '@shared/utils/async';
 
 export interface RetryOptions {
   attempts?: number;
   baseDelayMs?: number;
-  sleep?: (ms: number) => Promise<void>;
+  sleep?: Sleep;
   random?: () => number;
 }
 
 const RETRYABLE: ReadonlySet<GatewayFailure> = new Set(['network', 'rate-limited']);
-
-const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 // decorator: tenta de novo só o que é passageiro (rede, fila cheia), com backoff exponencial + jitter
 export class RetryingRegistrationGateway implements RegistrationGateway {
   private readonly inner: RegistrationGateway;
   private readonly attempts: number;
   private readonly baseDelayMs: number;
-  private readonly sleep: (ms: number) => Promise<void>;
+  private readonly sleep: Sleep;
   private readonly random: () => number;
 
   constructor(inner: RegistrationGateway, options: RetryOptions = {}) {

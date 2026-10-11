@@ -1,9 +1,14 @@
 # cloudflare pages: cache e segurança
+# CSP: nenhum script inline (o Astro empacota tudo em /_astro); os JSON de dados não executam.
+# Apps Script responde com 302 pro googleusercontent, por isso os dois hosts no connect-src.
+# Ligou Web Analytics ou Turnstile na Cloudflare? Libere o host deles aqui antes (Rocket Loader quebra com esta CSP).
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; media-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
 # arquivos com hash no nome nunca mudam
 /_astro/*

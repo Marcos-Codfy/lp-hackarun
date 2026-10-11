@@ -1,5 +1,6 @@
 ---
-// aceite do regulamento + LGPD; checkbox nativo com caixa custom de 24px num alvo de 44px
+// aceite do regulamento + LGPD; checkbox nativo com caixa custom de 24px num alvo de 44px.
+// o aviso abre em outra aba pra não perder o que já foi digitado
 ---
 
 <div class="consent">
@@ -14,8 +15,12 @@
     />
     <span class="consent__box" aria-hidden="true"></span>
     <span class="consent__text">
-      Li e aceito o regulamento e autorizo o uso dos meus dados pela organização do HackaRun apenas para fins
-      do evento (LGPD).
+      Li e aceito o regulamento (publicado pela organização) e autorizo o uso dos meus dados pela organização
+      do HackaRun apenas para fins do evento, conforme o{' '}
+      <a class="consent__link" href="/privacidade" target="_blank" rel="noopener">
+        aviso de privacidade<span class="sr-only"> (abre em nova aba)</span>
+      </a>{' '}
+      (LGPD).
     </span>
   </label>
   <p class="consent__error" id="reg-terms-error" data-error-for="acceptedTerms" hidden></p>
@@ -88,6 +93,22 @@
   .consent__input[aria-invalid='true'] + .consent__box {
     border-color: var(--c-danger);
     box-shadow: 0 0 16px rgb(255 77 141 / 0.35);
+  }
+
+  .consent__link {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .consent__link:hover {
+    color: var(--text);
+  }
+
+  .consent__link:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
   }
 
   .consent__error {

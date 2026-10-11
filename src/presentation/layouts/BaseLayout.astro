@@ -25,6 +25,8 @@ const fontFaces = [
   face('Montserrat Variable', bodyFont, '100 900'),
   face('JetBrains Mono Variable', monoFont, '100 800'),
 ].join('');
+// "<" vira \u003c: texto do conteúdo nunca fecha o <script> de dados antes da hora
+const configJson = JSON.stringify(appConfig).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -62,7 +64,7 @@ const fontFaces = [
 
     <slot />
 
-    <script type="application/json" id={APP_CONFIG_ID} set:html={JSON.stringify(appConfig)} />
+    <script type="application/json" id={APP_CONFIG_ID} set:html={configJson} />
     <script>
       import { App } from '@presentation/app/App';
       App.boot();

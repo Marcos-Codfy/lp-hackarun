@@ -8,6 +8,9 @@ export interface RegistrationPayload {
   accessibilityNeeds: string;
   submittedAt: string;
   source: string;
+  // prova do consentimento (LGPD): versão do aviso aceito e quando; vira a coluna Consentimento
+  consentVersion: string;
+  consentAt: string;
   // anti-spam: honeypot preenchido ou envio rápido demais = robô (o servidor decide)
   honeypot: string;
   elapsedMs: number;

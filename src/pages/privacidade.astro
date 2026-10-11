@@ -1,0 +1,219 @@
+---
+// aviso de privacidade (LGPD) linkado no consentimento e no rodapé; a versão é a que vai na coluna Consentimento
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import Wordmark from '@presentation/components/ui/Wordmark.astro';
+import { CONSENT_VERSION } from '@application/index';
+import { serverContainer } from '@composition/server';
+import type { AppConfig } from '@presentation/app/AppConfig';
+import '@presentation/sections/sections.css';
+
+const { event } = await serverContainer().getLandingPage.execute();
+
+const appConfig: AppConfig = {
+  milestones: event.milestones,
+  registration: event.registration,
+  teamsEndpoint: event.registration.endpoint,
+  audioCueUrl: '/audio/cta-globe.mp3',
+};
+
+const seo = {
+  title: 'Aviso de privacidade · HackaRun 2026',
+  description:
+    'Como o HackaRun 2026 trata os dados da inscrição: quem cuida, para que usa, por quanto tempo e os seus direitos.',
+  path: '/privacidade',
+};
+---
+
+<BaseLayout seo={seo} appConfig={appConfig}>
+  <header class="privacy__header">
+    <a class="privacy__brand" href="/" aria-label="HackaRun 2026, página inicial">
+      <Wordmark size="sm" />
+    </a>
+  </header>
+  <main id="conteudo">
+    <section
+      id="privacidade"
+      class="section tone-cyan privacy"
+      data-scene="dust"
+      data-checkpoint="Privacidade"
+      aria-labelledby="privacidade-title"
+    >
+      <div class="container container--narrow privacy__frame">
+        <p class="hud-label">
+          <span aria-hidden="true">// </span>LGPD · versão {CONSENT_VERSION}
+        </p>
+        <h1 id="privacidade-title" class="privacy__title">
+          Aviso de <em>privacidade</em>
+        </h1>
+        <p class="privacy__lead">
+          O que acontece com os dados da inscrição no HackaRun 2026. Curto e direto, sem juridiquês.
+        </p>
+
+        <div class="privacy__body sx-glass sx-glass--solid">
+          <h2>Quem cuida dos seus dados</h2>
+          <p>
+            O <strong>controlador</strong> é o Centro Universitário Católica do Tocantins (Unicatólica),
+            organização do HackaRun 2026.
+          </p>
+
+          <h2>O que coletamos</h2>
+          <ul>
+            <li>Do líder: nome completo, e-mail, WhatsApp, curso e período.</li>
+            <li>Da equipe: nome da equipe e nome, e-mail e curso de cada integrante.</li>
+            <li>Necessidade de acessibilidade, se você contar (opcional).</li>
+            <li>Data e hora da inscrição e do aceite, com a versão deste aviso.</li>
+          </ul>
+          <p>Inscreveu a equipe? Mostre este aviso para quem você incluiu.</p>
+
+          <h2>Para que usamos</h2>
+          <ul>
+            <li>Organizar o evento e as equipes.</li>
+            <li>Falar com você sobre o HackaRun (e-mail e WhatsApp).</li>
+            <li>Credenciamento nos dias do evento.</li>
+            <li>
+              Divulgar as equipes confirmadas no site, só com{' '}
+              <strong>nome da equipe, curso e quantidade</strong> de integrantes. Nome, e-mail e telefone
+              nunca aparecem.
+            </li>
+          </ul>
+
+          <h2>Base legal</h2>
+          <p>
+            <strong>Consentimento</strong> (LGPD, art. 7º, I), dado quando você marca a caixa de aceite. Para
+            o dado de acessibilidade, consentimento específico e destacado (art. 11, I).
+          </p>
+
+          <h2>Dado sensível de acessibilidade</h2>
+          <p>
+            É opcional e serve <strong>só para garantir a sua acessibilidade</strong> no evento. Não entra em
+            nenhuma lista nem é usado para outra coisa.
+          </p>
+
+          <h2>Com quem compartilhamos</h2>
+          <p>
+            As inscrições ficam numa planilha do <strong>Google</strong>, que atua como operador: hospeda a
+            planilha e roda o script que recebe o formulário. O acesso é restrito à organização. O site é
+            hospedado na Cloudflare, que recebe só os dados técnicos de acesso (como o IP) para entregar as
+            páginas.
+          </p>
+
+          <h2>Por quanto tempo</h2>
+          <p>
+            Até <strong>6 meses depois do evento</strong>. Depois disso, os dados são excluídos.
+          </p>
+
+          <h2>Seus direitos</h2>
+          <p>
+            Você pode pedir <strong>acesso, correção ou exclusão</strong> dos seus dados e{' '}
+            <strong>revogar</strong> o consentimento quando quiser (sem os dados, não dá para manter a
+            inscrição). Informe o protocolo <span class="privacy__mono">HR26-XXXXXX</span> para agilizar.
+          </p>
+          <p class="section-note section-note--time">
+            <Icon name="clock" size={18} />
+            <span>
+              <strong>Pendente:</strong> contato do encarregado a definir pela organização.
+            </span>
+          </p>
+
+          <h2>No seu navegador</h2>
+          <p>
+            Sem cookies de rastreamento nem analytics. A preferência de som e o progresso da caça aos NPCs
+            ficam salvos só no seu navegador.
+          </p>
+        </div>
+
+        <Button size="lg" href="/#inscricao" class="privacy__cta">
+          Ir para a inscrição
+          <Icon slot="icon" name="arrow-right" />
+        </Button>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .privacy__header {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: var(--z-header);
+    display: flex;
+    align-items: center;
+    height: var(--header-h);
+    padding-inline: var(--gutter);
+  }
+
+  .privacy__brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+  }
+
+  .privacy__frame {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .privacy__title {
+    font-size: var(--fs-3xl);
+  }
+
+  .privacy__lead {
+    color: var(--text-muted);
+    font-size: var(--fs-lg);
+  }
+
+  .privacy__body {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-5);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+
+  .privacy__body h2 {
+    margin-top: var(--space-4);
+    color: var(--text);
+    font-size: var(--fs-lg);
+  }
+
+  .privacy__body h2:first-child {
+    margin-top: 0;
+  }
+
+  .privacy__body ul {
+    display: grid;
+    gap: var(--space-2);
+    padding-inline-start: var(--space-5);
+  }
+
+  .privacy__body li::marker {
+    color: var(--accent);
+  }
+
+  .privacy__body strong {
+    color: var(--text);
+  }
+
+  .privacy__mono {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    white-space: nowrap;
+  }
+
+  .privacy__body :global(.section-note) {
+    max-width: none;
+  }
+
+  .privacy__frame :global(.privacy__cta) {
+    justify-self: start;
+  }
+
+  @media (min-width: 40rem) {
+    .privacy__body {
+      padding: var(--space-7);
+    }
+  }
+</style>

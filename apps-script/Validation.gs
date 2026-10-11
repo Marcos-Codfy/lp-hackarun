@@ -1,9 +1,10 @@
 // validação do lado do servidor: nunca confie só no front (qualquer um pode chamar a URL)
 
-// mantenha igual ao registration.teamSize do src/infrastructure/content/event.json
+// mantenha igual ao registration.teamSize do src/infrastructure/content/event.json (um teste confere)
 const TEAM_SIZE = { min: 2, max: 5 };
 const MIN_ELAPSED_MS = 3000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const CONSENT_VERSION_PATTERN = /^[A-Za-z0-9][\w.-]{0,31}$/;
 
 function parseBody_(e) {
   try {
@@ -15,6 +16,7 @@ function parseBody_(e) {
   }
 }
 
+// filtro de robô bobo; os dois campos vêm do cliente, então o limite de envios (Limits.gs) segue valendo
 function isBot_(body) {
   return String(body.honeypot || '').trim() !== '' || !(Number(body.elapsedMs) >= MIN_ELAPSED_MS);
 }
@@ -33,32 +35,43 @@ function validateRegistration_(body) {
   if (!mode || !isPersonName_(leader.name) || !EMAIL_PATTERN.test(leader.email) || !leader.phone || !leader.course) {
     return null;
   }
-
-  let teamName = '';
-  let members = [];
-  if (mode === 'team') {
-    teamName = clean_(body.teamName, 40);
-    const rawMembers = Array.isArray(body.members) ? body.members.slice(0, TEAM_SIZE.max) : [];
-    members = rawMembers.map((m) => ({
-      name: clean_(m && m.name, 80),
-      email: clean_(m && m.email, 120).toLowerCase(),
-      course: clean_(m && m.course, 80),
-    }));
-    const size = 1 + members.length;
-    const validMembers = members.every((m) => isPersonName_(m.name) && EMAIL_PATTERN.test(m.email));
-    const emails = [leader.email].concat(members.map((m) => m.email));
-    const unique = emails.filter((v, i) => emails.indexOf(v) === i).length === emails.length;
-    if (teamName.length < 2 || size < TEAM_SIZE.min || size > TEAM_SIZE.max || !validMembers || !unique) return null;
-  }
+  const team = mode === 'team' ? validateTeam_(body, leader.email) : { teamName: '', members: [] };
+  const consent = parseConsent_(body);
+  if (!team || !consent) return null;
 
   return {
     mode: mode,
-    teamName: teamName,
+    teamName: team.teamName,
     leader: leader,
-    members: members,
+    members: team.members,
     accessibilityNeeds: clean_(body.accessibilityNeeds, 500),
     source: clean_(body.source, 40) || 'landing-page',
+    consent: consent,
   };
+}
+
+function validateTeam_(body, leaderEmail) {
+  const teamName = clean_(body.teamName, 40);
+  const rawMembers = Array.isArray(body.members) ? body.members.slice(0, TEAM_SIZE.max) : [];
+  const members = rawMembers.map((m) => ({
+    name: clean_(m && m.name, 80),
+    email: clean_(m && m.email, 120).toLowerCase(),
+    course: clean_(m && m.course, 80),
+  }));
+  const size = 1 + members.length;
+  const validMembers = members.every((m) => isPersonName_(m.name) && EMAIL_PATTERN.test(m.email));
+  const emails = [leaderEmail].concat(members.map((m) => m.email));
+  const unique = emails.filter((v, i) => emails.indexOf(v) === i).length === emails.length;
+  if (teamName.length < 2 || size < TEAM_SIZE.min || size > TEAM_SIZE.max || !validMembers || !unique) return null;
+  return { teamName: teamName, members: members };
+}
+
+// prova do aceite (LGPD): versão do aviso de privacidade + quando; sem isso a inscrição não entra
+function parseConsent_(body) {
+  const version = clean_(body.consentVersion, 32);
+  const at = Date.parse(clean_(body.consentAt, 40));
+  if (!CONSENT_VERSION_PATTERN.test(version) || Number.isNaN(at)) return '';
+  return version + ' · ' + new Date(at).toISOString();
 }
 
 function isPersonName_(name) {
@@ -89,10 +102,18 @@ function sheetSafe_(value) {
 }
 
 function isConfirmed_(status) {
-  const normalized = String(status || '')
+  return normalizeStatus_(status).indexOf('confirmad') === 0;
+}
+
+function isRejected_(status) {
+  return normalizeStatus_(status).indexOf('recusad') === 0;
+}
+
+// "Confirmado", " confirmada " e "CONFIRMADO" valem igual
+function normalizeStatus_(status) {
+  return String(status || '')
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toLowerCase();
-  return normalized.indexOf('confirmad') === 0;
 }

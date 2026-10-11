@@ -11,6 +11,9 @@ import {
 
 const DEFAULT_META: SubmissionMeta = { honeypot: '', elapsedMs: 0 };
 
+// versão do aviso de privacidade (/privacidade) que o checkbox aceita; mudou o texto, suba a versão
+export const CONSENT_VERSION = '2026-10-v1';
+
 export type SubmitRegistrationResult =
   | { status: 'invalid'; errors: RegistrationErrors }
   | { status: 'success'; protocol: string }
@@ -28,11 +31,18 @@ export class SubmitRegistration {
   private readonly gateway: RegistrationGateway;
   private readonly clock: Clock;
   private readonly teamSize: TeamSizeRule;
+  private readonly consentVersion: string;
 
-  constructor(deps: { gateway: RegistrationGateway; clock: Clock; teamSize: TeamSizeRule }) {
+  constructor(deps: {
+    gateway: RegistrationGateway;
+    clock: Clock;
+    teamSize: TeamSizeRule;
+    consentVersion?: string;
+  }) {
     this.gateway = deps.gateway;
     this.clock = deps.clock;
     this.teamSize = deps.teamSize;
+    this.consentVersion = deps.consentVersion ?? CONSENT_VERSION;
   }
 
   // validação isolada pra feedback em tempo real no formulário
@@ -57,15 +67,19 @@ export class SubmitRegistration {
     }
   }
 
+  // só chega aqui com acceptedTerms = true (o domínio barra o resto), então o envio é o aceite
   private toPayload(registration: TeamRegistration, meta: SubmissionMeta): RegistrationPayload {
+    const now = this.clock.now().toISOString();
     return {
       mode: registration.mode,
       teamName: registration.teamName,
       leader: { ...registration.leader },
       members: registration.members.map((m) => ({ ...m })),
       accessibilityNeeds: registration.accessibilityNeeds,
-      submittedAt: this.clock.now().toISOString(),
+      submittedAt: now,
       source: meta.source ?? 'landing-page',
+      consentVersion: this.consentVersion,
+      consentAt: now,
       honeypot: meta.honeypot,
       elapsedMs: Math.max(0, Math.round(meta.elapsedMs)),
     };
