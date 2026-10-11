@@ -1,39 +1,35 @@
-# Briefing de assets visuais (hero e final)
+# Briefing de assets visuais e sonoros
 
-A hero é uma cena em camadas (2.5D): cada camada se move numa profundidade diferente com o scroll e o mouse.
-Por isso cada elemento precisa vir **separado, com fundo transparente e sem texto embutido**.
-Use fotos reais dos prédios como referência ao gerar (a ideia é que sejam reconhecíveis).
+> Situação na v2 (ADR 0006). O hero deixou de ser uma cena 2.5D com fotos dos prédios: agora é o logo oficial com
+> raios procedurais sobre o 3D de partículas. Por isso as ilustrações dos prédios saíram da lista.
 
-## Arquivos
+## Entregues e em uso
 
-| # | Arquivo | Conteúdo | Formato / tamanho |
-| --- | --- | --- | --- |
-| 1 | `hero-sky.jpg` | Céu noturno azul elétrico com nuvens volumosas e brilho ciano no horizonte. Sem prédios, sem texto | JPG 2560×1440 (e uma versão vertical 1440×2560) |
-| 2 | `building-unicatolica.png` | Fachada real da Unicatólica (Palmas–TO) à noite, vista 3/4 pela esquerda, iluminação azul/ciano, palmeiras na base. Sem pessoas | PNG transparente, ~2400 px de largura |
-| 3 | `building-capim-dourado.png` | Fachada real do Capim Dourado Shopping à noite, vista 3/4 pela direita, cúpula iluminada, mesma luz azul/ciano. Sem pessoas | PNG transparente, ~2400 px de largura |
-| 4 | `hackarun-logo.png` (ou `.svg`) | Logo HACKARUN (HACKA branco + RUN azul) com a placa escura, **sem** os raios (os raios são animados por código) | PNG transparente 3000 px de largura, ou SVG |
-| 5 | `logo-unicatolica.svg` | Logo oficial da Unicatólica, versão branca/monocromática | SVG (ou PNG transparente 1000 px) |
-| 6 | `logo-capim-dourado.svg` | Logo oficial do Capim Dourado Shopping, versão branca/monocromática | SVG (ou PNG transparente 1000 px) |
-| 7 | `cta-globe.mp3` | Som do globo final (energia carregando + impacto), 1,5 a 2 s | MP3 até 60 KB |
+| Asset                    | Arquivo no projeto                            | Observação                                                       |
+| ------------------------ | --------------------------------------------- | ---------------------------------------------------------------- |
+| Logo HackaRun (oficial)  | `src/assets/brand/hackarun-logo.png`          | PNG transparente 2156×749; os raios em volta são feitos por código |
+| Logo Unicatólica (branca) | `src/assets/brand/unicatolica-white.png`     | Versão oficial monocromática                                     |
+| Logo Capim Dourado (branca) | `src/assets/brand/capim-dourado-white.png` | Versão oficial monocromática                                     |
+| Imagem de compartilhamento | `public/og-image.jpg`                       | 1200×630 (Open Graph e Twitter Card)                             |
+| Som do clímax            | `public/audio/cta-globe.mp3`                  | Sintetizado (`scripts/audio/render_cues.py`), ~22 KB             |
+| Cliques de digitação     | `public/audio/ui-typing.wav`                  | Sprite sintetizado com 6 cliques, ~24 KB                         |
+| Fonte de títulos         | `src/assets/fonts/orbitron-pt-latin-wght.woff2` | Orbitron com o til redesenhado (`scripts/fonts/patch_orbitron_tilde.py`) |
 
-Os logos 5 e 6 devem ser os **oficiais** (peça ao marketing da Unicatólica e do shopping). Logo recriado por IA não
-pode ser usado.
+Logos oficiais vêm do marketing da Unicatólica e do shopping. **Logo recriado por IA não pode ser usado.**
 
-## Prompts prontos (Claude Design ou outro gerador)
+## Ainda desejáveis (opcionais)
 
-**1 · Céu**
-> Céu noturno cinematográfico em estilo de arte de e-sports, tons de azul profundo (#07152C) a azul elétrico (#1E7BFF), nuvens volumosas iluminadas por brilho ciano (#00CFFF) no horizonte, partículas de energia sutis, sem prédios, sem pessoas, sem texto. Proporção 16:9, alta resolução.
+| #   | Asset                   | Formato                       | Para quê                                                    |
+| --- | ----------------------- | ----------------------------- | ----------------------------------------------------------- |
+| 1   | Logos em SVG            | SVG (os três logos)           | Nitidez em qualquer tamanho e arquivos menores que o PNG    |
+| 2   | Sons oficiais           | MP3 até 60 KB (cue, 1,5–2 s)  | Substituir o cue sintetizado, se a organização preferir     |
+| 3   | Fotos reais do evento   | JPG/WebP, 2400 px de largura  | Edições futuras (galeria, prova social)                     |
 
-**2 · Unicatólica**
-> Ilustração cinematográfica semi-realista da fachada do Centro Universitário Católica do Tocantins (Unicatólica), em Palmas–TO, fiel à foto de referência, à noite, vista em 3/4 pela esquerda, iluminação azul e ciano neon refletindo nas paredes de vidro, palmeiras na base, atmosfera de arena de e-sports. Sem pessoas, sem texto adicional. Fundo transparente.
+## Regras para qualquer asset novo
 
-**3 · Capim Dourado Shopping**
-> Ilustração cinematográfica semi-realista da fachada do Capim Dourado Shopping, em Palmas–TO, fiel à foto de referência, à noite, vista em 3/4 pela direita, cúpula iluminada, iluminação azul e ciano neon, mesma luz e estilo da ilustração da Unicatólica. Sem pessoas, sem texto adicional. Fundo transparente.
-
-**4 · Logo**
-> Recorte o logo HACKARUN da arte original em camada própria, fundo transparente, sem raios e sem o subtítulo, mantendo a placa escura e o contorno.
-
-## Onde colocar
-
-Salve os arquivos em `src/assets/hero/` (imagens otimizadas automaticamente pelo Astro em AVIF/WebP) e os logos
-oficiais em `src/assets/brand/`. Até lá, o site usa recortes provisórios do vídeo de referência.
+- Logos e recortes com fundo transparente; nada de **texto embutido** (texto queimado não é acessível nem
+  indexável).
+- Paleta oficial (`docs/design/design-spec.md`, seção 4); nada de cores fora do manual.
+- Imagens em `src/assets/` (o Astro otimiza e gera WebP no build) e logos em `src/assets/brand/`.
+- Som: mono, até 60 KB, sem amostras de terceiros sem licença. Coloque em `public/audio/` com o mesmo nome do atual.
+- Referências visuais (não vão pro site) ficam em `design/references/`.

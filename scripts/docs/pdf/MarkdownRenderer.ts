@@ -1,6 +1,7 @@
 import type { InlineRun, PdfWriter } from './PdfWriter.ts';
 
-// subset de markdown suficiente pros docs do projeto: títulos, parágrafos, listas, tabelas e código
+// subset de markdown suficiente pros docs do projeto: títulos, parágrafos, listas, checklists, citações,
+// tabelas e código
 export class MarkdownRenderer {
   private readonly writer: PdfWriter;
 
@@ -41,30 +42,39 @@ export class MarkdownRenderer {
         const quote: string[] = [];
         while (i < lines.length && (lines[i] ?? '').startsWith('>'))
           quote.push((lines[i++] ?? '').replace(/^>\s?/, ''));
-        this.writer.paragraph(MarkdownRenderer.inline(quote.join(' ')), { indent: 10, color: '#55627A' });
+        this.writer.quote(MarkdownRenderer.inline(quote.join(' ')));
         continue;
       }
-      this.renderLine(line);
+      // item de lista quebrado em várias linhas: as linhas recuadas seguintes são continuação dele
+      let item = line;
       i++;
+      if (/^\s*([-*]|\d+\.)\s/.test(line)) {
+        while (i < lines.length && /^\s+\S/.test(lines[i] ?? '') && MarkdownRenderer.isPlain(lines[i] ?? ''))
+          item += ` ${(lines[i++] ?? '').trim()}`;
+      }
+      this.renderLine(item);
     }
   }
 
   private static isPlain(line: string): boolean {
     const t = line.trim();
-    return !!t && !/^(#{1,3}\s|[-*]\s|\d+\.\s|>|\||```|---+$)/.test(t);
+    return !!t && !/^(#{1,4}\s|[-*]\s|\d+\.\s|>|\||```|---+$)/.test(t);
   }
 
   private renderLine(line: string): void {
-    const heading = /^(#{1,3})\s+(.*)$/.exec(line);
+    const heading = /^(#{1,4})\s+(.*)$/.exec(line);
     if (heading) {
-      this.writer.heading(MarkdownRenderer.plain(heading[2] ?? ''), (heading[1]?.length ?? 1) as 1 | 2 | 3);
+      const level = Math.min(3, heading[1]?.length ?? 1) as 1 | 2 | 3;
+      this.writer.heading(MarkdownRenderer.plain(heading[2] ?? ''), level);
       return;
     }
-    const bullet = /^(\s*)[-*]\s+(.*)$/.exec(line);
+    const bullet = /^(\s*)[-*]\s+(\[[ xX]\]\s+)?(.*)$/.exec(line);
     if (bullet) {
+      // "- [ ] item" vira caixa de checklist
+      const box = bullet[2]?.trim().toLowerCase();
       this.writer.bullet(
-        MarkdownRenderer.inline(bullet[2] ?? ''),
-        '•',
+        MarkdownRenderer.inline(bullet[3] ?? ''),
+        box ?? '•',
         Math.floor((bullet[1]?.length ?? 0) / 2),
       );
       return;
@@ -88,7 +98,11 @@ export class MarkdownRenderer {
     for (const match of text.matchAll(pattern)) {
       const token = match[0];
       if (match.index > last) runs.push({ text: text.slice(last, match.index) });
-      if (token.startsWith('**')) runs.push({ text: token.slice(2, -2), bold: true });
+      // negrito pode embrulhar `código`: o trecho de código mantém a fonte mono
+      if (token.startsWith('**'))
+        runs.push(
+          ...MarkdownRenderer.inline(token.slice(2, -2)).map((r) => (r.code ? r : { ...r, bold: true })),
+        );
       else if (token.startsWith('`')) runs.push({ text: token.slice(1, -1), code: true });
       else {
         const link = /\[([^\]]+)\]\(([^)]+)\)/.exec(token);

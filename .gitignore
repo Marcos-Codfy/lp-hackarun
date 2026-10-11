@@ -19,6 +19,10 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 
+# python (scripts de áudio, fonte e assets dos PDFs)
+__pycache__/
+*.pyc
+
 # logs
 npm-debug.log*
 *.log
