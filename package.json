@@ -1,11 +1,34 @@
 {
   "name": "lp-hackarun",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
-  "description": "Landing page do HackaRun 2026 — Hackathon de Engenharia de Software e IA da Unicatólica com o Capim Dourado Shopping.",
+  "description": "Landing page cinematográfica do HackaRun 2026, o hackathon de Engenharia de Software e IA da Unicatólica com o Capim Dourado Shopping (Palmas-TO), feita com Astro, Three.js e GSAP.",
+  "keywords": [
+    "hackathon",
+    "hackarun",
+    "landing-page",
+    "astro",
+    "typescript",
+    "threejs",
+    "webgl",
+    "gsap",
+    "lenis",
+    "clean-architecture",
+    "accessibility",
+    "unicatolica"
+  ],
+  "homepage": "https://github.com/Marcos-Codfy/lp-hackarun#readme",
+  "bugs": {
+    "url": "https://github.com/Marcos-Codfy/lp-hackarun/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marcos-Codfy/lp-hackarun.git"
+  },
+  "author": "Marcos Vinicius Muniz Arruda (https://github.com/Marcos-Codfy)",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   },
   "scripts": {
     "dev": "astro dev",

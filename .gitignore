@@ -27,6 +27,6 @@ __pycache__/
 npm-debug.log*
 *.log
 
-# claude local
+# configs locais de ferramentas
 .claude/
 scripts/qa/out/
