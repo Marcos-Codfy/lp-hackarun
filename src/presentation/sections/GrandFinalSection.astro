@@ -37,7 +37,13 @@ const highlights: { icon: IconName; label: string }[] = [
 
   <div class="container">
     <div class="section-split__content section-stack final__content">
-      <SectionHeader id="final-title" code="06" eyebrow="Grande final" title="A final é no <em>telão</em>." />
+      <SectionHeader
+        id="final-title"
+        code="06"
+        eyebrow="Grande final"
+        size="sm"
+        title="A final é no <em>Capim Dourado Shopping</em>."
+      />
 
       {stamp && ceremonyAt && (
         <p class="final__stamp" data-reveal="up">
@@ -79,6 +85,11 @@ const highlights: { icon: IconName; label: string }[] = [
 
   .final__content {
     gap: clamp(2.5rem, 1.5rem + 2.5vw, 4rem);
+  }
+
+  /* trava "A final é no / Capim Dourado / Shopping." sem partir o nome do shopping (cabe 9,8em por linha) */
+  .final__content :global(.sx-head__title) {
+    max-width: 10.5em;
   }
 
   .final__stamp time > span[aria-hidden] {

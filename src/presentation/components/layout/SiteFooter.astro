@@ -5,27 +5,32 @@ import PartnersBand from '@presentation/components/partners/PartnersBand.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
 import FooterBrand from './footer/FooterBrand.astro';
 import FooterNav from './footer/FooterNav.astro';
+import { topHref, type SitePage } from './navLinks';
 
 interface Props {
   data: LandingPageDTO;
+  page?: SitePage;
 }
 
-const { event, partners } = Astro.props.data;
+const { data, page = 'home' } = Astro.props;
+const { event, partners } = data;
 const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
-const REPO_URL = 'https://github.com/Marcos-Codfy/lp-hackarun';
 ---
 
 <footer class="site-footer">
   <PartnersBand partners={partners} />
 
   <div class="container site-footer__main">
-    <FooterBrand meta={`${dates} · ${event.city} · Hackathon de Engenharia de Software e IA`} />
-    <FooterNav repoUrl={REPO_URL} />
+    <FooterBrand
+      meta={`${dates} · ${event.city} · Hackathon de Engenharia de Software e IA`}
+      home={page === 'home'}
+    />
+    <FooterNav page={page} />
   </div>
 
   <div class="container site-footer__bottom">
     <p>© 2026 HackaRun · Unicatólica</p>
-    <a class="site-footer__top" href="#inicio" data-nav-link>
+    <a class="site-footer__top" href={topHref(page)} data-nav-link>
       Voltar ao topo
       <span class="site-footer__top-icon" aria-hidden="true">
         <Icon name="arrow-up" size={16} />

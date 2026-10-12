@@ -18,12 +18,6 @@
     "answer": "Personagens espalhados pela corrida que guardam pistas sobre o desafio. Encontrar, conversar e decifrar o que eles dizem faz parte da missão. Onde eles estão? Isso também é uma pista."
   },
   {
-    "id": "running",
-    "category": "Corrida",
-    "question": "Vou precisar correr pelos corredores?",
-    "answer": "Não. A corrida é contra o relógio, não pelos corredores: o deslocamento entre as estações é sempre caminhando, sem correria em corredores e escadas."
-  },
-  {
     "id": "scoring",
     "category": "Corrida",
     "question": "Como funciona a pontuação?",

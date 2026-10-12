@@ -61,11 +61,11 @@ describe('LineSplit', () => {
   });
 
   it('mantém o aria-label que o título já tinha', () => {
-    const el = title('A final é no <em>telão</em>.');
-    el.setAttribute('aria-label', 'A final é no telão');
+    const el = title('A final é no <em>Capim Dourado Shopping</em>.');
+    el.setAttribute('aria-label', 'A final é no Capim Dourado Shopping');
 
     LineSplit.create(el, 'reveal-line')?.revert();
 
-    expect(el.getAttribute('aria-label')).toBe('A final é no telão');
+    expect(el.getAttribute('aria-label')).toBe('A final é no Capim Dourado Shopping');
   });
 });

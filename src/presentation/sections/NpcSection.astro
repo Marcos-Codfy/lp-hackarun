@@ -1,6 +1,5 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import Icon from '@presentation/components/ui/Icon.astro';
 import SectionHeader from './shared/SectionHeader.astro';
 import QuestLog from './npc/QuestLog.astro';
 import NpcTerminal from './npc/NpcTerminal.astro';
@@ -37,14 +36,6 @@ const { data: _data } = Astro.props;
       </div>
 
       <QuestLog />
-
-      <p class="section-note section-note--time" data-reveal="up">
-        <Icon name="shield" />
-        <span>
-          <strong>Corra contra o relógio, não pelos corredores.</strong> Entre as estações é sempre
-          caminhando.
-        </span>
-      </p>
     </div>
   </div>
 </section>

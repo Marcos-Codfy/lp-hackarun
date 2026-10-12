@@ -104,6 +104,11 @@
   color: var(--sx-ink);
 }
 
+/* sem palavra sozinha na última linha ("… e garanta / a sua.") */
+.section-note > span {
+  text-wrap: balance;
+}
+
 .section-note--time {
   border-left-color: var(--c-orange);
   background: linear-gradient(90deg, rgb(255 133 47 / 0.1), transparent 85%);

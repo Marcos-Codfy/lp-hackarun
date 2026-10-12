@@ -5,13 +5,20 @@ import logo from '../../../../assets/brand/hackarun-logo.png';
 // marca do rodapé: logo oficial (imagem, nunca redesenhada) + slogan + data/local
 interface Props {
   meta: string;
+  // fora da LP a logo leva pra página inicial
+  home?: boolean;
 }
 
-const { meta } = Astro.props;
+const { meta, home = true } = Astro.props;
 ---
 
 <div class="fbrand">
-  <a class="fbrand__logo" href="#inicio" data-nav-link aria-label="HackaRun 2026, voltar ao início">
+  <a
+    class="fbrand__logo"
+    href={home ? '#inicio' : '/'}
+    data-nav-link
+    aria-label={home ? 'HackaRun 2026, voltar ao início' : 'HackaRun 2026, página inicial'}
+  >
     <Image src={logo} alt="" widths={[320, 640]} sizes="(min-width: 640px) 20rem, 15rem" loading="lazy" />
   </a>
   <p class="fbrand__slogan">

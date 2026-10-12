@@ -133,8 +133,9 @@ const steps = ['Modalidade', 'Seus dados', 'Integrantes', 'Confirmar'];
     border-top: 1px solid rgb(140 160 255 / 0.12);
   }
 
-  /* sucesso já tem o próprio "adicionar à agenda" */
-  .lobby:global(:has([data-reg-success]:not([hidden]))) .lobby__agenda {
+  /* sucesso e "abrem em breve" já têm o próprio "adicionar à agenda" */
+  .lobby:global(:has([data-reg-success]:not([hidden]))) .lobby__agenda,
+  .lobby:global(:has([data-registration-form][data-status='soon'])) .lobby__agenda {
     display: none;
   }
 

@@ -1,7 +1,5 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import Button from '@presentation/components/ui/Button.astro';
-import Icon from '@presentation/components/ui/Icon.astro';
 import SectionHeader from './shared/SectionHeader.astro';
 import DayRound from './schedule/DayRound.astro';
 import './sections.css';
@@ -22,22 +20,13 @@ const days = schedule.length;
   aria-labelledby="programacao-title"
 >
   <div class="container section-stack">
-    <div class="schedule__head">
-      <SectionHeader
-        id="programacao-title"
-        code="04"
-        eyebrow="Programação"
-        title={`${days} dias. <em>${days} rounds.</em>`}
-        lead="Capacitação, lançamento, corrida e final. Cada noite é um round, e o último termina no palco."
-      />
-      <div class="schedule__agenda" data-reveal="up">
-        <Button variant="ghost" href="/hackarun-2026.ics" download="hackarun-2026.ics">
-          Adicionar à agenda
-          <Icon slot="icon" name="calendar" size={18} />
-        </Button>
-        <p class="schedule__agenda-hint">Arquivo .ics com todos os horários</p>
-      </div>
-    </div>
+    <SectionHeader
+      id="programacao-title"
+      code="04"
+      eyebrow="Programação"
+      title={`${days} dias. <em>${days} rounds.</em>`}
+      lead="Capacitação, lançamento, corrida e final. Cada noite é um round, e o último termina no palco."
+    />
 
     <div class="timeline" data-timeline>
       <span class="timeline__rail" aria-hidden="true">
@@ -53,25 +42,6 @@ const days = schedule.length;
 </section>
 
 <style>
-  .schedule__head {
-    display: grid;
-    gap: var(--space-6);
-  }
-
-  .schedule__agenda {
-    display: grid;
-    justify-items: start;
-    gap: var(--space-2);
-  }
-
-  .schedule__agenda-hint {
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    font-size: var(--fs-hud);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
   .timeline {
     position: relative;
   }
@@ -98,17 +68,5 @@ const days = schedule.length;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: clamp(4rem, 3rem + 3vw, 6.5rem);
-  }
-
-  @media (min-width: 1024px) {
-    .schedule__head {
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: end;
-    }
-
-    .schedule__agenda {
-      justify-items: end;
-      text-align: end;
-    }
   }
 </style>
