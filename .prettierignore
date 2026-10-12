@@ -3,4 +3,5 @@ dist
 node_modules
 coverage
 package-lock.json
-design
+# só a pasta de referências da raiz (docs/design continua formatada)
+/design

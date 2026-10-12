@@ -1,4 +1,5 @@
 // lista o que passa da largura da tela (scroll horizontal no celular); ignora quem está dentro de um pai que corta
+// ou que rola na horizontal
 // uso: node overflow.mjs <url> [--width=360] [--width=390]
 import { launch } from './lib/browser.mjs';
 import { print, readArgs } from './lib/cli.mjs';
@@ -22,7 +23,8 @@ for (const width of flags.width.map(Number)) {
     const clipped = (el) => {
       for (let parent = el.parentElement; parent; parent = parent.parentElement) {
         if (parent === document.body || parent === document.documentElement) return false;
-        if (/(hidden|clip)/.test(getComputedStyle(parent).overflowX)) return true;
+        // quem corta também é quem rola (o trilho de deslizar das missões): o que passa dele não rola a página
+        if (/(hidden|clip|auto|scroll)/.test(getComputedStyle(parent).overflowX)) return true;
       }
       return false;
     };

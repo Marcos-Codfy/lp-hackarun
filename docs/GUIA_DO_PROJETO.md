@@ -6,28 +6,40 @@
 
 ## 1. Links rápidos
 
-| Item                    | Valor                                                                                 |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| Repositório (público)   | https://github.com/Marcos-Codfy/lp-hackarun                                           |
-| Branch de produção      | `main`                                                                                |
-| Hospedagem              | Cloudflare Pages, plano gratuito (`https://lp-hackarun.pages.dev` depois de conectar) |
-| Inscrições              | Formulário do site, Google Apps Script (Web App) e Google Sheets                      |
-| Aviso de privacidade    | `/privacidade` (`src/pages/privacidade.astro`), linkado no consentimento e no rodapé  |
-| Equipes inscritas       | `/equipes` (`src/pages/equipes.astro`), com foto ou logo; link no header e na LP      |
-| Fotos das equipes       | Pasta do Google Drive gravada pelo Apps Script (`apps-script/Images.gs`, seção 9.6)   |
-| Node.js                 | 24 LTS (arquivo `.nvmrc`), mínimo 22.18                                               |
-| Scripts de QA           | `scripts/qa/` (Playwright + Lighthouse, instalados à parte; seção 13)                 |
-| Apresentação (README)   | `README.md` (pt-BR) e `README.en.md` (inglês): a vitrine do projeto                   |
-| Changelog               | `CHANGELOG.md` (Keep a Changelog + SemVer; seção 18)                                  |
-| Especificação de design | `docs/design/design-spec.md` (v2, vigente)                                            |
-| Decisões de arquitetura | `docs/adr/` (0001 a 0007)                                                             |
-| Stack e padrões (PDF)   | `docs/pdf/HackaRun_LP_Stack_e_Padroes.pdf`                                            |
+| Item                    | Valor                                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| Repositório (público)   | https://github.com/Marcos-Codfy/lp-hackarun                                               |
+| Branch de produção      | `main`                                                                                    |
+| Hospedagem              | Cloudflare Pages, plano gratuito (`https://lp-hackarun.pages.dev` depois de conectar)     |
+| Inscrições              | Formulário do site (só equipe), Apps Script (Web App) e Google Sheets em 3 abas (seção 9) |
+| Aviso de privacidade    | `/privacidade` (`src/pages/privacidade.astro`), linkado no consentimento e no rodapé      |
+| Equipes inscritas       | `/equipes` (`src/pages/equipes.astro`), com foto ou logo; link no header e na LP          |
+| Fotos das equipes       | Pasta do Google Drive gravada pelo Apps Script (`apps-script/Images.gs`, seção 9.6)       |
+| Node.js                 | 24 LTS (arquivo `.nvmrc`), mínimo 22.18                                                   |
+| Primeiros passos (fork) | `npm run setup` e o README, seção "Como rodar no seu PC" (seção 4)                        |
+| Scripts de QA           | `scripts/qa/` (Playwright + Lighthouse, instalados à parte; seção 13)                     |
+| Apresentação (README)   | `README.md` (pt-BR) e `README.en.md` (inglês): a vitrine do projeto e o guia de fork      |
+| Como contribuir         | `CONTRIBUTING.md`: fork, branch, Conventional Commits e checklist do PR (seção 15)        |
+| Changelog               | `CHANGELOG.md` (Keep a Changelog + SemVer; seção 18)                                      |
+| Especificação de design | `docs/design/design-spec.md` (v2, vigente)                                                |
+| Decisões de arquitetura | `docs/adr/` (0001 a 0008)                                                                 |
+| Stack e padrões (PDF)   | `docs/pdf/HackaRun_LP_Stack_e_Padroes.pdf`                                                |
 
 ## 2. O que é
 
-Landing page do **HackaRun 2026**, o hackathon dos cursos de Engenharia de Software e Inteligência Artificial da
-**Unicatólica**, com parceria do **Capim Dourado Shopping**. Evento de 11 a 14 de novembro de 2026, com minicursos,
-mentoria de egressos, corrida de missões (os NPCs dão pistas) e premiação no shopping com telão e banda.
+Landing page do **HackaRun 2026**, a 1ª edição do evento de tecnologia, inovação e empreendedorismo da
+**UniCatólica**, com o **Capim Dourado Shopping** como parceiro exclusivo da premiação. São 4 dias, de 11 a 14 de
+novembro de 2026, em Palmas, em duas frentes:
+
+- **Programação aberta** (11 a 13/11, a partir das 19h, no Bloco II da UniCatólica): 7 oficinas práticas, palestras e
+  a exposição de produtos e soluções em até 10 estandes, para a comunidade de tecnologia e para alunos do 3º ano do
+  ensino médio.
+- **Hackathon**, só para alunos da UniCatólica, em equipes de 2 a 5: uma corrida por objetivos (pistas, missões e
+  NPCs) lançada em 12/11, com o desenvolvimento final em 14/11, das 8h às 13h, e a **HackaRun Experience** no mesmo
+  dia, a partir das 17h, no Capim Dourado Shopping (premiação oficial às 19h15).
+
+A fonte dos fatos (datas, horários, locais, públicos e miniementas) é o documento do coordenador do evento. O conteúdo
+fica em `src/infrastructure/content/event.json`, e um teste confere o que foi copiado (seção 8.1).
 
 Objetivos da página: explicar o evento, mostrar a programação e as missões, mostrar as equipes confirmadas (na
 página `/equipes`, com a foto ou a logo de cada time) e **converter em inscrições**. Slogan oficial: **"Desvende.
@@ -39,10 +51,12 @@ para cada seção. A v1 ficou só no histórico do Git.
 **Situação em 11/10/2026:** design v2 **aprovado**, código publicado no GitHub (`main`) e Lighthouse mobile com
 Performance 95 e Acessibilidade, Boas práticas e SEO em 100. O que falta para abrir as inscrições está na seção 19.
 
-**Em 12/10/2026** entraram os ajustes pedidos pela organização, ainda sem versão fechada (`[Unreleased]` no
-changelog): o site não tem mais som, o clímax da inscrição ficou mais curto e calmo, e as equipes ganharam a página
-`/equipes`, com a foto ou a logo que cada uma sobe na inscrição. Resumo na seção 18.1. As medições do Lighthouse
-acima são de 11/10, antes desses ajustes.
+**Em 12/10/2026** entraram duas rodadas de ajustes pedidos pela organização, ainda sem versão fechada
+(`[Unreleased]` no changelog). Na rodada 2, o site perdeu o som, o clímax da inscrição ficou mais curto e calmo e as
+equipes ganharam a página `/equipes`, com a foto ou a logo que cada uma sobe na inscrição. Na rodada 3, o conteúdo
+passou a seguir o documento do coordenador (duas frentes, programação em abas e a HackaRun Experience), a inscrição
+virou só de equipe, com a planilha em três abas, e o repositório ficou pronto para fork (`npm run setup`). Resumo na
+seção 18.1. As medições do Lighthouse acima são de 11/10, antes desses ajustes.
 
 ## 3. Decisões principais
 
@@ -54,7 +68,7 @@ acima são de 11/10, antes desses ajustes.
 | Identidade  | Logo, paleta e fontes oficiais; til da Orbitron corrigido | Fidelidade ao manual da marca; "NÃO" legível em título grande    |
 | Animação    | GSAP + ScrollTrigger, Lenis, `LineSplit` próprio          | Padrão de mercado pra scroll storytelling, gratuito              |
 | Hospedagem  | Cloudflare Pages (grátis)                                 | Banda e requisições ilimitadas pra estático, CDN no Brasil       |
-| Inscrições  | Google Sheets via Apps Script                             | Gratuito, a organização já usa Google, planilha vira o painel    |
+| Inscrições  | Google Sheets via Apps Script, só de equipe, em 3 abas    | Gratuito, a organização já usa Google, planilha vira o painel    |
 | Fotos       | Google Drive + CDN `lh3.googleusercontent.com`            | Grátis, fica com a organização, só aparece depois da confirmação |
 | Arquitetura | Clean Architecture + DDD + MVVM                           | Camadas claras, regras testáveis, fácil de dividir entre pessoas |
 | QA          | Playwright + Brave instalado, Lighthouse (`scripts/qa`)   | Captura visual em várias larguras e métricas reais de GPU        |
@@ -63,34 +77,53 @@ Detalhes e alternativas descartadas estão em `docs/adr/`.
 
 ## 4. Como rodar
 
+O passo a passo completo para quem faz fork (pré-requisitos, `upstream`, planilha de teste e problemas comuns) está no
+`README.md`, seção "Como rodar no seu PC". O resumo:
+
 ```bash
-git clone https://github.com/Marcos-Codfy/lp-hackarun.git
+git clone https://github.com/<seu-usuario>/lp-hackarun.git
 cd lp-hackarun
-npm ci
-cp .env.example .env
+git remote add upstream https://github.com/Marcos-Codfy/lp-hackarun.git
+npm run setup
 npm run dev
 ```
 
-Abra `http://localhost:4321`. Sem `PUBLIC_REGISTRATION_ENDPOINT` o formulário roda em **modo simulado** no
-ambiente de desenvolvimento: não grava em lugar nenhum, e as equipes inscritas na simulação aparecem já confirmadas,
-com a foto, em `/equipes` e na LP enquanto a aba estiver aberta (`sessionStorage`, chave
-`hackarun:dev:simulated-teams`; apague a chave para ver os estados vazios).
+O `npm run setup` (`scripts/setup.mjs`, só com módulos do Node) confere o Node contra o `.nvmrc` (24) e o `engines`
+(mínimo 22.18), roda o `npm ci` se faltar o `node_modules` (e avisa quando o `package-lock.json` pede outras versões
+do que está instalado), cria o `.env` a partir do `.env.example` e mostra os próximos passos. Com `--qa` instala também
+os scripts de QA (seção 13), e com `--check` só confere, sem instalar nem criar nada. Sem o script: `npm ci` e
+`cp .env.example .env`.
 
-| Script                      | O que faz                                                 |
-| --------------------------- | --------------------------------------------------------- |
-| `npm run dev`               | Servidor local com hot reload                             |
-| `npm run build`             | `astro check` + build de produção em `dist/`              |
-| `npm run preview`           | Serve o `dist/` localmente                                |
-| `npm run lint` / `lint:fix` | ESLint (inclui as regras de dependência entre camadas)    |
-| `npm run format`            | Prettier em tudo (a CI roda `format:check`)               |
-| `npm test` / `test:watch`   | Testes unitários (Vitest)                                 |
-| `npm run validate`          | lint + testes + build (o mesmo que a CI roda)             |
-| `npm run docs:pdf`          | Gera os PDFs de documentação (e copia pra `DOCS_OUT_DIR`) |
+Abra `http://localhost:4321`. Sem `PUBLIC_REGISTRATION_ENDPOINT` o formulário roda em **modo simulado** no
+ambiente de desenvolvimento: não grava em lugar nenhum, aplica as mesmas regras do servidor (inclusive nome de
+equipe, e-mail e matrícula repetidos entre as equipes simuladas), e as equipes inscritas aparecem já confirmadas,
+com a foto, em `/equipes` e na LP enquanto a aba estiver aberta (`sessionStorage`, chave
+`hackarun:dev:simulated-teams`; apague a chave para ver os estados vazios). E-mail de contato começando com `falha`
+simula erro de rede, `servidor` o script caindo e `duplicado` inscrição repetida.
+
+Para testar o envio de verdade, publique o Apps Script numa planilha **sua** (`apps-script/README.md`) e coloque a URL
+`/exec` só no `.env`, nunca no `event.json` (ele vai para o Git e levaria a URL junto no PR).
+
+| Script                      | O que faz                                                        |
+| --------------------------- | ---------------------------------------------------------------- |
+| `npm run setup`             | Confere o Node, instala as dependências e cria o `.env` (`--qa`) |
+| `npm run dev`               | Servidor local com hot reload                                    |
+| `npm run build`             | `astro check` + build de produção em `dist/`                     |
+| `npm run preview`           | Serve o `dist/` localmente                                       |
+| `npm run lint` / `lint:fix` | ESLint (inclui as regras de dependência entre camadas)           |
+| `npm run format`            | Prettier em tudo (a CI roda `format:check`)                      |
+| `npm test` / `test:watch`   | Testes unitários (Vitest)                                        |
+| `npm run validate`          | lint + testes + build (o mesmo que a CI roda)                    |
+| `npm run docs:pdf`          | Gera os PDFs de documentação (e copia pra `DOCS_OUT_DIR`)        |
 
 Parâmetros de URL para testar:
 
 - `?quality=low`, `?quality=medium` ou `?quality=high`: força o tier do 3D e trava o ajuste automático por FPS.
-- `?now=2026-11-14T16:00:00-03:00`: desloca o relógio do site (troca de marcos do contador, estado da inscrição).
+- `?now=2026-11-14T16:00:00-03:00`: desloca o relógio do site (troca de marcos do contador, estado da inscrição). A
+  aba inicial da programação segue o relógio real (fuso `America/Araguaina`).
+
+Os scripts de assets em Python (seção 10) pedem Python 3.11 ou mais novo: `python -m pip install -r requirements.txt`
+(fonttools, brotli e Pillow).
 
 ## 5. Estrutura de pastas
 
@@ -110,10 +143,11 @@ src/
                        (contrato do EventBus)
     layouts/           BaseLayout (LP, com o canvas 3D), PageLayout (páginas leves) e parts/ (head, fontes,
                        SEO e aurora de fundo em comum)
-    sections/          uma seção por arquivo; subcomponentes em pastas (hero/, missions/, teams/...)
-    components/        ui/, layout/, hud/, countdown/, registration/, teams/, partners/,
+    sections/          uma seção por arquivo; subcomponentes em pastas (hero/, about/, schedule/, final/,
+                       missions/, teams/, shared/...)
+    components/        ui/, layout/, hud/, countdown/, registration/, teams/, partners/, privacy/,
                        npc/, motion/ (pausar animações), seo/
-    controllers/       header, menu mobile, nav spy, trilho do HUD, theme/ (aurora)
+    controllers/       header, menu mobile, nav spy, abas da programação, trilhos (missões, HUD), theme/ (aurora)
     view-models/       ViewModels (MVVM): estado e lógica de tela, sem DOM
     views/             Views (MVVM): ligam DOM e ViewModel
     formatters/        textos e datas da interface
@@ -134,26 +168,29 @@ src/
   shared/              utilitários sem regra de negócio (Observable, EventBus, Ticker, math, dom)
   composition/         composition roots: server.ts (build) e client.ts (browser)
   pages/               rotas do Astro (index, equipes, privacidade, 404, .ics)
-apps-script/           código do Google Apps Script (API de inscrições e fotos no Drive) + passo a passo
+apps-script/           Google Apps Script: 8 .gs + appsscript.json (inscrições, planilha em 3 abas e fotos no
+                       Drive) + passo a passo
 public/                servido como está: og-image.jpg, favicon, _headers, robots
 scripts/
+  setup.mjs            npm run setup: prepara o projeto num PC novo (Node, npm ci, .env, --qa)
   fonts/               patch_orbitron_tilde.py: til da Orbitron
   docs/                gerador dos PDFs, build_pdf_assets.py e assets/ (fontes TTF e logos)
   qa/                  QA visual e de performance (Playwright + Lighthouse), com package.json próprio
 tests/                 testes unitários espelhando as camadas
 docs/                  guia, design spec, asset brief, ADRs, manifesto da stack e PDFs gerados
 design/references/     referências visuais e o vídeo teaser (não vão pro site)
+requirements.txt       dependências dos scripts de assets em Python (fonttools, brotli, Pillow)
 ```
 
 Páginas geradas no build:
 
-| Rota                 | Arquivo                      | O que é                                                      |
-| -------------------- | ---------------------------- | ------------------------------------------------------------ |
-| `/`                  | `pages/index.astro`          | A landing page                                               |
-| `/equipes`           | `pages/equipes.astro`        | Equipes confirmadas com foto ou logo; página leve, sem 3D    |
-| `/privacidade`       | `pages/privacidade.astro`    | Aviso de privacidade (LGPD) com a versão vigente do aviso    |
-| `/404`               | `pages/404.astro`            | Página de erro, no mesmo visual                              |
-| `/hackarun-2026.ics` | `pages/hackarun-2026.ics.ts` | Agenda com todas as atividades (botões da área de inscrição) |
+| Rota                 | Arquivo                      | O que é                                                           |
+| -------------------- | ---------------------------- | ----------------------------------------------------------------- |
+| `/`                  | `pages/index.astro`          | A landing page                                                    |
+| `/equipes`           | `pages/equipes.astro`        | Equipes confirmadas com foto ou logo; página leve, sem 3D         |
+| `/privacidade`       | `pages/privacidade.astro`    | Aviso de privacidade (LGPD) com a versão vigente do aviso         |
+| `/404`               | `pages/404.astro`            | Página de erro, no mesmo visual                                   |
+| `/hackarun-2026.ics` | `pages/hackarun-2026.ics.ts` | Agenda com um evento por bloco da programação (área de inscrição) |
 
 O "Adicionar à agenda" aparece no aviso de inscrições em breve, no lobby do formulário e na tela de sucesso. O botão
 que ficava na programação saiu a pedido da organização. Todas as páginas entram no sitemap (a integração só exclui
@@ -189,22 +226,29 @@ Na prática: uma View ou ViewModel que precisa de armazenamento, imagem ou rede 
 
 ### 6.3 Fluxo no browser
 
-`App.boot()` espera o primeiro frame pintado (o hero, que é o LCP, aparece antes de qualquer JS pesado) e monta tudo
-por uma fila (`app/BootQueue.ts`): um passo curto por tarefa, cedendo a thread entre eles (`scheduler.yield`, ou
+O script de entrada (no `BaseLayout`) espera o navegador registrar o primeiro conteúdo pintado (`app/PaintGate.ts`,
+pela Paint Timing API, com teto de 3 s quando a API não existe ou a aba está oculta) e só então importa o chunk do
+`App`: o hero, que é o LCP, não disputa rede, CPU nem GPU com o boot. `App.boot()` monta tudo por uma fila (`app/BootQueue.ts`): um passo curto por tarefa, cedendo a thread entre eles (`scheduler.yield`, ou
 `setTimeout` 0 onde não existe). Cada passo aparece na trilha Timings do DevTools como `boot:<nome>`, e um passo que
 quebra não derruba os seguintes. Ordem:
 
 1. `mountMotion`: Lenis (smooth scroll), ScrollTrigger, o **SceneDirector** (acompanha as seções com `data-scene`) e
    o `AnchorNavigator` (links `#secao`). Se GSAP ou Lenis quebrar, a página segue no scroll nativo (`NativeScroll`).
 2. `mountViews`: Views MVVM (pausar animações, contador, HUD, tokens NPC, CTAs de inscrição, equipes ao vivo e
-   formulário). Funcionam sem 3D.
-3. `mountControllers`: controladores de DOM (header e menu primeiro, nav spy, trilho do HUD, aurora). Não usam GSAP,
-   então um animador quebrado não leva eles junto.
+   formulário). Funcionam sem 3D. O formulário e a vitrine de equipes são chunks à parte, carregados pelo `LazyMount`
+   (`app/LazyMount.ts`) quando a seção fica a até duas telas, quando a página abre ou salta para ela (`/#id`, link
+   para o `#id`), quando a pessoa foca ou toca nela, ou quando um CTA pede.
+3. `mountControllers`: controladores de DOM (header e menu primeiro, abas da programação, trilho das missões no
+   celular, também pelo `LazyMount`, nav spy, trilho do HUD e aurora). Não usam GSAP, então um animador quebrado não
+   leva eles junto.
 4. `mountAnimators`: o pin das missões e as entradas animadas, que só preparam o setup pesado quando a seção chega
    perto da tela (`motion/core/ApproachWatcher.ts`); os títulos se dividem em linhas pelo `LineSplit` próprio (`motion/animators/heading/LineSplit.ts`).
 5. Segunda fila, com o layout já no lugar: trilha de cenas, `SceneHoldWatcher` (carga do globo final) e, depois do
-   `load` com o navegador ocioso, o chunk do 3D (`mountExperience`). Sem WebGL2, com `save-data` ou se algo falhar, ele
-   emite `experience:fallback` e o brilho em CSS continua.
+   `load` com o navegador ocioso, o chunk do 3D (`mountExperience`). As formas já saem para o Web Worker, mas o
+   contexto WebGL só é criado quando os frames voltam ao ritmo da tela por meio segundo (`experience/FrameSettle.ts`,
+   teto de 3 s): logo depois do 1º paint a GPU ainda está ocupada com a página, e as primeiras chamadas síncronas
+   dela travavam a thread por 40 a 130 ms. Sem WebGL2, com `save-data` ou se algo falhar, ele emite
+   `experience:fallback` e o brilho em CSS continua.
 
 **Páginas leves** (`/equipes`): usam o `PageLayout` e o `LightApp.boot()`, que roda a mesma `BootQueue` só com header
 e menu, "Pausar animações" e a lista de equipes ao vivo (`TeamsView`). Nada de GSAP, Lenis, ScrollTrigger nem
@@ -223,8 +267,25 @@ para o `PageLayout` depois.
 
 Em `presentation/controllers`, montados por `mountControllers` (não são MVVM e funcionam sem GSAP):
 `HeaderScrollController` (header de vidro que reage ao scroll), `MobileMenuController` + `FocusTrap` + `ScrollLock`
-(overlay do menu no celular), `NavSpyController` (link ativo), `HudRailController` (tiques do trilho do HUD) e
-`SceneThemeController` (cores da aurora por cena). Os links internos ficam com o `AnchorNavigator`
+(overlay do menu no celular), `NavSpyController` (link ativo), `DayTabsController` (abas da programação),
+`MissionsRailController` (contador 01/08 e foco do trilho de deslizar das missões no celular, chunk à parte),
+`HudRailController` (tiques do trilho do HUD e, no celular, a pílula que sai da frente do texto) e
+`SceneThemeController` (cores da aurora por cena).
+
+No celular a pílula do HUD some enquanto o rodapé ou o formulário de inscrição estão na tela (`.is-footer` e
+`.is-form`) e recolhe rolando para baixo, como o header (`.is-tucked`); volta ao subir ou depois de ~1,2 s parado. No
+desktop o trilho vertical da borda fica sempre visível. O contador diz "01 de 11 · Largada": com barra ("01/11") ele
+lia como data numa página toda em dd/mm.
+
+As missões, no celular, viram um trilho nativo de deslizar (`scroll-snap`, sem JS e sem animação), com o card
+seguinte aparecendo pela metade; de 640px para cima voltam à grade, e no desktop ao trilho preso que anda com o scroll.
+
+O `DayTabsController` liga o padrão de abas WAI-ARIA na programação: `role="tablist"`, `tab` e `tabpanel`, tabindex
+móvel, setas (as quatro), Home/End, ativação automática e `aria-orientation` (horizontal no celular, vertical na coluna
+do desktop). Um link para um dia (`/#dia-11` a `/#dia-14`) abre a aba dele, também quando o hash muda com a página
+aberta; sem hash, no dia do evento a aba de hoje abre selecionada, pelo fuso de Palmas. Cada dia é uma `<section>`
+(o `role="tabpanel"` não vale num `<article>`). Sem JavaScript a barra de abas fica `hidden` e os 4 dias aparecem
+empilhados, cada um como região com o título do dia. Os links internos ficam com o `AnchorNavigator`
 (`motion/core`): rola com o driver de scroll, atualiza o hash sem pulo e leva o foco para a seção.
 
 ### 6.6 Eventos entre módulos
@@ -383,37 +444,75 @@ A seção `#inscricao` tem `data-scene="core"` e `data-scene-hold="900"`. Quando
 
 Tudo em `src/infrastructure/content/`. Edite, rode `npm test` (os testes validam o conteúdo real) e abra um PR.
 
-| Arquivo         | O que controla                                                                                 |
-| --------------- | ---------------------------------------------------------------------------------------------- |
-| `event.json`    | Datas, locais, marcos do contador e inscrição (`endpoint`, `closesAt`, `capacity`, `teamSize`) |
-| `stations.json` | As 8 missões e a pontuação (a soma dos critérios precisa dar 100)                              |
-| `speakers.json` | Instrutores, mentores, palestra e banca (`name: null` = card "a revelar")                      |
-| `prizes.json`   | Prêmios (`reward: null` = "a revelar")                                                         |
-| `partners.json` | Realização e parceiros (nome, papel e link)                                                    |
-| `faq.json`      | Perguntas frequentes                                                                           |
-| `teams.json`    | Lista reserva de equipes (as oficiais vêm da planilha, ao vivo)                                |
+| Arquivo         | O que controla                                                                                                               |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `event.json`    | Locais, marcos do contador, inscrição (`endpoint`, `closesAt`, `capacity`, `teamSize`), `maxStands` e a programação (`days`) |
+| `stations.json` | As 8 missões. `scoring` fica `null` até o regulamento; publicado (critérios somando 100), volta o painel de pontuação        |
+| `speakers.json` | Instrutores, mentores, palestra e banca (`name: null` = card "a revelar")                                                    |
+| `prizes.json`   | Prêmios (`reward: null` = "a revelar")                                                                                       |
+| `partners.json` | Realização e parceiros (nome, papel e link)                                                                                  |
+| `faq.json`      | Perguntas frequentes com `category` (Evento, Programação aberta, Hackathon, Inscrição); a `FAQPage` do JSON-LD sai daqui     |
+| `teams.json`    | Lista reserva de equipes (as oficiais vêm da planilha, ao vivo): só nome, quantidade de integrantes, status e foto           |
 
-Textos fixos de seção (títulos, chamadas) ficam nos próprios `.astro` em `presentation/sections/`.
+Textos fixos de seção (títulos, chamadas) ficam nos próprios `.astro` em `presentation/sections/`. A grafia é
+"UniCatólica" (caixa alta só na faixa de "O evento").
+
+### 8.1 Programação (`event.json`)
+
+- **`days[]`:** um dia por aba, com `date`, `label` (o rótulo curto da aba: Oficinas, Abertura, Mercado, Final),
+  `stage` (`workshops`, `launch`, `showcase` ou `final`), `title`, `summary` e `sessions`.
+- **`sessions[]`:** os blocos do dia, com `start` e `end` (`end: null` quando o documento não diz; o `.ics` usa 3 h),
+  `place`, `audience` (`open`, `hackathon`, `teams` ou `final`, que viram os selos "Aberto ao público", "Hackathon",
+  "Só equipes e mentores" e "Final com público"), `audienceNote` (a linha "Público" do documento), `note` e
+  `activities`.
+- **`activities[]`:** `start`, `end`, `title`, `summary` (uma linha), `details` (miniementa, abre num `<details>`),
+  `track` (`hackathon` marca o item com o selo), `flags` (`parallel`, `optional`, `tbd`), `parts` (um item com vários
+  horários, como as três oficinas de 13/11) e `checklist`.
+- **Regras:** a atividade precisa caber no bloco (`TimeSlot.contains`, no domínio); senão o build quebra.
+  `tests/infrastructure/EventContent.test.ts` confere o conteúdo real contra o documento do coordenador: mudou um
+  horário, ajuste os dois.
+- **Marcos do contador** (`milestones`): `kickoff` (11/11, 19h), `submission` (14/11, 13h, fim do desenvolvimento
+  presencial; o prazo oficial de entrega é o do regulamento) e `ceremony` (14/11, 17h, a HackaRun Experience).
+- **Números de "O evento":** saem do conteúdo. Dias, oficinas contadas por horário (3 + 1 + 3 = 7), estandes
+  (`maxStands`) e a final.
+- **Saem daqui também:** o JSON-LD (um `subEvent` por bloco, com local e público), o `.ics` (um evento por bloco) e o
+  roteiro da HackaRun Experience na grande final (6 chips, com a premiação das 19h15 em destaque).
 
 ## 9. Inscrições (Google Sheets)
 
-Fluxo: formulário (com a foto ou logo, no modo equipe) → validação no navegador (regras do domínio) → `POST` para o
-Web App do Apps Script → nova linha na aba **Inscricoes** com protocolo `HR26-XXXXXX` e a foto numa pasta do Drive
-(seção 9.6). Para a equipe aparecer no site, a organização muda a coluna **Status** para `confirmado`: ela entra em
-`/equipes` e no contador da LP. O site lê `?action=teams`, que expõe **só** nome da equipe, curso, quantidade de
-pessoas e o id da foto.
+Fluxo: formulário (só equipe: nome, foto ou logo e, de cada integrante, nome completo, matrícula e e-mail) →
+validação no navegador (regras do domínio) → `POST` para o Web App do Apps Script → uma linha na aba **Equipes** com
+protocolo `HR26-XXXXXX`, uma linha por pessoa na aba **Integrantes** e a foto numa pasta do Drive (seção 9.6). Para a
+equipe aparecer no site, a organização muda a coluna **Status** para `confirmado`: ela entra em `/equipes` e no
+contador da LP. O site lê `?action=teams`, que expõe **só** um id público (hash do protocolo com um segredo), o nome da
+equipe, a quantidade de integrantes e o id da foto. A comunicação oficial com as equipes é por e-mail (o formulário e a
+tela de sucesso avisam), e a aba **Resumo** junta os e-mails das equipes confirmadas (seção 9.7).
 
 Passo a passo completo em `apps-script/README.md`. Depois de publicar o Web App, coloque a URL em
-`PUBLIC_REGISTRATION_ENDPOINT` (variável de ambiente na Cloudflare) ou em `registration.endpoint` no `event.json`.
+`PUBLIC_REGISTRATION_ENDPOINT` (variável de ambiente na Cloudflare ou o `.env` local). O `registration.endpoint` do
+`event.json` também funciona, mas vai para o Git: prefira a variável, para nenhum fork gravar na planilha oficial.
 
-O Apps Script tem quatro arquivos: `Code.gs` (rotas `doPost`/`doGet`, planilha e protocolo), `Validation.gs` (regras
-do servidor), `Limits.gs` (prazo, capacidade e limite de envios) e `Images.gs` (foto da equipe no Drive). Os testes
-rodam os quatro de verdade no Node, com dublês dos serviços do Google (planilha, cache, lock, propriedades e Drive):
-`npx vitest run tests/infrastructure/apps-script`.
+| Arquivo           | O que faz                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| `Code.gs`         | Rotas `doPost` e `doGet`, protocolo, id público e o `onEdit` que limpa o cache              |
+| `Validation.gs`   | Regras do servidor (iguais às do domínio), consentimento e proteção contra fórmula injetada |
+| `Limits.gs`       | Prazo, capacidade e limite de envios                                                        |
+| `Images.gs`       | Foto ou logo da equipe no Drive                                                             |
+| `Sheets.gs`       | Colunas das abas e a gravação de cada inscrição                                             |
+| `Registry.gs`     | Quem já está inscrito: nome de equipe, e-mails e matrículas repetidos                       |
+| `Setup.gs`        | `configurarPlanilha()`: cria e formata as abas (seção 9.7)                                  |
+| `Summary.gs`      | Aba **Resumo**: contadores ao vivo e o passo a passo da organização                         |
+| `appsscript.json` | Fuso `America/Araguaina`, runtime V8, log de erros e escopos mínimos                        |
+
+Os escopos do manifesto são só a planilha do próprio script (`spreadsheets.currentonly`) e o Drive (as fotos). Os
+testes rodam todos os `.gs` de verdade no Node, com dublês dos serviços do Google (planilha com várias abas, fórmulas,
+filtros, cache, lock, propriedades e Drive): `npx vitest run tests/infrastructure/apps-script`. O `contract.test.ts`
+confere as constantes espelhadas com o TypeScript, e o `manifest.test.ts`, os escopos contra os serviços que o código
+chama.
 
 > **Mudou algum `.gs`? Publique uma nova versão do Web App junto com o deploy do site** (Implantar > Gerenciar
-> implantações > Editar > Nova versão). O script atual só aceita o aviso vigente (`CONSENT_VERSION`) e exige a foto
-> nas inscrições de equipe, então site e script precisam subir juntos.
+> implantações > Editar > Nova versão; nunca "Nova implantação", que troca a URL). O script só aceita o aviso vigente
+> (`CONSENT_VERSION`), o formato atual do envio (`members[]`) e exige a foto, então site e script sobem juntos.
 
 ### 9.1 Prazo e capacidade em tempo de execução
 
@@ -421,21 +520,22 @@ O build fecha o formulário pelo `event.json` (`closesAt`, `capacity`), mas qual
 direto. Por isso o `Limits.gs` confere **a cada envio** as Propriedades do script e responde `closed` quando não dá
 mais:
 
-| Propriedade           | O que faz                                                            |
-| --------------------- | -------------------------------------------------------------------- |
-| `CLOSES_AT`           | Prazo final, data ISO com hora e fuso (`2026-11-08T23:59:00-03:00`)  |
-| `CAPACITY`            | Máximo de equipes: conta as linhas `Equipe` que não estão `recusado` |
-| `INSCRICOES_FECHADAS` | `sim` fecha na hora, sem novo deploy do site                         |
+| Propriedade           | O que faz                                                           |
+| --------------------- | ------------------------------------------------------------------- |
+| `CLOSES_AT`           | Prazo final, data ISO com hora e fuso (`2026-11-08T23:59:00-03:00`) |
+| `CAPACITY`            | Máximo de equipes: conta as equipes que não estão `recusado`        |
+| `INSCRICOES_FECHADAS` | `sim` fecha na hora, sem novo deploy do site                        |
 
-- Lotou, fecha pra todo mundo (equipe e individual), igual ao site. Recusar uma equipe na coluna Status libera a vaga.
+- Lotou, fecha, igual ao site. Recusar uma equipe na coluna Status libera a vaga (e o nome, os e-mails e as
+  matrículas dela).
 - Valor inválido (`CAPACITY=trinta`) **fecha** as inscrições e grava o erro no log: melhor errar pro lado seguro.
 - `URL/exec?action=health` responde `open: true/false` sem ler a planilha: serve pra conferir a configuração.
 - Mantenha `CLOSES_AT` e `CAPACITY` iguais a `registration.closesAt` e `registration.capacity` do `event.json`.
 
 ### 9.2 Limites de envio
 
-- **Por e-mail:** até 10 tentativas a cada 10 min por e-mail do líder (guardado como hash no `CacheService`, nunca em
-  texto). Cobre os reenvios automáticos do site e segura quem fica testando se um e-mail já está inscrito.
+- **Por e-mail:** até 10 tentativas a cada 10 min por e-mail de contato da equipe (o do integrante 1, guardado como
+  hash no `CacheService`, nunca em texto). Cobre os reenvios automáticos do site e segura quem fica testando se um e-mail já está inscrito.
 - **Global:** 120 envios por minuto. O e-mail esbarra no próprio limite antes de contar no global, então um script
   repetindo o mesmo e-mail não tranca a fila de todo mundo.
 - Resposta `rate-limited`: o `RetryingRegistrationGateway` tenta de novo com espera crescente (até 3 tentativas, só
@@ -443,35 +543,52 @@ mais:
 
 ### 9.3 Consentimento (LGPD)
 
-- O checkbox do formulário linka o aviso em `/privacidade` (abre em nova aba), que também está no rodapé.
+- O checkbox do formulário linka o aviso em `/privacidade` (abre em nova aba), que também está no rodapé. O texto do
+  aviso fica em `components/privacy/PrivacyNotice.astro`, em 9 seções: quem cuida dos dados, o que coletamos (nome da
+  equipe, foto e, de cada integrante, nome completo, matrícula e e-mail; nada de telefone, curso ou dado sensível),
+  para que usamos, base legal, foto ou logo da equipe, com quem compartilhamos, retenção (até 6 meses depois do
+  evento), direitos e como pedir a remoção por e-mail, e o que fica no navegador.
 - O envio leva `consentVersion` (a constante `CONSENT_VERSION` de `application/use-cases/SubmitRegistration.ts`,
-  hoje `2026-10-v2`) e `consentAt`. O servidor exige os dois, **só aceita a versão vigente** (a mesma constante,
+  hoje `2026-10-v3`) e `consentAt`. O servidor exige os dois, **só aceita a versão vigente** (a mesma constante,
   espelhada no `Validation.gs`; um teste confere) e grava na coluna **Consentimento**: `versão · data/hora ISO do
 aceite`. Sem isso a inscrição não entra.
-- No modo equipe, o texto do aceite inclui a autorização para publicar a foto ou logo e a declaração de que todos que
-  aparecem nela concordaram. O aviso tem uma seção só para a foto (finalidade, base legal, link público do Drive,
-  retenção e como pedir a retirada).
-- **Mudou o texto do aviso? Suba o `CONSENT_VERSION` nos dois arquivos** e publique o script junto com o site. A
-  página `/privacidade` mostra a versão vigente.
+- O aceite é dado em nome da equipe: cobre os dados de cada integrante (para organizar a competição e falar com a
+  equipe por e-mail), a autorização para publicar o nome da equipe, a foto ou logo e o número de integrantes, e a
+  declaração de que todos os integrantes, e quem aparece na imagem, concordaram.
+- Sobre o regulamento, a equipe declara que **sabe que ele é apresentado na abertura (12/11, às 19h35) e se compromete
+  a segui-lo**: as inscrições fecham antes disso, então ninguém "leu e aceitou" um documento que ainda não existe. O
+  aviso diz que a comunicação oficial com as equipes (confirmação e avisos) é só por e-mail; o regulamento e os
+  resultados saem no evento (abertura e premiação).
+- **Mudou o texto do aviso ou do aceite? Suba o `CONSENT_VERSION` nos dois arquivos** e publique o script junto com o
+  site. A página `/privacidade` mostra a versão vigente.
 
 ### 9.4 Idempotência (reenvio sem linha duplicada)
 
 - Cada sessão do formulário gera uma **chave de envio** (UUID, `view-models/registration/idempotencyKey.ts`) que vale
   para todo reenvio até a inscrição entrar (`SubmissionSession`).
-- No servidor, mesma chave + mesmo e-mail devolve o **mesmo protocolo**: primeiro pelo cache (10 min) e, depois disso,
-  pela coluna **Chave de envio** gravada na linha. Mesmo e-mail com outra chave é `duplicate`.
-- Planilha criada antes da coluna nova: o script completa o título dela na primeira gravação.
+- No servidor, mesma chave + mesmo e-mail de contato devolve o **mesmo protocolo**: primeiro pelo cache (10 min) e,
+  depois disso, pela coluna **Chave de envio** da aba Equipes. Mesmo e-mail com outra chave cai na checagem de
+  duplicado (seção 9.5).
 
 ### 9.5 Outras proteções
 
-Honeypot e tempo mínimo de preenchimento (3 s: `MIN_FILL_MS` no `SubmitRegistration.ts` e `MIN_ELAPSED_MS` no
-`Validation.gs`, um teste confere), validação completa no servidor (nome, e-mail, WhatsApp, curso, tamanho da equipe,
-e-mails repetidos), trava de concorrência (`LockService`), proteção contra fórmula injetada na planilha (`=`, `+`,
-`-`, `@`) e cache de 60 s na lista de equipes (o `onEdit` limpa o cache quando a coluna Status ou a Imagem muda).
+- **Validação completa no servidor**, igual à do domínio (um teste roda os dois lados): nome da equipe de 2 a 40
+  caracteres, de 2 a 5 integrantes, nome completo com nome e sobrenome (até 80 caracteres), matrícula de 4 a 20
+  caracteres (letras, números, `.`, `-` e `/`, gravada em maiúsculas), e-mail válido (até 120), nada de e-mail ou
+  matrícula repetidos dentro da equipe, foto obrigatória e consentimento na versão vigente.
+- **Uma equipe por pessoa:** nome de equipe, e-mail ou matrícula que já estão numa equipe não recusada voltam
+  `duplicate_team_name`, `duplicate_email` ou `duplicate_student_id`, com a posição de cada integrante, sem
+  diferenciar caixa nem acento. O gateway transforma isso num `conflict`, e o site marca o campo certo
+  (`view-models/registration/ServerConflicts.ts`); a mensagem some quando o valor muda.
+- Honeypot e tempo mínimo de preenchimento (3 s: `MIN_FILL_MS` no `SubmitRegistration.ts` e `MIN_ELAPSED_MS` no
+  `Validation.gs`, um teste confere), trava de concorrência (`LockService`), proteção contra fórmula injetada na
+  planilha (`=`, `+`, `-`, `@`) e cache de 60 s na lista de equipes (chave `teams:v3`; o `onEdit` limpa o cache quando
+  Status, nome, quantidade ou foto mudam).
+- Os integrantes são gravados antes da linha da equipe: se algo cair no meio, a linha órfã em Integrantes é ignorada.
 
 ### 9.6 Foto ou logo da equipe
 
-Decisão registrada na ADR 0007. Na inscrição de equipe o campo **Foto ou logo da equipe** é obrigatório
+Decisão registrada na ADR 0007. O campo **Foto ou logo da equipe** é obrigatório, na etapa 01 do formulário
 (`components/registration/TeamImageField.astro` e `TeamImagePreview.astro`).
 
 **No navegador:**
@@ -482,7 +599,7 @@ Decisão registrada na ADR 0007. Na inscrição de equipe o campo **Foto ou logo
   `createImageBitmap`, orientação EXIF e `OffscreenCanvas` quando existe): reduz para 800 px no lado maior e tenta
   WebP, depois JPEG, baixando a qualidade e depois o tamanho até caber em ~300 KB. Passou de 400 KB, recusa.
 - Logo com fundo transparente ganha um fundo sólido que contrasta com o traço, para não sumir no card escuro.
-- Prévia com "Trocar imagem", arrastar e soltar, erros no resumo de erros do formulário (`aria-invalid`,
+- Prévia com "Trocar imagem" ("Trocar" abaixo de 400 px), arrastar e soltar, erros no resumo de erros do formulário (`aria-invalid`,
   `aria-describedby`) e status em região `aria-live`. O `TeamImageSlot` (view-model) descarta resultado atrasado de
   uma imagem trocada no meio.
 - A imagem vai em base64 dentro do mesmo `POST` `text/plain`. No reenvio vão os mesmos bytes com a mesma chave de
@@ -493,14 +610,17 @@ Decisão registrada na ADR 0007. Na inscrição de equipe o campo **Foto ou logo
 
 - Confere o base64, o teto de 400 KB (`MAX_IMAGE_BYTES`, igual ao `TEAM_IMAGE_RULES.maxBytes`; um teste confere) e o
   formato pelos primeiros bytes. O tipo declarado precisa bater com eles.
-- Grava só depois das checagens de reenvio e de e-mail repetido, então um retry nunca cria um segundo arquivo. O nome
-  é sempre o protocolo (`HR26-ABC234.webp`).
+- Grava só depois das checagens de reenvio e de duplicado, então um retry nunca cria um segundo arquivo. O nome é
+  sorteado (`foto-<uuid>.webp`): o arquivo tem link público e o nome aparece para quem abre, então ele não deriva do
+  protocolo. A coluna **ID da foto** liga a linha ao arquivo.
 - Pasta: a Propriedade `FOTOS_PASTA_ID`. Sem ela, o script cria `HackaRun 2026 · Fotos das equipes` uma vez e guarda
-  o id. A função `prepararFotos()`, rodada uma vez no editor, autoriza o Drive e cria a pasta.
+  o id. O `configurarPlanilha()` (ou o antigo `prepararFotos()`), rodado uma vez no editor, autoriza o Drive e cria a
+  pasta.
 - Cada arquivo fica como "Qualquer pessoa com o link · Leitor". Se o domínio bloquear link público, ou se o Drive
-  falhar, a inscrição entra do mesmo jeito (coluna Imagem vazia ou foto sem acesso) e o erro vai para o log. Se a
+  falhar, a inscrição entra do mesmo jeito (sem ID da foto ou com a foto sem acesso) e o erro vai para o log. Se a
   planilha falhar depois do upload, o arquivo vai para a lixeira.
-- Coluna nova **Imagem** (Q) com o id do arquivo. Planilha antiga ganha os títulos que faltam na primeira gravação.
+- Na aba Equipes: **ID da foto** (o id do arquivo), **Foto** (a miniatura dentro da célula, com `=IMAGE()`) e **Link
+  da foto** (`=HYPERLINK()` para o Drive). As duas fórmulas leem o ID, então apagar o ID some com as duas.
 
 **No site:**
 
@@ -510,11 +630,62 @@ Decisão registrada na ADR 0007. Na inscrição de equipe o campo **Foto ou logo
 - Os cards (`TeamCardFrame`) mostram a imagem inteira (`object-fit: contain`) sobre uma cópia desfocada dela, com
   `loading="lazy"`, `decoding="async"`, largura e altura fixas e alt "Foto ou logo da equipe X". Sem foto, ou se ela
   não carregar, o card mostra as iniciais do nome.
-- **Moderação é a confirmação:** nada aparece antes de alguém da organização olhar a foto e marcar `confirmado`.
-  Tirar do ar = apagar a célula **Imagem** (o card volta para as iniciais na hora). Detalhes em
-  `apps-script/README.md`, seções 5 e 7.
+- **Moderação é a confirmação:** nada aparece antes de alguém da organização olhar a foto (a miniatura está na própria
+  planilha) e marcar `confirmado`. Tirar do ar = apagar a célula **ID da foto** (o card volta para as iniciais na
+  hora). Pedido de remoção (LGPD) ou imagem imprópria: antes, mandar o arquivo para a lixeira do Drive pelo **Link da
+  foto** e esvaziar a lixeira, porque o arquivo continua compartilhado por link e o endereço já passou pelo site. O
+  passo a passo também está na aba Resumo. Detalhes em `apps-script/README.md`, seção 8.
 - Em `npm run dev` sem endpoint, o `InMemoryRegistrationGateway` grava as equipes aceitas no `SimulatedTeamStore`
   (memória + `sessionStorage`), com a foto como data URL, e o `SimulatedTeamRepository` alimenta `/equipes` e a LP.
+
+### 9.7 A planilha (abas, fórmulas e filtros)
+
+Decisão registrada na ADR 0008. O `configurarPlanilha()` (`Setup.gs`) monta tudo e pode rodar de novo quando quiser:
+não apaga dado nem duplica filtro, faixa ou proteção. Ele roda sozinho na primeira gravação e quando a versão do layout
+muda (Propriedade `PLANILHA_VERSAO`), e cria também a pasta das fotos e o `ID_SEGREDO` (segredo dos ids públicos).
+Numa planilha nova, a primeira aba vazia (`Página1` ou `Sheet1`) vira a aba Equipes.
+
+- **`Equipes`** (uma linha por equipe): Protocolo, Data/hora, Equipe, Integrantes (qtd), **Foto** (miniatura com
+  `=IMAGE()`), **Status** (menu `pendente`/`confirmado`/`recusado`), E-mail de contato, E-mails da equipe (separados por
+  `; `), Link da foto (`=HYPERLINK()`), ID da foto, Origem, Consentimento e Chave de envio.
+- **`Integrantes`** (uma linha por pessoa): Protocolo, Equipe, Nº, Nome completo, Matrícula, E-mail, Contato
+  (`sim`/`não`) e Status da equipe (fórmula que busca o Status na aba Equipes).
+- **`Resumo`:** equipes inscritas, confirmadas, pendentes e recusadas, total de integrantes, vagas restantes (com
+  `CAPACITY`) e os e-mails das equipes confirmadas numa célula só, além do passo a passo da organização.
+- **Formatação:** títulos fixos com fundo escuro, colunas da equipe congeladas, filtro em todas as colunas de Equipes e
+  Integrantes, faixas alternadas, cor por status (pendente âmbar, confirmado verde, recusado vermelho, linha recusada
+  apagada), data em `dd/MM/aaaa HH:mm`, matrícula como texto (o zero à esquerda não some) e proteção só de aviso nos
+  títulos e no Resumo.
+- **Rotina da organização:** conferir a foto e os dados, trocar o Status para `confirmado` (a equipe aparece no site em
+  até 1 minuto), filtrar pessoas e matrículas na aba Integrantes e, para mandar um aviso, colar a célula de e-mails do
+  Resumo no campo Cco do e-mail. Passo a passo no `apps-script/README.md`, seção 8.
+- Vindo da versão com a aba `Inscricoes` (modalidade individual, WhatsApp, curso): cole os oito arquivos e o
+  manifesto, rode `configurarPlanilha()`, publique a nova versão e apague a aba antiga.
+
+### 9.8 Formulário no site
+
+- **Estrutura** (`components/registration/RegistrationForm.astro`): três etapas (`FormStep`): 01 Equipe (nome e foto),
+  02 Integrantes (`MemberList` e `MemberRow`, um `fieldset` por pessoa, e o aviso `MailNotice` de comunicação oficial
+  por e-mail) e 03 Confirmação (`ConsentField` e envio).
+- **Integrantes:** de `registration.teamSize.min` a `max` cards (hoje 2 a 5). O integrante 1 é o contato da equipe e
+  nunca sai. Adicionar move o foco para o nome do card novo e anuncia ("Integrante 3 adicionado. A equipe tem 3 de 5
+  integrantes."); remover leva o foco para o card que subiu ou para "Adicionar integrante". Com 5 de 5 o botão desativa
+  e vira "Equipe completa · 5/5". Os cards do mínimo já saem no HTML (`MemberRow` com `memberKey` 0, 1...), então a
+  etapa tem conteúdo antes do JS e na prévia "em breve"; o `MemberRows` adota esses cards pela chave e só clona os
+  extras do `<template>`, e o que alguém digitar neles antes do chunk chegar vai para o VM. Só o integrante 1 (o
+  contato, quem costuma preencher) tem `autocomplete="name"` e `"email"` (WCAG 1.3.5); os outros ficam em `off`.
+- **Erros no envio:** com mais de um erro, o foco vai para o resumo (`role="group"` com o título "Faltam ajustar N
+  campos:"), que rola até logo abaixo do header; os links dele levam a cada campo. Com um erro só, o foco vai direto
+  para o campo e o live region anuncia.
+- **Inscrições em breve** (produção sem endpoint): o aviso com "Adicionar à agenda" e só uma amostra curta e apagada
+  do formulário (22rem, some num degradê), ainda `inert`.
+- **Regras** (domínio, `FullName`, `StudentId`, `Email`, `TeamMember` e `TeamRegistration`): nome completo com duas
+  palavras ou mais, matrícula aparada e em maiúsculas, e-mail válido, e e-mail ou matrícula repetidos na equipe
+  marcados no campo repetido ("já está no integrante N").
+- **Estado e tela:** `RegistrationFormViewModel` (estado e validação, sem DOM), `ServerConflicts` (conflitos do
+  servidor por campo), `memberNotices` (os anúncios) e as Views em `views/registration/`. Resumo de erros, honeypot,
+  regra dos 3 s, chave de envio e o clímax e o lobby continuam como antes. A tela de sucesso repete o aviso do e-mail
+  com o endereço do contato.
 
 ## 10. Identidade e assets
 
@@ -527,8 +698,7 @@ Decisão registrada na ADR 0007. Na inscrição de equipe o campo **Foto ou logo
 - **Compartilhamento:** `public/og-image.jpg` (1200×630), usada no Open Graph e no Twitter Card.
 - Imagens em `src/assets/` são otimizadas pelo Astro no build. Pedidos de arte em `docs/design/asset-brief.md`.
 - **Fotos das equipes** não ficam no repositório: vêm do Drive da organização pelo CDN do Google (seção 9.6).
-- **Som:** o site não tem nenhum. O botão de som, os sons sintetizados e o script que os gerava saíram a pedido da
-  organização em 12/10/2026 (changelog, `[Unreleased]`).
+- **Som:** o site não tem nenhum desde 12/10/2026, a pedido da organização (changelog, `[Unreleased]`).
 
 ### 10.2 Paleta e tipografia
 
@@ -538,12 +708,13 @@ subset latin, declaradas no `BaseLayout.astro`:
 - **Orbitron** (títulos, botões, números) em `src/assets/fonts/orbitron-pt-latin-wght.woff2`. A original tem um til
   que, em título grande, parece acento grave ("NÀO"). O script `python scripts/fonts/patch_orbitron_tilde.py` redesenha
   o til em degraus (Ã Õ ã õ Ñ ñ) a partir da fonte do Fontsource. Requer `fonttools` e `brotli`
-  (`pip install fonttools brotli`) e o `node_modules` instalado.
+  (`python -m pip install -r requirements.txt`) e o `node_modules` instalado.
 - **Montserrat** (texto) e **JetBrains Mono** (HUD) vêm direto dos pacotes `@fontsource-variable/*`.
 
 ### 10.3 Assets dos PDFs
 
-O pdfkit não lê woff2 variável. `python scripts/docs/build_pdf_assets.py` (requer `fonttools`, `brotli` e `Pillow`)
+O pdfkit não lê woff2 variável. `python scripts/docs/build_pdf_assets.py` (requer `fonttools`, `brotli` e `Pillow`,
+todos no `requirements.txt`)
 gera instâncias estáticas das fontes da marca e versões menores dos logos em `scripts/docs/assets/`. Sem esses
 arquivos, os PDFs caem nas fontes padrão (Helvetica/Courier).
 
@@ -581,44 +752,54 @@ arquivos, os PDFs caem nas fontes padrão (Helvetica/Courier).
 | LCP (4G, celular médio) | < 2,5 s                                                    |
 | CLS                     | < 0,05                                                     |
 | INP                     | < 200 ms                                                   |
-| JS inicial (gzip)       | < 70 KB (three.js fica num chunk lazy)                     |
+| JS inicial (gzip)       | < 70 KB, de 1.024 bytes (three.js fica num chunk lazy)     |
 | Fontes                  | 3 woff2 latin (~90 KB no total), 2 com preload             |
 | Foto de equipe          | Envio: meta 300 KB, teto 400 KB; no site, 600 px e lazy    |
 | Partículas              | low 9k · medium 22k · high 42k                             |
 
-Situação em 11/10/2026 (Lighthouse mobile, build de produção, Brave headless, mediana de 3 execuções; para repetir,
-`node lighthouse.mjs <url> --runs=3` em `scripts/qa/`, seção 13.2):
+Situação em 12/10/2026 (Lighthouse mobile, build de produção servido com gzip, Brave headless, mediana de 3
+execuções; para repetir, `node lighthouse.mjs <url> --runs=3` em `scripts/qa/`, seção 13.2):
 
-| Métrica                             | Antes da otimização | 11/10/2026 |
-| ----------------------------------- | ------------------- | ---------- |
-| Performance                         | 66                  | **95**     |
-| Total Blocking Time (TBT)           | 1.600 ms            | 18 ms      |
-| Largest Contentful Paint (LCP)      | 2,9 s               | 2,6 s      |
-| First Contentful Paint (FCP)        | não registrado      | 2,0 s      |
-| Speed Index                         | não registrado      | 2,5 s      |
-| Cumulative Layout Shift (CLS)       | não registrado      | 0,048      |
-| Acessibilidade, Boas práticas e SEO | 100                 | 100        |
+| Métrica                             | Antes da otimização | 11/10/2026 | 12/10/2026  |
+| ----------------------------------- | ------------------- | ---------- | ----------- |
+| Performance                         | 66                  | 95         | **98**      |
+| Total Blocking Time (TBT)           | 1.600 ms            | 18 ms      | 83 ms       |
+| Largest Contentful Paint (LCP)      | 2,9 s               | 2,6 s      | **2,2 s**   |
+| First Contentful Paint (FCP)        | não registrado      | 2,0 s      | 1,4 s       |
+| Speed Index                         | não registrado      | 2,5 s      | 2,4 s       |
+| Cumulative Layout Shift (CLS)       | não registrado      | 0,048      | **0,001**   |
+| Acessibilidade, Boas práticas e SEO | 100                 | 100        | 100         |
+| JS inicial (gzip)                   | não registrado      | 76,9 KB    | **68,4 KB** |
 
-O TBT caiu com o boot fatiado e o 3D fora da thread principal (seção 12.2). O Lighthouse simula 4G lento e CPU 4x
-mais lenta, mais duro que o "celular médio" da meta: o LCP de 2,6 s ainda passa um pouco dos 2,5 s e continua como
-pendência (seção 19.2).
+`/equipes` no mesmo dia: Performance 100, LCP 1,9 s (o logo do header, carregado na hora e com `fetchpriority`
+alta), TBT 0 e CLS 0,001. O JS inicial é o script de entrada, o chunk do `App` e o que eles importam direto, em gzip
+(KB de 1.024 bytes; em kB decimais dá 70,0, então qualquer passo novo no boot precisa ir para um chunk à parte).
+
+O LCP caiu com o `PaintGate` (o JS do app só baixa depois do 1º conteúdo pintado) e o `FrameSettle` (o contexto
+WebGL espera a GPU largar a página); o JS inicial, com o formulário, as equipes e o trilho das missões em chunks do
+`LazyMount` (seções 6.3 e 12.2). O Lighthouse simula 4G lento e CPU 4x mais lenta, mais duro que o "celular médio"
+da meta. O TBT varia entre execuções (13 a 194 ms nas últimas), sempre por tarefas do boot e do chunk do 3D.
 
 ### 12.2 Técnicas aplicadas
 
 - **HTML pronto no build:** o H1 do hero é o logo oficial e é o LCP: imagem otimizada pelo Astro, carregada sem
   lazy e com `fetchpriority` alta; CSS pequeno entra inline.
-- **Boot fatiado depois do paint:** `App.boot()` espera o primeiro frame e roda a `BootQueue`, um passo curto por
-  tarefa (seção 6.3): a primeira pintura não espera o JavaScript e o input não fica preso atrás do boot.
+- **Boot fatiado depois do paint:** o chunk do `App` só baixa depois do primeiro conteúdo pintado (`PaintGate`, com
+  teto de 3 s), e `App.boot()` roda a `BootQueue`, um passo curto por tarefa (seção 6.3): a primeira pintura não
+  espera o JavaScript e o input não fica preso atrás do boot.
+- **Chunks sob demanda:** o formulário de inscrição, a vitrine de equipes e o contador do trilho das missões ficam
+  fora do JS inicial e carregam pelo `LazyMount` (seção perto da tela, salto por âncora, toque, foco ou CTA).
 - **Setup sob demanda:** animações de entrada montam quando a seção se aproxima da tela (`ApproachWatcher`); os
   títulos usam o `LineSplit` próprio em vez do SplitText do GSAP, que cria um `Intl.Segmenter` caro ao carregar.
 - **3D tardio e fora da thread principal:** o chunk do three.js só é importado depois do `load` e com o navegador
   ocioso. As formas são geradas num Web Worker enquanto os shaders compilam; o `StageCompiler` prepara um programa por
-  tarefa com `KHR_parallel_shader_compile` (`compileAsync`), já no alvo de render certo, antes do primeiro frame.
+  tarefa com `KHR_parallel_shader_compile` (`compileAsync`), já no alvo de render certo, antes do primeiro frame. O
+  contexto WebGL só nasce quando os frames voltam ao ritmo da tela (`FrameSettle`, seção 6.3).
 - **Shader enxuto:** `defines` por cena removem ramos de formas ausentes; índices da paleta são constantes.
 - **Render adiado do layout:** `content-visibility: auto` nas seções longe do topo, em
   `styles/deferred-sections.css` (importado pelo `base.css`, na layer `base`), com `contain-intrinsic-size` (altura do
-  conteúdo, sem o padding da seção) medido em 390 e 1440 px. Mudou bastante o conteúdo de uma dessas seções? Meça de
-  novo e atualize o valor. O `LayoutRefresher` recalcula os gatilhos quando a seção monta, e o scroll por âncora
+  conteúdo, sem o padding da seção) medido em 390 e 1440 px (a programação, com a aba do dia 1 aberta). Mudou bastante
+  o conteúdo de uma dessas seções? Meça de novo e atualize o valor. O `LayoutRefresher` recalcula os gatilhos quando a seção monta, e o scroll por âncora
   confere o destino de novo ao chegar (`scripts/qa/anchorcheck.mjs` testa isso).
 - **Aurora barata:** manchas em `radial-gradient` sem `filter: blur()`; cores interpoladas por `@property`.
 - **Qualidade adaptativa** (seção 7.6), DPR limitado por tier, pausa com a aba oculta, raios do logo só com o hero
@@ -635,9 +816,8 @@ Os scripts ficam em `scripts/qa/`, com `package.json` próprio: Playwright e Lig
 projeto, só quem faz QA instala. Guia completo de cada script em `scripts/qa/README.md`.
 
 ```bash
-cd scripts/qa
-npm install
-npx playwright install chromium   # só se a máquina não tiver Brave nem Chrome
+npm run setup -- --qa             # na raiz; ou: cd scripts/qa e npm install
+npx playwright install chromium   # dentro de scripts/qa, só se a máquina não tiver Brave nem Chrome
 ```
 
 O navegador sai de `BRAVE_PATH`, depois `CHROME_PATH`, depois do caminho padrão do Brave ou do Chrome no sistema e,
@@ -697,8 +877,9 @@ Formato: `<tipo>(<escopo>): <descrição curta no imperativo, em inglês>`
 | `chore`    | Tarefas gerais                              |
 | `revert`   | Reverter commit                             |
 
-Escopos: `domain`, `application`, `infra`, `ui`, `sections`, `experience`, `motion`, `a11y`, `perf`, `seo`,
-`content`, `docs`, `ci`, `deps`, `config`, `tests`.
+Escopos (`commitlint.config.js`; escopo fora da lista gera aviso, tipo fora da lista dá erro): `domain`,
+`application`, `infra`, `ui`, `sections`, `experience`, `motion`, `a11y`, `perf`, `seo`, `content`, `docs`, `ci`,
+`deps`, `config`, `tests`. O que cada um cobre está na tabela do `CONTRIBUTING.md`.
 
 ```text
 feat(sections): add prizes section with locked rewards
@@ -713,16 +894,26 @@ Mudanças em `package.json`, `docs/stack-manifest.json` ou neste guia regeneram 
 
 ## 15. Branches e Pull Requests
 
-1. Atualize a `main` e crie a branch: `feat/<assunto>`, `fix/<assunto>`, `docs/<assunto>`.
-2. Commits pequenos, no padrão acima.
-3. `npm run validate` antes de abrir o PR.
-4. Abra o PR pra `main` usando o template (checklist). A CI roda lint, formatação, testes e build; a Cloudflare gera
-   uma URL de preview.
-5. Pelo menos 1 revisão. Merge com **squash**, com título no padrão Conventional Commits.
+1. Faça o fork e configure o `upstream` (seção 4). Quem tem acesso de escrita ao repositório original pode criar a
+   branch direto nele.
+2. Atualize a `main` (`git switch main`, `git pull upstream main`) e crie a branch: `feat/<assunto>`,
+   `fix/<assunto>`, `docs/<assunto>`.
+3. Commits pequenos, no padrão acima.
+4. `npm run validate` e `npm run format:check` antes de abrir o PR.
+5. Se a `main` andou, `git fetch upstream` e `git rebase upstream/main` na sua branch (depois,
+   `git push --force-with-lease`, só nela).
+6. Abra o PR pra `main` de `Marcos-Codfy/lp-hackarun` usando o template (checklist). A CI roda lint, formatação,
+   testes e build; com a Cloudflare ligada, o PR ganha uma URL de preview.
+7. Pelo menos 1 revisão. Merge com **squash**, com título no padrão Conventional Commits.
 
-Recomendado: proteger a `main` no GitHub (Settings → Branches), exigindo PR e CI verde.
+Recomendado: proteger a `main` no GitHub (Settings → Branches), exigindo PR e CI verde. O passo a passo para quem
+contribui está no `CONTRIBUTING.md`.
 
 ## 16. Deploy na Cloudflare Pages (grátis)
+
+**Situação:** a publicação oficial está em espera, por decisão do responsável pelo projeto. Os passos abaixo valem
+para quando ela sair e também para quem quer publicar um fork na própria conta (com o endpoint de uma planilha de
+teste).
 
 1. Crie uma conta gratuita em `dash.cloudflare.com`.
 2. **Workers & Pages → Create → Pages → Connect to Git** e escolha `Marcos-Codfy/lp-hackarun`.
@@ -752,6 +943,8 @@ Cache e headers de segurança ficam em `public/_headers`.
 - [ ] Sem texto com contraste baixo; imagens com `alt`.
 - [ ] Nenhum arquivo passou de 250 linhas (o ESLint avisa acima de 200); nenhum `console.log` esquecido.
 - [ ] Lighthouse mobile sem regressão (performance ≥ 90; acessibilidade, boas práticas e SEO em 100).
+- [ ] Mexeu na programação: as 4 abas conferidas com teclado e a versão sem JavaScript (dias empilhados).
+- [ ] Mexeu no formulário: testado no modo simulado com 2 e 5 integrantes, erros de campo e conflito de duplicado.
 - [ ] Mexeu em `apps-script/`: a nova versão do Web App sobe junto com o deploy do site (seção 9).
 - [ ] Mudança anotada em **[Unreleased]** no `CHANGELOG.md` (seção 18).
 
@@ -798,60 +991,104 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 - **Página `/equipes`:** cada equipe confirmada com a foto ou a logo que sobe na inscrição, guardada no Drive da
   organização (seção 9.6, ADR 0007). A seção de equipes da LP virou uma chamada para a página, e "Equipes" entrou no
   header, no menu e no rodapé.
-- **Consentimento `2026-10-v2`:** inclui a autorização de imagem; o Apps Script só aceita a versão vigente.
+- **Consentimento `2026-10-v2`:** inclui a autorização de imagem; o Apps Script só aceita a versão vigente (a
+  rodada 3 subiu para `2026-10-v3`).
 - **Textos:** "Final no Capim Dourado Shopping" (no lugar de "Final no telão"), "UNICATÓLICA" na faixa (no lugar de
   "Palmas–TO"), "Da sala de aula ao palco." no título de "O evento" e chamada nova dos prêmios.
 - **Saíram:** o "Adicionar à agenda" da programação (o `.ics` segue na área de inscrição), o aviso "Corra contra o
   relógio, não pelos corredores" dos NPCs (a regra vai ser dita no dia) e o link do repositório no rodapé.
 
+**12/10/2026, rodada 3 (em [Unreleased]):**
+
+- **Conteúdo do coordenador:** o evento em duas frentes (programação aberta e hackathon só para alunos da
+  UniCatólica), a programação real em abas por dia (seção 8.1), a grande final como HackaRun Experience (17h, com a
+  premiação às 19h15), FAQ com 15 perguntas em 4 grupos, JSON-LD com `subEvent` por bloco e `FAQPage`, e a grafia
+  "UniCatólica". A pontuação das missões saiu até o regulamento (`scoring: null`).
+- **Inscrição só de equipe:** nome completo, matrícula e e-mail de 2 a 5 integrantes, em três etapas; saíram a
+  modalidade individual, o WhatsApp, o curso, o período e a acessibilidade. Comunicação oficial por e-mail.
+- **Planilha organizada:** abas Equipes, Integrantes e Resumo, montadas pelo `configurarPlanilha()`, com a miniatura
+  da foto na célula, Status em menu com cor e filtros (seção 9.7, ADR 0008). Oito `.gs` e o `appsscript.json` com
+  escopos mínimos.
+- **Consentimento `2026-10-v3`** e aviso de privacidade com os dados atuais.
+- **Pronto para fork:** `npm run setup`, `requirements.txt`, o guia "Como rodar no seu PC" no README e o
+  `CONTRIBUTING.md` com o fluxo de fork. O README saiu das seções "Bastidores" e "Desafios que resolvi", e o roteiro
+  das cenas virou "Roteiro visual: uma cena 3D por seção".
+- **Revisão da rodada 3:** boot mais leve (`PaintGate`, `LazyMount`, `FrameSettle`; LCP 2,2 s e JS inicial 68,4 KB),
+  missões em trilho de deslizar no celular, rodapé com as logos lado a lado, HUD fora da frente do texto, resumo de
+  erros com foco, cards de integrante já no HTML, prévia "em breve" curta, abas da programação abrindo pelo
+  `/#dia-NN`, sem costura entre as seções no desktop e o aceite do regulamento como ele é (apresentado na abertura).
+
 ## 19. Pendências
 
 ### 19.1 Da organização
 
-- [ ] URL do Web App de inscrições (`PUBLIC_REGISTRATION_ENDPOINT`).
+- [ ] URL do Web App de inscrições (`PUBLIC_REGISTRATION_ENDPOINT`), publicado na conta da organização.
 - [ ] Prazo das inscrições (`registration.closesAt`) e capacidade de equipes (`registration.capacity`), repetidos
       nas Propriedades `CLOSES_AT` e `CAPACITY` do Apps Script (seção 9.1).
 - [ ] Tamanho mínimo e máximo da equipe (`registration.teamSize`, hoje 2 a 5 provisório; igual ao `TEAM_SIZE` do
       `apps-script/Validation.gs`).
-- [ ] Inscrição individual quando as vagas de equipe lotarem: hoje fecha pra todo mundo (seção 9.1); confirmar se é
-      isso mesmo.
-- [ ] Prêmios (`prizes.json`, os 3 estão "a revelar") e link do regulamento oficial.
+- [ ] Regulamento (apresentado na abertura, em 12/11, às 19h35): pontuação das missões (publicar o bloco `scoring` no
+      `stations.json`), prazo oficial de entrega, regras de uso de IA e desempate. Depois disso, conferir os textos
+      do `ScoringPanel` contra o regulamento.
+- [ ] Horário da premiação: o documento cita "prevista para as 18h" numa nota e 19h15 na programação da HackaRun
+      Experience. O site usa 19h15; confirmar.
+- [ ] Horário de término da HackaRun Experience (o documento não informa; o `.ics` usa 17h às 20h e avisa na
+      descrição "Horário de término a confirmar pela organização.", e o JSON-LD termina só na data).
+- [ ] Local exato do desenvolvimento final de 14/11, das 8h às 13h (o documento diz só "UniCatólica").
+- [ ] Faixa de horário de 11/11 (o site usa 19h às 21h50, tirada das três oficinas) e o fim da miniementa de "Do zero
+      ao código", que veio cortada no documento.
+- [ ] Temas das oficinas de 12 e 13/11 (hoje "Tema a definir") e a confirmação do desfile de cosplay (opcional).
+- [ ] Dinâmica da corrida (missões, pistas, estações e onde estão os NPCs): sai no lançamento do desafio, em 12/11, às
+      19h55. Depois disso, conferir se a página precisa de ajuste.
+- [ ] Prêmios (`prizes.json`, os 3 estão "a revelar") e link do regulamento oficial, se ele for publicado.
 - [ ] Nomes de instrutores, mentores, palestrante e banca (`speakers.json`, todos "a revelar").
-- [ ] E-mail do encarregado de dados (LGPD) para o aviso em `/privacidade` (hoje aparece como "pendente").
+- [ ] **Antes de abrir as inscrições:** e-mail do encarregado de dados (LGPD, art. 41) para o aviso em
+      `/privacidade`, que hoje mostra "Pendente" e manda escrever "para a organização" sem endereço. Não ligar o
+      `PUBLIC_REGISTRATION_ENDPOINT` antes disso. Se o contato mudar o texto do aviso, suba o `CONSENT_VERSION` nos
+      dois lados (seção 9.3).
 - [ ] Revisão jurídica do texto do aviso de privacidade. Mudou o texto? Suba o `CONSENT_VERSION` (seção 9.3).
 - [ ] Conta Google institucional dona da planilha e do Apps Script (cotas maiores, e os dados ficam com a
       instituição, não com uma pessoa).
 - [ ] Site oficial do Capim Dourado para o link da faixa de parceiros (`partners.json`, hoje `null`).
-- [ ] Local da caça aos NPCs (universidade ou shopping).
-- [ ] Publicar a nova versão do Apps Script (os quatro `.gs`), rodar `prepararFotos` uma vez para autorizar o Drive
-      e subir junto com o deploy do site (seção 9).
+- [ ] Publicar o Apps Script novo (os oito `.gs` e o `appsscript.json`), rodar `configurarPlanilha()` uma vez para
+      autorizar a planilha e o Drive e publicar uma nova versão junto com o deploy do site (seção 9). A aba antiga
+      `Inscricoes` pode ser apagada depois.
 - [ ] Confirmar que a conta institucional permite link público ("Qualquer pessoa com o link · Leitor") nos arquivos
       da pasta das fotos; senão as equipes aparecem só com as iniciais (seção 9.6).
-- [ ] FAQ "Vou precisar correr pelos corredores?" (`faq.json`): repete a regra de caminhar entre as estações, que a
-      organização vai passar só no dia. Confirmar se a pergunta sai também.
+- [ ] Imagem de compartilhamento (`public/og-image.jpg`) com o subtítulo novo: a arte oficial ainda traz
+      "Hackathon de Engenharia de Software e IA" sob o logo, e o evento agora se apresenta como "Tecnologia, inovação
+      e empreendedorismo". A faixa de datas e a de realização e parceria continuam certas. É arte da organização:
+      pedir a versão nova (ou o aval para trocar só o subtítulo).
 - [ ] Logos em SVG (opcional; as versões PNG oficiais já estão no site).
 - [ ] Domínio próprio (opcional).
 
 ### 19.2 Técnicas
 
-- [x] Lighthouse mobile ≥ 90 em performance: **95** em 11/10/2026 (seção 12.1).
+- [x] Lighthouse mobile ≥ 90 em performance: **98** em 12/10/2026 (seção 12.1).
+- [x] LCP do Lighthouse mobile abaixo de 2,5 s: 2,2 s em 12/10/2026 (`PaintGate` e `FrameSettle`, seção 6.3).
+- [x] JS inicial abaixo de 70 KB gzip: 68,4 KB, com o formulário, as equipes e o trilho das missões no `LazyMount`.
+- [x] Medir de novo o Lighthouse da LP e o de `/equipes` no build de produção: 98 e 100 de Performance, e 100 em
+      Acessibilidade, Boas práticas e SEO nas duas (seção 12.1).
+- [x] Remover o `TimelineAnimator` (`[data-timeline]`), que ficou sem alvo com a programação nova.
 - [x] Versionar os scripts de QA (capturas, vitals, tarefas longas, trace, âncoras, overflow e Lighthouse) em
       `scripts/qa/`.
 - [x] Remover dependências da v1 que não são mais usadas (`@fontsource-variable/big-shoulders` e `inter`).
 - [x] Publicar o código no GitHub (`main`).
 - [x] README de apresentação (pt-BR e inglês) e `CHANGELOG.md`.
-- [ ] Conectar a Cloudflare Pages (seção 16) e definir `PUBLIC_SITE_URL` com a URL final.
-- [ ] Excluir o deploy temporário de validação depois da aprovação final.
 - [x] Subir o `version` do `package.json` para `0.3.0` e criar as tags `v0.1.0` (`160bcda`), `v0.2.0` (`c5cf8c1`) e
       `v0.3.0` (commit que publica o changelog). Os links do `CHANGELOG.md` dependem delas.
-- [ ] LCP do Lighthouse mobile abaixo de 2,5 s (hoje 2,6 s; meta da seção 12.1).
-- [ ] Medir de novo o Lighthouse da LP e medir o de `/equipes` no build de produção. Em dev, `/equipes` deu
-      Acessibilidade, Boas práticas e SEO 100; a Performance ainda não foi medida.
-- [ ] Testar o caminho das fotos no Apps Script de verdade (autorização do Drive, compartilhamento num domínio
-      institucional e o `lh3.googleusercontent.com` servindo o link público). Hoje só os dublês dos testes cobrem.
+- [x] Inscrição só de equipe e planilha organizada em três abas (seção 9.7, ADR 0008).
+- [x] Guia de fork (`npm run setup`, `requirements.txt`, README "Como rodar no seu PC" e `CONTRIBUTING.md`).
+- [ ] Conectar a Cloudflare Pages (seção 16) e definir `PUBLIC_SITE_URL` com a URL final: **em espera**, por decisão
+      do responsável pelo projeto.
+- [ ] Excluir o deploy temporário de validação depois da aprovação final.
+- [ ] Testar o Apps Script de verdade: o escopo `spreadsheets.currentonly` num Web App (se a lista de equipes der erro
+      de permissão, trocar por `spreadsheets`, como está no `apps-script/README.md`), a autorização do Drive, o
+      compartilhamento num domínio institucional e o `lh3.googleusercontent.com` servindo o link público. Hoje só os
+      dublês dos testes cobrem.
 - [ ] Recapturar as imagens do README (`docs/media/`) e atualizar os textos alternativos: são de antes dos ajustes
-      de 12/10 (botão de som no header, títulos antigos de "O evento" e da grande final, "Adicionar à agenda" na
-      programação e a seção de equipes antiga).
+      de 12/10 (botão de som no header, títulos antigos de "O evento" e da grande final, a programação em rounds, a
+      seção de equipes antiga e o formulário com modalidades).
 - [ ] Levar `/privacidade` e `/404` para o `PageLayout` leve (seção 6.3), se fizer sentido.
 - [ ] Proteger a `main` no GitHub, exigindo PR e CI verde (seção 15).
 - [ ] Cloudflare Turnstile no formulário, quando a organização gerar as chaves (`apps-script/README.md`).

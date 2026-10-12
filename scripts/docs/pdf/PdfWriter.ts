@@ -30,7 +30,7 @@ export class PdfWriter implements PdfContext {
       size: 'A4',
       margins: { top: MARGIN + 10, bottom: MARGIN, left: MARGIN, right: MARGIN },
       bufferPages: true,
-      info: { Title: meta.title, Author: 'HackaRun · Unicatólica', CreationDate: meta.date },
+      info: { Title: meta.title, Author: 'HackaRun · UniCatólica', CreationDate: meta.date },
     });
     this.fonts = registerFonts(this.doc, meta.root);
     this.glyphs = {
