@@ -139,8 +139,8 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 
 ## 10. Movimento
 
-- Smooth scroll com **Lenis**; animações com **GSAP + ScrollTrigger**; títulos com **SplitText** (máscara de baixo pra
-  cima).
+- Smooth scroll com **Lenis**; animações com **GSAP + ScrollTrigger**; títulos divididos em linhas pelo `LineSplit` próprio
+  (máscara de baixo pra cima).
 - Entradas: `y: 40 → 0`, `opacity 0 → 1`, `stagger 0.06`, `ease: expo.out`, `duration 0.9–1.2`.
 - Missões no desktop (≥ 1024px, sem reduced motion): **trilho horizontal com pin**; no mobile, lista vertical.
 - Números (vagas, pontos, dias) contam de 0 até o valor ao entrar na tela. Terminal do NPC e protocolo da inscrição

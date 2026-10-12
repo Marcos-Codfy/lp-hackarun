@@ -2,6 +2,7 @@
 
 > Documento de handoff: tudo que uma pessoa nova precisa pra rodar, entender, alterar e publicar a landing page.
 > Mantido junto do código. O PDF é gerado a partir deste arquivo com `npm run docs:pdf`.
+> Última atualização: 11/10/2026 (versão 0.3.0, histórico na seção 18.1).
 
 ## 1. Links rápidos
 
@@ -12,8 +13,10 @@
 | Hospedagem              | Cloudflare Pages, plano gratuito (`https://lp-hackarun.pages.dev` depois de conectar) |
 | Inscrições              | Formulário do site, Google Apps Script (Web App) e Google Sheets                      |
 | Aviso de privacidade    | `/privacidade` (`src/pages/privacidade.astro`), linkado no consentimento e no rodapé  |
-| Node.js                 | 24 LTS (arquivo `.nvmrc`), mínimo 22.12                                               |
+| Node.js                 | 24 LTS (arquivo `.nvmrc`), mínimo 22.18                                               |
 | Scripts de QA           | `scripts/qa/` (Playwright + Lighthouse, instalados à parte; seção 13)                 |
+| Apresentação (README)   | `README.md` (pt-BR) e `README.en.md` (inglês): a vitrine do projeto                   |
+| Changelog               | `CHANGELOG.md` (Keep a Changelog + SemVer; seção 18)                                  |
 | Especificação de design | `docs/design/design-spec.md` (v2, vigente)                                            |
 | Decisões de arquitetura | `docs/adr/` (0001 a 0006)                                                             |
 | Stack e padrões (PDF)   | `docs/pdf/HackaRun_LP_Stack_e_Padroes.pdf`                                            |
@@ -30,6 +33,9 @@ Objetivos da página: explicar o evento, mostrar a programação e as missões, 
 A versão atual é a **v2 cinematográfica** (ADR 0006): identidade oficial, pós-processamento real e um objeto 3D novo
 para cada seção. A v1 ficou só no histórico do Git.
 
+**Situação em 11/10/2026:** design v2 **aprovado**, código publicado no GitHub (`main`) e Lighthouse mobile com
+Performance 95 e Acessibilidade, Boas práticas e SEO em 100. O que falta para abrir as inscrições está na seção 19.
+
 ## 3. Decisões principais
 
 | Decisão     | Escolha                                                   | Motivo curto                                                     |
@@ -38,7 +44,7 @@ para cada seção. A v1 ficou só no histórico do Git.
 | 3D          | Partículas procedurais (Three.js + GLSL), 8 objetos       | 0 KB de vídeo/modelo, nítido em qualquer tela, muda com o scroll |
 | Visual      | Pós-processamento (bloom, lente) + câmera coreografada    | Pedido do cliente: impacto de cinema, não "correto demais"       |
 | Identidade  | Logo, paleta e fontes oficiais; til da Orbitron corrigido | Fidelidade ao manual da marca; "NÃO" legível em título grande    |
-| Animação    | GSAP + ScrollTrigger + SplitText, Lenis                   | Padrão de mercado pra scroll storytelling, gratuito              |
+| Animação    | GSAP + ScrollTrigger, Lenis, `LineSplit` próprio          | Padrão de mercado pra scroll storytelling, gratuito              |
 | Hospedagem  | Cloudflare Pages (grátis)                                 | Banda e requisições ilimitadas pra estático, CDN no Brasil       |
 | Inscrições  | Google Sheets via Apps Script                             | Gratuito, a organização já usa Google, planilha vira o painel    |
 | Arquitetura | Clean Architecture + DDD + MVVM                           | Camadas claras, regras testáveis, fácil de dividir entre pessoas |
@@ -178,7 +184,7 @@ quebra não derruba os seguintes. Ordem:
 3. `mountControllers`: controladores de DOM (header e menu primeiro, nav spy, trilho do HUD, aurora). Não usam GSAP,
    então um animador quebrado não leva eles junto.
 4. `mountAnimators`: o pin das missões e as entradas animadas, que só preparam o setup pesado quando a seção chega
-   perto da tela (`motion/core/ApproachWatcher.ts`); o SplitText é carregado sob demanda (`motion/core/splitText.ts`).
+   perto da tela (`motion/core/ApproachWatcher.ts`); os títulos se dividem em linhas pelo `LineSplit` próprio (`motion/animators/heading/LineSplit.ts`).
 5. Segunda fila, com o layout já no lugar: trilha de cenas, `SceneHoldWatcher` (carga do globo final) e, depois do
    `load` com o navegador ocioso, o chunk do 3D (`mountExperience`). Sem WebGL2, com `save-data` ou se algo falhar, ele
    emite `experience:fallback` e o brilho em CSS continua.
@@ -443,8 +449,8 @@ Gerados por síntese, sem amostras de terceiros, com `python scripts/audio/rende
 - `ui-typing.wav`: sprite com 6 cliques de tecla de 0,09 s (22.050 Hz, mono), tocados a cada evento `ui:type` com
   variação de tom e intervalo mínimo de 35 ms.
 
-O som começa **desligado** (autoplay e WCAG 1.4.2). O botão de som do header (ícone de equalizador) liga o áudio, e só então os arquivos
-são baixados. A preferência fica salva no navegador.
+O som começa **desligado** (autoplay e WCAG 1.4.2). O botão de som do header (ícone de equalizador) liga o áudio, e
+só então os arquivos são baixados. A preferência fica salva no navegador.
 
 ### 10.4 Assets dos PDFs
 
@@ -491,8 +497,22 @@ arquivos, os PDFs caem nas fontes padrão (Helvetica/Courier).
 | Áudio                   | Cue até 60 KB; nada é baixado antes de ligar o som         |
 | Partículas              | low 9k · medium 22k · high 42k                             |
 
-Situação em 10/10/2026 (Lighthouse mobile): acessibilidade, boas práticas e SEO em **100**; performance em
-otimização.
+Situação em 11/10/2026 (Lighthouse mobile, build de produção, Brave headless, mediana de 3 execuções; para repetir,
+`node lighthouse.mjs <url> --runs=3` em `scripts/qa/`, seção 13.2):
+
+| Métrica                             | Antes da otimização | 11/10/2026 |
+| ----------------------------------- | ------------------- | ---------- |
+| Performance                         | 66                  | **95**     |
+| Total Blocking Time (TBT)           | 1.600 ms            | 18 ms      |
+| Largest Contentful Paint (LCP)      | 2,9 s               | 2,6 s      |
+| First Contentful Paint (FCP)        | não registrado      | 2,0 s      |
+| Speed Index                         | não registrado      | 2,5 s      |
+| Cumulative Layout Shift (CLS)       | não registrado      | 0,048      |
+| Acessibilidade, Boas práticas e SEO | 100                 | 100        |
+
+O TBT caiu com o boot fatiado e o 3D fora da thread principal (seção 12.2). O Lighthouse simula 4G lento e CPU 4x
+mais lenta, mais duro que o "celular médio" da meta: o LCP de 2,6 s ainda passa um pouco dos 2,5 s e continua como
+pendência (seção 19.2).
 
 ### 12.2 Técnicas aplicadas
 
@@ -500,8 +520,8 @@ otimização.
   lazy e com `fetchpriority` alta; CSS pequeno entra inline.
 - **Boot fatiado depois do paint:** `App.boot()` espera o primeiro frame e roda a `BootQueue`, um passo curto por
   tarefa (seção 6.3): a primeira pintura não espera o JavaScript e o input não fica preso atrás do boot.
-- **Setup sob demanda:** animações de entrada montam quando a seção se aproxima da tela (`ApproachWatcher`); o
-  SplitText fica fora do bundle inicial.
+- **Setup sob demanda:** animações de entrada montam quando a seção se aproxima da tela (`ApproachWatcher`); os
+  títulos usam o `LineSplit` próprio em vez do SplitText do GSAP, que cria um `Intl.Segmenter` caro ao carregar.
 - **3D tardio e fora da thread principal:** o chunk do three.js só é importado depois do `load` e com o navegador
   ocioso. As formas são geradas num Web Worker enquanto os shaders compilam; o `StageCompiler` prepara um programa por
   tarefa com `KHR_parallel_shader_compile` (`compileAsync`), já no alvo de render certo, antes do primeiro frame.
@@ -637,23 +657,60 @@ Cache e headers de segurança ficam em `public/_headers`.
 - [ ] "Pausar animações" para tudo o que se mexe sozinho (loop novo em CSS entrou no `motion-pause.css`).
 - [ ] Sem texto com contraste baixo; imagens com `alt`.
 - [ ] Nenhum arquivo passou de 250 linhas (o ESLint avisa acima de 200); nenhum `console.log` esquecido.
-- [ ] Lighthouse mobile sem regressão (acessibilidade, boas práticas e SEO em 100).
+- [ ] Lighthouse mobile sem regressão (performance ≥ 90; acessibilidade, boas práticas e SEO em 100).
+- [ ] Mudança anotada em **[Unreleased]** no `CHANGELOG.md` (seção 18).
 
 ## 18. Versionamento
 
 SemVer em `package.json` (`MAJOR.MINOR.PATCH`). Tags `vX.Y.Z` nos marcos (ex.: `v1.0.0` no lançamento das
-inscrições). As mensagens no padrão Conventional Commits permitem gerar changelog depois.
+inscrições). "v1" e "v2" no projeto são gerações do design, não versões: até as inscrições abrirem, tudo é `0.x`.
+
+O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em português:
+
+- Toda mudança que entra na `main` ganha uma linha em **[Unreleased]**, no grupo certo: `Added`, `Changed`,
+  `Removed`, `Fixed`, `Performance` ou `Security`.
+- Ao fechar uma versão: troque **[Unreleased]** pelo número e pela data (`AAAA-MM-DD`), suba o `version` do
+  `package.json` (`npm version X.Y.Z --no-git-tag-version`), faça o commit e crie a tag `vX.Y.Z` nele. Os links de
+  comparação no fim do changelog dependem das tags.
+- Antes da 1.0.0, funcionalidade nova ou mudança que quebra sobe o MINOR; correção e ajuste sobem o PATCH.
+
+### 18.1 Histórico
+
+| Data       | Versão | Marco                                                                                   |
+| ---------- | ------ | --------------------------------------------------------------------------------------- |
+| 10/10/2026 | 0.1.0  | Fundação: Astro + TypeScript estrito, Clean Architecture/DDD, tokens e layout base      |
+| 10/10/2026 | 0.2.0  | Site v1: seções, 3D de partículas, inscrição via Apps Script, testes, docs e CI         |
+| 11/10/2026 | 0.3.0  | v2 cinematográfica: identidade oficial, pós-processamento, LGPD, performance, QA e a11y |
+
+**11/10/2026, v2 aprovada e publicada:**
+
+- Design v2 cinematográfico **aprovado**: mudanças visuais grandes daqui pra frente passam por nova aprovação.
+- Código publicado no GitHub: https://github.com/Marcos-Codfy/lp-hackarun (branch `main`).
+- Um deploy temporário serviu pra validar o design com a organização. A hospedagem oficial continua a Cloudflare
+  Pages (ADR 0003), ainda por conectar.
+- Lighthouse mobile: Performance 66 → **95**, TBT 1.600 → 18 ms, LCP 2,9 → 2,6 s; Acessibilidade, Boas práticas e
+  SEO em 100 (detalhes na seção 12.1).
+- O README virou a página de apresentação do projeto (portfólio): `README.md` em português e `README.en.md` em
+  inglês.
+- Changelog criado (`CHANGELOG.md`), com as versões 0.1.0 a 0.3.0 derivadas do histórico do Git.
 
 ## 19. Pendências
 
 ### 19.1 Da organização
 
 - [ ] URL do Web App de inscrições (`PUBLIC_REGISTRATION_ENDPOINT`).
-- [ ] Prazo das inscrições (`registration.closesAt`) e capacidade de equipes (`registration.capacity`).
+- [ ] Prazo das inscrições (`registration.closesAt`) e capacidade de equipes (`registration.capacity`), repetidos
+      nas Propriedades `CLOSES_AT` e `CAPACITY` do Apps Script (seção 9.1).
 - [ ] Tamanho mínimo e máximo da equipe (`registration.teamSize`, hoje 2 a 5 provisório; igual ao `TEAM_SIZE` do
       `apps-script/Validation.gs`).
+- [ ] Inscrição individual quando as vagas de equipe lotarem: hoje fecha pra todo mundo (seção 9.1); confirmar se é
+      isso mesmo.
 - [ ] Prêmios (`prizes.json`, os 3 estão "a revelar") e link do regulamento oficial.
 - [ ] Nomes de instrutores, mentores, palestrante e banca (`speakers.json`, todos "a revelar").
+- [ ] E-mail do encarregado de dados (LGPD) para o aviso em `/privacidade` (hoje aparece como "pendente").
+- [ ] Revisão jurídica do texto do aviso de privacidade. Mudou o texto? Suba o `CONSENT_VERSION` (seção 9.3).
+- [ ] Conta Google institucional dona da planilha e do Apps Script (cotas maiores, e os dados ficam com a
+      instituição, não com uma pessoa).
 - [ ] Site oficial do Capim Dourado para o link da faixa de parceiros (`partners.json`, hoje `null`).
 - [ ] Local da caça aos NPCs (universidade ou shopping).
 - [ ] Aprovar os sons sintetizados (ou enviar os oficiais, até 60 KB).
@@ -662,10 +719,19 @@ inscrições). As mensagens no padrão Conventional Commits permitem gerar chang
 
 ### 19.2 Técnicas
 
-- [ ] Lighthouse mobile ≥ 90 em performance (em andamento).
+- [x] Lighthouse mobile ≥ 90 em performance: **95** em 11/10/2026 (seção 12.1).
 - [x] Versionar os scripts de QA (capturas, vitals, tarefas longas, trace, âncoras, overflow e Lighthouse) em
       `scripts/qa/`.
 - [x] Remover dependências da v1 que não são mais usadas (`@fontsource-variable/big-shoulders` e `inter`).
+- [x] Publicar o código no GitHub (`main`).
+- [x] README de apresentação (pt-BR e inglês) e `CHANGELOG.md`.
+- [ ] Conectar a Cloudflare Pages (seção 16) e definir `PUBLIC_SITE_URL` com a URL final.
+- [ ] Excluir o deploy temporário de validação depois da aprovação final.
+- [x] Subir o `version` do `package.json` para `0.3.0` e criar as tags `v0.1.0` (`160bcda`), `v0.2.0` (`c5cf8c1`) e
+      `v0.3.0` (commit que publica o changelog). Os links do `CHANGELOG.md` dependem delas.
+- [ ] LCP do Lighthouse mobile abaixo de 2,5 s (hoje 2,6 s; meta da seção 12.1).
+- [ ] Proteger a `main` no GitHub, exigindo PR e CI verde (seção 15).
+- [ ] Cloudflare Turnstile no formulário, quando a organização gerar as chaves (`apps-script/README.md`).
 
 ## 20. Documentação gerada
 
