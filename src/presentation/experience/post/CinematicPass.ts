@@ -20,7 +20,6 @@ export class CinematicPass extends ShaderPass {
         uResolution: { value: new Vector2(1, 1) },
         uTime: { value: 0 },
         uExposure: { value: 1 },
-        uFlash: { value: 0 },
         uAberration: { value: 0 },
         uVignette: { value: 0 },
         uGrain: { value: 0 },
@@ -45,7 +44,6 @@ export class CinematicPass extends ShaderPass {
     };
     set('uTime', state.time);
     set('uExposure', state.exposure);
-    set('uFlash', state.flash);
     set('uAberration', state.aberration);
     set('uVignette', state.vignette);
     set('uGrain', state.grain);

@@ -1,9 +1,8 @@
-// passe final: onda de choque, zoom blur, aberração cromática, exposição, ombro suave, flash, vinheta e grão
+// passe final: onda de choque, zoom blur, aberração cromática, exposição, ombro suave, vinheta e grão
 uniform sampler2D tDiffuse;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform float uExposure;
-uniform float uFlash;
 uniform float uAberration;
 uniform float uVignette;
 uniform float uGrain;
@@ -37,20 +36,20 @@ void main() {
   vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
   vec2 uv = vUv;
 
-  // anel de choque: refrata a imagem pra fora na frente da onda
+  // anel de choque: refrata de leve a imagem pra fora na frente da onda
   float ring = 0.0;
   if (uShock >= 0.0) {
     vec2 d = (uv - uFocus) * aspect;
     float dist = length(d);
-    float band = (dist - uShock * 1.25) / (0.03 + 0.06 * uShock);
+    float band = (dist - uShock * 1.1) / (0.035 + 0.06 * uShock);
     ring = exp(-band * band) * (1.0 - uShock) * (1.0 - uShock);
-    uv -= (d / max(dist, 1e-4)) / aspect * ring * 0.02;
+    uv -= (d / max(dist, 1e-4)) / aspect * ring * 0.012;
   }
 
   vec2 fromCenter = uv - 0.5;
   // aberração só nas bordas (cresce com o cubo da distância): o miolo da tela fica nítido
   float edge = dot(fromCenter, fromCenter);
-  vec2 split = fromCenter * edge * (uAberration + ring * 0.03);
+  vec2 split = fromCenter * edge * (uAberration + ring * 0.015);
 
   vec3 color;
   if (uWarp > 0.002) {
@@ -65,11 +64,9 @@ void main() {
     color = sampleSplit(uv, split);
   }
 
-  float focusDist = length((vUv - uFocus) * aspect);
   color *= uExposure;
-  color += ring * vec3(0.45, 0.8, 1.0);
-  // flash: núcleo branco-gelo no globo + um véu leve na tela toda (puxado pro ciano: energia, não lavado)
-  color += uFlash * (exp(-focusDist * focusDist * 7.0) * 0.55 + 0.02) * vec3(0.72, 0.87, 1.0);
+  // a frente da onda só tinge de ciano: luz de energia, não clarão por trás do texto
+  color += ring * vec3(0.05, 0.22, 0.34);
   color = shoulder(color);
 
   float vig = smoothstep(1.15, 0.3, length(fromCenter * aspect * vec2(0.82, 1.0)));

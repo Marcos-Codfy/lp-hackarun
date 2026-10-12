@@ -1,4 +1,7 @@
 // anel da onda de choque (o mesh cresce; aqui só a banda de luz com eco interno)
+// intensidade contida: é um respiro de energia em volta do globo, não um clarão
+const float STRENGTH = 0.38;
+
 uniform float uPhase;
 uniform vec3 uInner;
 uniform vec3 uOuter;
@@ -16,6 +19,6 @@ void main() {
   float glow = exp(-abs(d - 0.9) * 10.0) * 0.3;
   float fade = (1.0 - uPhase) * (1.0 - uPhase);
   vec3 color = mix(uInner, uOuter, smoothstep(-1.5, 1.5, band));
-  float a = (ring + glow) * fade;
+  float a = (ring + glow) * fade * STRENGTH;
   gl_FragColor = vec4(color * a, a);
 }

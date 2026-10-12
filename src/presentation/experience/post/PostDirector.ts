@@ -6,21 +6,24 @@ import { SCENE_LOOKS, type SceneLook } from './SceneLooks';
 export interface PostInput {
   weights: Float32Array;
   charge: number;
-  flash: number;
+  swell: number;
   shockPhase: number;
   afterglow: number;
   warp: number;
   velocity: number;
   time: number;
-  // centro da forma atual no mundo (foco do flash, do anel e do zoom blur)
+  // centro da forma atual no mundo (foco do anel e do zoom blur)
   pivot: Vector3;
 }
 
 const BASE_ABERRATION = 0.008;
 const BASE_GRAIN = 0.05;
 const BASE_VIGNETTE = 0.85;
+// teto do que a carga soma na luz: título, contador e CTA ficam por cima do globo e não podem lavar
+export const MAX_CHARGE_BLOOM = 0.3;
+export const MAX_CHARGE_EXPOSURE = 0.08;
 
-// mistura a luz das cenas com os mesmos pesos do layout e soma os eventos (carga, flash, travessia)
+// mistura a luz das cenas com os mesmos pesos do layout e soma os eventos (carga, pulso, travessia)
 export class PostDirector {
   readonly state = new PostState();
   readonly bokehA = new Color();
@@ -38,14 +41,10 @@ export class PostDirector {
     const s = this.state;
     this.blendLooks(input.weights);
 
-    const { charge, flash, afterglow } = input;
-    // flash contido: o texto do CTA não pode sumir no estouro
-    s.bloomStrength += charge * 0.5 + afterglow * 0.3 + flash * 0.6;
-    s.bloomRadius = Math.min(1, s.bloomRadius + flash * 0.1);
-    s.exposure *= 1 + charge * 0.15 + afterglow * 0.1 + flash * 0.35;
-    s.flash = flash;
-    s.aberration =
-      BASE_ABERRATION + charge * 0.012 + flash * 0.04 + input.warp * 0.03 + input.velocity * 0.01;
+    const { charge, swell, afterglow } = input;
+    s.bloomStrength += Math.min(MAX_CHARGE_BLOOM, charge * 0.28 + afterglow * 0.1 + swell * 0.22);
+    s.exposure *= 1 + Math.min(MAX_CHARGE_EXPOSURE, charge * 0.06 + afterglow * 0.02 + swell * 0.06);
+    s.aberration = BASE_ABERRATION + charge * 0.006 + input.warp * 0.03 + input.velocity * 0.01;
     s.vignette = BASE_VIGNETTE;
     s.grain = BASE_GRAIN;
     s.warp = input.warp;

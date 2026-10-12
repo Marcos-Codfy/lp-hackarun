@@ -19,7 +19,7 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 
-# python (scripts de áudio, fonte e assets dos PDFs)
+# python (scripts de fonte e assets dos PDFs)
 __pycache__/
 *.pyc
 

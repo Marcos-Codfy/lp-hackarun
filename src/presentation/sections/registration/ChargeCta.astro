@@ -4,8 +4,8 @@ import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 
-// CTA que "carrega" junto com o globo: a seção recebe is-awaiting-charge e depois is-charged
-// sem JS nenhuma classe entra e o CTA fica simplesmente visível
+// CTA que "carrega" junto com o globo: a seção recebe is-awaiting-charge, is-charging (com --charge-ms)
+// e por fim is-charged; sem JS nenhuma classe entra e o CTA fica simplesmente visível
 interface Props {
   registration: RegistrationDTO;
 }
@@ -15,6 +15,8 @@ const copy = new RegistrationCopy();
 const cta = copy.cta(registration.status);
 const href = cta.isRegistration ? '#inscricao-lobby' : cta.href;
 const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav-link': true };
+// no celular cada trecho vira uma linha (sem o "·" sobrando na quebra)
+const statusParts = copy.statusLine(registration).split(' · ');
 ---
 
 <div class="charge" data-charge-reveal>
@@ -32,7 +34,12 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
     </Button>
   </div>
   <p class:list={['charge__status', copy.isUrgent(registration.status) && 'charge__status--urgent']}>
-    {copy.statusLine(registration)}
+    {statusParts.map((part, index) => (
+      <>
+        {index > 0 && <span class="charge__sep"> · </span>}
+        <span class="charge__part">{part}</span>
+      </>
+    ))}
   </p>
 </div>
 
@@ -86,7 +93,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
     position: relative;
   }
 
-  /* onda de choque quando carrega */
+  /* onda que abre em volta do botão quando carrega */
   .charge__ring {
     position: absolute;
     inset: -12px -20px;
@@ -96,32 +103,54 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
     pointer-events: none;
   }
 
+  /* plaquinha escura: a linha fica embaixo do globo aceso e o texto miúdo precisa de 4.5:1 */
   .charge__status {
+    padding: 0.35rem 0.75rem;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--c-void) 72%, transparent);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
     color: var(--text-muted);
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    text-shadow: 0 1px 12px rgb(2 3 11 / 0.95);
+  }
+
+  .charge__part {
+    display: block;
+  }
+
+  .charge__sep {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .charge__part {
+      display: inline;
+    }
+
+    .charge__sep {
+      display: inline;
+    }
   }
 
   .charge__status--urgent {
     color: var(--ink-orange);
   }
 
-  /* aguardando a carga: CTA apagado e a barra enchendo em 1,5s */
+  /* aguardando a carga: CTA apagado e a barra vazia; carregando, ela enche no tempo do globo */
   :global(.is-awaiting-charge) .charge__button {
     opacity: 0.45;
     transform: scale(0.96);
-    filter: saturate(0.3);
+    filter: saturate(0.3) drop-shadow(0 0 0 rgb(0 229 255 / 0));
   }
 
   :global(.is-awaiting-charge) .charge__meter {
     opacity: 1;
   }
 
-  :global(.is-awaiting-charge) .charge__fill {
-    animation: charge-fill 1500ms cubic-bezier(0.55, 0, 0.9, 0.6) forwards;
+  :global(.is-charging) .charge__fill {
+    animation: charge-fill var(--charge-ms, 900ms) cubic-bezier(0.55, 0, 0.9, 0.6) forwards;
   }
 
   .charge__button {
@@ -131,7 +160,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
       filter var(--dur-slow) var(--ease-out);
   }
 
-  /* carregou: estouro de brilho no botão + anel que expande */
+  /* carregou: o botão acende com um brilho que sobe e assenta + anel que abre e some */
   :global(.is-charged) .charge__meter {
     opacity: 0;
   }
@@ -141,7 +170,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
   }
 
   :global(.is-charged) .charge__button {
-    animation: charge-burst 1.2s var(--ease-out) both;
+    animation: charge-glow 1.2s var(--ease-out) both;
   }
 
   :global(.is-charged) .charge__ring {
@@ -154,29 +183,30 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
     }
   }
 
-  @keyframes charge-burst {
+  /* mesma lista de filtros em todo quadro: o navegador interpola em vez de pular */
+  @keyframes charge-glow {
     0% {
-      filter: drop-shadow(0 0 0 rgb(0 229 255 / 0));
-      transform: scale(1);
+      filter: saturate(0.3) drop-shadow(0 0 0 rgb(0 229 255 / 0));
+      transform: scale(0.96);
     }
-    30% {
-      filter: drop-shadow(0 0 40px rgb(0 229 255 / 0.95)) brightness(1.3);
-      transform: scale(1.07);
+    35% {
+      filter: saturate(1) drop-shadow(0 0 26px rgb(0 229 255 / 0.7));
+      transform: scale(1.035);
     }
     100% {
-      filter: drop-shadow(0 0 22px rgb(0 229 255 / 0.45));
+      filter: saturate(1) drop-shadow(0 0 18px rgb(0 229 255 / 0.4));
       transform: scale(1);
     }
   }
 
   @keyframes charge-ring {
     0% {
-      opacity: 0.9;
-      transform: scale(0.9);
+      opacity: 0.7;
+      transform: scale(0.94);
     }
     100% {
       opacity: 0;
-      transform: scale(1.35, 1.9);
+      transform: scale(1.2, 1.6);
     }
   }
 
@@ -185,7 +215,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
       transform: none;
     }
 
-    :global(.is-awaiting-charge) .charge__fill {
+    :global(.is-charging) .charge__fill {
       animation: none;
       transform: scaleX(0.5);
     }
@@ -196,7 +226,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav
     }
 
     :global(.is-charged) .charge__button {
-      filter: drop-shadow(0 0 22px rgb(0 229 255 / 0.45));
+      filter: drop-shadow(0 0 18px rgb(0 229 255 / 0.4));
     }
   }
 </style>

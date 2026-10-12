@@ -109,7 +109,7 @@ void main() {
   if (wCore > 0.001) {
     vec3 coreNormal = normalize(normalMatrix * coreP);
     float rim = clamp(1.0 - abs(dot(coreNormal, normalize(-mv.xyz))), 0.0, 1.0);
-    float h = clamp(coreHeat * 0.9 + pow(rim, 4.0) * 0.6 + uCharge * 0.6 + uAfterglow * 0.22, 0.0, 1.0);
+    float h = clamp(coreHeat * 0.9 + pow(rim, 4.0) * 0.6 + uCharge * 0.2 + uAfterglow * 0.08, 0.0, 1.0);
     vec3 c = GRADE(IDX_CORE, h, mix(gTone, rim, 0.6), gPick);
     // carregando, parte das fitas puxa pro magenta antes do branco
     c = mix(c, uChargeTint, uCharge * step(0.55, gPick) * 0.55);
@@ -119,14 +119,14 @@ void main() {
     // fitas: frente visível mas discreta; véu: só a borda (desenha a silhueta inteira)
     float ribbonAlpha = mix(0.22, 1.0, pow(rim, 1.5)) * mix(0.04, 1.0, coreEdge);
     float veilAlpha = pow(rim, 3.0) * 1.3;
-    coreAlpha = mix(ribbonAlpha, veilAlpha, coreVeil) * (1.0 + uAfterglow * 0.4);
+    coreAlpha = mix(ribbonAlpha, veilAlpha, coreVeil) * (1.0 + uAfterglow * 0.15);
   }
 #endif
 
   float twinkle = mix(1.0, 0.55 + 0.45 * sin(uTime * 1.3 + aSeed.x * 30.0), wDust);
   float nearFade = smoothstep(0.06, 0.6, -mv.z);
 
-  float size = uSize * aScale * (1.0 + wCore * uCharge * 0.35 + gHeat * 0.3) * (1.0 - flight * 0.3);
+  float size = uSize * aScale * (1.0 + wCore * uCharge * 0.2 + gHeat * 0.3) * (1.0 - flight * 0.3);
   float px = size * uPixelRatio * (6.0 / max(-mv.z, 0.05));
   // perto da lente vira disco desfocado: maior e mais fraco (mesma energia, sem borrão estourado)
   vSoft = smoothstep(9.0 * uPixelRatio, 30.0 * uPixelRatio, px);

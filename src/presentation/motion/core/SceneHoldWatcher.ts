@@ -2,7 +2,14 @@ import type { EventBus } from '@shared/core/EventBus';
 import type { AppEvents } from '@presentation/app/AppEvents';
 import { ScrollTrigger } from './gsap';
 
-const DEFAULT_HOLD_MS = 1500;
+// segura curta: tempo de o globo juntar energia e o CTA acender, sem fazer ninguém esperar
+export const DEFAULT_HOLD_MS = 900;
+
+// data-scene-hold em ms; vazio, zero ou inválido cai no padrão
+export function holdDuration(el: HTMLElement): number {
+  const parsed = Number.parseInt(el.dataset['sceneHold'] ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_HOLD_MS;
+}
 
 // seções com data-scene-hold: carga do globo por TEMPO (nunca trava o scroll); funciona mesmo sem webgl
 export class SceneHoldWatcher {
@@ -16,8 +23,7 @@ export class SceneHoldWatcher {
   }
 
   private watch(el: HTMLElement): void {
-    const parsed = Number.parseInt(el.dataset['sceneHold'] ?? '', 10);
-    const durationMs = Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_HOLD_MS;
+    const durationMs = holdDuration(el);
     const charge = (): void => this.charge(durationMs);
     const cancel = (): void => this.cancel();
 

@@ -113,9 +113,9 @@ export class StageWorld {
     this.pointer?.update(delta);
     const from = this.keys[mixer.from] ?? 'core';
     const to = this.keys[mixer.to] ?? 'core';
-    const { flash, shock, afterglow } = charge;
+    const { swell, shock, afterglow } = charge;
     this.rig.update(
-      { weights, from, to, t: mixer.t, pivot, charge: charge.charge, flash, velocity, time, delta },
+      { weights, from, to, t: mixer.t, pivot, charge: charge.charge, velocity, time, delta },
       this.pointer,
     );
     this.camera.updateMatrixWorld();
@@ -129,17 +129,17 @@ export class StageWorld {
       charge: charge.charge,
       pulse: charge.pulse,
       afterglow,
-      // o flash também acende as partículas (no tier sem bloom é o único flash)
-      opacity: opacity * this.profile.alpha * (1 + flash * 0.6),
+      // o pulso também acende as partículas (no tier sem bloom é a única luz do pulso)
+      opacity: opacity * this.profile.alpha * (1 + swell * 0.2),
       size: POINT_SIZE * this.profile.pointScale * this.pointFit,
     });
     this.updatePointer(weights);
 
-    const post = { charge: charge.charge, flash, shockPhase: shock, afterglow, warp: this.rig.warp };
+    const post = { charge: charge.charge, swell, shockPhase: shock, afterglow, warp: this.rig.warp };
     this.director.update({ weights, ...post, velocity, time, pivot }, this.camera);
     const d = this.director;
     const radius = this.field.points.scale.x * SHAPE_RADIUS;
-    const layers = { stars: d.stars, bokehA: d.bokehA, bokehB: d.bokehB, flash, shock, pivot, radius };
+    const layers = { stars: d.stars, bokehA: d.bokehA, bokehB: d.bokehB, swell, shock, pivot, radius };
     this.atmosphere.update({ camera: this.camera, time, ...layers });
   }
 

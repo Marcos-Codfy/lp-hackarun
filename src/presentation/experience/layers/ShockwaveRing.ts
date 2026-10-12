@@ -11,9 +11,10 @@ void main() {
 }
 `;
 
-// inclinação do anel: elipse "equatorial", lê como explosão em volta do globo e não como um círculo chapado
+// inclinação do anel: elipse "equatorial", lê como onda em volta do globo e não como um círculo chapado
 const TILT = 1.12;
-const GROWTH = 3.4;
+// abre até ~2,6x o raio do globo e apaga antes de cobrir a tela
+const GROWTH = 1.65;
 
 type ShockUniforms = {
   uPhase: IUniform<number>;

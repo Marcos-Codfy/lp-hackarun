@@ -10,7 +10,7 @@ export interface AtmosphereFrame {
   stars: number;
   bokehA: Color;
   bokehB: Color;
-  flash: number;
+  swell: number;
   shock: number;
   pivot: Vector3;
   radius: number;
@@ -45,8 +45,9 @@ export class Atmosphere {
   }
 
   update(frame: AtmosphereFrame): void {
-    this.stars.update(frame.time, frame.stars * (0.85 + frame.flash * 1.5));
-    this.bokeh.update(frame.camera, frame.time, frame.bokehA, frame.bokehB, frame.flash * 2);
+    // o pulso só acorda o céu e o bokeh um pouco: luz de energia, não clarão
+    this.stars.update(frame.time, frame.stars * (0.85 + frame.swell * 0.45));
+    this.bokeh.update(frame.camera, frame.time, frame.bokehA, frame.bokehB, frame.swell * 0.6);
     this.ring.update(frame.shock, frame.pivot, frame.radius, frame.camera);
   }
 

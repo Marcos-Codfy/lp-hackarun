@@ -3,27 +3,29 @@ import type { Observable } from '@shared/core/Observable';
 import type { AppEvents } from '@presentation/app/AppEvents';
 import { damp, smoothstep } from '@shared/utils/math';
 
-const PULSE_S = 1.2;
-const SHOCK_S = 1.8;
-const FLASH_ATTACK_S = 0.05;
-const FLASH_DECAY = 4.2;
-const BURST_S = 2;
+const PULSE_S = 1.1;
+const SHOCK_S = 1.6;
+const SWELL_RISE_S = 0.22;
+const SWELL_DECAY = 2.6;
+const BURST_S = 1.8;
 // distância (em seções) da cena de carga que conta como "saiu"
 const AWAY = 0.85;
 
 type ChargeState = 'idle' | 'charging' | 'charged';
 
-// clímax do globo final: acumula energia em curva, estoura (flash + pulso + anel) no 'experience:charged'
-// e assenta num brilho calmo; descarrega se o usuário sair
+// clímax do globo final: junta energia em curva e, no 'experience:charged', solta um pulso suave
+// (respiro das fitas + anel + luz que sobe e desce, sem estouro branco) e assenta num brilho calmo;
+// descarrega se o usuário sair
 export class ChargeController {
   // agitação/contração/calor da carga
   charge = 0;
-  // empurrão radial das partículas no estouro
+  // empurrão radial das partículas no pulso
   pulse = 0;
-  flash = 0;
+  // onda de luz do pulso: sobe rápido e apaga devagar
+  swell = 0;
   // fase do anel de choque (< 0 = sem anel)
   shock = -1;
-  // brilho calmo depois do estouro
+  // brilho calmo depois do pulso
   afterglow = 0;
   private state: ChargeState = 'idle';
   private from = 0;
@@ -39,7 +41,7 @@ export class ChargeController {
     private readonly instant: boolean,
   ) {
     this.offs.push(bus.on('experience:charging', ({ durationMs }) => this.begin(durationMs / 1000)));
-    // o flash sai no mesmo evento do som: sincronia exata
+    // mesmo evento que acende o CTA: o pulso e o botão chegam juntos
     this.offs.push(bus.on('experience:charged', () => this.complete()));
     // o 3D chegou com o usuário já parado no final (deep link): o evento passou, começa assentado
     if (anchor >= 0 && Math.abs(progress.value - anchor) < 0.25) {
@@ -60,7 +62,8 @@ export class ChargeController {
       // segura no topo até o evento chegar (o timer do SceneHoldWatcher manda)
       this.charge = this.from + (1 - this.from) * k * k * k;
     } else if (this.state === 'charged') {
-      this.charge = this.settle(this.charge, 0, 1.6, delta);
+      // a energia sai rápido no pulso e o globo volta ao ritmo calmo
+      this.charge = this.settle(this.charge, 0, 2.4, delta);
       this.afterglow = this.settle(this.afterglow, 1, 2.5, delta);
     }
     this.updateBurst(delta);
@@ -95,7 +98,7 @@ export class ChargeController {
     return Math.abs(next - target) < 0.001 ? target : next;
   }
 
-  // envelopes do estouro: flash com ataque curto, pulso em curva e anel abrindo
+  // envelopes do pulso: luz com subida suave, respiro em curva e anel abrindo
   private updateBurst(delta: number): void {
     if (this.burstAge < 0) return;
     this.burstAge += delta;
@@ -103,14 +106,14 @@ export class ChargeController {
     if (age >= BURST_S) {
       this.burstAge = -1;
       this.pulse = 0;
-      this.flash = 0;
+      this.swell = 0;
       this.shock = -1;
       return;
     }
-    this.flash =
-      age < FLASH_ATTACK_S ? age / FLASH_ATTACK_S : Math.exp(-(age - FLASH_ATTACK_S) * FLASH_DECAY);
+    this.swell =
+      age < SWELL_RISE_S ? smoothstep(0, SWELL_RISE_S, age) : Math.exp(-(age - SWELL_RISE_S) * SWELL_DECAY);
     const phase = Math.min(1, age / PULSE_S);
-    this.pulse = smoothstep(0, 0.12, phase) * (1 - phase) * (1 - phase);
+    this.pulse = smoothstep(0, 0.18, phase) * (1 - phase) * (1 - phase);
     this.shock = age < SHOCK_S ? age / SHOCK_S : -1;
   }
 }

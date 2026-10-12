@@ -8,8 +8,6 @@ export class PostState {
   // tinta dos mips largos do bloom: o halo puxa pra cor da cena
   readonly bloomTint = new Color(1, 1, 1);
   exposure = 1;
-  // 0..1: estouro branco do clímax
-  flash = 0;
   aberration = 0.006;
   vignette = 0.85;
   grain = 0.05;
