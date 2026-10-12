@@ -16,8 +16,9 @@ export class ContentMapper {
     return raw.stations.map((s) => Station.create({ ...s, skills: s.skills ?? [] }));
   }
 
-  static toScoring(raw: RawStations): ScoringRule {
-    return ScoringRule.create(raw.scoring.maxPoints, raw.scoring.criteria);
+  // null = pontuação ainda não publicada (sai no regulamento)
+  static toScoring(raw: RawStations): ScoringRule | null {
+    return raw.scoring ? ScoringRule.create(raw.scoring.maxPoints, raw.scoring.criteria) : null;
   }
 
   // nome inválido explode: no build quebra o deploy, na lista ao vivo a linha é descartada
@@ -27,10 +28,7 @@ export class ContentMapper {
     return Team.create({
       id: raw.id,
       name: name.value,
-      members: raw.members ?? [],
       ...(raw.memberCount !== undefined && { memberCount: raw.memberCount }),
-      course: raw.course ?? null,
-      mentor: raw.mentor ?? null,
       status: raw.status ?? 'confirmed',
       imageUrl: raw.imageUrl ?? null,
     });

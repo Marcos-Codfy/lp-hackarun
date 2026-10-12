@@ -9,7 +9,8 @@ export interface MemberRowEvents {
 
 const KEY_ATTRS = ['id', 'for', 'aria-describedby', 'data-describedby-base'];
 
-// linhas de integrante por chave: o valor digitado nunca se perde quando alguém remove uma linha
+// linhas de integrante por chave: o valor digitado nunca se perde quando alguém remove uma linha.
+// As linhas que já vêm no HTML (data-member-key 0, 1...) são adotadas no lugar de clonar outras
 export class MemberRows {
   private readonly list: HTMLElement;
   private readonly template: HTMLTemplateElement;
@@ -49,14 +50,21 @@ export class MemberRows {
     return row;
   }
 
-  // o líder é o integrante 1, então a primeira linha é o 2
+  // o integrante 1 é o contato da equipe: tem o selo, o aviso do e-mail e nunca sai
   private label(row: HTMLElement, index: number, canRemove: boolean): void {
-    const number = index + 2;
+    const number = index + 1;
+    const contact = index === 0;
     const title = qs('[data-member-title]', row);
     if (title) title.textContent = `Integrante ${number}`;
+    row.classList.toggle('is-contact', contact);
+    row.querySelectorAll<HTMLElement>('[data-contact-only]').forEach((el) => (el.hidden = !contact));
+    // quem preenche costuma ser o contato: nome e e-mail dele aceitam o preenchimento automático (WCAG 1.3.5)
+    qs('[data-member-field="name"]', row)?.setAttribute('autocomplete', contact ? 'name' : 'off');
+    qs('[data-member-field="email"]', row)?.setAttribute('autocomplete', contact ? 'email' : 'off');
     const remove = qs<HTMLButtonElement>('[data-member-remove]', row);
     if (remove) {
-      remove.disabled = !canRemove;
+      remove.hidden = contact;
+      remove.disabled = contact || !canRemove;
       remove.setAttribute('aria-label', `Remover integrante ${number}`);
     }
   }

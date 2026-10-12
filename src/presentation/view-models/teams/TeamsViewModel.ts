@@ -3,11 +3,10 @@ import { normalizeSearch } from '@shared/utils/text';
 import { Slots } from '@domain/index';
 import type { ListTeams, SlotsDTO, TeamDTO } from '@application/index';
 
-// o que a página pública mostra de uma equipe: nunca nomes, e-mails ou telefones
+// o que a página pública mostra de uma equipe: nome, quantidade e foto. Nunca nomes, matrículas ou e-mails
 export interface PublicTeam {
   id: string;
   name: string;
-  course: string | null;
   memberCount: number;
   // foto/logo aprovada junto com a equipe; null = card com as iniciais
   imageUrl: string | null;
@@ -33,7 +32,6 @@ export interface TeamsDeps {
 export const toPublicTeam = (t: TeamDTO): PublicTeam => ({
   id: t.id,
   name: t.name,
-  course: t.course,
   memberCount: t.memberCount,
   imageUrl: t.imageUrl,
 });
@@ -45,7 +43,7 @@ export function pickFaces(teams: readonly PublicTeam[], limit: number): PublicTe
 }
 
 const matches = (team: PublicTeam, needle: string): boolean =>
-  !needle || normalizeSearch(`${team.name} ${team.course ?? ''}`).includes(needle);
+  !needle || normalizeSearch(team.name).includes(needle);
 
 // vagas recalculadas com a lista ao vivo (a do build pode estar velha)
 function slotsWith(base: SlotsDTO, taken: number): SlotsDTO {

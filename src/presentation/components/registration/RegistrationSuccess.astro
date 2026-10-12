@@ -1,10 +1,12 @@
 ---
-// tela de sucesso: emblema + protocolo "decodificando" + próximos passos (a View preenche e foca o título)
+// tela de sucesso: emblema + protocolo "decodificando" + canal oficial (e-mail) + próximos passos.
+// A View preenche o protocolo e o e-mail do contato e foca o título
 import Button from '@presentation/components/ui/Button.astro';
+import MailNotice from './MailNotice.astro';
 
 const steps = [
-  'Guarde o protocolo: é ele que identifica a sua inscrição.',
-  'A organização confere os dados e confirma pelo e-mail ou WhatsApp informado.',
+  'Guarde o protocolo: é ele que identifica a inscrição da equipe.',
+  'A organização confere os dados e a foto e confirma a equipe por e-mail.',
   'Confirmada, a equipe aparece com a foto ou a logo na página de equipes do site.',
   'Salve as datas na agenda pra não perder a largada.',
 ];
@@ -24,12 +26,19 @@ const steps = [
     Tá dentro! Agora é com a organização.
   </h3>
   <div class="success__ticket">
-    <p class="success__label">Seu protocolo</p>
+    <p class="success__label">Protocolo da equipe</p>
     <p class="success__protocol">
       <span class="sr-only" data-reg-protocol></span>
       <span aria-hidden="true" data-reg-protocol-typed></span>
     </p>
   </div>
+  <MailNotice compact>
+    A confirmação e todos os avisos do HackaRun chegam por e-mail em{' '}
+    <strong class="success__mail" data-reg-contact-email>
+      o e-mail do contato
+    </strong>
+    {'. '}Não usamos WhatsApp: fique de olho na caixa de entrada (e no spam).
+  </MailNotice>
   <ol class="success__steps" role="list">
     {steps.map((step, i) => (
       <li>
@@ -131,6 +140,11 @@ const steps = [
     letter-spacing: 0.1em;
     text-shadow: 0 0 18px color-mix(in srgb, var(--c-success) 55%, transparent);
     user-select: all;
+  }
+
+  .success__mail {
+    color: var(--text);
+    overflow-wrap: anywhere;
   }
 
   .success__steps {

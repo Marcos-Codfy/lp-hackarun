@@ -1,13 +1,11 @@
-import type { RegistrationMode, TeamImageType } from '@domain/index';
+import type { MemberInput, TeamImageType } from '@domain/index';
 
 export interface RegistrationPayload {
-  mode: RegistrationMode;
-  teamName: string | null;
-  leader: { name: string; email: string; phone: string; course: string; semester: string };
-  members: { name: string; email: string; course: string }[];
-  // foto/logo da equipe em base64 (vai no mesmo POST text/plain, sem preflight); null na inscrição individual
-  teamImage: { mimeType: TeamImageType; base64: string } | null;
-  accessibilityNeeds: string;
+  teamName: string;
+  // members[0] = contato da equipe; nome completo, matrícula e e-mail de cada um
+  members: MemberInput[];
+  // foto/logo da equipe em base64 (vai no mesmo POST text/plain, sem preflight)
+  teamImage: { mimeType: TeamImageType; base64: string };
   submittedAt: string;
   source: string;
   // prova do consentimento (LGPD): versão do aviso aceito e quando; vira a coluna Consentimento
@@ -32,16 +30,23 @@ export interface RegistrationReceipt {
   protocol: string;
 }
 
+// já inscrito em outra equipe: nome da equipe, e-mail ou matrícula (o servidor diz qual integrante)
+export type ConflictFailure = 'duplicate-team-name' | 'duplicate-email' | 'duplicate-student-id';
+
 // server = o Apps Script quebrou no meio (planilha, cota): passageiro, diferente de "recusada"
-export type GatewayFailure = 'network' | 'server' | 'rejected' | 'closed' | 'duplicate' | 'rate-limited';
+export type GatewayFailure =
+  'network' | 'server' | 'rejected' | 'closed' | 'duplicate' | 'rate-limited' | ConflictFailure;
 
 export class RegistrationGatewayError extends Error {
   readonly kind: GatewayFailure;
+  // posição (base 0) de cada integrante em conflito, na ordem do envio
+  readonly memberIndexes: readonly number[];
 
-  constructor(kind: GatewayFailure, message: string) {
+  constructor(kind: GatewayFailure, message: string, memberIndexes: readonly number[] = []) {
     super(message);
     this.name = 'RegistrationGatewayError';
     this.kind = kind;
+    this.memberIndexes = memberIndexes;
   }
 }
 

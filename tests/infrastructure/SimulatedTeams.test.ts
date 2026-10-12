@@ -17,18 +17,12 @@ class MemoryStorage {
 }
 
 const payload = (patch: Partial<RegistrationPayload> = {}): RegistrationPayload => ({
-  mode: 'team',
   teamName: 'Bug Busters',
-  leader: {
-    name: 'Ana Souza',
-    email: 'ana@exemplo.com',
-    phone: '',
-    course: 'Engenharia de Software',
-    semester: '',
-  },
-  members: [{ name: 'Bruno Lima', email: 'bruno@exemplo.com', course: '' }],
+  members: [
+    { name: 'Ana Souza', studentId: 'RA-0001', email: 'ana@exemplo.com' },
+    { name: 'Bruno Lima', studentId: 'RA-0002', email: 'bruno@exemplo.com' },
+  ],
   teamImage: TEAM_IMAGE,
-  accessibilityNeeds: '',
   submittedAt: '',
   source: 'landing-page',
   consentVersion: 'v',
@@ -53,14 +47,20 @@ describe('inscrição simulada do dev (sem planilha)', () => {
     expect(gateway.received[0]?.teamImage).toEqual(TEAM_IMAGE);
   });
 
-  it('reenvio com a mesma chave não duplica a equipe; individual não entra na lista', async () => {
+  it('reenvio com a mesma chave não duplica a equipe e a lista guarda só o que é público', async () => {
     const store = new SimulatedTeamStore(new MemoryStorage());
     const gateway = new InMemoryRegistrationGateway({ sleep: () => Promise.resolve(), store });
     await gateway.submit(payload());
     await gateway.submit(payload());
-    const solo = { teamName: null, teamImage: null, leader: { ...payload().leader, email: 'c@exemplo.com' } };
-    await gateway.submit(payload({ mode: 'solo', ...solo }));
     expect(store.list()).toHaveLength(1);
+    expect(Object.keys(store.list()[0] ?? {}).sort()).toEqual([
+      'id',
+      'imageUrl',
+      'memberCount',
+      'name',
+      'status',
+    ]);
+    expect(JSON.stringify(store.list())).not.toMatch(/ana@|RA-0001|Souza/);
   });
 
   it('outra página da mesma aba enxerga as equipes (cópia no sessionStorage)', () => {

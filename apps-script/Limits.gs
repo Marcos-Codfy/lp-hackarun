@@ -1,7 +1,7 @@
 // limites em tempo de execução: prazo e capacidade (Propriedades do script) + limite de envios.
 // o build do site também fecha o formulário, mas quem chama a URL direto só esbarra aqui.
 
-// 10 tentativas por e-mail a cada 10 min cobrem os retries automáticos do site (3 por clique)
+// 10 tentativas por e-mail de contato a cada 10 min cobrem os retries automáticos do site (3 por clique)
 const EMAIL_MAX_ATTEMPTS = 10;
 const EMAIL_WINDOW_SECONDS = 600;
 const GLOBAL_MAX_PER_MINUTE = 120;
@@ -16,6 +16,8 @@ function readConfig_() {
         .toLowerCase() === 'sim',
     closesAt: parseLimit_(props.CLOSES_AT, 'CLOSES_AT', (text) => Date.parse(text)),
     capacity: parseLimit_(props.CAPACITY, 'CAPACITY', (text) => (/^\d+$/.test(text) ? Number(text) : NaN)),
+    // versão do layout já aplicada na planilha (Setup.gs); diferente = refaz a formatação
+    setupVersion: String(props[SETUP_PROPERTY] || ''),
   };
 }
 
@@ -34,11 +36,11 @@ function closedByConfig_(config, nowMs) {
   return config.closesAt !== null && nowMs >= config.closesAt;
 }
 
-// conta equipes que ainda ocupam vaga (pendentes e confirmadas); lotou, fecha pra todo mundo
-function capacityReached_(config, rows) {
+// conta equipes que ainda ocupam vaga (pendentes e confirmadas); lotou, fecha as inscrições
+function capacityReached_(config, teams) {
   if (config.capacity === null) return false;
-  const teams = rows.filter((r) => String(r[COL.mode]) === 'Equipe' && !isRejected_(r[COL.status])).length;
-  return !(teams < config.capacity);
+  const taken = teams.filter((r) => !isRejected_(r[COL.status])).length;
+  return !(taken < config.capacity);
 }
 
 // true = segura o envio. O e-mail esbarra no limite dele antes de contar no global: um script

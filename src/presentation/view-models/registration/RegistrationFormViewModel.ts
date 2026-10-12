@@ -1,17 +1,23 @@
 import { Observable } from '@shared/core/Observable';
-import type { RegistrationErrors, RegistrationMode } from '@domain/index';
+import type { RegistrationErrors } from '@domain/index';
 import type { Clock, ImageFile, PreparedTeamImageDTO, SubmitRegistration } from '@application/index';
 import {
   emptyFields,
   emptyMember,
-  remapErrors,
   shiftMemberPath,
   toInput,
   withText,
   type RegistrationFields,
   type TextPath,
 } from './RegistrationFields';
-import { orderErrors, type RegistrationFormState, type TeamImageStatus } from './RegistrationFormState';
+import {
+  initialState,
+  orderErrors,
+  type RegistrationFormState,
+  type TeamImageStatus,
+} from './RegistrationFormState';
+import { addedNotice, removedNotice } from './memberNotices';
+import { ServerConflicts } from './ServerConflicts';
 import { SubmissionSession } from './SubmissionSession';
 import { TeamImageSlot, type TeamImagePreparer } from './TeamImageSlot';
 
@@ -21,6 +27,7 @@ export interface RegistrationFormDeps {
   submit: Pick<SubmitRegistration, 'validate' | 'execute' | 'currentStatus'>;
   // foto/logo da equipe: redimensiona e comprime no aparelho antes do envio
   prepareImage: TeamImagePreparer;
+  // contando todo mundo: o integrante 1 (contato) também
   teamSize: { min: number; max: number };
   // status do build (SSR): o estado inicial
   isOpen: boolean;
@@ -36,33 +43,20 @@ export class RegistrationFormViewModel {
   private readonly maxRows: number;
   private touched = new Set<string>();
   private nextKey: number;
-  private focusSeq = 0;
+  private seq = 0;
   private readonly session: SubmissionSession;
   private readonly image: TeamImageSlot;
+  private readonly conflicts = new ServerConflicts();
 
   constructor(deps: RegistrationFormDeps) {
     this.deps = deps;
-    // o líder conta como 1
-    this.minRows = Math.max(0, deps.teamSize.min - 1);
-    this.maxRows = Math.max(0, deps.teamSize.max - 1);
+    this.minRows = Math.max(1, deps.teamSize.min);
+    this.maxRows = Math.max(this.minRows, deps.teamSize.max);
     this.nextKey = this.minRows;
     this.session = new SubmissionSession(deps.clock, deps.newKey);
     this.image = new TeamImageSlot(deps.prepareImage);
     const fields = emptyFields(this.minRows);
-    this.state = new Observable<RegistrationFormState>({
-      fields,
-      errors: {},
-      orderedErrors: [],
-      status: 'idle',
-      attempted: false,
-      protocol: null,
-      failure: null,
-      retryable: false,
-      open: deps.isOpen,
-      focus: null,
-      imageStatus: 'empty',
-      ...this.bounds(fields),
-    });
+    this.state = new Observable(initialState(fields, deps.isOpen, this.bounds(fields)));
   }
 
   get isOpen(): boolean {
@@ -84,11 +78,6 @@ export class RegistrationFormViewModel {
     if (!open || status === 'submitting' || status === 'success') return;
     if (this.deps.submit.currentStatus(liveTaken) !== 'closed') return;
     this.state.update((s) => ({ ...s, open: false, focus: null }));
-  }
-
-  setMode(mode: RegistrationMode): void {
-    this.touched.add('mode');
-    this.patch({ ...this.fields, mode });
   }
 
   setText(path: TextPath, value: string): void {
@@ -124,14 +113,17 @@ export class RegistrationFormViewModel {
     if (!this.state.value.canAddMember) return;
     const members = [...this.fields.members, emptyMember(this.nextKey++)];
     this.patch({ ...this.fields, members }, `members.${members.length - 1}.name`);
+    this.announce(addedNotice(members.length, this.maxRows));
   }
 
+  // o contato (linha 0) nunca sai; o foco vai pra linha que subiu ou, se era a última, pro "Adicionar"
   removeMember(index: number): void {
-    if (!this.state.value.canRemoveMember || !this.fields.members[index]) return;
+    if (index < 1 || !this.state.value.canRemoveMember || !this.fields.members[index]) return;
     const members = this.fields.members.filter((_, i) => i !== index);
     this.touched = new Set([...this.touched].flatMap((p) => shiftMemberPath(p, index) ?? []));
-    const target = members.length ? `members.${Math.min(index, members.length - 1)}.name` : 'members';
+    const target = members[index] ? `members.${index}.name` : 'members.add';
     this.patch({ ...this.fields, members }, target);
+    this.announce(removedNotice(index + 1, members.length, this.maxRows));
   }
 
   async submit(): Promise<void> {
@@ -140,7 +132,6 @@ export class RegistrationFormViewModel {
     while (this.image.busy) await this.image.settled();
     const current = this.state.value;
     if (!current.open || current.status === 'submitting' || current.status === 'success') return;
-    const { input, indexMap } = toInput(current.fields);
     const errors = this.allErrors(current.fields);
     if (Object.keys(errors).length > 0) return this.showErrors(errors);
 
@@ -153,12 +144,19 @@ export class RegistrationFormViewModel {
       errors: {},
       orderedErrors: [],
     }));
-    const result = await this.deps.submit.execute(input, this.session.meta(current.fields.honeypot));
+    const result = await this.deps.submit.execute(
+      toInput(current.fields),
+      this.session.meta(current.fields.honeypot),
+    );
     if (result.status === 'success') {
       this.session.complete();
       this.state.update((s) => ({ ...s, status: 'success', protocol: result.protocol, focus: null }));
     } else if (result.status === 'invalid') {
-      this.showErrors(remapErrors(result.errors, indexMap));
+      this.showErrors(result.errors);
+    } else if (result.status === 'conflict') {
+      // nome, e-mail ou matrícula já inscritos: o erro fica no campo até a pessoa trocar o valor
+      this.conflicts.record(result.errors, current.fields);
+      this.showErrors(this.allErrors(this.fields));
     } else {
       const { message, retryable } = result;
       this.state.update((s) => ({ ...s, status: 'error', failure: message, retryable }));
@@ -179,7 +177,7 @@ export class RegistrationFormViewModel {
       attempted: true,
       errors: all,
       orderedErrors: ordered,
-      focus: first ? { path: first, seq: ++this.focusSeq, reason: 'invalid' } : s.focus,
+      focus: first ? { path: first, seq: ++this.seq, reason: 'invalid' } : s.focus,
     }));
   }
 
@@ -192,8 +190,12 @@ export class RegistrationFormViewModel {
       orderedErrors: orderErrors(errors, fields),
       imageStatus: this.imageStatus(fields),
       ...this.bounds(fields),
-      ...(focusPath && { focus: { path: focusPath, seq: ++this.focusSeq, reason: 'move' as const } }),
+      ...(focusPath && { focus: { path: focusPath, seq: ++this.seq, reason: 'move' as const } }),
     }));
+  }
+
+  private announce(text: string): void {
+    this.state.update((s) => ({ ...s, announcement: { text, seq: ++this.seq } }));
   }
 
   private imageStatus(fields: RegistrationFields): TeamImageStatus {
@@ -202,14 +204,12 @@ export class RegistrationFormViewModel {
     return this.image.problem ? 'invalid' : 'empty';
   }
 
-  // regras do domínio + o motivo do último arquivo recusado (mais útil que "falta a foto").
+  // conflitos do servidor + regras do domínio (que ganham) + o motivo do último arquivo recusado.
   // Foto preparando ainda não tem veredito: nada de "envie uma foto" com o spinner girando
   private allErrors(fields: RegistrationFields): RegistrationErrors {
-    const { input, indexMap } = toInput(fields);
-    const errors = remapErrors(this.deps.submit.validate(input), indexMap);
+    const errors = { ...this.conflicts.active(fields), ...this.deps.submit.validate(toInput(fields)) };
     if (this.image.busy) delete errors['teamImage'];
-    else if (fields.mode === 'team' && !fields.teamImage && this.image.problem)
-      errors['teamImage'] = this.image.problem;
+    else if (!fields.teamImage && this.image.problem) errors['teamImage'] = this.image.problem;
     return errors;
   }
 
@@ -226,10 +226,9 @@ export class RegistrationFormViewModel {
   }
 
   private bounds(fields: RegistrationFields): { canAddMember: boolean; canRemoveMember: boolean } {
-    const team = fields.mode === 'team';
     return {
-      canAddMember: team && fields.members.length < this.maxRows,
-      canRemoveMember: team && fields.members.length > this.minRows,
+      canAddMember: fields.members.length < this.maxRows,
+      canRemoveMember: fields.members.length > this.minRows,
     };
   }
 }

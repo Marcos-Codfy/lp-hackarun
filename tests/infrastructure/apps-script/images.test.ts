@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { FakeSheet } from '../../helpers/apps-script/fakes';
-import { AppsScriptSandbox, registrationBody } from '../../helpers/apps-script/sandbox';
+import { FakeSheet } from '../../helpers/apps-script/sheetFakes';
+import { AppsScriptSandbox, otherTeam, registrationBody } from '../../helpers/apps-script/sandbox';
 import { fakeImageBase64, type FakeImageType } from '../../helpers/images';
 
 const KEY = '3f0c9a52-6d1e-4b7a-9c3e-2a5b8d7e1f40';
@@ -10,20 +10,19 @@ const withImage = (type: FakeImageType, size?: number) =>
   registrationBody(image(type, fakeImageBase64(type, size)));
 
 function imageCell(script: AppsScriptSandbox, row = 0): unknown {
-  const headers = script.sheet.rows[0] ?? [];
-  return script.sheet.data[row]?.[headers.indexOf('Imagem')];
+  return script.row(script.teams, row)['ID da foto'];
 }
 
 // a organização confirma a primeira linha (como na planilha) e o site lê a lista pública
 function confirmFirst(script: AppsScriptSandbox): Record<string, unknown>[] {
-  const status = (script.sheet.rows[0] ?? []).indexOf('Status');
-  (script.sheet.data[0] ?? [])[status] = 'confirmado';
+  const status = (script.teams.rows[0] ?? []).indexOf('Status');
+  (script.teams.data[0] ?? [])[status] = 'confirmado';
   return script.get('teams').teams ?? [];
 }
 
 describe('Apps Script · foto/logo da equipe', () => {
   it.each(['image/jpeg', 'image/png', 'image/webp'] as const)(
-    'grava %s no Drive com link público e o id na coluna Imagem',
+    'grava %s no Drive com link público e o id na coluna ID da foto',
     (type) => {
       const script = new AppsScriptSandbox();
       const res = script.post(withImage(type));
@@ -56,9 +55,8 @@ describe('Apps Script · foto/logo da equipe', () => {
 
   it('cria a pasta das fotos uma vez só e guarda o id em FOTOS_PASTA_ID', () => {
     const script = new AppsScriptSandbox();
-    const leader = registrationBody()['leader'] as Record<string, unknown>;
     script.post(withImage('image/png'));
-    script.post({ ...withImage('image/jpeg'), leader: { ...leader, email: 'outra@exemplo.com' } });
+    script.post(otherTeam(2, image('image/jpeg', fakeImageBase64('image/jpeg'))));
     expect(script.drive.folders.size).toBe(1);
     const [folder] = [...script.drive.folders.values()];
     expect(folder?.name).toBe('HackaRun 2026 · Fotos das equipes');
@@ -94,15 +92,7 @@ describe('Apps Script · foto/logo da equipe', () => {
     const script = new AppsScriptSandbox();
     expect(script.post(body)).toEqual({ ok: false, error: 'invalid' });
     expect(script.drive.allFiles).toHaveLength(0);
-    expect(script.sheets.size).toBe(0);
-  });
-
-  it('inscrição individual não precisa de foto (e ignora a que vier)', () => {
-    const script = new AppsScriptSandbox();
-    const res = script.post({ ...withImage('image/png'), mode: 'solo', members: [] });
-    expect(res.ok).toBe(true);
-    expect(script.drive.allFiles).toHaveLength(0);
-    expect(imageCell(script)).toBe('');
+    expect(script.book.sheets).toHaveLength(0);
   });
 
   it('reenvio com a mesma chave devolve o mesmo protocolo e não cria um segundo arquivo', () => {
@@ -119,14 +109,14 @@ describe('Apps Script · foto/logo da equipe', () => {
     script.cache.store.clear();
     expect(attempt(3)).toEqual(first);
     expect(script.drive.allFiles).toHaveLength(1);
-    expect(script.sheet.data).toHaveLength(1);
+    expect(script.teams.data).toHaveLength(1);
   });
 
-  it('e-mail repetido com outra chave não grava foto nenhuma', () => {
+  it('equipe repetida com outra chave não grava foto nenhuma', () => {
     const script = new AppsScriptSandbox();
     script.post({ ...withImage('image/webp'), idempotencyKey: KEY });
     const other = { ...withImage('image/webp'), idempotencyKey: '9b1d2c3e-0000-4a4a-8b8b-123456789abc' };
-    expect(script.post(other)).toEqual({ ok: false, error: 'duplicate' });
+    expect(script.post(other)).toMatchObject({ ok: false, error: 'duplicate_team_name' });
     expect(script.drive.allFiles).toHaveLength(1);
   });
 
@@ -141,7 +131,7 @@ describe('Apps Script · foto/logo da equipe', () => {
     expect(script.errors.flat().join(' ')).toMatch(/Compartilhamento da foto bloqueado/);
   });
 
-  it('Drive fora do ar: a inscrição entra sem a foto (coluna Imagem vazia) e o erro vai pro log', () => {
+  it('Drive fora do ar: a inscrição entra sem a foto (ID da foto vazio) e o erro vai pro log', () => {
     const script = new AppsScriptSandbox();
     script.drive.failCreate = true;
     expect(script.post(withImage('image/png')).ok).toBe(true);
@@ -151,44 +141,33 @@ describe('Apps Script · foto/logo da equipe', () => {
 
   it('planilha falhou depois da foto: a foto vai pra lixeira e o site recebe "server"', () => {
     const script = new AppsScriptSandbox();
-    const sheet = new FakeSheet('Inscricoes');
-    sheet.appendRow(script.evaluate<string[]>('HEADERS'));
-    sheet.appendRow = () => {
+    const { teams } = script.seed([]);
+    teams.appendRow = () => {
       throw new Error('Service Spreadsheets failed');
     };
-    script.sheets.set(sheet.name, sheet);
     expect(script.post(withImage('image/png'))).toEqual({ ok: false, error: 'server' });
     expect(script.drive.allFiles.map((f) => f.trashed)).toEqual([true]);
-  });
-
-  it('planilha sem as colunas novas ganha "Chave de envio" e "Imagem" na primeira gravação', () => {
-    const script = new AppsScriptSandbox();
-    const headers = script.evaluate<string[]>('HEADERS');
-    const old = new FakeSheet('Inscricoes');
-    old.appendRow(headers.slice(0, -2));
-    script.sheets.set(old.name, old);
+    // os integrantes que entraram antes não seguram nada: a equipe não existe na aba Equipes
+    teams.appendRow = FakeSheet.prototype.appendRow;
     expect(script.post(withImage('image/png')).ok).toBe(true);
-    expect(old.rows[0]).toEqual(headers);
   });
 });
 
 describe('Apps Script · foto na lista pública', () => {
-  const seeded = (imagem: string) => [
+  const seeded = (id: string) => [
     {
       Protocolo: 'HR26-AAAAAA',
-      Modalidade: 'Equipe',
       Equipe: 'Com Foto',
-      Qtde: 3,
+      'Integrantes (qtd)': 3,
       Status: 'confirmado',
-      Imagem: imagem,
+      'ID da foto': id,
     },
     {
       Protocolo: 'HR26-BBBBBB',
-      Modalidade: 'Equipe',
       Equipe: 'Pendente',
-      Qtde: 2,
+      'Integrantes (qtd)': 2,
       Status: 'pendente',
-      Imagem: imagem,
+      'ID da foto': id,
     },
   ];
 
@@ -201,7 +180,7 @@ describe('Apps Script · foto na lista pública', () => {
   });
 
   it.each(['', 'curto', 'https://evil.example/x.png', '=IMAGE("x")'])(
-    'célula Imagem "%s" vira null',
+    'célula ID da foto "%s" vira null',
     (value) => {
       const script = new AppsScriptSandbox();
       script.seed(seeded(value));
@@ -209,13 +188,13 @@ describe('Apps Script · foto na lista pública', () => {
     },
   );
 
-  it('editar a coluna Imagem (moderação) limpa o cache da lista na hora', () => {
+  it('apagar o ID da foto (moderação) limpa o cache da lista na hora', () => {
     const script = new AppsScriptSandbox();
-    const sheet = script.seed(seeded('1AbCdEfGhIjKlMnOpQrStUvWxYz_-012'));
+    const { teams } = script.seed(seeded('1AbCdEfGhIjKlMnOpQrStUvWxYz_-012'));
     expect(script.get('teams').teams?.[0]?.['imageId']).not.toBeNull();
-    const col = script.evaluate<string[]>('HEADERS').indexOf('Imagem');
-    (sheet.rows[1] ?? [])[col] = '';
-    const range = { getSheet: () => sheet, getColumn: () => col + 1, getLastColumn: () => col + 1 };
+    const col = script.evaluate<string[]>('TEAM_HEADERS').indexOf('ID da foto');
+    (teams.rows[1] ?? [])[col] = '';
+    const range = { getSheet: () => teams, getColumn: () => col + 1, getLastColumn: () => col + 1 };
     (script.evaluate('onEdit') as (e: unknown) => void)({ range });
     expect(script.get('teams').teams?.[0]?.['imageId']).toBeNull();
   });

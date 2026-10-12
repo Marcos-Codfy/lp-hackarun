@@ -56,11 +56,11 @@ describe('TeamRegistration · foto da equipe', () => {
 
   it('equipe com foto guarda a imagem no aggregate', () => {
     const r = TeamRegistration.create(teamInput(), TEAM_SIZE);
-    expect(r.ok && r.value.teamImage?.mimeType).toBe('image/webp');
+    expect(r.ok && r.value.teamImage.mimeType).toBe('image/webp');
   });
 
-  it('inscrição individual ignora a foto', () => {
-    const r = TeamRegistration.create(teamInput({ mode: 'solo', teamImage: null }), TEAM_SIZE);
-    expect(r.ok && r.value.teamImage).toBeNull();
+  it('sem foto a equipe não entra', () => {
+    const r = TeamRegistration.create(teamInput({ teamImage: null }), TEAM_SIZE);
+    expect(!r.ok && r.error['teamImage']).toBe(TeamImage.MISSING);
   });
 });

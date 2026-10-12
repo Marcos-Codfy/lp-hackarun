@@ -1,0 +1,110 @@
+---
+// aviso do canal oficial: o HackaRun fala com as equipes só por e-mail. Aparece junto dos e-mails
+// (etapa Integrantes) e, numa versão curta, na tela de sucesso
+interface Props {
+  id?: string;
+  compact?: boolean;
+}
+
+const { id, compact = false } = Astro.props;
+---
+
+<div class:list={['mail', { 'mail--compact': compact }]} id={id}>
+  <span class="mail__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" focusable="false">
+      <path d="M3.5 6.5h17v11h-17z"></path>
+      <path d="m3.5 7 8.5 6.5L20.5 7"></path>
+    </svg>
+  </span>
+  <p class="mail__title">Comunicação oficial por e-mail</p>
+  <p class="mail__text">
+    <slot>
+      Confirmação e avisos do HackaRun chegam só por e-mail, nunca por WhatsApp. Confira cada endereço com
+      calma e, nos dias do evento, dê uma olhada também no spam.
+    </slot>
+  </p>
+</div>
+
+<style>
+  /* celular: ícone e título na mesma linha, texto embaixo na largura toda; desktop: texto ao lado do ícone */
+  .mail {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'icon title'
+      'text text';
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--c-violet) 38%, transparent);
+    border-left: 2px solid var(--c-magenta);
+    border-radius: 3px;
+    background:
+      radial-gradient(
+        120% 140% at 0% 0%,
+        color-mix(in srgb, var(--c-violet) 16%, transparent),
+        transparent 62%
+      ),
+      var(--surface-well);
+  }
+
+  .mail__icon {
+    grid-area: icon;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--c-magenta) 60%, transparent);
+    border-radius: 2px;
+    color: color-mix(in srgb, var(--c-magenta) 35%, var(--c-ice));
+    box-shadow: inset 0 0 14px color-mix(in srgb, var(--c-magenta) 25%, transparent);
+  }
+
+  .mail__icon svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .mail__title {
+    grid-area: title;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  .mail__text {
+    grid-area: text;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+  }
+
+  .mail--compact {
+    width: 100%;
+  }
+
+  @media (min-width: 40rem) {
+    .mail {
+      grid-template-areas:
+        'icon title'
+        'icon text';
+      align-items: start;
+      row-gap: var(--space-1);
+      padding: var(--space-4) var(--space-5);
+    }
+
+    .mail__icon {
+      align-self: start;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .mail {
+      border-left-width: 4px;
+    }
+  }
+</style>

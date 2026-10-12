@@ -33,3 +33,7 @@ devolve só as equipes com Status `confirmado` (nome, curso e quantidade), que o
 
 > **Atualização (2026-10-12):** a inscrição de equipe leva a foto ou logo, que o script grava no Google Drive, e a
 > rota `GET` passou a devolver também o id da foto das equipes confirmadas (ADR 0007).
+
+> **Atualização (2026-10-12, rodada 3):** a inscrição passou a ser **só de equipe** e a planilha ganhou três abas
+> (`Equipes`, `Integrantes` e `Resumo`), montadas pelo próprio script. A rota `GET` devolve só nome, quantidade de
+> integrantes e id da foto das equipes confirmadas (o curso saiu). Decisão e motivos na ADR 0008.

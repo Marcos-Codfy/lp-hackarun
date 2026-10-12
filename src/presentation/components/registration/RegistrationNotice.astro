@@ -82,7 +82,7 @@ const { status, simulated } = Astro.props;
     display: grid;
     justify-items: start;
     gap: var(--space-4);
-    padding: var(--space-5);
+    padding: var(--space-4);
     border: 1px solid color-mix(in srgb, var(--c-orange) 30%, transparent);
     border-left: 2px solid var(--c-orange);
     border-radius: 3px;
@@ -108,6 +108,39 @@ const { status, simulated } = Astro.props;
 
   .notice__text {
     color: var(--text-muted);
+  }
+
+  /* celular: o botão ocupa a largura do aviso e o rótulo fica numa linha só (abaixo de 24rem sem as setas
+     ">>" e com a fonte um pouco menor: "Adicionar à agenda" não cabe junto com elas em 360px) */
+  .notice :global(.btn) {
+    --btn-px: 1rem;
+    --btn-fs: 0.8125rem;
+    justify-self: stretch;
+  }
+
+  .notice :global(.btn .chevrons) {
+    display: none;
+  }
+
+  @media (min-width: 24rem) {
+    .notice :global(.btn) {
+      --btn-fs: 0.875rem;
+    }
+
+    .notice :global(.btn .chevrons) {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .notice {
+      padding: var(--space-5);
+    }
+
+    .notice :global(.btn) {
+      --btn-px: 1.6rem;
+      justify-self: start;
+    }
   }
 
   .notice-dev {

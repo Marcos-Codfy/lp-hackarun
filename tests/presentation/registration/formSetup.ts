@@ -50,14 +50,30 @@ export const windowClosingAt = (closesAt: string): RegistrationWindowSnapshot =>
   slots: { capacity: null, taken: 0, remaining: null, level: 'unknown' },
 });
 
+export const VALID_MEMBERS = [
+  { name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' },
+  { name: 'Bruno Lima', studentId: '2024100456', email: 'bruno@exemplo.com' },
+  { name: 'Carla Dias', studentId: '2024100789', email: 'carla@exemplo.com' },
+  { name: 'Davi Rocha', studentId: '2024100999', email: 'davi@exemplo.com' },
+  { name: 'Elisa Prado', studentId: '2024101000', email: 'elisa@exemplo.com' },
+];
+
+export function fillMember(
+  vm: RegistrationFormViewModel,
+  index: number,
+  member = VALID_MEMBERS[index],
+): void {
+  if (!member) throw new Error(`Sem integrante de exemplo na posição ${index}`);
+  vm.setText(`members.${index}.name`, member.name);
+  vm.setText(`members.${index}.studentId`, member.studentId);
+  vm.setText(`members.${index}.email`, member.email);
+}
+
+// equipe mínima válida (2 integrantes), com foto e aceite
 export function fillValidTeam(vm: RegistrationFormViewModel): void {
   vm.setText('teamName', 'Bug Busters');
-  vm.setText('leader.name', 'Ana Souza');
-  vm.setText('leader.email', 'ana@exemplo.com');
-  vm.setText('leader.phone', '63999991234');
-  vm.setText('leader.course', 'Engenharia de Software');
-  vm.setText('members.0.name', 'Bruno Lima');
-  vm.setText('members.0.email', 'bruno@exemplo.com');
+  fillMember(vm, 0);
+  fillMember(vm, 1);
   vm.setTeamImage(preparedImage());
   vm.setAcceptedTerms(true);
 }

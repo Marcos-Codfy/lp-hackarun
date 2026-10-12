@@ -31,16 +31,16 @@ export class SimulatedTeamStore {
     this.teams = this.read();
   }
 
+  // só o que a lista pública mostra: nome, quantidade de integrantes e a foto
   add(payload: RegistrationPayload, protocol: string): void {
-    if (payload.mode !== 'team' || !payload.teamName) return;
+    if (!payload.teamName) return;
     const image = payload.teamImage;
     this.teams = [
       ...this.teams,
       {
         id: `sim-${protocol}`,
         name: payload.teamName,
-        course: payload.leader.course || null,
-        memberCount: 1 + payload.members.length,
+        memberCount: payload.members.length,
         status: 'confirmed',
         imageUrl: image ? `data:${image.mimeType};base64,${image.base64}` : null,
       },

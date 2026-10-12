@@ -1,4 +1,5 @@
 import {
+  Activity,
   EventDay,
   HackathonEvent,
   Milestone,
@@ -7,8 +8,16 @@ import {
   Slots,
   TimeSlot,
   Venue,
+  toAudience,
 } from '@domain/index';
-import type { RawEvent, RawEventDay, RawSession, RawVenue } from '../content/schema';
+import type {
+  RawActivity,
+  RawEvent,
+  RawEventDay,
+  RawSession,
+  RawTimeRange,
+  RawVenue,
+} from '../content/schema';
 
 // JSON cru -> aggregate; qualquer dado inválido explode aqui, no build
 export class EventMapper {
@@ -31,6 +40,7 @@ export class EventMapper {
         slots: Slots.create(raw.registration.capacity ?? null, 0),
         teamSize: raw.registration.teamSize ?? EventMapper.DEFAULT_TEAM_SIZE,
       }),
+      maxStands: raw.maxStands ?? null,
     });
   }
 
@@ -42,15 +52,38 @@ export class EventMapper {
     return EventDay.create({ ...raw, sessions: raw.sessions.map(EventMapper.toSession) });
   }
 
+  private static slot(raw: RawTimeRange): TimeSlot {
+    return TimeSlot.create(raw.start, raw.end, raw.startHint ?? null);
+  }
+
   private static toSession(raw: RawSession): Session {
     return Session.create({
       id: raw.id,
       title: raw.title,
       kind: raw.kind,
-      slot: TimeSlot.create(raw.start, raw.end, raw.startHint ?? null),
+      slot: EventMapper.slot(raw),
       venueId: raw.venueId,
+      place: raw.place ?? null,
+      audience: toAudience(raw.audience, `Session ${raw.id}`),
+      audienceNote: raw.audienceNote ?? null,
       description: raw.description,
-      topics: raw.topics ?? [],
+      note: raw.note ?? null,
+      activities: raw.activities.map(EventMapper.toActivity),
+    });
+  }
+
+  private static toActivity(raw: RawActivity): Activity {
+    return Activity.create({
+      id: raw.id,
+      title: raw.title,
+      kind: raw.kind,
+      slot: EventMapper.slot(raw),
+      summary: raw.summary,
+      details: raw.details ?? null,
+      track: raw.track ? toAudience(raw.track, `Activity ${raw.id}`) : null,
+      flags: raw.flags ?? [],
+      parts: (raw.parts ?? []).map((p) => ({ label: p.label, slot: EventMapper.slot(p) })),
+      checklist: raw.checklist ?? [],
     });
   }
 }

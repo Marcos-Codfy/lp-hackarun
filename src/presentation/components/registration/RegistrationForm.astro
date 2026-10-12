@@ -1,15 +1,16 @@
 ---
-// lobby de inscrição (RegistrationFormView + RegistrationFormViewModel); grava na planilha via Apps Script
+// lobby de inscrição (RegistrationFormView + RegistrationFormViewModel); grava na planilha via Apps Script.
+// Só equipe: 01 Equipe (nome + foto), 02 Integrantes (nome, matrícula e e-mail), 03 Confirmação
 import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import TextField from './TextField.astro';
-import ModeSwitch from './ModeSwitch.astro';
+import FormStep from './FormStep.astro';
 import MemberList from './MemberList.astro';
 import ConsentField from './ConsentField.astro';
 import TeamImageField from './TeamImageField.astro';
 import RegistrationNotice from './RegistrationNotice.astro';
 import RegistrationSuccess from './RegistrationSuccess.astro';
-// css global com prefixo .regform (as linhas de integrante são clonadas em runtime)
+// css global com prefixo .regform (os cards de integrante são clonados em runtime)
 import './registration-form.css';
 import './registration-states.css';
 
@@ -23,19 +24,6 @@ const { min, max } = registration.teamSize;
 const simulated = import.meta.env.DEV && registration.status === 'soon' && !registration.endpoint;
 const status = simulated ? 'open' : registration.status;
 const isOpen = status === 'open' || status === 'closing';
-const SEMESTERS = ['1º período', '2º período', '3º período', '4º período', '5º período'].concat([
-  '6º período',
-  '7º período',
-  '8º período',
-  '9º período',
-  '10º período',
-  'Outro',
-]);
-const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas de Informação'].concat([
-  'Análise e Desenvolvimento de Sistemas',
-  'Engenharia da Computação',
-  'Redes de Computadores',
-]);
 ---
 
 <div class="regform" data-registration-form data-status={status} data-team-min={min} data-team-max={max}>
@@ -51,7 +39,9 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
         <span class="regform__squad-live">
           Lobby online<span class="regform__squad-extra"> · formação</span>
         </span>
-        <span data-reg-squad>Esquadrão 1/{max}</span>
+        <span data-reg-squad>
+          Esquadrão {min}/{max}
+        </span>
       </div>
       <noscript>
         <p class="regform__noscript">
@@ -71,135 +61,70 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
         action="#inscricao"
         novalidate
         inert={!isOpen}
-        aria-label="Inscrição no HackaRun"
+        aria-label="Inscrição da equipe no HackaRun"
       >
         <fieldset class="regform__fields" disabled={!isOpen}>
-          <div class="regform__summary" data-error-summary hidden>
-            <p class="regform__summary-title" data-error-summary-title></p>
+          {/* recebe o foco quando o envio volta com mais de um erro (os links levam a cada campo) */}
+          <div
+            class="regform__summary"
+            data-error-summary
+            role="group"
+            aria-labelledby="reg-error-summary-title"
+            tabindex="-1"
+            hidden
+          >
+            <p class="regform__summary-title" id="reg-error-summary-title" data-error-summary-title></p>
             <ul class="regform__summary-list" data-error-summary-list></ul>
           </div>
-          <ModeSwitch min={min} max={max} />
-          <div class="regform__block regform__team" data-mode-only="team">
+          <FormStep
+            index="01"
+            title="Equipe"
+            lead="O nome e a imagem aparecem na página de equipes depois que a organização confirma."
+          >
             <TextField
               id="reg-team-name"
               field="teamName"
               label="Nome da equipe"
+              hint="De 2 a 40 caracteres. Cada equipe tem um nome só dela."
               maxlength={40}
               autocomplete="off"
             />
             <TeamImageField />
-          </div>
-          <fieldset class="regform__group">
-            <legend class="regform__legend">Seus dados</legend>
-            <div class="regform__grid">
-              <TextField
-                id="reg-leader-name"
-                field="leader.name"
-                label="Nome completo"
-                autocomplete="name"
-                maxlength={80}
-                wide
-              />
-              <TextField
-                id="reg-leader-email"
-                field="leader.email"
-                label="E-mail"
-                type="email"
-                inputmode="email"
-                autocomplete="email"
-                maxlength={120}
-              />
-              <TextField
-                id="reg-leader-phone"
-                field="leader.phone"
-                label="WhatsApp"
-                type="tel"
-                inputmode="tel"
-                autocomplete="tel-national"
-                placeholder="(63) 99999-9999"
-                maxlength={20}
-              />
-              <TextField
-                id="reg-leader-course"
-                field="leader.course"
-                label="Curso"
-                list="reg-courses"
+          </FormStep>
+          <MemberList min={min} max={max} />
+          <FormStep index="03" title="Confirmação">
+            <ConsentField />
+            <div class="regform__hp" aria-hidden="true">
+              <label for="reg-website">Website</label>
+              <input
+                id="reg-website"
+                name="website"
+                type="text"
+                tabindex="-1"
                 autocomplete="off"
-                maxlength={80}
-              />
-              <TextField
-                id="reg-leader-semester"
-                field="leader.semester"
-                label="Período/semestre"
-                as="select"
-                options={SEMESTERS}
-                optional
+                data-field="honeypot"
               />
             </div>
-          </fieldset>
-          <MemberList min={min} max={max} />
-          {/* dado sensível (LGPD art. 11): o aviso vai na dica, que o leitor de tela lê junto com o campo */}
-          <div class="regform__sensitive">
-            <TextField
-              id="reg-accessibility"
-              field="accessibilityNeeds"
-              label="Alguma necessidade de acessibilidade?"
-              as="textarea"
-              maxlength={500}
-              hint="Dado sensível: ao preencher, você autoriza o uso só para garantir sua acessibilidade no evento. Ex.: intérprete de Libras, mesa adaptada, material ampliado."
-              optional
-            />
-          </div>
-          <ConsentField />
-          <div class="regform__hp" aria-hidden="true">
-            <label for="reg-website">Website</label>
-            <input
-              id="reg-website"
-              name="website"
-              type="text"
-              tabindex="-1"
-              autocomplete="off"
-              data-field="honeypot"
-            />
-          </div>
-          <div class="regform__failure" data-reg-failure role="alert" hidden>
-            <p data-reg-failure-text></p>
-            <button type="button" class="regform__retry" data-reg-retry>
-              Tentar de novo
-            </button>
-          </div>
-          <div class="regform__actions">
-            <Button type="submit" size="lg" data-reg-submit>
-              Confirmar inscrição
-            </Button>
-            <p class="regform__privacy">
-              Seus contatos ficam só com a organização. No site aparecem só nome, curso e foto da equipe.
-            </p>
-          </div>
+            <div class="regform__failure" data-reg-failure role="alert" hidden>
+              <p data-reg-failure-text></p>
+              <button type="button" class="regform__retry" data-reg-retry>
+                Tentar de novo
+              </button>
+            </div>
+            <div class="regform__actions">
+              <Button type="submit" size="lg" data-reg-submit>
+                Confirmar inscrição
+              </Button>
+              <p class="regform__privacy">
+                Os dados ficam só com a organização. No site aparecem só o nome, a foto e o número de
+                integrantes da equipe.
+              </p>
+            </div>
+          </FormStep>
         </fieldset>
       </form>
       <RegistrationSuccess />
       <p class="sr-only" aria-live="polite" data-reg-live></p>
-      <datalist id="reg-courses">
-        {COURSES.map((c) => (
-          <option value={c} />
-        ))}
-      </datalist>
     </div>
   )}
 </div>
-
-<style>
-  .regform__team {
-    display: grid;
-    gap: var(--space-5);
-  }
-
-  .regform__sensitive :global(.field__hint) {
-    padding: var(--space-2) var(--space-3);
-    border-inline-start: 2px solid var(--c-gold);
-    border-radius: 0 3px 3px 0;
-    background: var(--glass-bg);
-    color: var(--text-muted);
-  }
-</style>

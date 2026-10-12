@@ -21,7 +21,8 @@ export function controlFor(root: HTMLElement, path: string): HTMLElement | null 
   // erro do grupo: leva pro primeiro integrante (ou pro botão de adicionar)
   if (path === 'members')
     return qs('[data-member-row] [data-member-field="name"]', root) ?? qs('[data-member-add]', root);
-  if (path === 'mode') return qs('[data-reg-mode]:checked', root);
+  // foco depois de remover o último integrante
+  if (path === 'members.add') return qs('[data-member-add]', root);
   return qs(`[data-field="${path}"]`, root);
 }
 
@@ -34,5 +35,5 @@ export function labelFor(root: HTMLElement, path: string): string {
   // primeiro nó de texto = o rótulo sem o "(opcional)"
   const text = (label?.firstChild?.textContent ?? '').replace(/\s+/g, ' ').trim();
   const member = /^members\.(\d+)\./.exec(path);
-  return member ? `Integrante ${Number(member[1]) + 2} · ${text}` : text;
+  return member ? `Integrante ${Number(member[1]) + 1} · ${text}` : text;
 }

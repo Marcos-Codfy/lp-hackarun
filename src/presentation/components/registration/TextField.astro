@@ -6,19 +6,18 @@ import FieldError from './FieldError.astro';
 interface Props {
   id: string;
   label: string;
-  // caminho no VM ("leader.email"); linhas de integrante usam memberField
+  // caminho no VM ("teamName"); os cards de integrante usam memberField
   field?: string;
-  memberField?: 'name' | 'email' | 'course';
-  as?: 'input' | 'select' | 'textarea';
-  type?: 'text' | 'email' | 'tel';
+  memberField?: 'name' | 'studentId' | 'email';
+  type?: 'text' | 'email';
   autocomplete?: HTMLAttributes<'input'>['autocomplete'];
   inputmode?: HTMLAttributes<'input'>['inputmode'];
+  autocapitalize?: HTMLAttributes<'input'>['autocapitalize'];
+  spellcheck?: boolean;
   hint?: string;
   optional?: boolean;
   maxlength?: number;
   placeholder?: string;
-  options?: string[];
-  list?: string;
   wide?: boolean;
 }
 
@@ -27,33 +26,22 @@ const {
   label,
   field,
   memberField,
-  as = 'input',
   type = 'text',
   autocomplete,
   inputmode,
+  autocapitalize,
+  spellcheck = type === 'text' ? undefined : false,
   hint,
   optional = false,
   maxlength,
   placeholder,
-  options = [],
-  list,
   wide = false,
 } = Astro.props;
 
 const hintId = hint ? `${id}-hint` : undefined;
-const common = {
-  id,
-  name: field ?? memberField,
-  'data-field': field,
-  'data-member-field': memberField,
-  'data-describedby-base': hintId,
-  'aria-describedby': hintId,
-  'aria-required': optional ? undefined : ('true' as const),
-  class: 'field__control',
-};
 ---
 
-<div class:list={['field', { 'field--wide': wide, 'field--select': as === 'select' }]}>
+<div class:list={['field', { 'field--wide': wide }]}>
   <label class="field__label" for={id}>
     {label}
     {optional && <span class="field__optional">(opcional)</span>}
@@ -64,27 +52,23 @@ const common = {
     </p>
   )}
   <div class="field__box">
-    {as === 'select' ? (
-      <select {...common}>
-        <option value="">Selecione</option>
-        {options.map((o) => (
-          <option value={o}>{o}</option>
-        ))}
-      </select>
-    ) : as === 'textarea' ? (
-      <textarea {...common} rows={3} maxlength={maxlength} placeholder={placeholder} />
-    ) : (
-      <input
-        {...common}
-        type={type}
-        autocomplete={autocomplete}
-        inputmode={inputmode}
-        maxlength={maxlength}
-        placeholder={placeholder}
-        list={list}
-        spellcheck={type === 'text' ? undefined : 'false'}
-      />
-    )}
+    <input
+      id={id}
+      class="field__control"
+      name={field ?? memberField}
+      data-field={field}
+      data-member-field={memberField}
+      data-describedby-base={hintId}
+      aria-describedby={hintId}
+      aria-required={optional ? undefined : 'true'}
+      type={type}
+      autocomplete={autocomplete}
+      inputmode={inputmode}
+      autocapitalize={autocapitalize}
+      maxlength={maxlength}
+      placeholder={placeholder}
+      spellcheck={spellcheck === undefined ? undefined : spellcheck ? 'true' : 'false'}
+    />
   </div>
   <FieldError id={`${id}-error`} field={field} memberField={memberField} />
 </div>
@@ -131,36 +115,6 @@ const common = {
       border-color var(--dur-fast) var(--ease-out),
       box-shadow var(--dur-fast) var(--ease-out),
       background var(--dur-fast) var(--ease-out);
-  }
-
-  select.field__control {
-    padding-right: 2.75rem;
-    appearance: none;
-    cursor: pointer;
-  }
-
-  /* seta do select desenhada no CSS */
-  .field--select .field__box::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: 1.1rem;
-    width: 8px;
-    height: 8px;
-    border-right: 1.5px solid var(--c-cyan);
-    border-bottom: 1.5px solid var(--c-cyan);
-    transform: translateY(-70%) rotate(45deg);
-    pointer-events: none;
-  }
-
-  select.field__control option {
-    background: var(--c-night);
-    color: var(--text);
-  }
-
-  textarea.field__control {
-    min-height: 6.5rem;
-    resize: vertical;
   }
 
   .field__control::placeholder {

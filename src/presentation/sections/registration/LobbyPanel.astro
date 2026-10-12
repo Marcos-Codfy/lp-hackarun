@@ -13,7 +13,7 @@ interface Props {
 
 const { registration, kickoffLabel = null } = Astro.props;
 const { min, max } = registration.teamSize;
-const steps = ['Modalidade', 'Seus dados', 'Integrantes', 'Confirmar'];
+const steps = ['Equipe', 'Integrantes', 'Confirmação'];
 ---
 
 <div class="lobby sx-glass sx-corners" id="inscricao-lobby">
@@ -24,7 +24,8 @@ const steps = ['Modalidade', 'Seus dados', 'Integrantes', 'Confirmar'];
       Monte sua <em>equipe</em>
     </h3>
     <p class="lobby__lead">
-      Equipes de {min} a {max} pessoas. Junte o time e preencha os dados abaixo.
+      Exclusivo para alunos da UniCatólica. Equipes de {min} a {max} pessoas, cada uma com nome completo,
+      matrícula e e-mail.
     </p>
     <ol class="lobby__steps" role="list" aria-hidden="true">
       {steps.map((step, i) => (

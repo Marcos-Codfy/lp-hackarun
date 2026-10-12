@@ -1,5 +1,6 @@
 // entidade -> DTO; fica aqui pra todos os casos de uso falarem a mesma língua
 import type {
+  Activity,
   EventDay,
   FaqItem,
   Milestone,
@@ -12,9 +13,11 @@ import type {
   Speaker,
   Station,
   Team,
+  TimeSlot,
   Venue,
 } from '@domain/index';
 import type {
+  ActivityDTO,
   EventDayDTO,
   FaqItemDTO,
   MilestoneDTO,
@@ -26,6 +29,7 @@ import type {
   SpeakerDTO,
   StationDTO,
   TeamDTO,
+  TimeRangeDTO,
   VenueDTO,
 } from '../dto';
 
@@ -38,22 +42,44 @@ export const toVenueDTO = (v: Venue): VenueDTO => ({
   mapUrl: v.mapUrl,
 });
 
+const toTimeRangeDTO = (slot: TimeSlot): TimeRangeDTO => ({
+  start: slot.start,
+  end: slot.end,
+  startHint: slot.startHint,
+});
+
+export const toActivityDTO = (a: Activity): ActivityDTO => ({
+  id: a.id,
+  title: a.title,
+  kind: a.kind,
+  ...toTimeRangeDTO(a.slot),
+  summary: a.summary,
+  details: a.details,
+  track: a.track,
+  flags: [...a.flags],
+  parts: a.parts.map((p) => ({ label: p.label, ...toTimeRangeDTO(p.slot) })),
+  checklist: [...a.checklist],
+});
+
 export const toSessionDTO = (s: Session, venue: Venue): SessionDTO => ({
   id: s.id,
   title: s.title,
   kind: s.kind,
-  start: s.slot.start,
-  end: s.slot.end,
-  startHint: s.slot.startHint,
+  ...toTimeRangeDTO(s.slot),
   venue: toVenueDTO(venue),
+  place: s.place,
+  audience: s.audience,
+  audienceNote: s.audienceNote,
   description: s.description,
-  topics: [...s.topics],
+  note: s.note,
+  activities: s.activities.map(toActivityDTO),
 });
 
 export const toEventDayDTO = (d: EventDay, venueOf: (id: string) => Venue): EventDayDTO => ({
   id: d.id,
   date: d.date,
   stage: d.stage,
+  label: d.label,
   title: d.title,
   summary: d.summary,
   sessions: d.sessions.map((s) => toSessionDTO(s, venueOf(s.venueId))),
@@ -97,10 +123,7 @@ export const toScoringDTO = (r: ScoringRule): ScoringDTO => ({
 export const toTeamDTO = (t: Team): TeamDTO => ({
   id: t.id,
   name: t.name.value,
-  members: [...t.members],
   memberCount: t.size,
-  course: t.course,
-  mentor: t.mentor,
   status: t.status,
   imageUrl: t.imageUrl,
 });

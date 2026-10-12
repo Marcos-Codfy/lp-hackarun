@@ -1,4 +1,4 @@
-/* lobby de inscrição: global de propósito, tudo com prefixo .regform (as linhas de integrante são clonadas em runtime) */
+/* lobby de inscrição: global de propósito, tudo com prefixo .regform (os cards de integrante são clonados em runtime) */
 .regform {
   position: relative;
   isolation: isolate;
@@ -45,6 +45,26 @@
   line-height: 1.2;
 }
 
+/* celular: "Confirmar inscrição" cabe numa linha só dentro do paralelogramo (2 linhas na casca inclinada
+   ficam tortas); o respiro e a fonte cheios voltam quando sobra largura */
+.regform .btn--lg {
+  --btn-px: 1.25rem;
+  --btn-fs: 0.8125rem;
+}
+
+@media (min-width: 25rem) {
+  .regform .btn--lg {
+    --btn-fs: 0.875rem;
+  }
+}
+
+@media (min-width: 40rem) {
+  .regform .btn--lg {
+    --btn-px: 2.1rem;
+    --btn-fs: clamp(0.875rem, 0.82rem + 0.22vw, 1.0625rem);
+  }
+}
+
 /* barra de status do esquadrão, estilo lobby de jogo */
 .regform__squad {
   display: flex;
@@ -58,8 +78,10 @@
   color: var(--ink-cyan);
   font-family: var(--font-mono);
   font-size: var(--fs-hud);
-  letter-spacing: var(--tracking-hud);
+  /* no celular de 360px a faixa precisa caber numa linha só */
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .regform__squad-live {
@@ -82,6 +104,10 @@
 }
 
 @media (min-width: 480px) {
+  .regform__squad {
+    letter-spacing: var(--tracking-hud);
+  }
+
   .regform__squad-extra {
     display: inline;
   }
@@ -98,32 +124,11 @@
 
 .regform__fields {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-7);
   min-width: 0;
   padding: 0;
   border: 0;
-}
-
-.regform__group {
-  display: grid;
-  gap: var(--space-4);
-  min-width: 0;
-  padding: 0;
-  border: 0;
-}
-
-.regform__legend {
-  margin-bottom: var(--space-4);
-  font-family: var(--font-display);
-  font-size: var(--fs-lg);
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.regform__grid {
-  display: grid;
-  gap: var(--space-5) var(--space-4);
 }
 
 .regform__actions {
@@ -135,7 +140,7 @@
 
 .regform__privacy {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-2);
   color: var(--text-dim);
   font-size: var(--fs-xs);
@@ -146,6 +151,7 @@
   width: 10px;
   height: 12px;
   flex: none;
+  margin-top: 0.25em;
   background: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpath d='M5 0 10 2v4c0 3-2.2 5.4-5 6-2.8-.6-5-3-5-6V2z'/%3E%3C/svg%3E")
     center / contain no-repeat;
@@ -162,17 +168,24 @@
   overflow: hidden;
 }
 
+/* do celular ao desktop: o botão em cima e a nota de privacidade numa linha só embaixo */
 @media (min-width: 40rem) {
   .regform__actions {
-    grid-template-columns: auto 1fr;
-    align-items: center;
     justify-items: start;
-    gap: var(--space-5);
+    gap: var(--space-4);
   }
 }
 
-@media (min-width: 48rem) {
-  .regform__grid {
-    grid-template-columns: 1fr 1fr;
+/* card de integrante que acabou de entrar (MemberRow) */
+@keyframes regform-member-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .regform .member {
+    animation: none;
   }
 }

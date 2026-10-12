@@ -1,7 +1,7 @@
 ---
-// aceite do regulamento + LGPD; checkbox nativo com caixa custom de 24px num alvo de 44px.
-// o aviso abre em outra aba pra não perder o que já foi digitado. A frase da foto só aparece no modo equipe
-// (a View esconde [data-mode-only]); mudou o texto, suba o CONSENT_VERSION
+// aceite do regulamento + LGPD, em nome da equipe; checkbox nativo com caixa custom de 24px num alvo de 44px.
+// O aviso abre em outra aba pra não perder o que já foi digitado. Mudou o texto, suba o CONSENT_VERSION
+// (src/application/use-cases/SubmitRegistration.ts e apps-script/Validation.gs)
 ---
 
 <div class="consent">
@@ -16,17 +16,15 @@
     />
     <span class="consent__box" aria-hidden="true"></span>
     <span class="consent__text">
-      Li e aceito o regulamento (publicado pela organização) e autorizo o uso dos meus dados pela organização
-      do HackaRun apenas para fins do evento, conforme o{' '}
+      Estou ciente de que o regulamento do HackaRun é apresentado na abertura, em 12/11, às 19h35, e a equipe
+      se compromete a segui-lo. Em nome da equipe, autorizo a organização do HackaRun a usar os dados
+      informados (nomes, matrículas e e-mails) só para organizar a competição e falar com a equipe por e-mail,
+      conforme o{' '}
       <a class="consent__link" href="/privacidade" target="_blank" rel="noopener">
         aviso de privacidade<span class="sr-only"> (abre em nova aba)</span>
       </a>{' '}
-      (LGPD).
-      <span data-mode-only="team">
-        {' '}
-        Autorizo também a publicação da foto ou logo enviada na página de equipes do site e declaro que todas
-        as pessoas que aparecem nela concordaram.
-      </span>
+      (LGPD). Autorizo também publicar o nome da equipe, a foto ou logo e o número de integrantes na página de
+      equipes, e declaro que todos os integrantes, e quem aparece na imagem, concordaram.
     </span>
   </label>
   <p class="consent__error" id="reg-terms-error" data-error-for="acceptedTerms" hidden></p>

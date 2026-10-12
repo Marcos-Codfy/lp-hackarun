@@ -10,8 +10,9 @@
   <figcaption class="timg__info">
     <span class="timg__ok">Imagem pronta</span>
     <span class="timg__meta" data-team-image-meta></span>
+    {/* no celular de 360px cabe só "Trocar"; o "imagem" segue no nome acessível */}
     <button type="button" class="timg__change" data-team-image-change>
-      Trocar imagem
+      Trocar<span class="timg__change-extra"> imagem</span>
     </button>
   </figcaption>
 </figure>
@@ -89,9 +90,11 @@
     overflow-wrap: anywhere;
   }
 
+  /* gap: o " imagem" vira item flex a partir de 25rem e o espaço do começo dele some */
   .timg__change {
     display: inline-flex;
     align-items: center;
+    gap: 0.35em;
     min-height: 44px;
     padding: 0 var(--space-3);
     border: 1px solid color-mix(in srgb, var(--c-cyan) 55%, transparent);
@@ -106,6 +109,15 @@
     transition: box-shadow var(--dur-fast) var(--ease-out);
   }
 
+  .timg__change-extra {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .timg__change:hover {
     box-shadow: 0 0 22px color-mix(in srgb, var(--c-cyan) 30%, transparent);
   }
@@ -113,6 +125,16 @@
   .timg__change:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 3px;
+  }
+
+  @media (min-width: 25rem) {
+    .timg__change-extra {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+    }
   }
 
   @media (min-width: 40rem) {

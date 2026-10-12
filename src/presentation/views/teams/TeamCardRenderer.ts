@@ -56,8 +56,6 @@ function setImage(card: HTMLElement, team: PublicTeam): void {
 export function fillTeamCard(card: HTMLElement, team: PublicTeam): void {
   // hífen opcional nas palavras longas: no card estreito o nome quebra na sílaba, não no meio dela
   setText(card, '[data-team-name]', softHyphenate(team.name));
-  setText(card, '[data-team-course]', team.course ?? '');
-  qs('[data-team-course]', card)?.toggleAttribute('hidden', !team.course);
   setText(card, '[data-team-count]', memberCountLabel(team.memberCount));
   setText(card, '[data-team-initials]', teamInitials(team.name));
   qs('[data-team-pips]', card)?.style.setProperty('--count', String(team.memberCount));

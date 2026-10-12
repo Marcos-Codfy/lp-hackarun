@@ -13,7 +13,7 @@ export class StaticStationRepository implements StationRepository {
     return ContentMapper.toStations(this.raw);
   }
 
-  async scoring(): Promise<ScoringRule> {
+  async scoring(): Promise<ScoringRule | null> {
     return ContentMapper.toScoring(this.raw);
   }
 }

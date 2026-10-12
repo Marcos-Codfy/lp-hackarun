@@ -107,7 +107,10 @@ describe('RegistrationFormViewModel · foto ou logo da equipe', () => {
     vm.setText('teamName', 'Bug Busters');
     await vm.submit();
     expect(vm.state.value.errors['teamImage']).toBe(TeamImage.MISSING);
-    expect(vm.state.value.orderedErrors.map((e) => e.path).slice(0, 2)).toEqual(['teamImage', 'leader.name']);
+    expect(vm.state.value.orderedErrors.map((e) => e.path).slice(0, 2)).toEqual([
+      'teamImage',
+      'members.0.name',
+    ]);
   });
 
   it('o "Tentar de novo" reenvia a mesma imagem com a mesma chave, sem preparar de novo', async () => {
@@ -123,12 +126,13 @@ describe('RegistrationFormViewModel · foto ou logo da equipe', () => {
     expect(prepareImage.execute).toHaveBeenCalledTimes(1);
   });
 
-  it('inscrição individual não pede foto', async () => {
-    const { vm, gateway } = setupForm();
+  it('a foto é obrigatória: arquivo recusado segura o envio e o motivo fica no campo', async () => {
+    const { vm, gateway } = setupForm({ prepare: async () => fail('Use uma imagem JPG, PNG ou WebP.') });
     fillValidTeam(vm);
-    vm.setMode('solo');
-    await vm.chooseTeamImage(FILE).catch(() => {});
+    await vm.chooseTeamImage(FILE);
     await vm.submit();
-    expect(gateway.calls[0]?.teamImage).toBeNull();
+    expect(gateway.calls).toHaveLength(0);
+    expect(vm.state.value.errors['teamImage']).toBe('Use uma imagem JPG, PNG ou WebP.');
+    expect(vm.state.value.focus).toMatchObject({ path: 'teamImage', reason: 'invalid' });
   });
 });

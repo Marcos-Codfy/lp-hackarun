@@ -1,82 +1,65 @@
 import { describe, expect, it } from 'vitest';
 import { DomainError, TeamRegistration } from '@domain/index';
-import { TEAM_SIZE, teamInput } from '../helpers/fixtures';
-
-const member = (n: number) => ({ name: `Pessoa Numero${n}`, email: `p${n}@exemplo.com`, course: '' });
+import { MEMBER_ANA, MEMBER_BRUNO, TEAM_SIZE, member, teamInput } from '../helpers/fixtures';
 
 describe('TeamRegistration', () => {
-  it('cria uma equipe válida e formata o telefone', () => {
-    const r = TeamRegistration.create(
-      teamInput({ leader: { ...teamInput().leader, phone: '63999991234' } }),
-      TEAM_SIZE,
-    );
+  it('cria a equipe válida; o integrante 1 é o contato', () => {
+    const r = TeamRegistration.create(teamInput(), TEAM_SIZE);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value.size).toBe(2);
     expect(r.value.teamName).toBe('Bug Busters');
-    expect(r.value.leader.phone).toBe('(63) 99999-1234');
+    expect(r.value.contact.email).toBe('ana@exemplo.com');
+    expect(r.value.members.map((m) => m.studentId)).toEqual(['2024100123', '2024100456']);
   });
 
-  it('barra equipe menor que o mínimo (o líder conta como 1)', () => {
-    const r = TeamRegistration.create(teamInput({ members: [] }), TEAM_SIZE);
-    expect(!r.ok && r.error['members']).toContain('pelo menos 2');
+  it('barra equipe menor que o mínimo (todo mundo conta, inclusive o contato)', () => {
+    const r = TeamRegistration.create(teamInput({ members: [MEMBER_ANA] }), TEAM_SIZE);
+    expect(!r.ok && r.error['members']).toBe('A equipe precisa de pelo menos 2 integrantes.');
   });
 
   it('barra equipe maior que o máximo', () => {
-    const r = TeamRegistration.create(teamInput({ members: [1, 2, 3, 4, 5].map(member) }), TEAM_SIZE);
-    expect(!r.ok && r.error['members']).toContain('no máximo 5');
+    const r = TeamRegistration.create(teamInput({ members: [1, 2, 3, 4, 5, 6].map(member) }), TEAM_SIZE);
+    expect(!r.ok && r.error['members']).toBe('A equipe pode ter no máximo 5 integrantes.');
   });
 
-  it('ignora linhas de integrante totalmente vazias', () => {
-    const blank = { name: ' ', email: '', course: 'ES' };
-    const r = TeamRegistration.create(teamInput({ members: [blank, member(1)] }), TEAM_SIZE);
-    expect(r.ok && r.value.members).toHaveLength(1);
+  it('todos os campos de cada integrante são obrigatórios, com o erro no caminho do campo', () => {
+    const blank = { name: '', studentId: '', email: '' };
+    const r = TeamRegistration.create(teamInput({ members: [MEMBER_ANA, blank] }), TEAM_SIZE);
+    expect(!r.ok && r.error).toMatchObject({
+      'members.1.name': 'Informe o nome completo.',
+      'members.1.studentId': 'Informe a matrícula.',
+      'members.1.email': 'Informe o e-mail.',
+    });
   });
 
-  it('acusa e-mail repetido dentro da equipe', () => {
+  it('e-mail repetido dentro da equipe aponta o campo repetido e o integrante original', () => {
     const r = TeamRegistration.create(
-      teamInput({ members: [{ name: 'Bruno Lima', email: 'ANA@exemplo.com', course: '' }] }),
+      teamInput({ members: [MEMBER_ANA, { ...MEMBER_BRUNO, email: 'ANA@exemplo.com' }] }),
       TEAM_SIZE,
     );
-    expect(!r.ok && r.error['members']).toBe('Tem e-mail repetido na equipe.');
+    expect(!r.ok && r.error).toEqual({ 'members.1.email': 'Esse e-mail já está no integrante 1.' });
   });
 
-  it('aponta o erro no caminho do campo do integrante', () => {
-    const r = TeamRegistration.create(
-      teamInput({ members: [{ name: 'Bruno', email: 'x', course: '' }] }),
-      TEAM_SIZE,
-    );
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.error['members.0.name']).toBeDefined();
-    expect(r.error['members.0.email']).toBe('E-mail inválido.');
+  it('matrícula repetida (sem diferenciar caixa) também', () => {
+    const members = [
+      { ...MEMBER_ANA, studentId: 'ra-1234' },
+      MEMBER_BRUNO,
+      { ...member(3), studentId: 'RA-1234' },
+    ];
+    const r = TeamRegistration.create(teamInput({ members }), TEAM_SIZE);
+    expect(!r.ok && r.error).toEqual({ 'members.2.studentId': 'Essa matrícula já está no integrante 1.' });
   });
 
-  it('modo solo ignora nome da equipe e integrantes', () => {
-    const r = TeamRegistration.create(
-      teamInput({ mode: 'solo', teamName: '', members: [member(1), member(2)] }),
-      TEAM_SIZE,
-    );
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    expect(r.value.teamName).toBeNull();
-    expect(r.value.members).toEqual([]);
-    expect(r.value.size).toBe(1);
-  });
-
-  it('valida o nome da equipe só no modo equipe', () => {
-    const r = TeamRegistration.create(teamInput({ teamName: 'x' }), TEAM_SIZE);
+  it('valida o nome da equipe e exige a foto', () => {
+    const r = TeamRegistration.create(teamInput({ teamName: 'x', teamImage: null }), TEAM_SIZE);
     expect(!r.ok && r.error['teamName']).toContain('de 2 a 40');
+    expect(!r.ok && r.error['teamImage']).toBeDefined();
   });
 
   it('exige o aceite do regulamento', () => {
     const r = TeamRegistration.create(teamInput({ acceptedTerms: false }), TEAM_SIZE);
     expect(!r.ok && r.error['acceptedTerms']).toBeDefined();
-  });
-
-  it('corta a necessidade de acessibilidade em 500 caracteres', () => {
-    const r = TeamRegistration.create(teamInput({ accessibilityNeeds: 'a'.repeat(900) }), TEAM_SIZE);
-    expect(r.ok && r.value.accessibilityNeeds).toHaveLength(500);
   });
 
   it('não aceita regra de tamanho impossível', () => {

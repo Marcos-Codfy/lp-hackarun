@@ -11,7 +11,7 @@ const PHOTO = 'https://lh3.googleusercontent.com/d/1AbCdEfGhIjKlMnOpQrStUvWxYz_-
 // o mínimo do TeamCard.astro (+ TeamCardFrame) que o TeamCardRenderer preenche
 const card = `<li class="team-card" data-team-card>
   <div data-team-frame><span data-team-initials></span></div>
-  <h2 data-team-name></h2><p data-team-course></p><span data-team-pips></span><span data-team-count></span>
+  <h2 data-team-name></h2><span data-team-pips></span><span data-team-count></span>
 </li>`;
 
 const gallery = (ssr = '') => `
@@ -35,10 +35,7 @@ const team = (id: string, name: string, imageUrl: string | null = null) =>
   Team.create({
     id,
     name: teamName(name),
-    members: [],
     memberCount: 3,
-    course: 'ES',
-    mentor: null,
     status: 'confirmed',
     imageUrl,
   });

@@ -1,11 +1,9 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { AppsScriptSandbox, registrationBody } from '../../helpers/apps-script/sandbox';
+import { AppsScriptSandbox, otherTeam, registrationBody } from '../../helpers/apps-script/sandbox';
 
-const leader = registrationBody()['leader'] as Record<string, unknown>;
-// cada envio com um líder diferente, pra não cair na regra de e-mail repetido
-const bodyFor = (i: number) =>
-  registrationBody({ leader: { ...leader, email: `pessoa${i}@exemplo.com` }, members: [], mode: 'solo' });
+// cada envio é outra equipe inteira, pra não cair nas regras de nome, e-mail ou matrícula repetidos
+const bodyFor = (i: number) => otherTeam(i + 10);
 
 describe('Apps Script · prazo e capacidade em tempo de execução', () => {
   it('INSCRICOES_FECHADAS=sim fecha na mão', () => {
@@ -36,12 +34,10 @@ describe('Apps Script · prazo e capacidade em tempo de execução', () => {
     const script = new AppsScriptSandbox();
     script.properties['CAPACITY'] = '2';
     script.seed([
-      { Protocolo: 'HR26-AAAAAA', Modalidade: 'Equipe', 'E-mail': 'a@x.com', Status: 'confirmado' },
-      { Protocolo: 'HR26-BBBBBB', Modalidade: 'Equipe', 'E-mail': 'b@x.com', Status: 'Recusado' },
-      { Protocolo: 'HR26-CCCCCC', Modalidade: 'Individual', 'E-mail': 'c@x.com', Status: 'pendente' },
+      { Protocolo: 'HR26-AAAAAA', Equipe: 'Alfa', Status: 'confirmado' },
+      { Protocolo: 'HR26-BBBBBB', Equipe: 'Beta', Status: 'Recusado' },
     ]);
     expect(script.post(registrationBody()).ok).toBe(true);
-    // lotou: vale pra equipe e pra individual
     expect(script.post(bodyFor(1))).toEqual({ ok: false, error: 'closed' });
   });
 
@@ -54,21 +50,21 @@ describe('Apps Script · prazo e capacidade em tempo de execução', () => {
 });
 
 describe('Apps Script · limite de envios', () => {
-  it('o mesmo e-mail tem um teto de tentativas por janela de 10 min', () => {
+  it('o mesmo e-mail de contato tem um teto de tentativas por janela de 10 min', () => {
     const script = new AppsScriptSandbox();
-    script.seed([{ Protocolo: 'HR26-AAAAAA', 'E-mail': 'ana@exemplo.com' }]);
+    script.seed([{ Protocolo: 'HR26-AAAAAA', Equipe: 'Bug Busters', Status: 'pendente' }]);
     const max = script.evaluate<number>('EMAIL_MAX_ATTEMPTS');
     const attempt = (i: number) => script.post(registrationBody({ submittedAt: `tentativa-${i}` })).error;
     const errors = Array.from({ length: max + 1 }, (_, i) => attempt(i));
-    expect(errors.slice(0, max).every((e) => e === 'duplicate')).toBe(true);
+    expect(errors.slice(0, max).every((e) => e === 'duplicate_team_name')).toBe(true);
     expect(errors[max]).toBe('rate-limited');
     script.now += 10 * 60_000;
-    expect(attempt(max + 1)).toBe('duplicate');
+    expect(attempt(max + 1)).toBe('duplicate_team_name');
   });
 
   it('um e-mail martelando não esgota o balde global de todo mundo', () => {
     const script = new AppsScriptSandbox();
-    script.seed([{ Protocolo: 'HR26-AAAAAA', 'E-mail': 'ana@exemplo.com' }]);
+    script.seed([{ Protocolo: 'HR26-AAAAAA', Equipe: 'Bug Busters', Status: 'pendente' }]);
     for (let i = 0; i < 200; i++) script.post(registrationBody({ submittedAt: `tentativa-${i}` }));
     expect(script.post(bodyFor(1)).ok).toBe(true);
   });

@@ -1,0 +1,127 @@
+---
+// etapa do formulário (Equipe, Integrantes, Confirmação): fieldset com número, título e uma linha de energia.
+// O número fica fora do nome acessível: o leitor de tela ouve só "Equipe", "Integrantes"...
+interface Props {
+  index: string;
+  title: string;
+  lead?: string;
+  describedby?: string;
+  class?: string;
+}
+
+const { index, title, lead, describedby, class: className } = Astro.props;
+const leadId = lead ? `reg-step-${index}-lead` : undefined;
+const description = [leadId, describedby].filter(Boolean).join(' ') || undefined;
+---
+
+<fieldset class:list={['step', className]} aria-describedby={description}>
+  <legend class="step__legend">
+    <span class="step__index" aria-hidden="true">
+      {index}
+    </span>
+    <span class="step__title">{title}</span>
+  </legend>
+  <span class="step__line" aria-hidden="true"></span>
+  {lead && (
+    <p class="step__lead" id={leadId}>
+      {lead}
+    </p>
+  )}
+  <div class="step__body">
+    <slot />
+  </div>
+</fieldset>
+
+<style>
+  .step {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  /* legend com float: é o jeito estável de pôr um legend dentro do grid */
+  .step__legend {
+    float: left;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: 0;
+  }
+
+  .step__index {
+    position: relative;
+    isolation: isolate;
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.6rem;
+    height: 1.9rem;
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  /* casca inclinada, a mesma linguagem dos botões e chips */
+  .step__index::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid color-mix(in srgb, var(--c-cyan) 55%, transparent);
+    border-radius: 2px;
+    background: linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--c-cyan) 16%, transparent),
+      color-mix(in srgb, var(--c-electric) 12%, transparent)
+    );
+    box-shadow: 0 0 18px color-mix(in srgb, var(--c-cyan) 22%, transparent);
+    transform: skewX(var(--skew));
+  }
+
+  .step__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .step__line {
+    clear: both;
+    display: block;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--c-cyan) 55%, transparent),
+      color-mix(in srgb, var(--c-violet) 30%, transparent) 45%,
+      transparent
+    );
+  }
+
+  .step__lead {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+  }
+
+  .step__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-2);
+  }
+
+  @media (forced-colors: active) {
+    .step__index::before {
+      border-color: CanvasText;
+    }
+  }
+</style>

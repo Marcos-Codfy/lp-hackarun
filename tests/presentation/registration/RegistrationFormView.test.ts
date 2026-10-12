@@ -12,8 +12,7 @@ const markup = (extra = '') => `
     ${extra}
     <div class="regform__panel" data-reg-panel>
       <form data-reg-form>
-        <input type="radio" name="mode" value="team" checked data-reg-mode />
-        <input id="reg-leader-email" data-field="leader.email" />
+        <input id="reg-team-name" data-field="teamName" />
         <div data-reg-failure hidden><p data-reg-failure-text></p><button type="button" data-reg-retry>Tentar de novo</button></div>
         <button type="submit" data-reg-submit><span class="btn__label">Confirmar inscrição</span></button>
       </form>
@@ -81,7 +80,7 @@ describe('RegistrationFormView · falha no envio', () => {
 
     gateway.willThrow(new RegistrationGatewayError('duplicate', 'x'));
     await vm.retry();
-    expect(el('[data-reg-failure-text]')?.textContent).toBe('Esse e-mail já tem uma inscrição registrada.');
+    expect(el('[data-reg-failure-text]')?.textContent).toBe('Essa equipe já tem uma inscrição registrada.');
     expect(el('[data-reg-retry]')?.hidden).toBe(true);
   });
 });

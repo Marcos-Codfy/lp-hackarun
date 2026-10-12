@@ -1,218 +1,256 @@
 # Inscrições do HackaRun na planilha (Google Apps Script)
 
-O site é estático (Cloudflare Pages) e não tem servidor. As inscrições vão para uma **planilha do Google** através de um
-**Web App do Apps Script**, que é gratuito. A foto ou logo de cada equipe vai para uma pasta do **Google Drive**. O mesmo
-Web App devolve a lista de **equipes confirmadas**, que aparece na página `/equipes` do site quase em tempo real.
+O site é estático (Cloudflare Pages) e não tem servidor. As inscrições das equipes vão para uma **planilha do Google**
+através de um **Web App do Apps Script**, que é gratuito. A foto ou logo de cada equipe vai para uma pasta do
+**Google Drive**. O mesmo Web App devolve a lista de **equipes confirmadas**, que aparece na página `/equipes` do site
+quase em tempo real.
 
 ```
-site (formulário + foto) --POST--> Web App (Code.gs) --> planilha "Inscricoes"
-                                                     +-> Drive: pasta "HackaRun 2026 · Fotos das equipes"
-site (/equipes)          --GET ?action=teams--> só equipes com Status "confirmado" (+ id da foto)
+site (formulário + foto) --POST--> Web App --> aba "Equipes"      (1 linha por equipe, com a foto na célula)
+                                           +-> aba "Integrantes"  (1 linha por pessoa: nome, matrícula, e-mail)
+                                           +-> Drive: pasta das fotos (FOTOS_PASTA_ID)
+site (/equipes)          --GET ?action=teams--> só equipes com Status "confirmado": nome, nº de integrantes e foto
 ```
 
-## 1. Criar a planilha
+A inscrição é **só de equipe** (de 2 a 5 pessoas, todas alunas da UniCatólica). Cada integrante informa nome
+completo, matrícula e e-mail; o integrante 1 é o **contato da equipe**. A comunicação oficial do HackaRun é **por
+e-mail** (não usamos WhatsApp).
 
-1. Entre no Google Drive com a conta da organização (não use conta pessoal: ela vira a dona dos dados).
-2. Crie uma planilha nova, por exemplo **HackaRun 2026 · Inscrições**.
-3. Não precisa criar abas nem cabeçalho: na primeira inscrição o script cria a aba `Inscricoes` com as colunas
-   `Protocolo, Data/hora, Modalidade, Equipe, Lider, E-mail, WhatsApp, Curso, Periodo, Integrantes, Qtde,
-Acessibilidade, Status, Origem, Consentimento, Chave de envio, Imagem` e um menu suspenso na coluna **Status**.
-4. A aba já existia de uma versão anterior? O script completa sozinho, na primeira gravação, os títulos que faltam no
-   fim (**Consentimento**, **Chave de envio** e **Imagem**, colunas O, P e Q). Título que você renomeou fica como
-   está.
+## 1. Criar (ou abrir) a planilha
+
+1. Entre no Google Drive com a **conta da organização** (não use conta pessoal: ela vira a dona dos dados).
+2. Crie uma planilha nova, por exemplo **HackaRun 2026 · Inscrições** (ou abra a que já existe).
+3. Não crie abas nem títulos: o script monta tudo (seção 4). Se a planilha for nova, a primeira aba vazia
+   (`Página1` ou `Sheet1`) vira a aba **Equipes**. Uma aba que já tem dados nunca é renomeada nem apagada.
 
 ## 2. Colar o código
 
-1. Na planilha, abra **Extensões > Apps Script**.
-2. Apague o conteúdo do `Código.gs` e cole o conteúdo de [`Code.gs`](./Code.gs).
-3. Clique em **+ > Script**, dê o nome `Validation` e cole o conteúdo de [`Validation.gs`](./Validation.gs).
-4. Repita com o nome `Limits` e o conteúdo de [`Limits.gs`](./Limits.gs) (prazo, capacidade e limite de envios).
-5. Repita com o nome `Images` e o conteúdo de [`Images.gs`](./Images.gs) (foto ou logo das equipes no Drive).
-6. (Opcional) Em **Configurações do projeto**, marque "Mostrar o arquivo de manifesto appsscript.json" e cole o
-   conteúdo de [`appsscript.json`](./appsscript.json). Ele fixa o fuso `America/Araguaina` e o runtime V8.
-7. Salve (Ctrl+S).
-8. Autorize o Drive uma vez: com o arquivo `Images` aberto, escolha a função **`prepararFotos`** no topo do editor
-   e clique em **Executar**. O Google pede permissão para o script acessar o **Google Drive** (é onde as fotos ficam)
-   e a função cria a pasta das fotos (seção 7) e o segredo dos ids públicos (`ID_SEGREDO`, seção 7). O endereço da
-   pasta aparece no **Registro de execução**.
+1. Na planilha, abra **Extensões > Apps Script**. O projeto aberto fica ligado a esta planilha.
+2. Dê um nome ao projeto (topo da tela), por exemplo **HackaRun 2026 · Inscrições**.
+3. Apague o conteúdo do `Código.gs` e cole o conteúdo de [`Code.gs`](./Code.gs). Se quiser, renomeie o arquivo
+   para `Code` (o nome não muda nada, só ajuda a achar).
+4. Para cada arquivo abaixo, clique em **+ > Script**, digite o nome (sem o `.gs`) e cole o conteúdo:
+
+   | Nome do arquivo | O que faz                                                                        |
+   | --------------- | -------------------------------------------------------------------------------- |
+   | `Validation`    | Regras do servidor (iguais às do site), consentimento e proteção contra fórmula  |
+   | `Limits`        | Prazo, capacidade e limite de envios                                             |
+   | `Images`        | Foto ou logo da equipe no Drive                                                  |
+   | `Sheets`        | Colunas das abas e a gravação de cada inscrição                                  |
+   | `Registry`      | Quem já está inscrito: nome de equipe, e-mails e matrículas repetidos            |
+   | `Setup`         | `configurarPlanilha()`: cria e formata as abas (filtros, cores, menus, proteção) |
+   | `Summary`       | Aba **Resumo**: contadores ao vivo e o passo a passo da organização              |
+
+5. Mostre o manifesto: **Configurações do projeto** (ícone de engrenagem) > marque **Mostrar arquivo de manifesto
+   "appsscript.json" no editor**. Volte ao **Editor**, abra o `appsscript.json` e troque todo o conteúdo pelo de
+   [`appsscript.json`](./appsscript.json). Ele fixa o fuso `America/Araguaina`, o runtime V8, o log de erros e os
+   **escopos mínimos**: só esta planilha (`spreadsheets.currentonly`) e o Drive (`drive`, para as fotos).
+6. Salve (Ctrl+S). O editor não pode mostrar erro em vermelho.
 
 > O tamanho da equipe está em `TEAM_SIZE` no `Validation.gs` (hoje 2 a 5 pessoas). Ele precisa ser igual ao
-> `registration.teamSize` do arquivo `src/infrastructure/content/event.json` (o `npm test` acusa se divergir).
+> `registration.teamSize` do `src/infrastructure/content/event.json` (o `npm test` acusa se divergir).
 
-## 3. Publicar como Web App
+## 3. Propriedades do script
+
+Em **Configurações do projeto > Propriedades do script > Adicionar propriedade do script**, crie as que precisar
+(nome à esquerda, valor à direita) e clique em **Salvar propriedades do script**:
+
+| Propriedade           | Exemplo                     | O que faz                                                                         |
+| --------------------- | --------------------------- | --------------------------------------------------------------------------------- |
+| `FOTOS_PASTA_ID`      | `1AbC...xyz`                | Pasta do Drive das fotos. Id = o final da URL da pasta (`.../folders/<id>`)       |
+| `CLOSES_AT`           | `2026-11-08T23:59:00-03:00` | Prazo final. Data ISO **com hora e fuso** (`-03:00` é o horário de Palmas)        |
+| `CAPACITY`            | `30`                        | Máximo de equipes. Conta as que não estão `recusado`                              |
+| `INSCRICOES_FECHADAS` | `sim`                       | Fecha na hora, sem mexer no site. Para reabrir, apague ou troque para `nao`       |
+| `ID_SEGREDO`          | (criada sozinha)            | Segredo dos ids públicos das equipes. Não apague nem compartilhe                  |
+| `PLANILHA_VERSAO`     | (criada sozinha)            | Versão do layout já aplicado. Apagar faz a próxima inscrição refazer a formatação |
+
+- **Sem `FOTOS_PASTA_ID`**, o script cria a pasta `HackaRun 2026 · Fotos das equipes` no Drive de quem publica e
+  guarda o id sozinho. A conta que publica o Web App precisa poder **editar** a pasta escolhida.
+- Valor torto (`CLOSES_AT=8 de novembro`, `CAPACITY=trinta`) **fecha** as inscrições e grava o erro no log: melhor
+  errar pro lado seguro. Mantenha `CLOSES_AT` e `CAPACITY` iguais ao `registration` do `event.json`.
+
+## 4. Montar a planilha e autorizar
+
+1. No editor, abra o arquivo `Setup`, escolha a função **`configurarPlanilha`** no seletor do topo e clique em
+   **Executar**.
+2. O Google pede autorização. Escolha a conta da organização. Vai aparecer **"O Google não verificou este app"**:
+   clique em **Avançado > Acessar HackaRun... (não seguro)** e depois em **Permitir**. O app é seu; o aviso aparece
+   para todo script que não passou pela verificação do Google. As permissões pedidas são só **esta planilha** e o
+   **Google Drive** (para as fotos).
+3. No **Registro de execução** aparecem as abas criadas e o endereço da pasta das fotos. Na planilha agora existem:
+   - **Equipes**: Protocolo, Data/hora, Equipe, Integrantes (qtd), **Foto** (miniatura dentro da célula, pela
+     fórmula `=IMAGE()`), **Status** (menu `pendente` / `confirmado` / `recusado`), E-mail de contato, E-mails da
+     equipe (separados por `; `), Link da foto (abre no Drive), ID da foto, Origem, Consentimento, Chave de envio.
+   - **Integrantes**: Protocolo, Equipe, Nº, Nome completo, Matrícula, E-mail, Contato (`sim`/`não`) e **Status da
+     equipe** (fórmula que busca o Status na aba Equipes).
+   - **Resumo**: equipes inscritas, confirmadas, pendentes, recusadas, total de integrantes, vagas restantes (com
+     `CAPACITY`) e os e-mails das equipes confirmadas numa célula só, prontos para colar.
+4. Já vem tudo formatado: títulos fixos com fundo escuro, coluna da equipe congelada, filtro em todas as colunas,
+   faixas alternadas, cor por status (pendente âmbar, confirmado verde, recusado vermelho, linha recusada apagada),
+   data no formato `dd/MM/aaaa HH:mm`, matrícula como texto (o zero à esquerda não some) e aviso ao editar um título.
+
+> Pode rodar `configurarPlanilha` de novo quando quiser (depois de mudar a `CAPACITY`, por exemplo): não apaga dado
+> nem duplica filtro, faixa ou proteção. Se esquecer de rodar, a primeira inscrição monta a planilha sozinha, mas a
+> autorização do Drive precisa ter sido feita antes (passo 2).
+
+## 5. Publicar como Web App
 
 1. Clique em **Implantar > Nova implantação**.
-2. Em "Tipo", escolha **App da Web**.
-3. **Executar como:** _Eu_ (a conta da organização). **Quem pode acessar:** _Qualquer pessoa_.
-4. Clique em **Implantar** e autorize o acesso à planilha e ao Drive (o Google mostra um aviso de app não verificado:
-   clique em "Avançado" e continue, o app é seu).
+2. Em **Selecionar tipo** (engrenagem), escolha **App da Web**.
+3. **Descrição:** `v1`. **Executar como:** _Eu (conta da organização)_. **Quem pode acessar:** _Qualquer pessoa_.
+4. Clique em **Implantar** (se pedir, autorize de novo como no passo 4.2).
 5. Copie a **URL do app da Web** (termina em `/exec`).
 6. Teste no navegador: `URL/exec?action=health` precisa responder `{"ok":true,"open":true}` (`open: false` = as
-   propriedades da seção 6 estão fechando as inscrições).
+   propriedades da seção 3 estão fechando as inscrições). `URL/exec?action=teams` responde `{"ok":true,"teams":[]}`.
 
-> Mudou o código? Use **Implantar > Gerenciar implantações > Editar > Nova versão**. Assim a URL continua a mesma.
-> "Nova implantação" gera outra URL e o site para de enviar. Colou um `Code.gs`, `Validation.gs` ou `Images.gs` novo?
-> Publique a nova versão, senão o Web App segue rodando o código antigo.
->
-> **Atualizando de uma versão sem fotos:** cole os quatro arquivos, rode `prepararFotos` (passo 8 da seção 2) para
-> autorizar o Drive e só então publique a nova versão. Faça isso junto com o deploy do site: o script novo só aceita o
-> aviso de privacidade vigente (`CONSENT_VERSION`) e exige a foto nas inscrições de equipe.
+> O `teams` respondeu erro de permissão na planilha (o Registro de execução mostra a mensagem)? No
+> `appsscript.json`, troque o escopo `spreadsheets.currentonly` por `https://www.googleapis.com/auth/spreadsheets`,
+> salve, rode `configurarPlanilha` de novo para autorizar e publique uma nova versão (seção 7).
 
-## 4. Ligar o site na planilha
+## 6. Ligar o site na planilha
 
 Escolha **uma** das opções:
 
 - **Cloudflare Pages (recomendado):** no projeto, abra **Settings > Environment variables** e crie
-  `PUBLIC_REGISTRATION_ENDPOINT` com a URL do passo 3. Faça um novo deploy (as variáveis entram no build).
+  `PUBLIC_REGISTRATION_ENDPOINT` com a URL `/exec` do passo 5. Faça um novo deploy (as variáveis entram no build).
 - **No código:** coloque a URL em `registration.endpoint` no `src/infrastructure/content/event.json` e faça commit.
 
 Sem URL, o site mostra "As inscrições abrem em breve" com o formulário desativado. Em `npm run dev` sem URL, o envio é
-simulado na memória para testar a tela (e-mail começando com `falha` simula erro de rede e `duplicado` simula inscrição
-repetida). As equipes inscritas na simulação aparecem em `/equipes` já confirmadas, com a foto, enquanto a aba do
-navegador estiver aberta.
+simulado na memória para testar a tela: e-mail de contato começando com `falha` simula erro de rede, `servidor` o
+script caindo e `duplicado` inscrição repetida; nome de equipe, e-mail ou matrícula repetidos entre as equipes da
+simulação dão o mesmo erro no campo que o script de verdade. As equipes simuladas aparecem em `/equipes` já
+confirmadas, com a foto, enquanto a aba do navegador estiver aberta.
 
-## 5. Confirmar uma equipe
+## 7. Mudou o código? Publique uma nova versão
 
-1. Confira os dados na aba `Inscricoes`.
-2. Confira a foto: a coluna **Imagem** guarda o id do arquivo no Drive. Abra
-   `https://drive.google.com/file/d/<id>/view`. Na pasta das fotos o arquivo tem um nome sorteado
-   (`foto-<código aleatório>.webp`), nunca o protocolo: ache pela coluna **Imagem**.
+1. Cole os arquivos que mudaram (e crie os novos, se houver) e salve.
+2. **Implantar > Gerenciar implantações** > selecione a implantação ativa > **Editar** (lápis) > em **Versão**,
+   escolha **Nova versão** > **Implantar**. A URL continua a mesma.
+3. **Nunca** use "Nova implantação" para atualizar: ela gera outra URL e o site para de enviar.
+4. Mudou `CONSENT_VERSION`, colunas ou regras? Publique o script **junto com o deploy do site**: o script só aceita o
+   aviso de privacidade vigente e o formato de envio atual.
+
+> **Vindo da versão com a aba `Inscricoes`** (modalidade individual, WhatsApp, curso): a aba antiga não é mais usada.
+> Cole os oito arquivos, rode `configurarPlanilha` e publique a nova versão. Depois apague a aba `Inscricoes`.
+
+## 8. Rotina da organização
+
+### Confirmar uma equipe
+
+1. Na aba **Equipes**, confira os dados e a **Foto** (a miniatura aparece na própria célula; o **Link da foto** abre
+   no Drive).
+2. Se quiser, confira as pessoas na aba **Integrantes** (filtre pelo Protocolo ou pela Equipe).
 3. Na coluna **Status**, troque `pendente` por `confirmado`.
-4. Em até 1 minuto a equipe aparece na página **/equipes** do site, com a foto (o script limpa o cache na hora da
-   edição, mas o navegador de quem já está com o site aberto só busca de novo quando a lista volta para a tela).
+4. Em até 1 minuto a equipe aparece em **/equipes** e no contador do site, só com **nome, foto e número de
+   integrantes**. Nomes, matrículas e e-mails nunca saem da planilha.
 
-O site mostra **apenas** o nome da equipe, o curso do líder, a quantidade de integrantes e a foto ou logo. Nomes,
-e-mails e telefones nunca saem da planilha. Inscrições individuais (sem nome de equipe) não aparecem na lista. Equipe
-sem foto (coluna **Imagem** vazia) aparece com as iniciais do nome.
+`recusado` tira a equipe do site e **libera** a vaga, o nome da equipe, os e-mails e as matrículas (podem se inscrever
+de novo).
+
+### Filtrar
+
+- Clique no ícone de filtro de qualquer título. Na aba **Equipes**: por Status, Equipe, data...
+- Na aba **Integrantes**: por pessoa, **Matrícula**, **E-mail**, Contato ou **Status da equipe** (a coluna acompanha a
+  aba Equipes sozinha).
+- Para não atrapalhar quem está olhando junto, use uma visualização filtrada (**Dados > Visualizações filtradas**).
+
+### Mandar e-mail para as equipes
+
+- Aba **Resumo**: a célula de **E-mails das equipes confirmadas** já junta todos os endereços com `; `. Copie e cole
+  no campo **Para** (ou **Cco**, para ninguém ver o e-mail de ninguém) do Gmail. Há também a lista de todas as
+  inscritas (menos as recusadas).
+- Para uma equipe só: copie a célula **E-mails da equipe** da linha dela.
 
 ### Moderação das fotos
 
-- **Tirar uma foto do ar:** apague a célula **Imagem** da equipe. O site passa a mostrar as iniciais na hora (editar a
-  coluna também limpa o cache). Pedido de exclusão (LGPD)? Apague também o arquivo no Drive e esvazie a lixeira.
+- **Tirar uma foto do ar:** apague a célula **ID da foto**. A miniatura some e o site passa a mostrar as iniciais na
+  hora (editar a coluna também limpa o cache).
+- **Pedido de remoção (LGPD) ou imagem imprópria:** antes de apagar a célula, abra o **Link da foto**, mova o arquivo
+  para a lixeira do Drive e esvazie a lixeira. Só apagar a célula não basta: o arquivo continua compartilhado por link
+  e o endereço dele já passou pelo site (`?action=teams`).
 - **Trocar a foto:** suba o arquivo novo na pasta das fotos, compartilhe como **Qualquer pessoa com o link · Leitor**,
-  copie o id do link (`.../file/d/<id>/view`) e cole na célula **Imagem**. Use só JPG, PNG ou WebP.
-- **Recusar a inscrição:** o Status `recusado` já tira a equipe (e a foto) da lista. Apague o arquivo se não for usar.
+  copie o id do link (`.../file/d/<id>/view`) e cole na célula **ID da foto**. Use só JPG, PNG ou WebP.
 - O site só aceita na célula um id do Drive (letras, números, `_` e `-`): qualquer outra coisa vira as iniciais.
-
-## 6. Prazo e capacidade (Propriedades do script)
-
-O site fecha o formulário no build, mas qualquer um pode chamar a URL do Web App direto. Por isso o script confere
-prazo e capacidade **a cada envio** e responde `{"ok":false,"error":"closed"}` quando não dá mais.
-
-Em **Configurações do projeto > Propriedades do script**, crie as que precisar:
-
-| Propriedade           | Exemplo                     | O que faz                                                                   |
-| --------------------- | --------------------------- | --------------------------------------------------------------------------- |
-| `CLOSES_AT`           | `2026-11-08T23:59:00-03:00` | Prazo final. Data ISO **com hora e fuso** (`-03:00` é o horário de Palmas)  |
-| `CAPACITY`            | `30`                        | Máximo de equipes. Conta as linhas `Equipe` que não estão `recusado`        |
-| `INSCRICOES_FECHADAS` | `sim`                       | Fecha na hora, sem mexer no site. Para reabrir, apague ou troque para `nao` |
-
-- Lotou a `CAPACITY`, fecha pra todo mundo (equipe e individual), igual ao site. Recusar uma equipe na coluna
-  **Status** libera a vaga.
-- Valor torto (`CLOSES_AT=8 de novembro`, `CAPACITY=trinta`) **fecha** as inscrições e grava o erro no log de
-  execuções: melhor errar pro lado seguro. Depois de mexer, confira `URL/exec?action=health`.
-- Mantenha `CLOSES_AT` e `CAPACITY` iguais a `registration.closesAt` e `registration.capacity` do `event.json`.
-
-## 7. Fotos das equipes (Google Drive)
-
-Na inscrição de equipe a foto ou logo é **obrigatória**. O navegador já redimensiona (até 800 px no lado maior, WebP ou
-JPEG de até ~300 KB) e manda junto com o formulário. O `Images.gs` grava na pasta das fotos, definida por uma
-Propriedade do script:
-
-| Propriedade      | O que faz                                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------------------------- |
-| `FOTOS_PASTA_ID` | Id da pasta das fotos. Sem ela, o script cria `HackaRun 2026 · Fotos das equipes` uma vez e guarda o id |
-| `ID_SEGREDO`     | Criada sozinha. Segredo do id público de cada equipe na lista do site. Não apague nem compartilhe       |
-
-- **Usar uma pasta que já existe:** abra a pasta no Drive, copie o id da URL (`.../folders/<id>`) e crie a propriedade
-  `FOTOS_PASTA_ID` em **Configurações do projeto > Propriedades do script**. A conta que publica o Web App precisa
-  poder editar a pasta.
-- **Nome do arquivo:** sorteado (`foto-<código aleatório>.webp`). Nunca o protocolo, que identifica a inscrição
-  (troca de foto e pedidos da LGPD) e não pode vazar pelo link público, e nunca algo digitado no formulário. A coluna
-  **Imagem** liga a linha ao arquivo.
-- **Id público da equipe (`ID_SEGREDO`):** a lista do site mostra um id por equipe (`team-3f9a0c12bd`) que sai do
-  protocolo misturado com esse segredo. Sem ele, dava para testar todos os protocolos possíveis e descobrir o de cada
-  equipe. Apagar ou trocar a propriedade só muda os ids da lista (nada se perde), mas não faça isso à toa.
-- **Compartilhamento:** cada arquivo fica como **Qualquer pessoa com o link · Leitor**, porque o site mostra a foto pelo
-  endereço público do Google (`lh3.googleusercontent.com`). O id só aparece no site depois da confirmação. Nunca
-  compartilhe a **planilha** assim: só as fotos.
-- **Conta institucional que bloqueia link público:** a inscrição entra do mesmo jeito, o bloqueio vai para o
-  **Registro de execução** e o site mostra as iniciais. Peça ao administrador do Google Workspace para liberar
-  compartilhamento externo nessa pasta, ou compartilhe os arquivos à mão depois.
-- **Drive fora do ar ou cota estourada:** a inscrição também entra, com a coluna **Imagem** vazia e o erro no log. A
-  organização pede a foto pelo contato e cola o id depois (seção 5).
-- **Reenvio:** a foto só sobe depois das checagens de reenvio e de e-mail repetido, então o "Tentar de novo" do site e
-  os reenvios automáticos nunca criam um segundo arquivo. Se a planilha falhar depois do upload, a foto vai para a
-  lixeira e o reenvio grava outra.
-- **Fila do lock:** o upload roda dentro do lock, depois das checagens de reenvio, de e-mail repetido, do limite de
-  envios e da capacidade (assim nenhum desses casos sobe arquivo à toa). O link público é ligado logo depois de soltar
-  o lock, para a próxima inscrição não esperar essa ida a mais ao Drive.
+- Na pasta, o arquivo tem nome sorteado (`foto-<código aleatório>.webp`), nunca o protocolo: ache pela coluna **ID da
+  foto**.
 
 ## Proteções que o script já faz
 
-- **Primeiro filtro:** campo isca (honeypot) e tempo mínimo de 3s no formulário. Os dois vêm do navegador, então
-  só barram robô bobo; os limites abaixo continuam valendo para quem chama a URL direto.
-- Validação completa no servidor (nome, e-mail, WhatsApp, curso, tamanho da equipe, e-mails repetidos e
-  consentimento na versão vigente do aviso).
-- **Foto:** base64 que decodifica, até 400 KB, só JPEG, PNG ou WebP conferidos pelos primeiros bytes do arquivo (e o
-  tipo declarado precisa bater com eles). Arquivo fora disso recusa a inscrição antes de tocar no Drive.
-- **Limite por e-mail:** no máximo 10 tentativas a cada 10 min por e-mail do líder (guardado como hash no cache,
-  nunca em texto). Cobre os reenvios automáticos do site e segura quem fica testando se um e-mail já está inscrito.
-- **Limite global:** 120 envios por minuto. Como o e-mail esbarra no próprio limite antes, um script repetindo o
-  mesmo e-mail não consegue travar a fila de todo mundo.
-- `LockService` em volta da gravação: duas inscrições ao mesmo tempo não se atropelam.
-- Bloqueio de inscrição repetida pelo e-mail do líder.
-- Cada formulário manda uma chave de envio (UUID): reenvio com a mesma chave e o mesmo e-mail (automático ou pelo
-  "Tentar de novo") recebe o mesmo protocolo, mesmo depois de o cache expirar. Erro interno responde `server`, que o
-  site trata como passageiro.
-- Proteção contra fórmulas injetadas na planilha (`=`, `+`, `-`, `@`).
-- Prazo e capacidade conferidos a cada envio (seção 6).
+- **Primeiro filtro:** campo isca (honeypot) e tempo mínimo de 3 s no formulário. Os dois vêm do navegador, então só
+  barram robô bobo; os limites abaixo continuam valendo para quem chama a URL direto.
+- **Validação completa no servidor**, igual à do site (um teste roda os dois lados): nome da equipe de 2 a 40
+  caracteres; de 2 a 5 integrantes; nome completo com nome e sobrenome; matrícula de 4 a 20 caracteres (letras,
+  números, `.`, `-` e `/`, gravada em maiúsculas); e-mail válido; nada de e-mail ou matrícula repetidos na equipe;
+  foto obrigatória; consentimento na versão vigente do aviso.
+- **Uma equipe por pessoa:** nome de equipe já usado (sem diferenciar acento e caixa), e-mail ou matrícula que já
+  estão em outra equipe não recusada voltam `duplicate_team_name`, `duplicate_email` ou `duplicate_student_id`, com a
+  posição de cada integrante; o site marca o campo certo.
+- **Reenvio sem duplicar:** cada formulário manda uma chave de envio (UUID). A mesma chave com o mesmo contato recebe
+  o mesmo protocolo, pelo cache (10 min) e depois pela coluna **Chave de envio**.
+- **Limite por e-mail:** até 10 tentativas a cada 10 min por e-mail de contato (guardado como hash no cache, nunca em
+  texto). **Limite global:** 120 envios por minuto.
+- `LockService` em volta da gravação: duas inscrições ao mesmo tempo não se atropelam. Os integrantes são gravados
+  antes da equipe: se algo cair no meio, a linha órfã em Integrantes é ignorada.
+- **Foto:** base64 que decodifica, até 400 KB, só JPEG, PNG ou WebP conferidos pelos primeiros bytes. Sobe só depois
+  das checagens de reenvio e de duplicado (retry nunca cria um segundo arquivo); se a planilha falhar depois, vai para
+  a lixeira. Drive fora do ar ou link público bloqueado pelo domínio: a inscrição entra do mesmo jeito e o erro vai
+  para o log.
+- **Fórmula injetada:** texto digitado começando com `=`, `+`, `-` ou `@` vira texto puro. As únicas fórmulas da
+  planilha são as do próprio script (`IMAGE`, `HYPERLINK`, a busca do Status e o Resumo).
+- Prazo e capacidade conferidos a cada envio; lista pública com cache de 60 s (o `onEdit` limpa quando Status, nome,
+  quantidade ou foto mudam).
 
-Os testes rodam o `Code.gs`, o `Validation.gs`, o `Limits.gs` e o `Images.gs` de verdade no Node, com dublês dos
-serviços do Google (planilha, cache, lock, propriedades e Drive): `npx vitest run tests/infrastructure/apps-script`.
+Os testes rodam todos os `.gs` de verdade no Node, com dublês dos serviços do Google (planilha com várias abas,
+fórmulas, filtros, cache, lock, propriedades e Drive): `npx vitest run tests/infrastructure/apps-script`.
+
+## Para quem faz fork: fluxo com clasp (opcional)
+
+O [clasp](https://github.com/google/clasp) envia esta pasta direto para o Apps Script, sem copiar e colar:
+
+1. `npm install -g @google/clasp` e `clasp login` (abre o navegador para autorizar).
+2. Ative a API em <https://script.google.com/home/usersettings> (**Google Apps Script API: ativada**).
+3. Crie a planilha e o projeto ligado a ela (seções 1 e 2.1) e copie o **ID do script** em **Configurações do
+   projeto**.
+4. Na pasta `apps-script/`, crie um `.clasp.json` (não versione):
+   `{ "scriptId": "<ID do script>", "rootDir": "." }`.
+5. `clasp push` envia os `.gs` e o `appsscript.json` (o editor mostra os arquivos com os mesmos nomes).
+6. Siga as seções 3, 4 e 5. Para atualizar: `clasp push` e depois **Nova versão** na implantação (seção 7), ou
+   `clasp deploy -i <ID da implantação>` para manter a mesma URL.
+
+## Cotas do plano gratuito (conta Google comum)
+
+| Recurso                | Limite aproximado                                         |
+| ---------------------- | --------------------------------------------------------- |
+| Tempo por execução     | 6 min (cada inscrição leva cerca de 1 s)                  |
+| Execuções simultâneas  | 30 (o lock coloca o resto na fila)                        |
+| Gatilhos (o `onEdit`)  | 90 min por dia no total; cada edição leva milissegundos   |
+| Planilha               | 10 milhões de células (sobra para milhares de inscrições) |
+| Drive (conta gratuita) | 15 GB; cada foto tem até 400 KB (100 equipes ≈ 30 MB)     |
+
+Contas Google Workspace (institucionais) têm limites maiores. Se o site receber "muita gente se inscrevendo", ele
+mesmo tenta de novo com espera crescente.
 
 ### Próximo passo recomendado: Cloudflare Turnstile
 
 Um robô que gera e-mails diferentes ainda consegue gastar o limite global. O passo seguinte é o
-[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) (gratuito, sem quebra-cabeça de imagem):
-
-1. A organização cria o widget no painel da Cloudflare e recebe a **site key** (pública) e a **secret key**.
-2. O site mostra o widget no formulário e manda o token junto com a inscrição.
-3. O `doPost` valida o token com `UrlFetchApp` em `https://challenges.cloudflare.com/turnstile/v0/siteverify`,
-   usando a secret key guardada numa Propriedade do script (nunca no código).
-4. O `public/_headers` precisa liberar `https://challenges.cloudflare.com` em `script-src` e `frame-src`.
-
-Fica pendente até a organização gerar as chaves.
-
-## Cotas do plano gratuito (conta Google comum)
-
-| Recurso                         | Limite aproximado                                         |
-| ------------------------------- | --------------------------------------------------------- |
-| Tempo por execução              | 6 min (cada inscrição leva menos de 1s)                   |
-| Execuções simultâneas           | 30 (o lock coloca o resto na fila)                        |
-| Gatilhos (o `onEdit` do Status) | 90 min por dia no total; cada edição leva milissegundos   |
-| Planilha                        | 10 milhões de células (sobra para milhares de inscrições) |
-| Drive (conta gratuita)          | 15 GB; cada foto tem até 400 KB (100 equipes ≈ 30 MB)     |
-
-Contas Google Workspace (institucionais) têm limites maiores. Se o site receber o erro de "muita gente se inscrevendo",
-ele mesmo tenta de novo com espera crescente. A lista de equipes fica em cache por 60s para economizar cota.
+[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) (gratuito): o site manda o token junto com a
+inscrição e o `doPost` valida com `UrlFetchApp` (aí o manifesto ganha o escopo `script.external_request`) usando a
+secret key guardada numa Propriedade do script. O `public/_headers` precisa liberar `https://challenges.cloudflare.com`
+em `script-src` e `frame-src`. Fica pendente até a organização gerar as chaves.
 
 ## LGPD
 
-- O aviso de privacidade fica em `/privacidade` (`src/pages/privacidade.astro`), linkado no checkbox de
-  consentimento e no rodapé. Mudou o texto do aviso? Suba `CONSENT_VERSION` em
-  `src/application/use-cases/SubmitRegistration.ts` **e** no `Validation.gs` (um teste confere que são iguais) e
-  publique o script junto com o site: o servidor recusa aceite de versão antiga.
-- Cada linha guarda a prova do aceite na coluna **Consentimento**: versão do aviso + data/hora do aceite. Sem isso o
-  script recusa a inscrição.
+- O aviso de privacidade fica em `/privacidade`, linkado no checkbox de consentimento e no rodapé. Mudou o texto do
+  aviso? Suba `CONSENT_VERSION` em `src/application/use-cases/SubmitRegistration.ts` **e** no `Validation.gs` (hoje
+  `2026-10-v3`; um teste confere que são iguais) e publique o script junto com o site.
+- Dados guardados: nome da equipe, foto ou logo e, de cada integrante, nome completo, matrícula e e-mail. Nada de
+  telefone, curso ou dado sensível. Cada linha guarda a prova do aceite na coluna **Consentimento** (versão do aviso
+  e data/hora); sem isso o script recusa a inscrição.
+- Finalidades: organizar a competição, a comunicação oficial por e-mail e mostrar no site, depois da confirmação, só
+  o nome da equipe, a foto e o número de integrantes.
 - A planilha guarda dados pessoais: compartilhe **só** com quem organiza e nunca deixe "qualquer pessoa com o link".
-  O Google atua como operador (hospeda a planilha e roda o script).
-- A coluna **Acessibilidade** é dado sensível: use só para garantir a acessibilidade da pessoa no evento.
-- Use os dados só para o HackaRun (contato, credenciamento, certificados). O site público mostra apenas nome da
-  equipe, curso, quantidade de integrantes e a foto ou logo.
-- **Foto da equipe:** é dado pessoal (imagem das pessoas). O aceite da versão `2026-10-v2` inclui a autorização de
-  publicar a imagem e a declaração do líder de que todos que aparecem nela concordaram. Pedido de retirada: seção 5.
+  Só as fotos ficam públicas. O Google atua como operador (hospeda a planilha e roda o script).
 - **Retenção:** até 6 meses depois do evento. Depois disso, apague a planilha e a pasta das fotos (ou anonimize o que
   precisar guardar para estatística).
-- Pedidos de acesso, correção, exclusão ou revogação do consentimento chegam pelo contato do encarregado (a definir
-  pela organização e publicado no aviso): localize pelo e-mail ou pelo protocolo e atenda em até 15 dias.
+- Pedidos de acesso, correção, exclusão ou revogação chegam por e-mail: localize pelo protocolo, pelo nome da equipe
+  ou pelo e-mail (filtro da aba Integrantes) e atenda em até 15 dias.

@@ -1,5 +1,8 @@
 // formato cru dos JSONs de conteúdo (o que a equipe edita)
 import type {
+  ActivityFlag,
+  ActivityKind,
+  Audience,
   EventStage,
   MilestoneKey,
   PartnerRole,
@@ -19,22 +22,42 @@ export interface RawVenue {
   mapUrl?: string | null;
 }
 
-export interface RawSession {
-  id: string;
-  title: string;
-  kind: SessionKind;
+export interface RawTimeRange {
   start: string | null;
   end: string | null;
   startHint?: string | null;
+}
+
+export interface RawActivity extends RawTimeRange {
+  id: string;
+  title: string;
+  kind: ActivityKind;
+  summary: string;
+  details?: string | null;
+  track?: Audience | null;
+  flags?: ActivityFlag[];
+  parts?: (RawTimeRange & { label: string })[];
+  checklist?: string[];
+}
+
+export interface RawSession extends RawTimeRange {
+  id: string;
+  title: string;
+  kind: SessionKind;
   venueId: string;
+  place?: string | null;
+  audience: Audience;
+  audienceNote?: string | null;
   description: string;
-  topics?: string[];
+  note?: string | null;
+  activities: RawActivity[];
 }
 
 export interface RawEventDay {
   id: string;
   date: string;
   stage: EventStage;
+  label: string;
   title: string;
   summary: string;
   sessions: RawSession[];
@@ -55,11 +78,14 @@ export interface RawEvent {
     capacity?: number | null;
     teamSize?: { min: number; max: number } | null;
   };
+  // teto de estandes da exposição
+  maxStands?: number | null;
   days: RawEventDay[];
 }
 
 export interface RawStations {
-  scoring: { maxPoints: number; criteria: { key: string; label: string; points: number }[] };
+  // null até o regulamento publicar a pontuação
+  scoring: { maxPoints: number; criteria: { key: string; label: string; points: number }[] } | null;
   stations: {
     id: string;
     order: number;
@@ -71,13 +97,11 @@ export interface RawStations {
   }[];
 }
 
+// equipe pública: só nome, quantidade de integrantes e foto (nada pessoal)
 export interface RawTeam {
   id: string;
   name: string;
-  members?: string[];
   memberCount?: number;
-  course?: string | null;
-  mentor?: string | null;
   status?: TeamStatus;
   // url https da foto/logo (a lista ao vivo monta a partir do id do Drive)
   imageUrl?: string | null;

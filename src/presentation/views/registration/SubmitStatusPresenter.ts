@@ -29,7 +29,8 @@ export class SubmitStatusPresenter {
     const retry = qs('[data-reg-retry]', this.root);
     if (retry) retry.hidden = !state.retryable;
     if (submitting) this.announce('Enviando inscrição…');
-    if (state.status === 'success') this.showSuccess(state.protocol ?? '');
+    if (state.status === 'success')
+      this.showSuccess(state.protocol ?? '', state.fields.members[0]?.email ?? '');
   }
 
   announce(text: string): void {
@@ -37,13 +38,16 @@ export class SubmitStatusPresenter {
     if (live) live.textContent = text;
   }
 
-  private showSuccess(protocol: string): void {
+  private showSuccess(protocol: string, contactEmail: string): void {
     const form = qs('[data-reg-form]', this.root);
     const success = qs('[data-reg-success]', this.root);
     if (!form || !success) return;
     // cópia fiel pro leitor de tela; a visível "decodifica"
     const code = qs('[data-reg-protocol]', success);
     if (code) code.textContent = protocol;
+    // é por esse e-mail que a organização fala com a equipe (comunicação oficial)
+    const mail = qs('[data-reg-contact-email]', success);
+    if (mail) mail.textContent = contactEmail.trim().toLowerCase() || 'o e-mail do contato';
     const typed = qs('[data-reg-protocol-typed]', success);
     form.hidden = true;
     success.hidden = false;

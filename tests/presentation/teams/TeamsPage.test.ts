@@ -31,7 +31,6 @@ describe('textos do card de equipe', () => {
     const t = (id: string, imageUrl: string | null): PublicTeam => ({
       id,
       name: id,
-      course: null,
       memberCount: 2,
       imageUrl,
     });

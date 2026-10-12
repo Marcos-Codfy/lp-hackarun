@@ -1,4 +1,3 @@
-import type { RegistrationMode } from '@domain/index';
 import type { EventBus } from '@shared/core/EventBus';
 import { qs, qsa } from '@shared/utils/dom';
 import type { AppEvents } from '@presentation/app/AppEvents';
@@ -12,7 +11,10 @@ import { ErrorPresenter } from './registration/ErrorPresenter';
 import { MemberRows } from './registration/MemberRows';
 import { SubmitStatusPresenter } from './registration/SubmitStatusPresenter';
 import { TeamImagePicker } from './registration/TeamImagePicker';
-import { controlFor } from './registration/fieldLookup';
+import { controlFor, pathOf } from './registration/fieldLookup';
+
+// rolagem do app (Lenis ou nativa): o alvo para logo abaixo do header fixo
+export type ScrollToElement = (el: HTMLElement) => void;
 
 // [data-registration-form]: liga o DOM ao VM; valores moram nos inputs, o VM só espelha
 export class RegistrationFormView {
@@ -21,13 +23,20 @@ export class RegistrationFormView {
   private readonly errors: ErrorPresenter;
   private readonly status: SubmitStatusPresenter;
   private readonly lobby: ClosedLobby;
+  private readonly scrollTo: ScrollToElement;
   private rows: MemberRows | null = null;
   private image: TeamImagePicker | null = null;
   private lastFocusSeq = 0;
 
-  constructor(root: HTMLElement, vm: RegistrationFormViewModel, bus: EventBus<AppEvents>) {
+  constructor(
+    root: HTMLElement,
+    vm: RegistrationFormViewModel,
+    bus: EventBus<AppEvents>,
+    scrollTo: ScrollToElement = (el) => el.scrollIntoView?.({ block: 'start' }),
+  ) {
     this.root = root;
     this.vm = vm;
+    this.scrollTo = scrollTo;
     this.errors = new ErrorPresenter(root);
     this.status = new SubmitStatusPresenter(root, bus);
     this.lobby = new ClosedLobby(root);
@@ -60,7 +69,7 @@ export class RegistrationFormView {
       status === 'success'
         ? qs('[data-reg-success-title]', this.root)
         : this.vm.isOpen
-          ? controlFor(this.root, 'mode')
+          ? controlFor(this.root, 'teamName')
           : (qs('[data-reg-notice-title]', this.root) ?? qs('[data-reg-form]', this.root));
     if (!target) return false;
     const rect = target.getBoundingClientRect();
@@ -72,22 +81,12 @@ export class RegistrationFormView {
   private bindForm(form: HTMLFormElement): void {
     form.addEventListener('input', (e) => {
       const el = e.target;
-      const isControl =
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        el instanceof HTMLSelectElement;
-      // o arquivo da foto é do TeamImagePicker (change)
-      if (!isControl || (el instanceof HTMLInputElement && el.type === 'file')) return;
+      // o arquivo da foto é do TeamImagePicker (change); os integrantes são do MemberRows
+      if (!(el instanceof HTMLInputElement) || el.type === 'file') return;
       const path = el.dataset['field'];
       if (!path) return;
-      if (el instanceof HTMLInputElement && el.type === 'checkbox') this.vm.setAcceptedTerms(el.checked);
+      if (el.type === 'checkbox') this.vm.setAcceptedTerms(el.checked);
       else this.vm.setText(path as TextPath, el.value);
-    });
-    form.addEventListener('change', (e) => {
-      const el = e.target;
-      if (el instanceof HTMLInputElement && el.matches('[data-reg-mode]'))
-        this.vm.setMode(el.value as RegistrationMode);
-      if (el instanceof HTMLSelectElement && el.dataset['field']) this.vm.blur(el.dataset['field']);
     });
     // a foto não valida no blur: abrir o seletor de arquivo já tira o foco e o erro piscaria à toa
     form.addEventListener('focusout', (e) => {
@@ -109,15 +108,12 @@ export class RegistrationFormView {
     });
   }
 
-  // autofill ou voltar no histórico podem deixar valores nos inputs antes do JS
+  // autofill, voltar no histórico ou o que foi digitado nos cards do HTML antes do chunk chegar
   private restoreFromDom(form: HTMLFormElement): void {
-    const mode = qs<HTMLInputElement>('[data-reg-mode]:checked', form);
-    if (mode && mode.value !== this.vm.fields.mode) this.vm.setMode(mode.value as RegistrationMode);
-    qsa<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[data-field]', form).forEach((el) => {
-      const path = el.dataset['field'];
-      if (!path) return;
-      if (el instanceof HTMLInputElement && el.type === 'file') return;
-      if (el instanceof HTMLInputElement && el.type === 'checkbox') {
+    qsa<HTMLInputElement>('input[data-field], input[data-member-field]', form).forEach((el) => {
+      const path = pathOf(el);
+      if (!path || el.type === 'file') return;
+      if (el.type === 'checkbox') {
         if (el.checked) this.vm.setAcceptedTerms(true);
       } else if (el.value) {
         this.vm.setText(path as TextPath, el.value);
@@ -134,10 +130,10 @@ export class RegistrationFormView {
     if (!prev || prev.fields.members !== fields.members || prev.canRemoveMember !== state.canRemoveMember) {
       this.rows?.sync(fields.members, state.canRemoveMember);
     }
-    if (!prev || prev.fields.mode !== fields.mode) {
-      qsa('[data-mode-only="team"]', this.root).forEach((el) => (el.hidden = fields.mode !== 'team'));
-    }
     this.renderCounters(state);
+    if (state.announcement && state.announcement !== prev?.announcement) {
+      this.status.announce(state.announcement.text);
+    }
     if (!prev || prev.imageStatus !== state.imageStatus || prev.fields.teamImage !== fields.teamImage) {
       this.image?.render(state);
     }
@@ -152,20 +148,29 @@ export class RegistrationFormView {
 
   private renderCounters(state: RegistrationFormState): void {
     const max = Number(this.root.dataset['teamMax'] ?? 0);
-    const size = 1 + state.fields.members.length;
+    const size = state.fields.members.length;
     const squad = qs('[data-reg-squad]', this.root);
-    if (squad) squad.textContent = state.fields.mode === 'team' ? `Esquadrão ${size}/${max}` : 'Modo solo';
+    if (squad) squad.textContent = `Esquadrão ${size}/${max}`;
     const count = qs('[data-member-count]', this.root);
     if (count) count.textContent = `${size}/${max}`;
     const add = qs<HTMLButtonElement>('[data-member-add]', this.root);
     if (add) add.disabled = !state.canAddMember;
     const addLabel = qs('[data-member-add-label]', this.root);
-    if (addLabel) addLabel.textContent = state.canAddMember ? 'Adicionar integrante' : 'Equipe completa';
+    if (addLabel)
+      addLabel.textContent = state.canAddMember ? 'Adicionar integrante' : `Equipe completa · ${max}/${max}`;
   }
 
+  // envio com vários erros: o foco vai pro resumo (título e lista inteiros na tela, logo abaixo do header),
+  // que se anuncia pelo título ("Faltam ajustar 9 campos:"). Com um erro só, direto pro campo
   private focusPath(path: string, announceErrors: boolean): void {
-    controlFor(this.root, path)?.focus();
     const count = this.vm.state.value.orderedErrors.length;
+    const summary = qs('[data-error-summary]', this.root);
+    if (announceErrors && count > 1 && summary && !summary.hidden) {
+      summary.focus({ preventScroll: true });
+      this.scrollTo(summary);
+      return;
+    }
+    controlFor(this.root, path)?.focus();
     if (announceErrors && count > 0) {
       this.status.announce(
         count === 1 ? '1 campo precisa de ajuste.' : `${count} campos precisam de ajuste.`,

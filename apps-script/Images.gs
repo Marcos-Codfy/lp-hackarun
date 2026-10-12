@@ -50,7 +50,7 @@ function detectImageType_(bytes) {
 }
 
 // grava e devolve o arquivo; null se o Drive falhar. A inscrição vale mesmo sem a foto:
-// a coluna Imagem fica vazia e a organização pede a foto de novo pelo contato.
+// a coluna ID da foto fica vazia e a organização pede a foto de novo pelo e-mail do contato.
 // O link público (shareImage_) o doPost liga depois de soltar o lock
 function saveTeamImage_(protocol, image) {
   if (!image) return null;
@@ -64,7 +64,7 @@ function saveTeamImage_(protocol, image) {
 }
 
 // o arquivo fica com link público e o nome aparece pra quem abre: o protocolo identifica a inscrição
-// (troca de foto, pedidos da LGPD), então o nome é sorteado e não deriva dele. A coluna Imagem liga linha e arquivo
+// (troca de foto, pedidos da LGPD), então o nome é sorteado e não deriva dele. A coluna ID da foto liga linha e arquivo
 function imageFileName_(ext) {
   return 'foto-' + Utilities.getUuid() + '.' + ext;
 }
@@ -104,14 +104,14 @@ function discardImage_(fileId) {
   }
 }
 
-// célula Imagem -> id público; vazio ou editado à mão com lixo vira null (o site mostra as iniciais)
+// célula ID da foto -> id público; vazio ou editado à mão com lixo vira null (o site mostra as iniciais)
 function publicImageId_(value) {
   const id = String(value == null ? '' : value).trim();
   return IMAGE_ID_PATTERN.test(id) ? id : null;
 }
 
-// rode uma vez no editor (selecione prepararFotos e clique em Executar): autoriza o Drive e cria a pasta
-// (e já deixa criado o segredo dos ids públicos, antes da 1ª inscrição)
+// versão antiga do passo a passo: hoje o configurarPlanilha (Setup.gs) já faz isso e monta a planilha.
+// Autoriza o Drive, cria a pasta e o segredo dos ids públicos
 function prepararFotos() {
   idSecret_();
   console.log('Pasta das fotos das equipes: ' + imageFolder_().getUrl());

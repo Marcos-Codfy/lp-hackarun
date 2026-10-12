@@ -53,12 +53,17 @@ describe('EventMapper (event.json real)', () => {
 });
 
 describe('ContentMapper (JSONs reais)', () => {
-  it('estações: ordem única e pontuação fechando com o máximo', () => {
+  it('estações: ordem única; pontuação só depois do regulamento, e fechando com o máximo', () => {
     const raw = stationsData as RawStations;
     const stations = ContentMapper.toStations(raw);
     expect(unique(stations.map((s) => s.id))).toBe(true);
     expect(new Set(stations.map((s) => s.order)).size).toBe(stations.length);
-    expect(() => ContentMapper.toScoring(raw)).not.toThrow();
+    // o regulamento (12/11) é quem publica a pontuação: até lá fica null
+    expect(ContentMapper.toScoring(raw)).toBeNull();
+    const published = { maxPoints: 100, criteria: [{ key: 'a', label: 'A', points: 60 }] };
+    expect(() => ContentMapper.toScoring({ ...raw, scoring: published })).toThrow(DomainError);
+    published.criteria.push({ key: 'b', label: 'B', points: 40 });
+    expect(ContentMapper.toScoring({ ...raw, scoring: published })?.maxPoints).toBe(100);
   });
 
   it('equipes, mentores, prêmios, parceiros e FAQ mapeiam sem erro', () => {
@@ -77,10 +82,10 @@ describe('ContentMapper (JSONs reais)', () => {
     expect(() => ContentMapper.toTeam({ id: 't0', name: ' x ' })).toThrow(DomainError);
   });
 
-  it('equipe da planilha usa a contagem em vez da lista de nomes', () => {
-    const team = ContentMapper.toTeam({ id: 't1', name: 'Os Brabos', memberCount: 4, course: 'ES' });
+  it('equipe pública guarda só nome, quantidade de integrantes, status e foto', () => {
+    const team = ContentMapper.toTeam({ id: 't1', name: 'Os Brabos', memberCount: 4 });
     expect(team.size).toBe(4);
-    expect(team.members).toEqual([]);
     expect(team.isConfirmed).toBe(true);
+    expect(Object.keys(team).sort()).toEqual(['id', 'imageUrl', 'name', 'size', 'status']);
   });
 });

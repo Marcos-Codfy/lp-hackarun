@@ -4,7 +4,10 @@ import { AppsScriptClient, type FetchLike } from '@infrastructure/registration/A
 import { AppsScriptRegistrationGateway } from '@infrastructure/registration/AppsScriptRegistrationGateway';
 
 const ENDPOINT = 'https://script.google.com/macros/s/abc/exec';
-const payload = { mode: 'solo', leader: { email: 'ana@exemplo.com' } } as RegistrationPayload;
+const payload = {
+  teamName: 'Bug Busters',
+  members: [{ name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' }],
+} as RegistrationPayload;
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -29,7 +32,7 @@ describe('AppsScriptRegistrationGateway', () => {
       redirect: 'follow',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     });
-    expect(JSON.parse(String(init?.body))).toMatchObject({ action: 'register', mode: 'solo' });
+    expect(JSON.parse(String(init?.body))).toMatchObject({ action: 'register', teamName: 'Bug Busters' });
   });
 
   it('a chave de idempotência vai no corpo', async () => {
@@ -41,6 +44,10 @@ describe('AppsScriptRegistrationGateway', () => {
 
   it.each([
     ['duplicate', 'duplicate'],
+    ['duplicate_team_name', 'duplicate-team-name'],
+    ['duplicate_email', 'duplicate-email'],
+    ['duplicate_student_id', 'duplicate-student-id'],
+    ['constructor', 'rejected'],
     ['closed', 'closed'],
     ['invalid', 'rejected'],
     ['rate-limited', 'rate-limited'],
@@ -49,6 +56,16 @@ describe('AppsScriptRegistrationGateway', () => {
   ])('erro "%s" do servidor vira "%s"', async (error, kind) => {
     const { gateway } = gatewayWith(async () => jsonResponse({ ok: false, error }));
     await expect(gateway.submit(payload)).rejects.toMatchObject({ kind });
+  });
+
+  it('conflito traz a posição de cada integrante já inscrito (e ignora posição torta)', async () => {
+    const { gateway } = gatewayWith(async () =>
+      jsonResponse({ ok: false, error: 'duplicate_email', members: [1, '2', -1, 3.5, 40, 3] }),
+    );
+    await expect(gateway.submit(payload)).rejects.toMatchObject({
+      kind: 'duplicate-email',
+      memberIndexes: [1, 3],
+    });
   });
 
   it('sem rede vira "network"', async () => {

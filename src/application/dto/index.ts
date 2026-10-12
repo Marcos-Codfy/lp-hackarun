@@ -1,5 +1,8 @@
 // DTOs serializáveis: é o que sai da aplicação pra camada de apresentação
 import type {
+  ActivityFlag,
+  ActivityKind,
+  Audience,
   EventStage,
   FaqItem,
   MilestoneKey,
@@ -23,22 +26,42 @@ export interface VenueDTO {
   mapUrl: string | null;
 }
 
-export interface SessionDTO {
-  id: string;
-  title: string;
-  kind: SessionKind;
+export interface TimeRangeDTO {
   start: string | null;
   end: string | null;
   startHint: string | null;
+}
+
+export interface ActivityDTO extends TimeRangeDTO {
+  id: string;
+  title: string;
+  kind: ActivityKind;
+  summary: string;
+  details: string | null;
+  track: Audience | null;
+  flags: ActivityFlag[];
+  parts: (TimeRangeDTO & { label: string })[];
+  checklist: string[];
+}
+
+export interface SessionDTO extends TimeRangeDTO {
+  id: string;
+  title: string;
+  kind: SessionKind;
   venue: VenueDTO;
+  place: string | null;
+  audience: Audience;
+  audienceNote: string | null;
   description: string;
-  topics: string[];
+  note: string | null;
+  activities: ActivityDTO[];
 }
 
 export interface EventDayDTO {
   id: string;
   date: string;
   stage: EventStage;
+  label: string;
   title: string;
   summary: string;
   sessions: SessionDTO[];
@@ -68,7 +91,10 @@ export interface RegistrationDTO {
 export interface EventStatsDTO {
   days: number;
   stations: number;
+  // oficinas da programação (cada horário avulso conta)
   workshops: number;
+  // teto de estandes da exposição ("até 10"), null = não anunciado
+  stands: number | null;
 }
 
 export interface EventOverviewDTO {
@@ -110,16 +136,15 @@ export interface ScoringDTO {
 
 export interface MissionsDTO {
   stations: StationDTO[];
-  scoring: ScoringDTO;
+  // null até o regulamento publicar a pontuação
+  scoring: ScoringDTO | null;
 }
 
+// equipe pública: nunca nome de pessoa, matrícula ou e-mail
 export interface TeamDTO {
   id: string;
   name: string;
-  members: string[];
   memberCount: number;
-  course: string | null;
-  mentor: string | null;
   status: TeamStatus;
   // url pública da foto/logo (Drive) ou null: a página mostra as iniciais
   imageUrl: string | null;

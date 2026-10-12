@@ -1,0 +1,73 @@
+---
+// "Remover" do card de integrante (o MemberRows liga o clique e o estado). O contato nunca sai; no mínimo
+// da equipe o botão fica travado e some da tela
+interface Props {
+  // " 2" no card numerado, vazio no molde do <template>
+  number: string;
+  contact: boolean;
+  locked: boolean;
+}
+
+const { number, contact, locked } = Astro.props;
+---
+
+<button
+  type="button"
+  class="member__remove"
+  data-member-remove
+  aria-label={`Remover integrante${number}`}
+  hidden={contact}
+  disabled={locked}
+>
+  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    <path d="m4 4 8 8M12 4l-8 8"></path>
+  </svg>
+  <span>Remover</span>
+</button>
+
+<style>
+  .member__remove {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    border-radius: 3px;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out);
+  }
+
+  .member__remove svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .member__remove:hover {
+    background: color-mix(in srgb, var(--c-danger) 10%, transparent);
+    color: var(--ink-danger);
+  }
+
+  .member__remove:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .member__remove:disabled {
+    visibility: hidden;
+  }
+
+  @media (min-width: 40rem) {
+    .member__remove {
+      right: var(--space-4);
+    }
+  }
+</style>

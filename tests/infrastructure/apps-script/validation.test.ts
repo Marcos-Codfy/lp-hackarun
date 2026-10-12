@@ -1,91 +1,96 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { AppsScriptSandbox, registrationBody } from '../../helpers/apps-script/sandbox';
+import { AppsScriptSandbox, MEMBER_A, MEMBER_B, registrationBody } from '../../helpers/apps-script/sandbox';
 
-const leader = registrationBody()['leader'] as Record<string, unknown>;
-const withLeader = (patch: Record<string, unknown>) => registrationBody({ leader: { ...leader, ...patch } });
-const member = (name: string, email: string) => ({ name, email, course: '' });
+const withMember = (index: number, patch: Record<string, unknown>) => {
+  const members = [MEMBER_A, MEMBER_B].map((m, i) => (i === index ? { ...m, ...patch } : m));
+  return registrationBody({ members });
+};
+const extra = (n: number) => ({
+  name: 'Pessoa Extra',
+  studentId: `RA-000${n}`,
+  email: `extra${n}@exemplo.com`,
+});
 
 describe('Apps Script · validação do envio', () => {
-  it('grava a inscrição válida com protocolo, status pendente e consentimento', () => {
+  it('grava a equipe com protocolo, status pendente, contato, e-mails e consentimento', () => {
     const script = new AppsScriptSandbox();
     const res = script.post(registrationBody());
     expect(res.ok).toBe(true);
     expect(res.protocol).toMatch(/^HR26-[A-HJ-NP-Z2-9]{6}$/);
-    const headers = script.sheet.rows[0] ?? [];
-    const row = script.sheet.data[0] ?? [];
-    const cell = (name: string) => row[headers.indexOf(name)];
-    expect(cell('Protocolo')).toBe(res.protocol);
-    expect(cell('Modalidade')).toBe('Equipe');
-    expect(cell('Integrantes')).toBe('Bruno Lima <bruno@exemplo.com> - Ciência da Computação');
-    expect(cell('Qtde')).toBe(2);
-    expect(cell('Status')).toBe('pendente');
-    expect(cell('Consentimento')).toBe('2026-10-v2 · 2026-10-20T15:00:00.000Z');
+    expect(script.row(script.teams, 0)).toMatchObject({
+      Protocolo: res.protocol,
+      Equipe: 'Bug Busters',
+      'Integrantes (qtd)': 2,
+      Status: 'pendente',
+      'E-mail de contato': 'ana@exemplo.com',
+      'E-mails da equipe': 'ana@exemplo.com; bruno@exemplo.com',
+      Origem: 'landing-page',
+      Consentimento: '2026-10-v3 · 2026-10-20T15:00:00.000Z',
+    });
+    expect(script.row(script.teams, 0)['Data/hora']).toBeInstanceOf(Date);
     expect(script.lock.held).toBe(false);
   });
 
+  it('normaliza o que chega: matrícula em maiúsculas, e-mail em minúsculas, nome sem espaço sobrando', () => {
+    const script = new AppsScriptSandbox();
+    script.post(
+      withMember(1, { name: '  Bruno   Lima ', studentId: ' ra-2023.044 ', email: 'Bruno@Exemplo.COM' }),
+    );
+    expect(script.row(script.members, 1)).toMatchObject({
+      'Nome completo': 'Bruno Lima',
+      Matrícula: 'RA-2023.044',
+      'E-mail': 'bruno@exemplo.com',
+    });
+  });
+
   it.each([
-    ['sem modalidade', registrationBody({ mode: 'duo' })],
-    ['nome sem sobrenome', withLeader({ name: 'Ana' })],
-    ['e-mail do líder inválido', withLeader({ email: 'ana@exemplo' })],
-    ['WhatsApp sem DDD', withLeader({ phone: '99999-1234' })],
-    ['sem curso', withLeader({ course: '  ' })],
     ['nome da equipe curto', registrationBody({ teamName: 'X' })],
-    ['equipe abaixo do mínimo', registrationBody({ members: [] })],
+    ['nome da equipe longo', registrationBody({ teamName: 'Equipe '.repeat(7) })],
+    ['equipe abaixo do mínimo', registrationBody({ members: [MEMBER_A] })],
     [
       'equipe acima do máximo',
       registrationBody({
-        members: ['b', 'c', 'd', 'e', 'f'].map((l) => member(`Pessoa ${l}`, `${l}@exemplo.com`)),
+        members: [MEMBER_A, MEMBER_B, 1, 2, 3, 4].map((m) => (typeof m === 'number' ? extra(m) : m)),
       }),
     ],
-    ['e-mail de integrante inválido', registrationBody({ members: [member('Bruno Lima', 'bruno@')] })],
-    ['e-mail repetido na equipe', registrationBody({ members: [member('Bruno Lima', 'ANA@exemplo.com')] })],
+    ['sem integrantes', registrationBody({ members: 'Ana, Bruno' })],
+    ['integrante que não é objeto', registrationBody({ members: [MEMBER_A, 'Bruno'] })],
+    ['nome sem sobrenome', withMember(0, { name: 'Ana' })],
+    ['nome com número', withMember(0, { name: 'Ana Souza 2' })],
+    ['sobrenome abreviado', withMember(0, { name: 'Ana S.' })],
+    ['nome longo demais', withMember(0, { name: `Ana ${'Souza'.repeat(20)}` })],
+    ['sem matrícula', withMember(1, { studentId: '  ' })],
+    ['matrícula curta', withMember(1, { studentId: '123' })],
+    ['matrícula longa', withMember(1, { studentId: '1'.repeat(21) })],
+    ['matrícula com espaço', withMember(1, { studentId: '2024 100' })],
+    ['matrícula com símbolo', withMember(1, { studentId: '2024#100' })],
+    ['e-mail inválido', withMember(1, { email: 'bruno@' })],
+    ['e-mail repetido na equipe', withMember(1, { email: 'ANA@exemplo.com' })],
+    ['matrícula repetida na equipe', withMember(1, { studentId: '2024100123' })],
     ['sem versão do consentimento', registrationBody({ consentVersion: '' })],
-    ['aceite de uma versão antiga do aviso', registrationBody({ consentVersion: '2026-10-v1' })],
+    ['aceite de uma versão antiga do aviso', registrationBody({ consentVersion: '2026-10-v2' })],
     ['consentimento com data torta', registrationBody({ consentAt: 'ontem' })],
   ])('recusa %s', (_case, body) => {
     const script = new AppsScriptSandbox();
     expect(script.post(body)).toEqual({ ok: false, error: 'invalid' });
-    expect(script.sheets.size).toBe(0);
-  });
-
-  it('inscrição individual não exige equipe e ignora integrantes', () => {
-    const script = new AppsScriptSandbox();
-    const res = script.post(registrationBody({ mode: 'solo', teamName: 'Ignorado', members: [] }));
-    expect(res.ok).toBe(true);
-    const row = script.sheet.data[0] ?? [];
-    expect(row.slice(2, 4)).toEqual(['Individual', '']);
-  });
-
-  it('e-mail de líder já inscrito (sem diferenciar caixa) vira "duplicate"', () => {
-    const script = new AppsScriptSandbox();
-    script.seed([{ Protocolo: 'HR26-AAAAAA', 'E-mail': 'ana@exemplo.com', Status: 'pendente' }]);
-    expect(script.post(withLeader({ email: 'Ana@Exemplo.com' }))).toEqual({ ok: false, error: 'duplicate' });
-    expect(script.sheet.data).toHaveLength(1);
-  });
-
-  it('reenvio do mesmo envio (mesmo e-mail e horário) devolve o mesmo protocolo sem duplicar', () => {
-    const script = new AppsScriptSandbox();
-    const first = script.post(registrationBody());
-    expect(script.post(registrationBody())).toEqual(first);
-    expect(script.sheet.data).toHaveLength(1);
+    expect(script.book.sheets).toHaveLength(0);
   });
 
   it.each(['=', '+', '-', '@'])('neutraliza fórmula começando com "%s"', (prefix) => {
     const script = new AppsScriptSandbox();
     const payload = `${prefix}HYPERLINK("https://exemplo.com")`;
-    script.post(
-      registrationBody({
-        teamName: payload,
-        accessibilityNeeds: payload,
-        leader: { ...leader, name: `${prefix}Ana Souza`, course: payload },
-      }),
-    );
-    const row = script.sheet.data[0] ?? [];
-    const texts = row.filter((v): v is string => typeof v === 'string');
+    script.post(registrationBody({ teamName: payload.slice(0, 40), source: payload }));
+    const cells = [...script.teams.data[0]!, ...script.members.data[0]!];
+    const texts = cells.filter((v): v is string => typeof v === 'string');
     expect(texts.filter((v) => /^[=+\-@]/.test(v))).toEqual([]);
-    expect(row).toContain(`'${payload}`);
-    expect(row).toContain(`'${prefix}Ana Souza`);
+    expect(cells).toContain(`'${payload.slice(0, 40)}`);
+  });
+
+  it('e-mail começando com "+" ou "-" é aceito e gravado como texto puro', () => {
+    const script = new AppsScriptSandbox();
+    expect(script.post(withMember(1, { email: '-bruno@exemplo.com' })).ok).toBe(true);
+    expect(script.row(script.members, 1)['E-mail']).toBe("'-bruno@exemplo.com");
   });
 
   it.each([

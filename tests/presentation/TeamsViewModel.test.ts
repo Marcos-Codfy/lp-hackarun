@@ -5,8 +5,8 @@ import { TeamsViewModel, type PublicTeam } from '@presentation/view-models/teams
 import { teamName } from '../helpers/fixtures';
 
 const initial: PublicTeam[] = [
-  { id: '1', name: 'Café com Código', course: 'Engenharia de Software', memberCount: 4, imageUrl: null },
-  { id: '2', name: 'Null Pointers', course: 'Ciência da Computação', memberCount: 3, imageUrl: null },
+  { id: '1', name: 'Café com Código', memberCount: 4, imageUrl: null },
+  { id: '2', name: 'Null Pointers', memberCount: 3, imageUrl: null },
 ];
 const SLOTS: SlotsDTO = { capacity: 10, taken: 2, remaining: 8, level: 'plenty' };
 
@@ -14,10 +14,7 @@ const team = (id: string, name: string, status: 'confirmed' | 'pending' = 'confi
   Team.create({
     id,
     name: teamName(name),
-    members: [],
     memberCount: 5,
-    course: null,
-    mentor: null,
     status,
   });
 
@@ -26,11 +23,11 @@ function setup(repo: TeamRepository | null, now = () => 0) {
 }
 
 describe('TeamsViewModel', () => {
-  it('filtra por nome ou curso ignorando acento', () => {
+  it('filtra pelo nome da equipe ignorando acento e caixa', () => {
     const vm = setup(null);
     vm.setQuery('cafe');
     expect(vm.state.value.visible.map((t) => t.id)).toEqual(['1']);
-    vm.setQuery('CIÊNCIA');
+    vm.setQuery('NULL');
     expect(vm.state.value.visible.map((t) => t.id)).toEqual(['2']);
     vm.setQuery('');
     expect(vm.state.value.visible).toHaveLength(2);
@@ -54,7 +51,7 @@ describe('TeamsViewModel', () => {
     expect(s.teams.map((t) => t.id)).toEqual(['a', 'c']);
     expect(s.visible.map((t) => t.id)).toEqual(['c']);
     expect(s.slots).toEqual({ capacity: 10, taken: 2, remaining: 8, level: 'plenty' });
-    expect(s.teams[0]).toEqual({ id: 'a', name: 'Alfa Squad', course: null, memberCount: 5, imageUrl: null });
+    expect(s.teams[0]).toEqual({ id: 'a', name: 'Alfa Squad', memberCount: 5, imageUrl: null });
   });
 
   it('erro é silencioso: a lista atual continua', async () => {

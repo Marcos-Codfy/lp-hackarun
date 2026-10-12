@@ -5,40 +5,34 @@ import type { RegistrationDTO } from '../dto';
 import type { Clock } from '../ports/Clock';
 import {
   RegistrationGatewayError,
+  type ConflictFailure,
   type GatewayFailure,
   type RegistrationGateway,
   type RegistrationPayload,
   type SubmissionMeta,
 } from '../ports/RegistrationGateway';
+import { FAILURE_MESSAGES, RETRYABLE_FAILURES, conflictErrors, isConflict } from './registrationFailures';
+
+export { RETRYABLE_FAILURES } from './registrationFailures';
 
 const DEFAULT_META: SubmissionMeta = { honeypot: '', elapsedMs: 0 };
 
 // versão do aviso de privacidade (/privacidade) que o checkbox aceita; mudou o texto, suba a versão
 // mantenha igual ao CONSENT_VERSION do apps-script/Validation.gs (um teste confere)
-export const CONSENT_VERSION = '2026-10-v2';
+export const CONSENT_VERSION = '2026-10-v3';
 
 // mantenha igual ao MIN_ELAPSED_MS do apps-script/Validation.gs (um teste confere)
 export const MIN_FILL_MS = 3000;
 
-// passageiras: vale tentar de novo com os mesmos dados
-export const RETRYABLE_FAILURES: ReadonlySet<GatewayFailure> = new Set(['network', 'server', 'rate-limited']);
-
 // prazo e vagas que o build manda pro navegador (o RegistrationDTO serve)
 export type RegistrationWindowSnapshot = Pick<RegistrationDTO, 'endpoint' | 'closesAt' | 'slots'>;
 
+// conflict = nome, e-mail ou matrícula já inscritos em outra equipe: o erro vai no campo
 export type SubmitRegistrationResult =
   | { status: 'invalid'; errors: RegistrationErrors }
+  | { status: 'conflict'; reason: ConflictFailure; errors: RegistrationErrors; message: string }
   | { status: 'success'; protocol: string }
   | { status: 'failed'; reason: GatewayFailure; message: string; retryable: boolean };
-
-const FAILURE_MESSAGES: Record<GatewayFailure, string> = {
-  network: 'Não conseguimos falar com o servidor. Confira sua conexão e tente de novo.',
-  server: 'O servidor das inscrições falhou por um instante. Seus dados continuam aqui: tente de novo.',
-  rejected: 'A inscrição foi recusada. Revise os dados e tente novamente.',
-  closed: 'As inscrições estão encerradas.',
-  duplicate: 'Esse e-mail já tem uma inscrição registrada.',
-  'rate-limited': 'Muita gente se inscrevendo agora. Tenta de novo em alguns segundos.',
-};
 
 export interface SubmitRegistrationDeps {
   gateway: RegistrationGateway;
@@ -104,8 +98,17 @@ export class SubmitRegistration {
       const receipt = await this.gateway.submit(payload);
       return { status: 'success', protocol: receipt.protocol };
     } catch (error) {
-      return SubmitRegistration.failure(error instanceof RegistrationGatewayError ? error.kind : 'network');
+      if (!(error instanceof RegistrationGatewayError)) return SubmitRegistration.failure('network');
+      return SubmitRegistration.rejection(error, input.members.length);
     }
+  }
+
+  // conflito com campo conhecido vira erro no formulário; o resto vira a caixa de falha
+  private static rejection(error: RegistrationGatewayError, memberCount: number): SubmitRegistrationResult {
+    if (!isConflict(error.kind)) return SubmitRegistration.failure(error.kind);
+    const errors = conflictErrors(error.kind, error.memberIndexes, memberCount);
+    if (Object.keys(errors).length === 0) return SubmitRegistration.failure(error.kind);
+    return { status: 'conflict', reason: error.kind, errors, message: FAILURE_MESSAGES[error.kind] };
   }
 
   private static failure(reason: GatewayFailure): SubmitRegistrationResult {
@@ -136,14 +139,9 @@ export class SubmitRegistration {
   private toPayload(registration: TeamRegistration, meta: SubmissionMeta): RegistrationPayload {
     const now = this.clock.now().toISOString();
     return {
-      mode: registration.mode,
       teamName: registration.teamName,
-      leader: { ...registration.leader },
-      members: registration.members.map((m) => ({ ...m })),
-      teamImage: registration.teamImage
-        ? { mimeType: registration.teamImage.mimeType, base64: registration.teamImage.base64 }
-        : null,
-      accessibilityNeeds: registration.accessibilityNeeds,
+      members: registration.members.map((m) => m.toJSON()),
+      teamImage: { mimeType: registration.teamImage.mimeType, base64: registration.teamImage.base64 },
       submittedAt: now,
       source: meta.source ?? 'landing-page',
       consentVersion: this.consentVersion,

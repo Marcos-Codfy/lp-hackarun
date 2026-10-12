@@ -50,17 +50,28 @@ describe('SubmitRegistration', () => {
   it('envia o payload normalizado com os metadados anti-spam e a chave do envio', async () => {
     const { gateway, useCase, sleep } = setup();
     gateway.willReturn('HR26-ABC234');
-    const result = await useCase.execute(
-      teamInput({ leader: { ...teamInput().leader, phone: '63999991234' } }),
-      { honeypot: '', elapsedMs: 4321.6, source: 'hero', idempotencyKey: 'chave-0001' },
-    );
+    const members = [
+      { name: '  Ana   Souza ', studentId: ' ra-2024.01 ', email: 'Ana@Exemplo.com' },
+      teamInput().members[1]!,
+    ];
+    const result = await useCase.execute(teamInput({ members }), {
+      honeypot: '',
+      elapsedMs: 4321.6,
+      source: 'hero',
+      idempotencyKey: 'chave-0001',
+    });
     expect(result).toEqual({ status: 'success', protocol: 'HR26-ABC234' });
-    expect(gateway.calls[0]).toMatchObject({
-      mode: 'team',
+    expect(gateway.calls[0]).toEqual({
       teamName: 'Bug Busters',
-      leader: { phone: '(63) 99999-1234', email: 'ana@exemplo.com' },
+      members: [
+        { name: 'Ana Souza', studentId: 'RA-2024.01', email: 'ana@exemplo.com' },
+        { name: 'Bruno Lima', studentId: '2024100456', email: 'bruno@exemplo.com' },
+      ],
+      teamImage: TEAM_IMAGE,
       submittedAt: NOW.toISOString(),
       source: 'hero',
+      consentVersion: CONSENT_VERSION,
+      consentAt: NOW.toISOString(),
       honeypot: '',
       elapsedMs: 4322,
       idempotencyKey: 'chave-0001',
@@ -68,21 +79,23 @@ describe('SubmitRegistration', () => {
     expect(sleep).not.toHaveBeenCalled();
   });
 
-  it('registra o consentimento (versão do aviso + quando) junto com a inscrição', async () => {
+  it('o payload não leva nada além do que a planilha guarda (sem WhatsApp, curso ou modalidade)', async () => {
     const { gateway, useCase } = setup();
     await useCase.execute(teamInput(), META);
-    expect(gateway.calls[0]).toMatchObject({ consentVersion: CONSENT_VERSION, consentAt: NOW.toISOString() });
-  });
-
-  it('a foto da equipe vai no mesmo envio (base64, sem o tamanho em pixels); individual manda null', async () => {
-    const { gateway, useCase } = setup();
-    await useCase.execute(teamInput(), META);
-    expect(gateway.calls[0]?.teamImage).toEqual(TEAM_IMAGE);
-    await useCase.execute(
-      teamInput({ mode: 'solo', leader: { ...teamInput().leader, email: 'b@exemplo.com' } }),
-      META,
+    expect(Object.keys(gateway.calls[0] ?? {}).sort()).toEqual(
+      [
+        'consentAt',
+        'consentVersion',
+        'elapsedMs',
+        'honeypot',
+        'idempotencyKey',
+        'members',
+        'source',
+        'submittedAt',
+        'teamImage',
+        'teamName',
+      ].sort(),
     );
-    expect(gateway.calls[1]?.teamImage).toBeNull();
   });
 
   it('equipe sem foto nem chega no gateway', async () => {
@@ -118,7 +131,7 @@ describe('SubmitRegistration', () => {
   });
 
   it.each([
-    ['duplicate', 'Esse e-mail já tem uma inscrição registrada.', false],
+    ['duplicate', 'Essa equipe já tem uma inscrição registrada.', false],
     ['closed', 'As inscrições estão encerradas.', false],
     ['rejected', 'A inscrição foi recusada. Revise os dados e tente novamente.', false],
     ['rate-limited', 'Muita gente se inscrevendo agora. Tenta de novo em alguns segundos.', true],

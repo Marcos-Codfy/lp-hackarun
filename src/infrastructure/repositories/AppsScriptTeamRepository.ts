@@ -5,10 +5,10 @@ import { driveImageUrl } from './driveImageUrl';
 
 const TIMEOUT_MS = 6_000;
 
+// o que o ?action=teams devolve: nome, quantidade e id da foto (nada pessoal)
 interface TeamRow {
   id?: unknown;
   name?: unknown;
-  course?: unknown;
   memberCount?: unknown;
   // id do arquivo no Drive (coluna Imagem); vira URL pública só se tiver cara de id
   imageId?: unknown;
@@ -40,7 +40,6 @@ export class AppsScriptTeamRepository implements TeamRepository {
         ContentMapper.toTeam({
           id: row.id,
           name: row.name,
-          course: typeof row.course === 'string' && row.course.trim() ? row.course.trim() : null,
           // equipe confirmada tem pelo menos 1 pessoa, mesmo se a célula vier torta
           memberCount: Number.isFinite(count) && count > 0 ? Math.round(count) : 1,
           status: 'confirmed',

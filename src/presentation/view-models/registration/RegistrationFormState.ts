@@ -35,8 +35,16 @@ export interface RegistrationFormState {
   open: boolean;
   focus: FocusRequest | null;
   canAddMember: boolean;
+  // tem integrante além do mínimo: as linhas 2 em diante ganham o "Remover" (o contato nunca sai)
   canRemoveMember: boolean;
   imageStatus: TeamImageStatus;
+  // aviso pro leitor de tela ao somar ou tirar integrante; seq muda a cada aviso
+  announcement: Announcement | null;
+}
+
+export interface Announcement {
+  text: string;
+  seq: number;
 }
 
 // erros na ordem visual do formulário (o primeiro é quem ganha o foco)
@@ -46,4 +54,27 @@ export function orderErrors(errors: RegistrationErrors, fields: RegistrationFiel
   return Object.entries(errors)
     .map(([path, message]) => ({ path, message }))
     .sort((a, b) => rank(a.path) - rank(b.path));
+}
+
+// formulário recém-montado: vazio, sem erro à vista e com o status do build
+export function initialState(
+  fields: RegistrationFields,
+  open: boolean,
+  bounds: Pick<RegistrationFormState, 'canAddMember' | 'canRemoveMember'>,
+): RegistrationFormState {
+  return {
+    fields,
+    errors: {},
+    orderedErrors: [],
+    status: 'idle',
+    attempted: false,
+    protocol: null,
+    failure: null,
+    retryable: false,
+    open,
+    focus: null,
+    imageStatus: 'empty',
+    announcement: null,
+    ...bounds,
+  };
 }

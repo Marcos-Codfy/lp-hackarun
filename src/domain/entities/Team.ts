@@ -6,14 +6,12 @@ export type TeamStatus = 'confirmed' | 'pending';
 // só https (Drive) ou data:image (simulação do dev): nada de javascript: ou http solto no src da foto
 const SAFE_IMAGE_URL = /^(?:https:\/\/|data:image\/(?:png|jpeg|webp);base64,)/;
 
+// equipe pública: só o que o site mostra (nome, quantidade de integrantes e a foto). Nome de pessoa,
+// matrícula e e-mail ficam na planilha
 export interface TeamProps {
   id: string;
   name: TeamName;
-  members: string[];
-  // fonte pública (planilha) não expõe nomes, só a quantidade
   memberCount?: number;
-  course: string | null;
-  mentor: string | null;
   status: TeamStatus;
   // foto ou logo pública (só aparece depois da confirmação)
   imageUrl?: string | null;
@@ -21,20 +19,15 @@ export interface TeamProps {
 
 export class Team extends Entity {
   readonly name: TeamName;
-  readonly members: readonly string[];
   readonly size: number;
-  readonly course: string | null;
-  readonly mentor: string | null;
   readonly status: TeamStatus;
   readonly imageUrl: string | null;
 
   private constructor(props: TeamProps) {
     super(props.id);
     this.name = props.name;
-    this.members = [...props.members];
-    this.size = props.memberCount ?? props.members.length;
-    this.course = props.course;
-    this.mentor = props.mentor;
+    const count = props.memberCount ?? 0;
+    this.size = Number.isFinite(count) ? Math.max(0, Math.round(count)) : 0;
     this.status = props.status;
     this.imageUrl = props.imageUrl && SAFE_IMAGE_URL.test(props.imageUrl) ? props.imageUrl : null;
   }

@@ -11,18 +11,26 @@ import { AppsScriptHttpError, type AppsScriptClient } from './AppsScriptClient';
 const TIMEOUT_MS = 30_000;
 
 // erros que o Code.gs devolve -> falhas que a aplicação entende
-const SERVER_ERRORS: Record<string, GatewayFailure> = {
-  duplicate: 'duplicate',
-  closed: 'closed',
-  invalid: 'rejected',
-  'rate-limited': 'rate-limited',
-  server: 'server',
-};
+const SERVER_ERRORS = new Map<string, GatewayFailure>([
+  ['duplicate', 'duplicate'],
+  ['duplicate_team_name', 'duplicate-team-name'],
+  ['duplicate_email', 'duplicate-email'],
+  ['duplicate_student_id', 'duplicate-student-id'],
+  ['closed', 'closed'],
+  ['invalid', 'rejected'],
+  ['rate-limited', 'rate-limited'],
+  ['server', 'server'],
+]);
+
+// nunca passa do máximo de integrantes; o que vier torto é ignorado
+const MAX_INDEXES = 20;
 
 interface ServerResponse {
   ok?: unknown;
   protocol?: unknown;
   error?: unknown;
+  // posição dos integrantes já inscritos em outra equipe (duplicate_email / duplicate_student_id)
+  members?: unknown;
 }
 
 // adapter: porta RegistrationGateway -> Web App do Apps Script que grava na planilha
@@ -59,7 +67,15 @@ export class AppsScriptRegistrationGateway implements RegistrationGateway {
       return { protocol: body.protocol };
     }
     const code = typeof body.error === 'string' ? body.error : '';
-    throw new RegistrationGatewayError(SERVER_ERRORS[code] ?? 'rejected', code || 'Rejected');
+    const kind = SERVER_ERRORS.get(code) ?? 'rejected';
+    throw new RegistrationGatewayError(kind, code || 'Rejected', AppsScriptRegistrationGateway.indexes(body));
+  }
+
+  private static indexes(body: ServerResponse): number[] {
+    if (!Array.isArray(body.members)) return [];
+    return body.members
+      .filter((i): i is number => Number.isInteger(i) && i >= 0 && i < MAX_INDEXES)
+      .slice(0, MAX_INDEXES);
   }
 
   private static describe(error: unknown): string {
