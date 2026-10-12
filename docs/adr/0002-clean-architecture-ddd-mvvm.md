@@ -24,3 +24,8 @@ acoplamento com bibliotecas visuais que mudam rápido (three.js, GSAP).
 - Regras de negócio (validação da inscrição, status, contador, pontuação) testadas sem navegador.
 - Trocar a fonte de dados (JSON → planilha → API) não muda domínio nem telas.
 - Mais arquivos do que uma landing page "simples"; compensado por arquivos pequenos e nomes previsíveis.
+
+> **Atualização (2026-10-12):** o áudio saiu do site (ADR 0006, atualização). Strategy continua nas formas 3D, nos
+> pipelines de render e na qualidade, e o Null Object continua no `UnavailableRegistrationGateway`. A foto das equipes
+> entrou pelo mesmo caminho das outras portas: `ImageCodec` na aplicação e `CanvasImageCodec` na infraestrutura
+> (ADR 0007).

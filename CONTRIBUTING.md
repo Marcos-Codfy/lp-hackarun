@@ -56,7 +56,10 @@ O Husky valida a mensagem (commitlint) e roda ESLint e Prettier nos arquivos do 
 - 3D: uma `ShapeStrategy` e um `.glsl` por objeto; passo a passo em
   [docs/GUIA_DO_PROJETO.md](docs/GUIA_DO_PROJETO.md#77-como-adicionar-uma-cena).
 - Toda regra nova de negócio vem com teste em `tests/`.
-- Asset gerado por script (sons, fonte, assets dos PDFs) não se edita à mão: rode o script e versione a saída.
+- Asset gerado por script (fonte, assets dos PDFs) não se edita à mão: rode o script e versione a saída.
+- Mexeu em `apps-script/`? Publique uma nova versão do Web App junto com o deploy do site (passo a passo em
+  [apps-script/README.md](apps-script/README.md)). Constante espelhada entre o `.gs` e o TypeScript (`CONSENT_VERSION`,
+  `TEAM_SIZE`, `MIN_ELAPSED_MS`, teto da foto) muda nos dois lados; os testes acusam se divergir.
 
 ## Checklist do PR
 
@@ -64,6 +67,7 @@ O Husky valida a mensagem (commitlint) e roda ESLint e Prettier nos arquivos do 
 - [ ] Testado no celular (360 e 390px) e no desktop (1440px), com capturas das seções alteradas
       ([scripts de QA](scripts/qa/README.md): `shots`, `overflow` e `anchorcheck`)
 - [ ] Mexeu no 3D: conferido com `?quality=low` e `?quality=high`, sem erro no console
+- [ ] Mexeu em header, rodapé ou equipes: conferido também em `/equipes` (vazia e com equipes)
 - [ ] Teclado e leitor de tela ok; `prefers-reduced-motion` respeitado; "Pausar animações" para tudo
 - [ ] Lighthouse mobile sem regressão (acessibilidade, boas práticas e SEO em 100)
 - [ ] Sem `console.log`, sem arquivo acima de 250 linhas, sem segredo no código

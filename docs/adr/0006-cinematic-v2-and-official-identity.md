@@ -57,3 +57,15 @@ impacto visual esperado de um evento com estética de e-sports. Três pontos con
   seção 7.7.
 - A fonte corrigida é um asset gerado: atualizar a Orbitron do Fontsource exige rodar o script de novo.
 - As referências visuais e as capturas de QA viram parte do processo de revisão de qualquer PR visual.
+
+## Atualização (2026-10-12)
+
+A pedido da organização, depois da aprovação da v2, o site deixou de ter som e o clímax ficou mais calmo. O resto
+desta decisão continua valendo.
+
+- **Itens 3 e 5:** o passe de lente não tem mais flash branco, e o clímax não sincroniza flash, tremor nem som. A
+  carga dura 0,9 s (era 1,5 s) e termina num pulso suave: o globo respira inteiro, o anel é menor e o brilho que a
+  carga soma tem teto (`MAX_CHARGE_BLOOM` e `MAX_CHARGE_EXPOSURE`, no `PostDirector`). A câmera na mão ficou só com a
+  deriva lenta.
+- **Áudio:** saíram o botão de som, o cue do globo, o som de digitação e o script que os sintetizava. Detalhes no
+  `CHANGELOG.md` (`[Unreleased]`) e no guia, seção 7.5.

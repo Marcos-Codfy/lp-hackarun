@@ -2,7 +2,11 @@
 
 > **Versão 2 (vigente).** Fonte de verdade visual e de interação da landing page. Antes de mexer em seção, componente
 > ou 3D, leia isto. A v1 ("correta" demais: Big Shoulders, Inter, ciano #00CFFF, HUD no topo) está **obsoleta**; o que
-> mudou está resumido no fim, na seção 14. A decisão está registrada na ADR 0006.
+> mudou está resumido no fim, na seção 15. A decisão está registrada na ADR 0006.
+>
+> **Ajustes de 12/10/2026**, pedidos pela organização em cima da v2 aprovada: o site não tem mais som, o clímax da
+> inscrição ficou mais curto e calmo (seção 9) e as equipes ganharam a página `/equipes` (seção 14). A linguagem visual
+> é a mesma.
 
 ## 1. Conceito: "a página é a corrida"
 
@@ -26,19 +30,19 @@ tela e contraste alto.
 
 ## 3. Roteiro de cenas
 
-| #   | Seção (id)     | `data-scene`                      | Objeto                                                     | Cor dominante                    | Intenção                     |
-| --- | -------------- | --------------------------------- | ---------------------------------------------------------- | -------------------------------- | ---------------------------- |
-| 0   | `#inicio`      | `core`                            | Globo de energia em fitas, borda acesa                     | azul elétrico, cristas ciano     | Impacto inicial, curiosidade |
-| 1   | `#sobre`       | `orbit`                           | Cronômetro-giroscópio (mostrador, ponteiro, anéis em cardã) | ciano/azul, acento violeta       | Tempo: é uma corrida         |
-| 2   | `#npcs`        | `enigma`                          | "?" extrudado com faixa tracejada e auréola de HUD         | violeta + magenta, aro ciano     | Mistério: onde estão os NPCs |
-| 3   | `#missoes`     | `map`                             | Mapa em holograma: rota em espiral com 8 faróis            | ciano/azul, topo laranja         | A corrida em si; progresso   |
-| 4   | `#programacao` | `terrain`                         | Terreno synthwave: grade, montanhas e sol em faixas        | azul, sol magenta → laranja      | Os 4 dias como "rounds"      |
-| 5   | `#mentores`    | `terrain`                         | (mantém o terreno; pausa visual)                           | idem                             | Autoridade                   |
-| 6   | `#final`       | `stage`                           | Palco: telão de LED, treliça, canhões de luz, plateia      | ciano/branco, feixes violeta     | A final no Capim Dourado     |
-| 7   | `#premios`     | `trophy`                          | Troféu de torno em linhas, alças e estrela                 | laranja/ouro                     | Desejo                       |
-| 8   | `#equipes`     | `dust`                            | Galáxia distante e calma                                   | azul-violeta suave               | Prova social (fundo calmo)   |
-| 9   | `#faq`         | `dust`                            | Galáxia                                                    | idem                             | Tirar objeções               |
-| 10  | `#inscricao`   | `core` + `data-scene-hold="1500"` | O globo se reconstrói, carrega 1,5 s e estoura             | azul → magenta → branco no flash | Pico emocional → CTA         |
+| #   | Seção (id)     | `data-scene`                     | Objeto                                                      | Cor dominante                | Intenção                        |
+| --- | -------------- | -------------------------------- | ----------------------------------------------------------- | ---------------------------- | ------------------------------- |
+| 0   | `#inicio`      | `core`                           | Globo de energia em fitas, borda acesa                      | azul elétrico, cristas ciano | Impacto inicial, curiosidade    |
+| 1   | `#sobre`       | `orbit`                          | Cronômetro-giroscópio (mostrador, ponteiro, anéis em cardã) | ciano/azul, acento violeta   | Tempo: é uma corrida            |
+| 2   | `#npcs`        | `enigma`                         | "?" extrudado com faixa tracejada e auréola de HUD          | violeta + magenta, aro ciano | Mistério: onde estão os NPCs    |
+| 3   | `#missoes`     | `map`                            | Mapa em holograma: rota em espiral com 8 faróis             | ciano/azul, topo laranja     | A corrida em si; progresso      |
+| 4   | `#programacao` | `terrain`                        | Terreno synthwave: grade, montanhas e sol em faixas         | azul, sol magenta → laranja  | Os 4 dias como "rounds"         |
+| 5   | `#mentores`    | `terrain`                        | (mantém o terreno; pausa visual)                            | idem                         | Autoridade                      |
+| 6   | `#final`       | `stage`                          | Palco: telão de LED, treliça, canhões de luz, plateia       | ciano/branco, feixes violeta | A final no Capim Dourado        |
+| 7   | `#premios`     | `trophy`                         | Troféu de torno em linhas, alças e estrela                  | laranja/ouro                 | Desejo                          |
+| 8   | `#equipes`     | `dust`                           | Galáxia distante e calma                                    | azul-violeta suave           | Prova social: leva a `/equipes` |
+| 9   | `#faq`         | `dust`                           | Galáxia                                                     | idem                         | Tirar objeções                  |
+| 10  | `#inscricao`   | `core` + `data-scene-hold="900"` | O globo se reconstrói, carrega 0,9 s e solta um pulso       | azul elétrico, pulso ciano   | Pico emocional → CTA            |
 
 Regras:
 
@@ -49,6 +53,7 @@ Regras:
 - Em paisagem a forma fica ao lado do texto; em retrato fica menor e mais apagada, atrás do título e do parágrafo
   (a única área sem cards de vidro por cima).
 - **Nunca travamos o scroll do usuário.** O clímax da inscrição conta tempo, não scroll (seção 9).
+- A página `/equipes` não tem 3D: no lugar do objeto fica um halo de HUD estático em CSS, e a aurora continua.
 
 ## 4. Paleta oficial
 
@@ -111,9 +116,10 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 
 - **Header:** barra de vidro flutuante (12px do topo), transparente no topo e com vidro + fio degradê depois de rolar;
   recolhe ao rolar pra baixo e volta em qualquer rolagem pra cima ou foco. Logo oficial, links com sublinhado degradê
-  animado, botão de som (ícone de equalizador: barras paradas e riscadas quando desligado, dançando quando ligado),
-  botão **Pausar animações** (mesma placa do som, com tooltip da ação do próximo clique) e CTA. Desktop: grade de 3
-  colunas com a navegação no centro exato.
+  animado (o **Equipes** leva para a página `/equipes`), botão **Pausar animações** (placa com ícone e tooltip da ação
+  do próximo clique) e CTA "Participar". Desktop: grade de 3 colunas com a navegação no centro exato. Celular: logo,
+  pausar e o botão do menu. Fora da LP, os links das seções voltam para a LP (`/#secao`) e o item da página atual fica
+  marcado (`aria-current="page"`).
 - **Menu mobile:** overlay de tela cheia com links grandes numerados ("checkpoints"), entrada em cascata, foco preso,
   `Esc` fecha e o resto da página fica `inert`. No rodapé do menu, o "Pausar animações" vira uma chave com texto.
 - **HUD desktop:** trilho vertical fino na **borda direita**, com um tique por checkpoint (passados acesos, atual
@@ -125,16 +131,20 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 ## 9. 3D cinematográfico
 
 - **Pós-processamento:** bloom real (em meia resolução no tier médio), exposição com ombro suave, aberração cromática
-  sutil, vinheta, grão, zoom blur nas travessias, flash e onda de choque no clímax. Cada cena tem seu "look" (força e
-  raio do bloom, tinta do halo, exposição, quantidade de estrelas e bokeh).
+  sutil, vinheta, grão, zoom blur nas travessias e uma onda de choque discreta no clímax (tinta ciano e um pouco de
+  refração, sem flash). Cada cena tem seu "look" (força e raio do bloom, tinta do halo, exposição, quantidade de
+  estrelas e bokeh).
 - **Color grading por cena:** cada objeto tem fundo, corpo, crista e acento da paleta (tabela da seção 3).
 - **Câmera coreografada:** enquadramento próprio por cena (hero quase parado; giroscópio visto um pouco de cima; mapa
   em travelling; terreno de grua alta; palco com push-in; troféu em órbita; galáxia por dentro da nuvem). Nas
   travessias a câmera mergulha pela casca do globo rumo ao giroscópio e, no fim, puxa pra trás até o globo final se
   revelar inteiro. "Câmera na mão" sempre: deriva lenta, nunca tremida aleatória.
-- **Clímax da inscrição:** o globo carrega por 1,5 s (energia em curva, fitas puxando pro magenta, ronco crescente da
-  câmera), estoura com flash branco contido (o texto do CTA não pode sumir), pulso, anel de choque e tranco curto, e
-  assenta num brilho calmo. O som toca no mesmo evento do flash. Se o usuário sai, a carga descarrega.
+- **Clímax da inscrição:** curto e calmo, nada de explosão. O globo carrega por 0,9 s (energia em curva, fitas um
+  pouco mais agitadas, câmera se aproximando devagar) e solta um **pulso suave**: o globo respira inteiro, a luz sobe
+  e apaga sem estouro branco, um anel abre até cerca de 2,6 vezes o raio do globo e some, e tudo assenta num brilho
+  calmo. Sem tremor de câmera. O brilho extra da carga tem teto, para o título, o contador e o CTA continuarem nítidos.
+  A barra do CTA enche no mesmo tempo da carga e o botão acende junto com o pulso. A linha de status fica numa placa
+  escura (contraste sobre o anel) e, no celular, quebra em duas linhas. Se o usuário sai, a carga descarrega.
 - **Sem WebGL, `save-data` ou falha:** brilho estático em CSS no lugar do canvas; o resto da página é idêntico.
 
 ## 10. Movimento
@@ -144,7 +154,7 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 - Entradas: `y: 40 → 0`, `opacity 0 → 1`, `stagger 0.06`, `ease: expo.out`, `duration 0.9–1.2`.
 - Missões no desktop (≥ 1024px, sem reduced motion): **trilho horizontal com pin**; no mobile, lista vertical.
 - Números (vagas, pontos, dias) contam de 0 até o valor ao entrar na tela. Terminal do NPC e protocolo da inscrição
-  "digitam" caractere a caractere.
+  "digitam" caractere a caractere, em silêncio.
 - `prefers-reduced-motion`: sem Lenis, sem pin, sem morph contínuo (a cena troca inteira, render sob demanda),
   entradas viram fade simples, durações dos tokens zeradas.
 - **Pausar animações** (WCAG 2.2.2): congela onde estão o 3D, os raios do logo e os loops infinitos em CSS (lista em
@@ -157,34 +167,59 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 - **Urgência:** contador laranja para o próximo marco (largada → entrega 15h → premiação 18h).
 - **Escassez:** "vagas limitadas à capacidade dos laboratórios" e contador de vagas quando a organização definir a
   capacidade.
-- **Prova social:** equipes confirmadas aparecem na lista em tempo real (planilha).
+- **Prova social:** na LP, o contador de equipes confirmadas e uma vitrine com até 5 fotos levam para a página
+  `/equipes`, onde cada equipe confirmada aparece com a foto ou a logo, em tempo real (planilha).
 - **Autoridade:** Unicatólica + Capim Dourado com logos oficiais, mentores egressos, banca.
 - **Gamificação:** 3 tokens NPC escondidos na página; achar os 3 revela uma mensagem secreta no HUD.
-- **Microcompromisso:** "Adicionar à agenda" (.ics) antes da inscrição.
-- **Pico-fim:** o clímax com globo, flash e som é o momento mais forte da página, logo antes do formulário.
+- **Microcompromisso:** "Adicionar à agenda" (.ics) no aviso de inscrições em breve, no lobby do formulário e na tela
+  de sucesso. Na programação o botão saiu, a pedido da organização.
+- **Pico-fim:** o globo carregando e o CTA acendendo junto com o pulso é o momento mais forte da página, logo antes do
+  formulário.
 
 ## 12. Acessibilidade (WCAG 2.2 AA)
 
 HTML semântico com landmarks e hierarquia de títulos, skip link, foco visível em ouro, alvos de toque ≥ 44px, canvas
 e aurora `aria-hidden`, contador com texto estático para leitor de tela (os dígitos que mudam são `aria-hidden`),
-formulário com `label`, `aria-describedby`, `aria-invalid` e erros anunciados (`aria-live`), FAQ com `<details>`,
-tokens NPC como botões de verdade, som desligado por padrão e com controle visível, botão para pausar tudo que se
-mexe sozinho (2.2.2), `prefers-reduced-motion` respeitado, foco programático das seções com contorno transparente
-(continua visível em cores forçadas), conteúdo completo sem JS e sem WebGL. Lighthouse mobile: acessibilidade 100
-(10/10/2026).
+formulário com `label`, `aria-describedby`, `aria-invalid` e erros anunciados (`aria-live`), campo da foto com
+prévia, troca, arrastar e soltar e status anunciado, FAQ com `<details>`, tokens NPC como botões de verdade, botão
+para pausar tudo que se mexe sozinho (2.2.2), `prefers-reduced-motion` respeitado, foco programático das seções com
+contorno transparente (continua visível em cores forçadas), conteúdo completo sem JS e sem WebGL. O site não toca
+som nenhum. Na página `/equipes`: trilha de navegação com `aria-current="page"`, busca com `label`, contagem
+anunciada em região live e alt "Foto ou logo da equipe X" em cada card. Lighthouse mobile: acessibilidade 100 na LP
+(10/10/2026) e em `/equipes` (12/10/2026, medido em dev).
 
-## 13. Áudio e copy
+## 13. Copy
 
-- **Som desligado por padrão** (autoplay e WCAG 1.4.2). O botão de som do header liga o áudio e destrava o
-  `AudioContext`; os arquivos só são baixados a partir daí.
-- **Cue do clímax** (`public/audio/cta-globe.mp3`): zap elétrico + estalo do flash + grave com queda de pitch e
-  harmônicos (o "low" aparece até em caixinha de celular). Sem o arquivo, toca uma versão sintetizada.
-- **Digitação** (`public/audio/ui-typing.wav`): cliques curtos com tom variando, a cada caractere "digitado".
-- Os sons são sintetizados em `scripts/audio/render_cues.py`. Para trocar, substitua os arquivos (cue < 60 KB).
+- **Sem áudio:** a página não tem som, nem botão de som. A organização pediu para tirar, e o impacto fica com a luz e
+  o movimento.
 - **Tom de voz:** direto, jovem, "dev pra dev", sem jargão corporativo, verbos de ação. Nada de prometer o que não está
-  no regulamento: prêmios e vagas ficam "a revelar" até a organização confirmar.
+  no regulamento: prêmios e vagas ficam "a revelar" até a organização confirmar. Nada de frase de efeito forçada: o
+  título diz uma coisa concreta (ex.: "Da sala de aula ao _palco_.").
+- **Local da final:** sempre "Capim Dourado Shopping" (na faixa: "Final no Capim Dourado Shopping"; na grande final:
+  "A final é no Capim Dourado Shopping."). O telão é detalhe do palco, não o lugar. O título da grande final usa o
+  tamanho menor do cabeçalho e uma largura máxima para nunca partir o nome do shopping.
+- **Faixa do "O evento":** a instituição aparece como "UNICATÓLICA", em caixa alta e com acento.
+- **Regras do dia a dia** (por exemplo, andar entre as estações) não entram na página: a organização passa no dia.
 
-## 14. Histórico: o que a v2 substituiu (obsoleto)
+## 14. Página de equipes (`/equipes`)
+
+- **Papel:** a vitrine das equipes confirmadas, separada da LP. Na LP, a seção `#equipes` vira uma chamada: contador
+  ao vivo, uma fileira com até 5 fotos (quatro vagas tracejadas quando ainda não há equipe) e "+N", "Ver as equipes" e
+  "Inscrever minha equipe".
+- **Estrutura:** trilha "HackaRun 2026 › Equipes", H1 "Equipes _inscritas_" com o código de HUD `EQ`, contador ao vivo
+  e busca (aparece quando há equipes), grade de cards e uma nota de que a equipe aparece depois da confirmação e de
+  como pedir a troca ou a retirada da foto.
+- **Grade:** 2 colunas no celular, 3 a partir de 640 px e 4 a partir de 1024 px.
+- **Card:** a foto ou logo aparece inteira (`object-fit: contain`) sobre uma cópia desfocada e escurecida dela mesma,
+  então logo não corta e foto não ganha tarja preta. Sem imagem, ou se ela não carregar, o card mostra as iniciais do
+  nome. Por baixo: posição, nome, curso e a quantidade de integrantes.
+- **Estado vazio:** a grade de vagas (`LineupSlots`) com "Inscrever minha equipe", que leva para `/#inscricao`.
+- **Fundo:** a mesma aurora da LP, sem 3D. No desktop entra um halo de HUD estático em CSS, sem cobrir a busca nem o
+  título.
+- **Foto na inscrição:** o campo mostra a prévia com "Trocar imagem". Logo com fundo transparente ganha um fundo
+  sólido que contrasta com o traço, para não sumir no card escuro.
+
+## 15. Histórico: o que a v2 substituiu (obsoleto)
 
 | Tema           | v1 (obsoleto, não use)                                       | v2 (vigente)                                                       |
 | -------------- | ------------------------------------------------------------ | ------------------------------------------------------------------ |

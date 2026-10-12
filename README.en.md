@@ -46,20 +46,21 @@ scene to scene and, at registration, the globe charges up and bursts with energy
   front end, the Apps Script registration API, the tests, the CI and the docs.
 - **What it is:** the official site of HackaRun 2026, the hackathon run by Unicatólica's Software Engineering and
   Artificial Intelligence courses in partnership with Capim Dourado Shopping, a local mall. It is a 4-day event,
-  November 11 to 14, 2026, in Palmas, Tocantins, Brazil. The page covers the schedule, 8 missions, mentors, prizes, a hunt for 3 hidden
-  tokens, the confirmed teams (live) and registration. All site content is in Brazilian Portuguese.
+  November 11 to 14, 2026, in Palmas, Tocantins, Brazil. The page covers the schedule, 8 missions, mentors, prizes, a
+  hunt for 3 hidden tokens, registration and a page of its own for the confirmed teams, with each team's photo or
+  logo, live. All site content is in Brazilian Portuguese.
 - **What sets it apart:** 8 procedural 3D objects (globe, stopwatch, "?", holographic map, synthwave terrain, stage,
   trophy and galaxy) made of 9,000 to 42,000 particles, with no 3D models and no video, plus cinematic
   post-processing and a choreographed camera for every transition.
 - **Fast:** Lighthouse mobile Performance **95** (up from 66), 18 ms TBT and 0.048 CLS. Accessibility, Best practices
   and SEO at **100**.
 - **Accessible:** all content shows up without JavaScript and without WebGL (only submitting the registration needs
-  JavaScript, and the page says so), `prefers-reduced-motion` is respected, there is a pause animations button
-  (WCAG 2.2.2) and sound starts off.
-- **Zero-cost backend:** form → Google Apps Script → Google Sheets, with idempotent retries, rate limits, a
-  concurrency lock and versioned LGPD (Brazil's data protection law) consent.
-- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 304 tests, CI on
-  GitHub Actions, Conventional Commits and 6 ADRs.
+  JavaScript, and the page says so), `prefers-reduced-motion` is respected and there is a pause animations button
+  (WCAG 2.2.2).
+- **Zero-cost backend:** form → Google Apps Script → Google Sheets, with the team photo in Google Drive, idempotent
+  retries, rate limits, a concurrency lock and versioned LGPD (Brazil's data protection law) consent.
+- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 411 tests, CI on
+  GitHub Actions, Conventional Commits and 7 ADRs.
 
 ## Visuals
 
@@ -90,9 +91,13 @@ with fontTools, across weights 400 to 900. Almost nobody will notice, but I woul
 opened the page.
 
 I also decided early that the 3D would be an extra: if it fails, the page is still whole. All content shows up without
-JavaScript and without WebGL (only registration needs JavaScript), sound starts off and anyone can pause the
-animations. What's left is bringing LCP from 2.6 s to under 2.5 s and the initial JS under 70 KB. Both are on the
-roadmap.
+JavaScript and without WebGL (only registration needs JavaScript), and anyone can pause the animations. What's left is
+bringing LCP from 2.6 s to under 2.5 s and the initial JS under 70 KB. Both are on the roadmap.
+
+After v2 was approved, the organizers sent a list of tweaks, and most of it asked for less, not more. I removed sound
+entirely (the toggle, the synthesis and the files), made the registration climax shorter and calmer, with no white
+flash and no camera shake, and gave the teams a page of their own, with the photo or logo each team uploads when it
+registers ([challenge 9](#9-team-photos-without-an-image-server)).
 
 ## Challenges I solved
 
@@ -178,21 +183,38 @@ roadmap.
   `= + - @` gets an apostrophe against formula injection, and requests are a plain `text/plain` "simple request" with
   no CORS preflight.
 - **Result:** the real `.gs` files run in the tests inside a Node `vm` sandbox with fake Sheet, Cache and Lock
-  services ([`sandbox.ts`](tests/helpers/apps-script/sandbox.ts)), and a test checks that `TEAM_SIZE` and
-  `MIN_ELAPSED_MS` stay in sync with the TypeScript side.
+  services ([`sandbox.ts`](tests/helpers/apps-script/sandbox.ts)), and a test checks that `TEAM_SIZE`,
+  `MIN_ELAPSED_MS` and `CONSENT_VERSION` stay in sync with the TypeScript side.
+
+### 9. Team photos without an image server
+
+- **Problem:** each team uploads a photo or logo when it registers, but the site is static, Apps Script only receives a
+  text body and phone photos weigh several MB. Nothing could go live before the organizers had looked at it.
+- **Solution:** the browser does the heavy lifting.
+  [`PrepareTeamImage`](src/application/use-cases/PrepareTeamImage.ts) opens the image with `createImageBitmap`
+  (respecting EXIF), scales it to 800 px on the long side and tries WebP, then JPEG, lowering the quality and then the
+  size until it fits in ~300 KB. A logo with a transparent background gets a contrasting fill. The bytes travel as
+  base64 in the same `POST`, and a retry sends the same bytes with the same key. On the server,
+  [`Images.gs`](apps-script/Images.gs) checks the format by its leading bytes, writes to Drive only after the duplicate
+  checks, names the file after the protocol code, and the public list only exposes the photo id of confirmed teams.
+- **Result:** zero cost, moderation is the same `confirmado` the organizers were already setting, and the CSP allows a
+  single image host (`lh3.googleusercontent.com`). A Drive outage or a blocked public link never takes the
+  registration down: the card shows the team's initials. The decision is in
+  [ADR 0007](docs/adr/0007-team-photos-google-drive.md).
 
 <details>
 <summary><b>Other details I'm proud of</b></summary>
 
 - **Custom post-processing:** `RenderPass` → bloom at its own resolution, tinted per scene →
-  [cinematic pass](src/presentation/experience/shaders/cinematic.frag.glsl) with shockwave refraction, hyperspace
-  zoom blur, edge-only chromatic aberration, exposure with a soft shoulder, flash, vignette and 24 fps grain.
+  [cinematic pass](src/presentation/experience/shaders/cinematic.frag.glsl) with light shockwave refraction,
+  hyperspace zoom blur, edge-only chromatic aberration, exposure with a soft shoulder, vignette and 24 fps grain.
 - **Registration climax:** when `#inscricao` enters the viewport,
-  [`SceneHoldWatcher`](src/presentation/motion/core/SceneHoldWatcher.ts) counts 1.5 s (the scroll is never locked)
-  and fires the globe burst, the flash, the camera shake, the sound (if enabled) and the CTA reveal from one event.
-- **Audio synthesized in Python** ([`render_cues.py`](scripts/audio/render_cues.py), NumPy, LAME and a time-varying
-  RBJ filter), with no third-party samples. The `AudioContext` is only created after a user gesture and unlocks iOS
-  with a silent buffer.
+  [`SceneHoldWatcher`](src/presentation/motion/core/SceneHoldWatcher.ts) counts 0.9 s (the scroll is never locked).
+  The CTA meter fills over the same time as the charge and, at the end, a single event releases the globe's pulse and
+  lights up the button. What the charge adds to the glow is capped (`MAX_CHARGE_BLOOM`), so the heading and the CTA
+  never lose contrast.
+- **A light page for the teams:** `/equipes` boots on its own ([`LightApp`](src/presentation/app/LightApp.ts)), which
+  only wires the header, menu, pause toggle and live list. No three.js, GSAP or Lenis module is downloaded.
 - **Resilience:** `EventBus`, `Observable` and `Ticker` isolate a handler that throws, and if GSAP or Lenis fail the
   page falls back to native scrolling.
 - **`content-visibility` without broken anchors:** far sections render on demand, with `contain-intrinsic-size`
@@ -219,7 +241,7 @@ flying through the globe shell to the final pull-back.
 | Grand final (`#final`)      | `stage`   | Show stage: 16:9 LED wall, truss, 8 light cannons and a bouncing crowd  |
 | Prizes (`#premios`)         | `trophy`  | Lathe-profile cup drawn in lines, tube handles and a star on top        |
 | Teams and FAQ               | `dust`    | A distant, calm galaxy with 2 spiral arms: a quiet backdrop for reading |
-| Registration (`#inscricao`) | `core`    | The globe returns, charges for 1.5 s and bursts (the climax)            |
+| Registration (`#inscricao`) | `core`    | The globe returns, charges for 0.9 s and releases a pulse (the climax)  |
 
 ## Stack
 
@@ -230,8 +252,8 @@ flying through the globe shell to the final pull-back.
 | Motion   | [GSAP](https://gsap.com) 3.15 (ScrollTrigger), [Lenis](https://lenis.darkroom.engineering) 1.3, `LineSplit`     |
 | Styling  | Modern CSS (custom properties, `@property`, cascade layers, `clamp()`, `content-visibility`), design tokens     |
 | Fonts    | Orbitron (with the fixed tilde), Montserrat and JetBrains Mono, self-hosted via Fontsource, latin subset only   |
-| Audio    | Web Audio API, with sounds synthesized in Python (NumPy + LAME)                                                 |
-| Backend  | Google Apps Script (V8) + Google Sheets, serverless                                                             |
+| Images   | `createImageBitmap` + canvas in the browser (WebP or JPEG), Google's image CDN for the team photos              |
+| Backend  | Google Apps Script (V8) + Google Sheets + Google Drive (photos), serverless                                     |
 | Quality  | Vitest + happy-dom, ESLint 10 + typescript-eslint, Prettier, Astro Check, Playwright + Lighthouse               |
 | Workflow | Husky, lint-staged, commitlint (Conventional Commits), GitHub Actions                                           |
 | Hosting  | Cloudflare Pages ([ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md))                                        |
@@ -264,7 +286,7 @@ flowchart TB
   subgraph INFRA["Infrastructure"]
     JSON["JSON repositories"]
     GAS["Apps Script gateway"]
-    ADP["Audio, storage and ICS"]
+    ADP["Image, storage and ICS"]
   end
   COMP(["Composition roots"])
 
@@ -282,12 +304,12 @@ flowchart TB
 - **Shared** (`EventBus`, `Observable`, `Ticker`): used by the other layers and imports none of them.
 
 **DDD building blocks:** `Entity` and `ValueObject` base types, `Result<T, E>` with `ok` and `fail`, two aggregate
-roots (`HackathonEvent` and `TeamRegistration`), value objects such as `Email`, `Phone`, `TeamName`, `Countdown` and
-`ScoringRule`, the `RegistrationPolicy` domain service (soon, open, closing, closed) and 12 use cases. Invalid JSON
-content fails the build.
+roots (`HackathonEvent` and `TeamRegistration`), value objects such as `Email`, `Phone`, `TeamName`, `TeamImage`,
+`Countdown` and `ScoringRule`, the `RegistrationPolicy` domain service (soon, open, closing, closed) and 13 use cases.
+Invalid JSON content fails the build.
 
-**MVVM:** 7 DOM-free ViewModels holding state in `Observable` (countdown, HUD, pause, NPC hunt, form, sound and
-teams), and Views that only bind the DOM. Modules talk through a typed `EventBus`
+**MVVM:** 6 DOM-free ViewModels holding state in `Observable` (countdown, HUD, pause, NPC hunt, form and teams), and
+Views that only bind the DOM. Modules talk through a typed `EventBus`
 ([`AppEvents.ts`](src/presentation/app/AppEvents.ts)): `scene:enter`, `experience:charged`, `motion:paused`,
 `npc:found` and more.
 
@@ -310,24 +332,24 @@ between targets) → `RenderPass` → bloom → cinematic pass → opaque canvas
 <details>
 <summary><b>Design patterns and where they live</b></summary>
 
-| Pattern              | Where                                                                                                                                                                                                             |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Strategy             | [`ShapeStrategy`](src/presentation/experience/shapes/ShapeStrategy.ts) (8 objects), [`RenderPipeline`](src/presentation/experience/post/RenderPipeline.ts), `QualityProfile`, `ScrollDriver`, `AudioCue`          |
-| Factory + registry   | [`ShapeFactory`](src/presentation/experience/shapes/ShapeFactory.ts), [`BoltFactory`](src/presentation/motion/animators/hero/lightning/BoltFactory.ts)                                                            |
-| Registry             | [`AnimatorRegistry`](src/presentation/motion/animators/AnimatorRegistry.ts)                                                                                                                                       |
-| Template Method      | [`SectionAnimator`](src/presentation/motion/animators/SectionAnimator.ts)                                                                                                                                         |
-| Adapter              | [`SmoothScroll`](src/presentation/motion/core/SmoothScroll.ts) (Lenis), [`AppsScriptRegistrationGateway`](src/infrastructure/registration/AppsScriptRegistrationGateway.ts)                                       |
-| Decorator            | [`RetryingRegistrationGateway`](src/infrastructure/registration/RetryingRegistrationGateway.ts): 3 attempts, exponential backoff with jitter                                                                      |
-| Fallback proxy       | [`FallbackTeamRepository`](src/infrastructure/repositories/FallbackTeamRepository.ts): live sheet first, build-time list as backup                                                                                |
-| Null Object          | [`NullAudioCue`](src/infrastructure/audio/NullAudioCue.ts), [`UnavailableRegistrationGateway`](src/infrastructure/registration/UnavailableRegistrationGateway.ts)                                                 |
-| Observer             | [`Observable`](src/shared/core/Observable.ts), [`EventBus`](src/shared/core/EventBus.ts)                                                                                                                          |
-| Singleton            | [`Ticker.shared`](src/shared/core/Ticker.ts) (one rAF for the whole site), [`serverContainer()`](src/composition/server.ts)                                                                                       |
-| Facade               | [`GetLandingPage`](src/application/use-cases/GetLandingPage.ts), [`ExperienceStage`](src/presentation/experience/ExperienceStage.ts)                                                                              |
-| Composite            | [`strokes.ts`](src/presentation/experience/shapes/strokes.ts): a shape is a list of weighted strokes                                                                                                              |
-| Builder              | [`PointBrush`](src/presentation/experience/shapes/PointBrush.ts), [`BoltBuilder`](src/presentation/motion/animators/hero/lightning/BoltBuilder.ts), [`StageBuilder`](src/presentation/experience/StageBuilder.ts) |
-| Repository + Mapper  | [`StaticListRepository`](src/infrastructure/repositories/StaticListRepository.ts), [`EventMapper`](src/infrastructure/mappers/EventMapper.ts)                                                                     |
-| Cooperative job      | [`ParticleJob`](src/presentation/experience/shapes/ParticleJob.ts): a generator that yields the thread                                                                                                            |
-| Dependency inversion | [`BootSteps`](src/presentation/app/BootQueue.ts), the interface the boot sees                                                                                                                                     |
+| Pattern              | Where                                                                                                                                                                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Strategy             | [`ShapeStrategy`](src/presentation/experience/shapes/ShapeStrategy.ts) (8 objects), [`RenderPipeline`](src/presentation/experience/post/RenderPipeline.ts), `QualityProfile`, `ScrollDriver`                                                    |
+| Factory + registry   | [`ShapeFactory`](src/presentation/experience/shapes/ShapeFactory.ts), [`BoltFactory`](src/presentation/motion/animators/hero/lightning/BoltFactory.ts)                                                                                          |
+| Registry             | [`AnimatorRegistry`](src/presentation/motion/animators/AnimatorRegistry.ts)                                                                                                                                                                     |
+| Template Method      | [`SectionAnimator`](src/presentation/motion/animators/SectionAnimator.ts)                                                                                                                                                                       |
+| Adapter              | [`SmoothScroll`](src/presentation/motion/core/SmoothScroll.ts) (Lenis), [`AppsScriptRegistrationGateway`](src/infrastructure/registration/AppsScriptRegistrationGateway.ts), [`CanvasImageCodec`](src/infrastructure/image/CanvasImageCodec.ts) |
+| Decorator            | [`RetryingRegistrationGateway`](src/infrastructure/registration/RetryingRegistrationGateway.ts): 3 attempts, exponential backoff with jitter                                                                                                    |
+| Fallback proxy       | [`FallbackTeamRepository`](src/infrastructure/repositories/FallbackTeamRepository.ts): live sheet first, build-time list as backup                                                                                                              |
+| Null Object          | [`UnavailableRegistrationGateway`](src/infrastructure/registration/UnavailableRegistrationGateway.ts): in production with no endpoint, every submission answers "closed"                                                                        |
+| Observer             | [`Observable`](src/shared/core/Observable.ts), [`EventBus`](src/shared/core/EventBus.ts)                                                                                                                                                        |
+| Singleton            | [`Ticker.shared`](src/shared/core/Ticker.ts) (one rAF for the whole site), [`serverContainer()`](src/composition/server.ts)                                                                                                                     |
+| Facade               | [`GetLandingPage`](src/application/use-cases/GetLandingPage.ts), [`ExperienceStage`](src/presentation/experience/ExperienceStage.ts)                                                                                                            |
+| Composite            | [`strokes.ts`](src/presentation/experience/shapes/strokes.ts): a shape is a list of weighted strokes                                                                                                                                            |
+| Builder              | [`PointBrush`](src/presentation/experience/shapes/PointBrush.ts), [`BoltBuilder`](src/presentation/motion/animators/hero/lightning/BoltBuilder.ts), [`StageBuilder`](src/presentation/experience/StageBuilder.ts)                               |
+| Repository + Mapper  | [`StaticListRepository`](src/infrastructure/repositories/StaticListRepository.ts), [`EventMapper`](src/infrastructure/mappers/EventMapper.ts)                                                                                                   |
+| Cooperative job      | [`ParticleJob`](src/presentation/experience/shapes/ParticleJob.ts): a generator that yields the thread                                                                                                                                          |
+| Dependency inversion | [`BootSteps`](src/presentation/app/BootQueue.ts), the interface the boot sees                                                                                                                                                                   |
 
 </details>
 
@@ -359,7 +381,13 @@ keeps the rest in shape:
 - Self-hosted fonts, latin subset only, two preloaded, `font-display: swap`.
 - three.js in its own chunk (606 KB, 155 KB gzip), imported after `load` and once the browser is idle.
 - 3D rendering pauses when the tab is hidden, and the logo lightning only runs while the hero is visible.
-- Immutable caching for one year on `/_astro/*` and 7 days for audio ([`public/_headers`](public/_headers)).
+- `/equipes` has no 3D, GSAP or Lenis. Photos come at 600 px from Google's CDN with `loading="lazy"`,
+  `decoding="async"` and a fixed width and height (no layout shift); on upload, the browser already brings each photo
+  down to ~300 KB.
+- Immutable caching for one year on `/_astro/*` and HTML always revalidated ([`public/_headers`](public/_headers)).
+
+<sub>The measurements above are from 2026-10-11, before the 2026-10-12 tweaks (sound removed, calmer climax and the
+teams page). The `/equipes` page has not been measured on a production build yet.</sub>
 
 ## Accessibility
 
@@ -371,34 +399,42 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
   animations.
 - A **pause animations** button (WCAG 2.2.2) in the header and the mobile menu: it freezes the 3D clock, the
   lightning and the CSS loops, and the choice is saved. Its tooltip closes with Esc (WCAG 1.4.13).
-- Sound off by default (WCAG 1.4.2): audio files only download after the visitor turns sound on.
 - Mobile menu with the rest of the page `inert`, a focus trap, Esc to close and focus returned to the toggle. Anchor
   links move focus to the target section.
 - Form with an accessible error summary, `aria-invalid` and `aria-describedby`, live regions for status and
-  screen-reader copies of the "typed" or "decoded" text.
+  screen-reader copies of the "typed" or "decoded" text. The photo field has a preview, a replace button, drag and
+  drop and an announced status.
+- The `/equipes` page has a breadcrumb (`aria-current="page"`), a labeled search, a count announced in a live region
+  and "Foto ou logo da equipe X" alt text on every card. Lighthouse (measured in dev) scores its accessibility at 100.
 - Full content without JavaScript and without WebGL: the HTML is complete at build time, and the form says so when
   JavaScript is off.
 
 ## Security and privacy (LGPD)
 
 - **Strict CSP** in [`public/_headers`](public/_headers): `script-src 'self'` with no inline script, `connect-src`
-  limited to the site's own origin and Apps Script, `object-src 'none'` and `frame-ancestors 'none'`, plus `nosniff`,
+  limited to the site's own origin and Apps Script, `img-src` limited to the site's own origin and
+  `lh3.googleusercontent.com` (the team photos), `object-src 'none'` and `frame-ancestors 'none'`, plus `nosniff`,
   `X-Frame-Options: DENY`, COOP, Permissions-Policy and Referrer-Policy.
-- **Minimal public data:** the teams list shows only the team name, course and member count (never people's names,
-  e-mails or phone numbers), and it is built from a `<template>` using `textContent` (nothing from the sheet becomes
-  HTML).
+- **Minimal public data:** the teams page shows only the team name, course, member count and photo or logo (never
+  people's names, e-mails or phone numbers), and only after the organizers confirm the registration. Cards are built
+  from a `<template>` using `textContent` (nothing from the sheet becomes HTML), and the photo URL is only built from
+  an id in the Drive id format.
+- **Uploads checked on the server:** the photo is validated by its leading bytes (JPEG, PNG or WebP), the declared
+  type has to match and the cap is 400 KB. The file is named after the protocol code, never after anything typed.
 - **Anti-spam:** a honeypot field, a 3 s minimum fill time, and per-e-mail (the counter keys on the e-mail's SHA-256
   hash only) and global limits.
 - **Protected sheet:** formula injection (`= + - @`) is neutralized and `LockService` prevents concurrent writes.
-- **LGPD:** a privacy notice at [`/privacidade`](src/pages/privacidade.astro) in 9 sections, from who handles the data
-  to in-browser storage, including how sensitive accessibility data is treated. Each registration stores the accepted
-  notice version and the consent time (`CONSENT_VERSION`), and the server rejects submissions without them.
+- **LGPD:** a privacy notice at [`/privacidade`](src/pages/privacidade.astro) in 10 sections, from who handles the
+  data to in-browser storage, including the team photo and how sensitive accessibility data is treated. Each
+  registration stores the accepted notice version and the consent time (`CONSENT_VERSION`), and the server rejects
+  submissions without them or with an old version. For team registrations, consent includes permission to publish the
+  photo and a statement that everyone in it agreed.
 
 ## Quality
 
 | Item       | Status                                                                                                           |
 | ---------- | ---------------------------------------------------------------------------------------------------------------- |
-| Tests      | **304 tests in 45 files** (Vitest + happy-dom), split by layer, including 4 suites that run the real Apps Script |
+| Tests      | **411 tests in 56 files** (Vitest + happy-dom), split by layer, including 5 suites that run the real Apps Script |
 | Lint       | ESLint with no errors or warnings: layer rules, a 250 code-line cap per file, `import type`                      |
 | Types      | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check          |
 | Formatting | Prettier across the repository                                                                                   |
@@ -406,8 +442,8 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
 | Commits    | Husky + lint-staged on pre-commit and commitlint on commit-msg (a scope outside the list triggers a warning)     |
 | Browser QA | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow, Web Vitals, long tasks and Lighthouse     |
 
-**By the numbers:** 368 files and 26,167 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 88 files and 5,592
-lines are the 3D module; 45 test files and 4 helpers, with 3,820 lines; 383 lines of Apps Script; 6 ADRs.
+**By the numbers:** 378 files and 27,323 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 88 files and 5,578
+lines are the 3D module; 56 test files and 6 helpers, with 5,073 lines; 512 lines of Apps Script; 7 ADRs.
 
 ---
 
@@ -416,7 +452,7 @@ lines are the 3D module; 45 test files and 4 helpers, with 3,820 lines; 383 line
 ### Getting started
 
 **Requirements:** Node.js 24 LTS (the `.nvmrc` and CI version; on Node 22, use 22.18 or newer) and npm. Python 3 only
-to regenerate sounds, fonts or PDF assets.
+to regenerate the font or the PDF assets.
 
 ```bash
 git clone https://github.com/Marcos-Codfy/lp-hackarun.git
@@ -426,7 +462,8 @@ cp .env.example .env
 npm run dev
 ```
 
-Open `http://localhost:4321`. Without a registration endpoint, the form runs in **simulated mode** under `npm run dev`.
+Open `http://localhost:4321`. Without a registration endpoint, the form runs in **simulated mode** under `npm run dev`,
+and teams registered in the simulation show up as confirmed, with their photo, on `/equipes` while the tab stays open.
 
 | URL parameter                    | Effect                                                              |
 | -------------------------------- | ------------------------------------------------------------------- |
@@ -461,11 +498,10 @@ The QA scripts read `BRAVE_PATH` or `CHROME_PATH` to find the browser.
 
 Script-generated assets are never edited by hand: run the script and commit the output.
 
-| Command                                        | Requires                        | Generates                                                     |
-| ---------------------------------------------- | ------------------------------- | ------------------------------------------------------------- |
-| `python scripts/audio/render_cues.py`          | `numpy`, `lameenc`              | `public/audio/cta-globe.mp3` and `public/audio/ui-typing.wav` |
-| `python scripts/fonts/patch_orbitron_tilde.py` | `fonttools`, `brotli`           | `src/assets/fonts/orbitron-pt-latin-wght.woff2`               |
-| `python scripts/docs/build_pdf_assets.py`      | `fonttools`, `brotli`, `Pillow` | `scripts/docs/assets/` (TTF fonts and logos for the PDFs)     |
+| Command                                        | Requires                        | Generates                                                 |
+| ---------------------------------------------- | ------------------------------- | --------------------------------------------------------- |
+| `python scripts/fonts/patch_orbitron_tilde.py` | `fonttools`, `brotli`           | `src/assets/fonts/orbitron-pt-latin-wght.woff2`           |
+| `python scripts/docs/build_pdf_assets.py`      | `fonttools`, `brotli`, `Pillow` | `scripts/docs/assets/` (TTF fonts and logos for the PDFs) |
 
 The QA scripts have their own `package.json`, so Playwright and Lighthouse stay out of the project's `npm ci`. They
 use the installed Brave or Chrome with a real GPU and take the URL as an argument:
@@ -494,17 +530,17 @@ throttling and slow 4G) and `trace.mjs` (a trace up to first paint and the boot 
 src/
 ├── domain/          # entities, value objects, aggregates, a domain service and repository interfaces
 ├── application/     # use cases, DTOs and ports
-├── infrastructure/  # JSON content, mappers, repositories, Apps Script, audio, storage, clock and ICS
+├── infrastructure/  # JSON content, mappers, repositories, Apps Script, image, storage, clock and ICS
 ├── presentation/    # app, layouts, sections, components, controllers, formatters, view-models, views, motion,
 │                    # styles and experience/ (3D: camera, input, layers, particles, post, quality, scene, shaders, shapes)
 ├── shared/          # EventBus, Observable, Ticker and utilities
 ├── composition/     # composition roots (build and browser)
 ├── assets/          # official logos and Orbitron with the redrawn tilde
-└── pages/           # index, privacidade (LGPD), 404 and the .ics calendar
-apps-script/         # registration API (Google Apps Script) + setup guide
+└── pages/           # index, equipes (teams), privacidade (LGPD), 404 and the .ics calendar
+apps-script/         # registration and photo API (Google Apps Script) + setup guide
 design/              # briefing references and the teaser video (not shipped)
-public/              # og-image, favicon, _headers, robots and audio
-scripts/             # audio, font patch, PDF generator and qa/
+public/              # og-image, favicon, _headers and robots
+scripts/             # font patch, PDF generator and qa/
 tests/               # tests split by layer
 docs/                # guide, design spec, ADRs, stack manifest, PDFs and README media
 ```
@@ -515,14 +551,17 @@ docs/                # guide, design spec, ADRs, stack manifest, PDFs and README
 
 - **Content** (dates, missions, FAQ, prizes, mentors, partners) lives in `src/infrastructure/content/*.json`. It can
   be edited without coding; invalid data fails the build and the tests validate the real content.
-- **Registrations** go to a Google Sheet through Apps Script (`doPost`). A team shows up on the site once the
-  organizers set the Status column to `confirmado`, and the public list (`doGet ?action=teams`) is cached for 60 s,
-  with the cache cleared automatically when Status changes. Step-by-step setup (pt-BR) in
+- **Registrations** go to a Google Sheet through Apps Script (`doPost`), and the team's photo or logo goes to a Google
+  Drive folder. A team shows up on `/equipes` once the organizers set the Status column to `confirmado`, and the public
+  list (`doGet ?action=teams`) is cached for 60 s, with the cache cleared automatically when Status or Imagem changes.
+  Taking a photo down only takes clearing its Imagem cell. Step-by-step setup (pt-BR) in
   [`apps-script/README.md`](apps-script/README.md).
-- **Script Properties:** `CLOSES_AT` (deadline), `CAPACITY` (max teams) and `INSCRICOES_FECHADAS` (closes
-  immediately, no site redeploy). Changed the privacy notice text? Bump `CONSENT_VERSION` in
-  [`SubmitRegistration.ts`](src/application/use-cases/SubmitRegistration.ts).
-- **Calendar:** the build generates `/hackarun-2026.ics` (RFC 5545) with every session.
+- **Script Properties:** `CLOSES_AT` (deadline), `CAPACITY` (max teams), `INSCRICOES_FECHADAS` (closes immediately, no
+  site redeploy) and `FOTOS_PASTA_ID` (the photo folder). Changed the privacy notice text? Bump `CONSENT_VERSION` in
+  [`SubmitRegistration.ts`](src/application/use-cases/SubmitRegistration.ts) and in
+  [`Validation.gs`](apps-script/Validation.gs), and publish the script together with the site.
+- **Calendar:** the build generates `/hackarun-2026.ics` (RFC 5545) with every session, downloaded from the "Adicionar
+  à agenda" (add to calendar) buttons in the registration area.
 
 ### Deploy
 
@@ -552,6 +591,7 @@ workflow (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTING.md), and each release's ch
 - [x] Lighthouse mobile ≥ 90 on performance and 100 on accessibility, best practices and SEO
 - [x] Pause animations button (WCAG 2.2.2)
 - [x] QA scripts (Playwright + Lighthouse) versioned in the repository
+- [x] Teams page with each team's photo or logo, moderated through confirmation ([ADR 0007](docs/adr/0007-team-photos-google-drive.md))
 - [ ] Official launch on Cloudflare Pages
 - [ ] Mobile LCP under 2.5 s
 - [ ] Initial JS under 70 KB gzip
@@ -565,7 +605,6 @@ workflow (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTING.md), and each release's ch
 - **Organized by:** Unicatólica · Software Engineering and Artificial Intelligence courses
 - **Partner:** Capim Dourado Shopping
 - **Fonts:** Orbitron, Montserrat and JetBrains Mono (SIL Open Font License)
-- **Sounds:** synthesized in this project, with no third-party samples
 
 <sub>HackaRun, Unicatólica, Capim Dourado Shopping and their logos are trademarks of their respective owners and
 appear here only to identify the event.</sub>

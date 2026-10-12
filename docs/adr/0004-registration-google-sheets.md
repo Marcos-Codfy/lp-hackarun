@@ -30,3 +30,6 @@ devolve só as equipes com Status `confirmado` (nome, curso e quantidade), que o
 - Cotas do Apps Script (execuções simultâneas por conta) são suficientes pro volume de um hackathon. Picos são
   absorvidos pelo retry.
 - A URL do Web App é pública por natureza; a proteção está nas validações e no anti-spam.
+
+> **Atualização (2026-10-12):** a inscrição de equipe leva a foto ou logo, que o script grava no Google Drive, e a
+> rota `GET` passou a devolver também o id da foto das equipes confirmadas (ADR 0007).
