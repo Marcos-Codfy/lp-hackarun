@@ -26,6 +26,7 @@ export class CinematicPass extends ShaderPass {
         uWarp: { value: 0 },
         uFocus: { value: new Vector2(0.5, 0.5) },
         uShock: { value: -1 },
+        uShockRadius: { value: 0.4 },
       },
       vertexShader,
       fragmentShader,
@@ -49,6 +50,7 @@ export class CinematicPass extends ShaderPass {
     set('uGrain', state.grain);
     set('uWarp', state.warp);
     set('uShock', state.shockPhase);
+    set('uShockRadius', state.shockRadius);
     (u['uFocus']?.value as Vector2).copy(state.focus);
   }
 }

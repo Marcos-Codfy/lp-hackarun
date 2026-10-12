@@ -14,7 +14,9 @@ export interface RigInput {
   t: number;
   // centro da forma no mundo (pivô da órbita)
   pivot: Vector3;
-  charge: number;
+  // aproximação da carga (unidades de mundo) e intensidade da câmera na mão (1 = cheia), por cena
+  push: number;
+  hand: number;
   velocity: number;
   time: number;
   delta: number;
@@ -57,7 +59,7 @@ export class CameraRig {
     const time = this.animated ? input.time : 0;
     if (this.animated) {
       this.flight.update(input.from, input.to, input.t);
-      this.hand.update(time);
+      this.hand.update(time, input.hand);
     }
     const f = this.flight.offset;
 
@@ -68,11 +70,7 @@ export class CameraRig {
     const track = b.track * Math.sin(time * 0.09);
 
     // carregando, a câmera chega um pouco mais perto do globo (aproximação lenta, sem tremor)
-    this.eye.set(
-      b.truck + f.truck + track,
-      b.crane + f.crane,
-      this.baseZ + b.dolly + f.dolly - input.charge * 0.3,
-    );
+    this.eye.set(b.truck + f.truck + track, b.crane + f.crane, this.baseZ + b.dolly + f.dolly - input.push);
     this.aim.set(b.truck + f.truck * 0.6 + track * 0.85, b.aim, 0);
     this.orbit(this.eye, input.pivot, yaw, pitch);
     this.orbit(this.aim, input.pivot, yaw, pitch);

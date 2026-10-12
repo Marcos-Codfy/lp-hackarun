@@ -1,4 +1,4 @@
-import { Color, LinearSRGBColorSpace, Vector3, type Camera } from 'three';
+import { Color, LinearSRGBColorSpace, Vector3, type PerspectiveCamera } from 'three';
 import type { SceneKey } from '@presentation/app/AppEvents';
 import { PostState } from './PostState';
 import { SCENE_LOOKS, type SceneLook } from './SceneLooks';
@@ -12,8 +12,9 @@ export interface PostInput {
   warp: number;
   velocity: number;
   time: number;
-  // centro da forma atual no mundo (foco do anel e do zoom blur)
+  // centro da forma atual no mundo (foco do anel e do zoom blur) e raio do globo no mundo
   pivot: Vector3;
+  radius: number;
 }
 
 const BASE_ABERRATION = 0.008;
@@ -32,12 +33,13 @@ export class PostDirector {
   private readonly looks: SceneLook[];
   private readonly color = new Color();
   private readonly projected = new Vector3();
+  private readonly edge = new Vector3();
 
   constructor(keys: readonly SceneKey[]) {
     this.looks = keys.map((key) => SCENE_LOOKS[key]);
   }
 
-  update(input: PostInput, camera: Camera): void {
+  update(input: PostInput, camera: PerspectiveCamera): void {
     const s = this.state;
     this.blendLooks(input.weights);
 
@@ -53,6 +55,16 @@ export class PostDirector {
 
     this.projected.copy(input.pivot).project(camera);
     s.focus.set(this.projected.x * 0.5 + 0.5, this.projected.y * 0.5 + 0.5);
+    if (input.shockPhase >= 0) s.shockRadius = this.screenRadius(input.pivot, input.radius, camera);
+  }
+
+  // raio do globo na tela (em alturas de tela, a unidade do passe de lente): a onda nasce na silhueta
+  private screenRadius(pivot: Vector3, radius: number, camera: PerspectiveCamera): number {
+    const edge = this.edge.setFromMatrixColumn(camera.matrixWorld, 0).multiplyScalar(radius).add(pivot);
+    edge.project(camera);
+    const dx = (edge.x - this.projected.x) * 0.5 * camera.aspect;
+    const dy = (edge.y - this.projected.y) * 0.5;
+    return Math.hypot(dx, dy);
   }
 
   private blendLooks(weights: Float32Array): void {

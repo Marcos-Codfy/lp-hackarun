@@ -29,6 +29,11 @@ export type ParticleUniforms = {
   uPulse: IUniform<number>;
   uAfterglow: IUniform<number>;
   uSpin: IUniform<Vector2>;
+  // movimento do globo por cena (CoreMotion): fase e amplitude do fluxo, escala do raio, turbulência do voo
+  uCoreTime: IUniform<number>;
+  uCoreFlow: IUniform<number>;
+  uCoreScale: IUniform<number>;
+  uFlight: IUniform<number>;
   uPointer: IUniform<Vector3>;
   uPointerStrength: IUniform<number>;
   uPixelRatio: IUniform<number>;
@@ -87,6 +92,10 @@ export function createParticleMaterial(keys: readonly SceneKey[]): {
     uPulse: { value: 0 },
     uAfterglow: { value: 0 },
     uSpin: { value: new Vector2() },
+    uCoreTime: { value: 0 },
+    uCoreFlow: { value: 1 },
+    uCoreScale: { value: 1 },
+    uFlight: { value: 1 },
     uPointer: { value: new Vector3(0, 0, 100) },
     uPointerStrength: { value: 0 },
     uPixelRatio: { value: 1 },

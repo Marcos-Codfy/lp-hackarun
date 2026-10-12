@@ -8,6 +8,13 @@ uniform float uCharge;
 uniform float uPulse;
 uniform float uAfterglow;
 uniform vec2 uSpin;
+// globo: fase do fluxo das fitas (integrada no CPU, nunca salta), amplitude do fluxo e escala do raio
+// (contração da carga e respiro); valores por cena no CoreMotion
+uniform float uCoreTime;
+uniform float uCoreFlow;
+uniform float uCoreScale;
+// turbulência do voo entre formas (1 = cheia; a travessia do clímax chega mais calma)
+uniform float uFlight;
 uniform vec3 uPointer;
 uniform float uPointerStrength;
 uniform float uPixelRatio;

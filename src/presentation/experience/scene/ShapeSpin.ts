@@ -7,9 +7,9 @@ export class ShapeSpin {
   // x: núcleo, y: troféu (o mesmo Vector2 vai direto pro uniform uSpin)
   readonly angles = new Vector2();
 
-  update(delta: number, charge: number): void {
-    // carregando, o globo acelera bastante
-    this.angles.x = (this.angles.x + delta * (0.12 + charge * 1.8)) % TAU;
+  // coreRate: giro do globo (rad/s), vindo do perfil de movimento da cena (CoreMotion)
+  update(delta: number, coreRate: number): void {
+    this.angles.x = (this.angles.x + delta * coreRate) % TAU;
     this.angles.y = (this.angles.y + delta * 0.45) % TAU;
   }
 }

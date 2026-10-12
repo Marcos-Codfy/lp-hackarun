@@ -9,6 +9,7 @@ import { PostDirector } from './post/PostDirector';
 import type { PostState } from './post/PostState';
 import type { EffectsLevel, QualityProfile } from './quality/QualityProfile';
 import { ChargeController } from './scene/ChargeController';
+import { CoreMotion } from './scene/CoreMotion';
 import { SceneLayout } from './scene/SceneLayout';
 import type { SceneMixer } from './scene/SceneMixer';
 import { ShapeSpin } from './scene/ShapeSpin';
@@ -26,6 +27,8 @@ export interface WorldParts {
   keys: readonly SceneKey[];
   profile: QualityProfile;
   holdIndex: number;
+  // seção do clímax (data-scene-hold) que pede o globo calmo; -1 sem ela
+  finaleIndex: number;
   maxPointSize: number;
 }
 
@@ -43,6 +46,7 @@ export class StageWorld {
   private readonly director: PostDirector;
   private readonly pointer: PointerTracker | null;
   private readonly charge: ChargeController;
+  private readonly motion: CoreMotion;
   private readonly reduced: boolean;
   private readonly coreIndex: number;
   private profile: QualityProfile;
@@ -68,6 +72,7 @@ export class StageWorld {
     this.director = new PostDirector(parts.keys);
     this.pointer = this.reduced || ctx.coarsePointer ? null : new PointerTracker(this.camera);
     this.charge = new ChargeController(ctx.bus, ctx.scenes.progress, parts.holdIndex, this.reduced);
+    this.motion = new CoreMotion(parts.finaleIndex);
   }
 
   get post(): PostState {
@@ -102,10 +107,13 @@ export class StageWorld {
   // snap: entra direto na cena atual (primeiro frame e reduced motion)
   update(time: number, delta: number, snap: boolean): void {
     const velocity = this.reduced ? 0 : this.ctx.scenes.velocity.value;
-    const { mixer, charge } = this;
+    const { mixer, charge, motion } = this;
     mixer.update(this.ctx.scenes.progress.value, delta, snap);
     charge.update(delta);
-    if (!this.reduced) this.spin.update(delta, charge.charge);
+    // reduced motion: nada se integra (fase do fluxo e respiro parados, como o giro)
+    motion.update(mixer.position, charge.charge, time, this.reduced ? 0 : delta);
+    if (!this.reduced) this.spin.update(delta, motion.spinRate);
+    const m = motion.profile;
 
     const weights = mixer.weights;
     const opacity = this.layout.apply(weights, this.field.points);
@@ -115,7 +123,7 @@ export class StageWorld {
     const to = this.keys[mixer.to] ?? 'core';
     const { swell, shock, afterglow } = charge;
     this.rig.update(
-      { weights, from, to, t: mixer.t, pivot, charge: charge.charge, velocity, time, delta },
+      { weights, from, to, t: mixer.t, pivot, push: motion.push, hand: m.hand, velocity, time, delta },
       this.pointer,
     );
     this.camera.updateMatrixWorld();
@@ -125,20 +133,24 @@ export class StageWorld {
       to: mixer.to,
       t: mixer.t,
       time,
-      velocity,
+      velocity: velocity * m.scroll,
       charge: charge.charge,
-      pulse: charge.pulse,
+      pulse: charge.pulse * m.pulse,
       afterglow,
-      // o pulso também acende as partículas (no tier sem bloom é a única luz do pulso)
-      opacity: opacity * this.profile.alpha * (1 + swell * 0.2),
+      coreTime: motion.coreTime,
+      coreFlow: motion.coreFlow,
+      coreScale: motion.coreScale,
+      flight: m.flight,
+      // o pulso e o respiro também acendem as partículas (no tier sem bloom é a única luz deles)
+      opacity: opacity * this.profile.alpha * (1 + swell * 0.2 + motion.glow),
       size: POINT_SIZE * this.profile.pointScale * this.pointFit,
     });
-    this.updatePointer(weights);
+    this.updatePointer(weights, m.pointer);
 
-    const post = { charge: charge.charge, swell, shockPhase: shock, afterglow, warp: this.rig.warp };
-    this.director.update({ weights, ...post, velocity, time, pivot }, this.camera);
-    const d = this.director;
     const radius = this.field.points.scale.x * SHAPE_RADIUS;
+    const post = { charge: charge.charge, swell, shockPhase: shock, afterglow, warp: this.rig.warp };
+    this.director.update({ weights, ...post, velocity, time, pivot, radius }, this.camera);
+    const d = this.director;
     const layers = { stars: d.stars, bokehA: d.bokehA, bokehB: d.bokehB, swell, shock, pivot, radius };
     this.atmosphere.update({ camera: this.camera, time, ...layers });
   }
@@ -150,11 +162,11 @@ export class StageWorld {
     this.atmosphere.dispose();
   }
 
-  private updatePointer(weights: Float32Array): void {
+  private updatePointer(weights: Float32Array, gain: number): void {
     if (!this.pointer) return;
     const u = this.field.uniforms;
     u.uPointer.value.copy(this.pointer.world);
-    // repulsão forte no globo, quase nada nas outras formas
-    u.uPointerStrength.value = this.pointer.active * (0.15 + 0.85 * (weights[this.coreIndex] ?? 0));
+    // repulsão forte no globo, quase nada nas outras formas (o globo do clímax pede menos)
+    u.uPointerStrength.value = this.pointer.active * (0.15 + 0.85 * (weights[this.coreIndex] ?? 0)) * gain;
   }
 }

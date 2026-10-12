@@ -25,6 +25,11 @@ export class SceneMixer {
     this.slots = Uint8Array.from(sequence, (key) => Math.max(0, keys.indexOf(key)));
   }
 
+  // índice contínuo suavizado (o mesmo que o shader vê): i na seção i, i + 0,5 no meio da troca
+  get position(): number {
+    return Math.max(0, this.progress);
+  }
+
   indexOf(key: SceneKey): number {
     return this.keys.indexOf(key);
   }

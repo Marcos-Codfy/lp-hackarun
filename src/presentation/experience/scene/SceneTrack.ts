@@ -13,13 +13,18 @@ export function trackOf(ctx: AppContext): Track {
   return { sequence, keys: [...new Set(sequence)] };
 }
 
-// índice da seção que segura a carga (data-scene-hold); sem ela, o último core
-export function holdIndexOf(sequence: readonly SceneKey[]): number {
+// índice da seção do clímax (data-scene-hold); -1 se a página não tem
+export function finaleIndexOf(sequence: readonly SceneKey[]): number {
   // mesmo filtro do SceneDirector, pra o índice bater com a trilha
   const known = new Set<string>(sequence);
   const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).filter((el) =>
     known.has(el.dataset['scene'] ?? ''),
   );
-  const index = sections.findIndex((el) => el.hasAttribute('data-scene-hold'));
+  return sections.findIndex((el) => el.hasAttribute('data-scene-hold'));
+}
+
+// índice da seção que segura a carga; sem ela, o último core
+export function holdIndexOf(sequence: readonly SceneKey[]): number {
+  const index = finaleIndexOf(sequence);
   return index >= 0 ? index : sequence.lastIndexOf('core');
 }

@@ -13,8 +13,8 @@ vec3 shapeCore(vec3 p, out float heat, out float edge, out float veil) {
   veil = step(CORE_VEIL_RIBBON - 0.5, ribbon);
   float phase = hash11(ribbon * 7.31 + 1.7);
 
-  float t = uTime * (0.075 + uCharge * 0.42);
-  float agitation = 1.0 + uCharge * 0.7;
+  float t = uCoreTime;
+  float agitation = uCoreFlow;
 
   // fluxo tangente em baixa frequência: linhas vizinhas dobram juntas (ruído no espaço, contínuo no tempo)
   vec3 q = n * 0.95 + vec3(phase * 6.0, t, t * 0.7);
@@ -26,10 +26,11 @@ vec3 shapeCore(vec3 p, out float heat, out float edge, out float veil) {
   float big = snoise(m * 1.45 + vec3(0.0, -t * 1.2, phase * 3.0));
   float fine = snoise(m * 3.4 + vec3(t * 1.6, phase * 5.0, 0.0));
   float twist = (v - 0.5) * (0.07 + 0.06 * big) * (1.0 - veil);
-  float r = 1.0 + big * 0.04 * agitation + fine * 0.014 + twist;
-  r *= 1.0 - uCharge * 0.1;
-  // pulso quase igual pra todas: o globo respira inteiro e as fitas não viram nuvem
-  r += uPulse * (0.15 + 0.04 * aSeed.x);
+  // o grão fino só diminui (globo calmo); nunca passa do de sempre
+  float r = 1.0 + big * 0.04 * agitation + fine * 0.014 * min(agitation, 1.0) + twist;
+  r *= uCoreScale;
+  // pulso quase igual pra todas (uPulse já vem na escala da cena): o globo respira inteiro
+  r += uPulse * (1.0 + 0.2667 * aSeed.x);
 
   heat = smoothstep(0.25, 0.95, big * 0.7 + fine * 0.5) * (1.0 - veil * 0.6);
   // bordas da fita e pontas do arco apagam (seda afinando); o véu fica fraco no miolo

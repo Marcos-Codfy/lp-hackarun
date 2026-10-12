@@ -9,6 +9,7 @@ uniform float uGrain;
 uniform float uWarp;
 uniform vec2 uFocus;
 uniform float uShock;
+uniform float uShockRadius;
 
 varying vec2 vUv;
 
@@ -36,14 +37,17 @@ void main() {
   vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
   vec2 uv = vUv;
 
-  // anel de choque: refrata de leve a imagem pra fora na frente da onda
+  // onda do clímax: nasce na silhueta do globo e abre junto com o anel 3D (mesma curva do ringScale,
+  // banda em 0,9 do quad), refratando de leve; o miolo (título, contador, CTA) não é varrido
   float ring = 0.0;
   if (uShock >= 0.0) {
     vec2 d = (uv - uFocus) * aspect;
     float dist = length(d);
-    float band = (dist - uShock * 1.1) / (0.035 + 0.06 * uShock);
-    ring = exp(-band * band) * (1.0 - uShock) * (1.0 - uShock);
-    uv -= (d / max(dist, 1e-4)) / aspect * ring * 0.012;
+    float eased = 1.0 - pow(1.0 - uShock, 3.0);
+    float reach = uShockRadius * (1.02 + eased * 0.58);
+    float band = (dist - reach) / (0.035 + 0.05 * uShock);
+    ring = exp(-band * band) * smoothstep(0.0, 0.12, uShock) * (1.0 - uShock) * (1.0 - uShock);
+    uv -= (d / max(dist, 1e-4)) / aspect * ring * 0.008;
   }
 
   vec2 fromCenter = uv - 0.5;

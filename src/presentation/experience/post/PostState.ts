@@ -14,7 +14,9 @@ export class PostState {
   // 0..1: zoom blur radial (hiperespaço na travessia do globo)
   warp = 0;
   time = 0;
-  // centro do globo na tela (uv) e fase do anel de choque (< 0 = desligado)
+  // centro do globo na tela (uv), fase do anel de choque (< 0 = desligado) e raio do globo na tela
+  // (em alturas de tela): a onda nasce na silhueta e abre por fora, sem varrer o miolo
   readonly focus = new Vector2(0.5, 0.5);
   shockPhase = -1;
+  shockRadius = 0.4;
 }

@@ -25,6 +25,10 @@ export interface ParticleFrame {
   charge: number;
   pulse: number;
   afterglow: number;
+  coreTime: number;
+  coreFlow: number;
+  coreScale: number;
+  flight: number;
   opacity: number;
   size: number;
 }
@@ -83,6 +87,10 @@ export class ParticleField {
     u.uCharge.value = frame.charge;
     u.uPulse.value = frame.pulse;
     u.uAfterglow.value = frame.afterglow;
+    u.uCoreTime.value = frame.coreTime;
+    u.uCoreFlow.value = frame.coreFlow;
+    u.uCoreScale.value = frame.coreScale;
+    u.uFlight.value = frame.flight;
     u.uOpacity.value = frame.opacity;
     u.uSize.value = frame.size;
   }

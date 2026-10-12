@@ -1,25 +1,29 @@
 import type { EventBus } from '@shared/core/EventBus';
 import type { Observable } from '@shared/core/Observable';
 import type { AppEvents } from '@presentation/app/AppEvents';
-import { damp, smoothstep } from '@shared/utils/math';
+import { clamp, damp, smoothstep } from '@shared/utils/math';
 
-const PULSE_S = 1.1;
-const SHOCK_S = 1.6;
-const SWELL_RISE_S = 0.22;
-const SWELL_DECAY = 2.6;
-const BURST_S = 1.8;
+// pulso lento e macio: respiro radial, anel abrindo e luz que sobe e apaga sem pressa
+export const PULSE_S = 2.2;
+export const SHOCK_S = 2.6;
+export const SWELL_RISE_S = 0.45;
+export const BURST_S = 2.8;
+// pico do respiro radial dentro do PULSE_S (fração)
+const PULSE_PEAK = 0.3;
+// depois do pulso a energia sai devagar (a câmera recua e o calor apaga sem tranco)
+const RELEASE = 1.5;
 // distância (em seções) da cena de carga que conta como "saiu"
 const AWAY = 0.85;
 
 type ChargeState = 'idle' | 'charging' | 'charged';
 
-// clímax do globo final: junta energia em curva e, no 'experience:charged', solta um pulso suave
-// (respiro das fitas + anel + luz que sobe e desce, sem estouro branco) e assenta num brilho calmo;
-// descarrega se o usuário sair
+// clímax do globo final: junta energia em curva e, no 'experience:charged', solta um pulso suave e lento
+// (respiro do globo + anel + luz que sobe e desce, sem estouro branco) e assenta num brilho calmo;
+// descarrega se o usuário sair. Os envelopes saem em 0..1: a amplitude de cada cena fica no CoreMotion
 export class ChargeController {
   // agitação/contração/calor da carga
   charge = 0;
-  // empurrão radial das partículas no pulso
+  // respiro radial do pulso (0..1, sobe e volta em curva)
   pulse = 0;
   // onda de luz do pulso: sobe rápido e apaga devagar
   swell = 0;
@@ -63,7 +67,7 @@ export class ChargeController {
       this.charge = this.from + (1 - this.from) * k * k * k;
     } else if (this.state === 'charged') {
       // a energia sai rápido no pulso e o globo volta ao ritmo calmo
-      this.charge = this.settle(this.charge, 0, 2.4, delta);
+      this.charge = this.settle(this.charge, 0, RELEASE, delta);
       this.afterglow = this.settle(this.afterglow, 1, 2.5, delta);
     }
     this.updateBurst(delta);
@@ -98,7 +102,7 @@ export class ChargeController {
     return Math.abs(next - target) < 0.001 ? target : next;
   }
 
-  // envelopes do pulso: luz com subida suave, respiro em curva e anel abrindo
+  // envelopes do pulso: luz com subida suave e queda longa, respiro em curva e anel abrindo
   private updateBurst(delta: number): void {
     if (this.burstAge < 0) return;
     this.burstAge += delta;
@@ -110,10 +114,10 @@ export class ChargeController {
       this.shock = -1;
       return;
     }
-    this.swell =
-      age < SWELL_RISE_S ? smoothstep(0, SWELL_RISE_S, age) : Math.exp(-(age - SWELL_RISE_S) * SWELL_DECAY);
+    const fall = 1 - clamp((age - SWELL_RISE_S) / (BURST_S - SWELL_RISE_S));
+    this.swell = age < SWELL_RISE_S ? smoothstep(0, SWELL_RISE_S, age) : fall * fall;
     const phase = Math.min(1, age / PULSE_S);
-    this.pulse = smoothstep(0, 0.18, phase) * (1 - phase) * (1 - phase);
+    this.pulse = smoothstep(0, PULSE_PEAK, phase) * (1 - smoothstep(PULSE_PEAK, 1, phase));
     this.shock = age < SHOCK_S ? age / SHOCK_S : -1;
   }
 }

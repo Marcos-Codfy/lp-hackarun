@@ -83,12 +83,13 @@ void main() {
   // no meio do voo: as partículas escorrem pelas linhas de um fluxo ABC (sem divergência, contínuo no tempo);
   // vizinhas seguem a mesma corrente e o meio da troca vira filamentos girando, não chuvisco
   if (flight > 0.001) {
+    float swirl = flight * uFlight;
     vec3 q = pos * 1.9 + vec3(uTime * 0.12, 0.0, uTime * 0.07);
     vec3 start = q;
     for (int i = 0; i < 5; i++) {
-      q += vec3(sin(q.z) + cos(q.y), sin(q.x) + cos(q.z), sin(q.y) + cos(q.x)) * (0.14 * flight);
+      q += vec3(sin(q.z) + cos(q.y), sin(q.x) + cos(q.z), sin(q.y) + cos(q.x)) * (0.14 * swirl);
     }
-    pos += (q - start) / 1.9 + aSeed * (0.04 * flight);
+    pos += (q - start) / 1.9 + aSeed * (0.04 * swirl);
     gHot += flight * 0.25;
   }
 

@@ -10,7 +10,7 @@ import { StageRenderer } from './post/StageRenderer';
 import { QualityDetector } from './quality/QualityDetector';
 import { profileFor } from './quality/QualityProfile';
 import { SceneMixer } from './scene/SceneMixer';
-import { holdIndexOf } from './scene/SceneTrack';
+import { finaleIndexOf, holdIndexOf } from './scene/SceneTrack';
 import type { Prelude, ShapeOrder } from './StagePrelude';
 import { StageWorld } from './StageWorld';
 import { yieldToMain } from './yieldToMain';
@@ -70,10 +70,9 @@ async function assemble(canvas: HTMLCanvasElement, ctx: AppContext, prelude: Pre
     StageCompiler.queueAhead(renderer, field.points, profile.effects !== 'off');
     await yieldToMain();
     const mixer = new SceneMixer(sequence, keys);
-    const world = new StageWorld(
-      { field, mixer, keys, profile, holdIndex: holdIndexOf(sequence), maxPointSize },
-      ctx,
-    );
+    const holdIndex = holdIndexOf(sequence);
+    const finaleIndex = finaleIndexOf(sequence);
+    const world = new StageWorld({ field, mixer, keys, profile, holdIndex, finaleIndex, maxPointSize }, ctx);
     await yieldToMain();
     const output = new StageRenderer(renderer, world.scene, world.camera, profile.effects);
     await yieldToMain();
