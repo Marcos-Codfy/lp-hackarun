@@ -4,7 +4,7 @@
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/Marcos-Codfy/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
-  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun cinematic scroll: the hero opens with the official logo and lightning over the particle globe; at each section the 3D particles become a new shape (stopwatch, neon question mark, mission map, synthwave terrain, stage with an LED wall, golden trophy and galaxy) and at the end they form the globe again, now calm: it turns slowly behind the &quot;Sua vaga na corrida&quot; call to action, charges up, lights the &quot;Quero participar&quot; button and releases a soft pulse of light at its edge." />
+  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun cinematic scroll: the hero opens with the UniCatólica logo and its two courses, Engenharia de Software and Inteligência Artificial (Software Engineering and Artificial Intelligence), above the official logo, with lightning over the particle globe; at each section the 3D particles become a new shape (stopwatch, neon question mark, mission map, synthwave terrain, stage with an LED wall, golden trophy and galaxy) and at the end they form the globe again, now calm: it turns slowly behind the &quot;Sua vaga na corrida&quot; call to action, charges up, lights the &quot;Quero participar&quot; button and releases a soft pulse of light at its edge." />
 </picture>
 
 # HackaRun · Overdrive
@@ -45,14 +45,14 @@ scene to scene and, at the finish, the globe charges up and releases a pulse of 
 - **My role:** solo development. I created the event's visual identity with Eduarda, a fellow member of the Academic
   League, and, on top of it, designed the page and built the 3D and shaders, the front end, the Apps Script
   registration API, the tests, the CI and the docs.
-- **What it is:** the official site of HackaRun 2026, the 1st edition of UniCatólica's event, with Capim Dourado
-  Shopping, a local mall, as the exclusive partner of the awards. It is a 4-day event, November 11 to 14, 2026, in
-  Palmas, Tocantins, Brazil, with two tracks: a program open to the public (7 workshops, talks and up to 10 exhibitor
-  stands) and a hackathon for UniCatólica students only, an objective-based race in teams that ends at the HackaRun
-  Experience, at the mall. The page covers the schedule in tabs, 8 missions, mentors, prizes, a hunt for 3 hidden
-  tokens, a team registration page (with a draft kept in the tab and a way back to the same spot on the landing page)
-  and another page for the confirmed teams, with each team's photo or logo, live. All site content is in Brazilian
-  Portuguese.
+- **What it is:** the official site of HackaRun 2026, the 1st edition of UniCatólica's event, organized by LAES (the
+  Software Engineering and Artificial Intelligence Academic League), with Capim Dourado Shopping, a local mall, as the
+  exclusive partner of the awards. It is a 4-day event, November 11 to 14, 2026, in Palmas, Tocantins, Brazil, with
+  two tracks: a program open to the public (7 workshops, talks and up to 10 exhibitor stands) and a hackathon for
+  UniCatólica students only, an objective-based race in teams that ends at the HackaRun Experience, at the mall. The
+  page covers the schedule in tabs, 8 missions, mentors, prizes, a hunt for 3 hidden tokens, a team registration page
+  (with a draft kept in the tab and a way back to the same spot on the landing page) and another page for the
+  confirmed teams, with each team's photo or logo, live. All site content is in Brazilian Portuguese.
 - **What sets it apart:** 8 procedural 3D objects (globe, stopwatch, "?", holographic map, synthwave terrain, stage,
   trophy and galaxy) made of 9,000 to 42,000 particles, with no 3D models and no video
   ([ADR 0005](docs/adr/0005-procedural-particles-over-video.md)), plus cinematic post-processing and a choreographed
@@ -66,18 +66,18 @@ scene to scene and, at the finish, the globe charges up and releases a pulse of 
   inside the cell, members with one row per person and a live summary), with the team photo in Google Drive, one team
   per person, idempotent retries, rate limits, a concurrency lock and versioned LGPD (Brazil's data protection law)
   consent.
-- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 765 tests, CI on
+- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 786 tests, CI on
   GitHub Actions, Conventional Commits, 9 ADRs and an `npm run setup` for anyone who forks it.
 
 ## Visuals
 
 <p align="center">
-  <img src="docs/media/sections-desktop.jpg" width="960" alt="Mosaic of nine desktop sections: the hero with the official logo, lightning and the countdown; From the classroom to the stage, with the stopwatch; the NPCs, with the neon question mark; 8 missions, with the 3D map; 4 days of schedule, with the day tabs and the synthwave terrain; the final at Capim Dourado Shopping, with the LED wall; the prizes, with the golden trophy; the teams, with the galaxy and the confirmed teams counter; and the end of the page, with the calm globe behind Sua vaga na corrida, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
-  <br /><sub>Nine sections, nine moments of the same particle field. In the hero, the official logo is the H1 and the LCP element.</sub>
+  <img src="docs/media/sections-desktop.jpg" width="960" alt="Mosaic of nine desktop sections: the hero with the UniCatólica logo and the two course names above the official logo, lightning and the countdown; From the classroom to the stage, with the stopwatch; the NPCs, with the neon question mark; 8 missions, with the 3D map; 4 days of schedule, with the day tabs and the synthwave terrain; the final at Capim Dourado Shopping, with the LED wall; the prizes, with the golden trophy; the teams, with the galaxy and the confirmed teams counter; and the end of the page, with the calm globe behind Sua vaga na corrida, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
+  <br /><sub>Nine sections, nine moments of the same particle field. In the hero, the UniCatólica and course lockup opens the screen, and the official logo right below it is the H1 and the LCP element.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/mobile.jpg" width="960" alt="Five mobile screens side by side: the hero with the countdown, the NPCs with the 3D question mark and the NPC terminal, the missions with the particle map, the prizes with the golden trophy and the champion team card, and the end of the page with the globe, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
+  <img src="docs/media/mobile.jpg" width="960" alt="Five mobile screens side by side: the hero with the UniCatólica logo and the two course names, the official logo and the countdown, the NPCs with the 3D question mark and the NPC terminal, the missions with the particle map, the prizes with the golden trophy and the champion team card, and the end of the page with the globe, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
   <br /><sub>On a phone (390 px), at the same quality tier a recent device gets.</sub>
 </p>
 
@@ -350,18 +350,18 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
 
 ## Quality
 
-| Item       | Status                                                                                                           |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- |
-| Tests      | **765 tests in 98 files** (Vitest + happy-dom), split by layer, including 9 suites that run the real Apps Script |
-| Lint       | ESLint with no errors or warnings: layer rules, a 250 code-line cap per file, `import type`                      |
-| Types      | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check          |
-| Formatting | Prettier across the repository                                                                                   |
-| CI         | GitHub Actions on push to `main` and on PRs: `npm ci` → lint → format check → tests → build → `dist` artifact    |
-| Commits    | Husky + lint-staged on pre-commit and commitlint on commit-msg (a scope outside the list triggers a warning)     |
-| Browser QA | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow, Web Vitals, long tasks and Lighthouse     |
+| Item       | Status                                                                                                            |
+| ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| Tests      | **786 tests in 102 files** (Vitest + happy-dom), split by layer, including 9 suites that run the real Apps Script |
+| Lint       | ESLint with no errors or warnings: layer rules, a 250 code-line cap per file, `import type`                       |
+| Types      | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check           |
+| Formatting | Prettier across the repository                                                                                    |
+| CI         | GitHub Actions on push to `main` and on PRs: `npm ci` → lint → format check → tests → build → `dist` artifact     |
+| Commits    | Husky + lint-staged on pre-commit and commitlint on commit-msg (a scope outside the list triggers a warning)      |
+| Browser QA | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow, Web Vitals, long tasks and Lighthouse      |
 
-**By the numbers:** 435 files and 33,019 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 90 files and 5,852
-lines are the 3D module; 98 test files and 10 helpers, with 9,653 lines; 999 lines of Apps Script in 8 files; 9 ADRs.
+**By the numbers:** 439 files and 33,361 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 90 files and 5,852
+lines are the 3D module; 102 test files and 10 helpers, with 9,910 lines; 999 lines of Apps Script in 8 files; 9 ADRs.
 
 ---
 
@@ -657,6 +657,7 @@ options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - [x] Apps Script deployed on the registration spreadsheet and tested end to end (photo in the cell, duplicates blocked)
 - [x] Registration on a page of its own, with a draft kept in the tab and a way back to the same spot on the landing page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md))
 - [x] A calmer globe at the end of the page: it turns slowly, breathes and releases a soft pulse
+- [x] UniCatólica and course lockup (Software Engineering and Artificial Intelligence) at the top of the hero, and LAES as organizer in the partners band
 - [ ] Registrations switched on in the official site, together with the Cloudflare launch
 - [ ] Official launch on Cloudflare Pages: on hold, by my decision
 - [ ] Rules and mission scoring: the organizers present them at the opening, on November 12, at 7:35 p.m.
@@ -666,12 +667,13 @@ options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 
 - **Design and development:** [Marcos Vinicius Muniz Arruda](https://github.com/Marcos-Codfy)
 - **Visual identity:** Marcos Vinicius Muniz Arruda and Eduarda, a fellow member of the Academic League
-- **Organized by:** UniCatólica
+- **Hosted by:** UniCatólica
+- **Organized by:** LAES, the Software Engineering and Artificial Intelligence Academic League
 - **Partner:** Capim Dourado Shopping, exclusive partner of the awards
 - **Fonts:** Orbitron, Montserrat and JetBrains Mono (SIL Open Font License)
 
-<sub>HackaRun, UniCatólica, Capim Dourado Shopping and their logos are trademarks of their respective owners and
-appear here only to identify the event.</sub>
+<sub>HackaRun, UniCatólica, LAES, Capim Dourado Shopping and their logos are trademarks of their respective owners
+and appear here only to identify the event.</sub>
 
 ---
 

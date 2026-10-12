@@ -14,6 +14,9 @@
 > - **Rodada 4:** o formulário saiu da LP para a página `/inscricao`, com uma sub-navegação compartilhada com
 >   `/equipes` (seção 16, ADR 0009). O fim da LP ficou só com o clímax e o CTA, e o globo final ficou bem mais calmo:
 >   gira devagar, respira e solta um pulso suave (seção 9).
+> - **Rodada 5:** o topo do hero ganhou o selo da UniCatólica com os cursos de Engenharia de Software e Inteligência
+>   Artificial (seção 6), e a LAES entrou como Organização na faixa "Quem faz acontecer", entre a Realização e a
+>   Parceria.
 
 ## 1. Conceito: "a página é a corrida"
 
@@ -82,6 +85,10 @@ gamificação (NPCs); laranja/ouro = tempo, prazos e prêmios.
 | Ouro              | `#FFC24A` | `--c-gold`     | Prêmios (`--prize`), a final e **foco do teclado** (`--focus`) |
 | Branco Gelo       | `#F5F8FF` | `--c-ice`      | Texto (`--text`); secundário a 76% e 60%                       |
 
+Texto miúdo sobre o escuro usa as tintas claras da mesma família, porque o neon puro vibra em letra pequena:
+`--ink-cyan` (`#8FF3FF`), `--ink-violet` (`#D2A8FF`) e `--ink-gold` (`#FFD88A`). O violeta puro (`#941BFF`) fica em
+cerca de 3,8:1 em letra pequena; o `--ink-violet` passa com folga, inclusive sobre o globo.
+
 Degradês: **energia** `#00E5FF → #1264FF → #941BFF → #ED28E8` (95°), azul, mistério, prêmio e tempo. Fio de 1px das
 bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-violet`, `--glow-orange`. Use só os tokens
 (papéis semânticos como `--accent`, `--time`, `--prize` nos componentes). Todos os pares de texto atendem WCAG AA.
@@ -105,8 +112,21 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 - **Slogan oficial:** "Desvende. Programe. Conquiste." Cada verbo na cor do seu papel: desvendar = violeta (mistério),
   programar = azul (energia), conquistar = ouro (prêmio). Linha de apoio: "Encontre os NPCs, decifre as pistas e
   codifique contra o relógio."
-- **Parceiros:** logos oficiais brancas da UniCatólica (Realização) e do Capim Dourado (parceiro exclusivo da
-  premiação), discretas no rodapé do hero e grandes na faixa "Quem faz acontecer" antes do rodapé.
+- **Selo de cursos (topo do hero):** no lugar de uma linha de HUD, acima do logo, a logo branca da UniCatólica, um
+  fio vertical (ciano → violeta) e os dois cursos empilhados em JetBrains Mono, caixa alta e tracking largo:
+  "ENGENHARIA DE SOFTWARE" em `--ink-cyan` e "INTELIGÊNCIA ARTIFICIAL" em `--ink-violet` (energia × mistério).
+  Centralizado, com as réguas de HUD dos dois lados a partir de 480 px (a da esquerda ciano, a da direita violeta).
+  A logo tem 2,5rem de altura no celular, 2,75rem a partir de 480 px e 3,25rem a partir de 1024 px, nunca desfocada;
+  o texto vai de 0,6875rem a 0,875rem. Atrás dele, um véu escuro oval e sem borda (a mesma ideia do halo do logo)
+  separa as letras do aro do globo. "1ª edição" não aparece no hero: fica em "O evento", no FAQ e no rodapé.
+- **Parceiros:** logos oficiais brancas da UniCatólica (Realização), da LAES (Organização) e do Capim Dourado
+  (Parceria, parceiro exclusivo da premiação). Na primeira tela, a UniCatólica aparece só no selo de cursos e o
+  Capim Dourado no crédito discreto do rodapé do hero ("Parceria", a ~60% de opacidade, acende no hover). Grandes,
+  as três ficam na faixa "Quem faz acontecer", antes do rodapé, nessa ordem e com o rótulo do papel em HUD: ciano
+  na Realização, violeta na Organização, ouro na Parceria. Abaixo de 1024 px a faixa fica em 2 + 1 (UniCatólica e
+  LAES lado a lado, Capim Dourado embaixo, na largura toda); a partir daí, três colunas iguais com fios verticais.
+  Cada logo tem uma altura ótica própria (a LAES, sólida e quadrada, é a menor) e é centralizada pelo desenho, não
+  pela borda transparente do PNG; as legendas começam na mesma linha.
 
 ## 7. Linguagem visual
 
@@ -171,6 +191,9 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 - Smooth scroll com **Lenis**; animações com **GSAP + ScrollTrigger**; títulos divididos em linhas pelo `LineSplit` próprio
   (máscara de baixo pra cima).
 - Entradas: `y: 40 → 0`, `opacity 0 → 1`, `stagger 0.06`, `ease: expo.out`, `duration 0.9–1.2`.
+- Selo de cursos do hero: entra uma vez, em CSS, em cerca de 1,4 s. A logo sobe com fade, o fio e as réguas se
+  desenham e cada curso entra numa varredura da esquerda para a direita. Sem loop, então não entra na lista do
+  "Pausar animações"; com reduced motion, aparece pronto.
 - Missões no desktop (≥ 1024px, sem reduced motion): **trilho horizontal com pin**; no mobile, lista vertical.
 - Números (dias, oficinas, estandes) contam de 0 até o valor ao entrar na tela. Terminal do NPC e protocolo da inscrição
   "digitam" caractere a caractere, em silêncio.
@@ -190,7 +213,8 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
   capacidade.
 - **Prova social:** na LP, o contador de equipes confirmadas e uma vitrine com até 5 fotos levam para a página
   `/equipes`, onde cada equipe confirmada aparece com a foto ou a logo, em tempo real (planilha).
-- **Autoridade:** UniCatólica + Capim Dourado com logos oficiais, mentores egressos, banca.
+- **Autoridade:** UniCatólica, LAES e Capim Dourado com logos oficiais, o selo dos cursos no topo do hero, mentores
+  egressos e banca.
 - **Gamificação:** 3 tokens NPC escondidos na página; achar os 3 revela uma mensagem secreta no HUD.
 - **Microcompromisso:** "Adicionar à agenda" (.ics) em `/inscricao`: no rodapé do formulário, no aviso de inscrições
   em breve e na tela de sucesso. Na programação o botão saiu, a pedido da organização. No fim da LP, a lista curta
@@ -208,7 +232,8 @@ arrastar e soltar e status anunciado, programação em abas no padrão WAI-ARIA 
 ativação automática; sem JS, os 4 dias empilhados), FAQ com `<details>`, tokens NPC como botões de verdade, botão
 para pausar tudo que se mexe sozinho (2.2.2), `prefers-reduced-motion` respeitado, foco programático das seções com
 contorno transparente (continua visível em cores forçadas), conteúdo completo sem JS e sem WebGL. O site não toca
-som nenhum. Em `/inscricao` e `/equipes`: sub-navegação com `aria-current="page"` e nome acessível inteiro mesmo com
+som nenhum. No hero, o selo de cursos é lido uma vez só: o alt "UniCatólica", ", cursos:" e a lista com os dois
+cursos. Em `/inscricao` e `/equipes`: sub-navegação com `aria-current="page"` e nome acessível inteiro mesmo com
 o rótulo curto; o link da página atual sobe para o topo e leva o foco ao conteúdo. Em `/inscricao`: indicador de
 etapas com `aria-current="step"` e ", com campos a ajustar" para leitor de tela, resumo de erros agrupado por bloco e
 clique que não se perde quando um erro aparece acima do botão. Em `/equipes`: busca com `label`, contagem anunciada
@@ -234,6 +259,9 @@ acessibilidade 100 na LP, em `/equipes` e em `/inscricao` com as inscrições ab
 - **Duas frentes sempre claras:** todo bloco diz para quem é, com um selo de público: "Aberto ao público" (ciano),
   "Hackathon" ou "Só alunos da UniCatólica" (violeta), "Só equipes e mentores" (laranja) e "Final com público" (ouro).
 - **Grafia:** "UniCatólica" no texto, no SEO e nos dados; caixa alta só na faixa ("UNICATÓLICA").
+- **Créditos:** sempre nesta ordem: Realização · UniCatólica, Organização · LAES e Parceria · Capim Dourado
+  Shopping. A sigla LAES vem com o nome por extenso na legenda e no alt: "Liga Acadêmica de Engenharia de Software
+  e Inteligência Artificial".
 - **Canal oficial:** a comunicação do hackathon é por e-mail, nunca por WhatsApp. O formulário e a tela de sucesso
   dizem isso.
 

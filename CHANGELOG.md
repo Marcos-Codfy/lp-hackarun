@@ -12,14 +12,41 @@ do Git.
 
 ## [Unreleased]
 
-Ajustes pedidos pela organização depois da aprovação da v2, em três rodadas. Na rodada 2, o site deixa de ter som, o
-clímax da inscrição fica mais curto e calmo e as equipes ganham uma página própria, com a foto ou a logo de cada time.
-Na rodada 3, o conteúdo passa a seguir o documento do coordenador do evento (duas frentes, a programação real e a
-HackaRun Experience), a inscrição vira só de equipe, com uma planilha organizada, e o repositório fica pronto para
+Ajustes pedidos pela organização depois da aprovação da v2, em quatro rodadas. Na rodada 2, o site deixa de ter som,
+o clímax da inscrição fica mais curto e calmo e as equipes ganham uma página própria, com a foto ou a logo de cada
+time. Na rodada 3, o conteúdo passa a seguir o documento do coordenador do evento (duas frentes, a programação real e
+a HackaRun Experience), a inscrição vira só de equipe, com uma planilha organizada, e o repositório fica pronto para
 fork. Na rodada 4, o formulário sai da LP para a página `/inscricao`, com rascunho na aba e volta ao mesmo ponto do
-evento, e o globo do fim da página fica bem mais calmo.
+evento, e o globo do fim da página fica bem mais calmo. Na rodada 5, o topo do hero ganha o selo da UniCatólica com
+os cursos de Engenharia de Software e Inteligência Artificial, a LAES entra como Organização na faixa de parceiros e
+a revisão acerta o hero no celular e em notebooks baixos, a ordem dos títulos de `/inscricao` e o contraste da linha
+violeta sobre o globo.
 
 ### Added
+
+- Selo de cursos no topo do hero (`hero/HeroCourses.astro`, com as réguas em `hero/HeroRule.astro` e os cursos em
+  `hero/courseLockup.ts`): acima do logo, a logo branca da UniCatólica, um fio vertical e os dois cursos empilhados em
+  caixa alta, "ENGENHARIA DE SOFTWARE" em ciano e "INTELIGÊNCIA ARTIFICIAL" em violeta, em JetBrains Mono, entre as
+  réguas de HUD (a partir de 480 px). A logo tem 2,5rem de altura no celular, 2,75rem a partir de 480 px e 3,25rem a
+  partir de 1024 px, servida em 1x, 2x e 3x e sem desfoque. A entrada acontece uma vez, em cerca de 1,4 s: a logo
+  sobe, o fio e as réguas se desenham e cada curso entra numa varredura da esquerda para a direita. Com
+  `prefers-reduced-motion`, nada anima. Um véu escuro oval, sem caixa, separa as letras do aro do globo (mais largo
+  e mais denso a partir de 768 px). O leitor de tela ouve uma vez só "UniCatólica, cursos: Engenharia de Software,
+  Inteligência Artificial", com os cursos numa lista de verdade.
+- LAES (Liga Acadêmica de Engenharia de Software e Inteligência Artificial) na faixa "Quem faz acontecer", como
+  **Organização**, entre a Realização (UniCatólica) e a Parceria (Capim Dourado Shopping), com a logo
+  `src/assets/brand/laes-white.png`. Papel novo `coorganizer` (rótulo "Organização", tom violeta) e campo opcional
+  `fullName` no `partners.json`: o nome por extenso vira a legenda, o alt ("LAES · Liga Acadêmica de Engenharia de
+  Software e Inteligência Artificial") e o nome no JSON-LD, com a sigla em `alternateName`.
+- Faixa de parceiros montada a partir dos dados: uma lista na ordem dos papéis (`organizer`, `coorganizer`,
+  `partner`, `supporter`, ordenada no `ListPartners`), com logo, legenda e tamanho ótico por id em
+  `components/partners/partnerBrands.ts` e rótulo e tom por papel em `components/partners/partnerMarks.ts`. Cada logo
+  é medida e centralizada pelo desenho, não pela borda transparente do PNG.
+- Tokens `--ink-violet` (`#d2a8ff`) e `--ink-gold` (`#ffd88a`), tintas claras para texto miúdo sobre o escuro, ao
+  lado do `--ink-cyan`.
+- Testes do selo de cursos (só ele usa a logo da UniCatólica no hero), da faixa de parceiros (rótulos e tons, logo
+  para cada parceiro, legenda e alt da LAES, a conta do tamanho ótico e papel desconhecido no `partners.json`), da
+  ordem do `ListPartners`, do JSON-LD com a LAES e da ordem dos títulos de `/inscricao`.
 
 - Página `/inscricao` (ADR 0009), leve como a `/equipes` (`PageLayout` + `LightApp`, sem 3D, GSAP nem Lenis), com
   título, descrição, canonical, Open Graph e JSON-LD próprios (`BreadcrumbList` Início › Inscrição) e entrada no
@@ -128,6 +155,27 @@ evento, e o globo do fim da página fica bem mais calmo.
 
 ### Changed
 
+- O crédito do rodapé do hero ficou só com "Parceria · Capim Dourado". A UniCatólica assina o selo de cursos no topo
+  (com as duas, a mesma logo apareceria duas vezes na primeira tela, a uns 700 px de distância no desktop) e continua
+  grande na faixa "Quem faz acontecer". Um teste garante que só o selo usa a logo da UniCatólica no hero.
+- "1ª edição" saiu do hero junto com a linha antiga; continua na abertura de "O evento", no FAQ e no rodapé
+  (`event.tagline`).
+- O hero inteiro, rodapé incluído, cabe na primeira tela de 1024×768 a 1920×1080: o `HeroLogo` reserva 28,5rem da
+  altura para o resto do hero (eram 26rem), e telas a partir de 1024 px de largura com até 800 px de altura usam um
+  espaço menor entre os blocos. Em 1280×720 o logo fica com 686 px de largura.
+- JSON-LD do `Event`: o `organizer` traz a UniCatólica e a LAES (nome por extenso e a sigla em `alternateName`), e o
+  `sponsor` fica só com o Capim Dourado Shopping.
+- Faixa "Quem faz acontecer": abaixo de 1024 px, 2 + 1 (UniCatólica e LAES lado a lado, com um fio entre elas, e o
+  Capim Dourado na largura toda embaixo); a partir de 1024 px, três colunas iguais com fios verticais. As logos ficam
+  em caixas da mesma altura, então as legendas começam na mesma linha. Abaixo de 48rem, a Parceria fica a 0,66 da
+  escala e os itens perdem o recuo lateral; em 1024 px, o recuo lateral é menor e os itens esticam.
+- A legenda da UniCatólica na faixa sai da lista de cursos do `courseLockup.ts`, a mesma do selo do hero.
+- `contain-intrinsic-size` do rodapé medido de novo, porque a faixa cresceu no celular e no tablet: 1.564 px em
+  390 px (era 1.341), 1.583 px a partir de 48rem (era 1.322) e 1.087 px a partir de 1024 px (era 1.103).
+- `RegistrationNotice` ganhou a prop `level` (`h2` ou `h3`, `h2` por padrão), com o mesmo visual do h3 de antes.
+- README (pt-BR e inglês), guia, design spec e asset brief atualizados para o selo de cursos e a LAES. Mídias do
+  README refeitas: a prévia animada e o pôster, `hero-desktop.webp` e o primeiro e o último quadro de
+  `sections-desktop.jpg` e de `mobile.jpg` (o último só para o contador bater com o do hero).
 - O formulário saiu da LP. A seção `#inscricao` virou só o clímax: contador, a lista curta "Tenha em mãos", o botão
   principal ("Quero participar" ou "Inscrever minha equipe", conforme o status), "Ver as equipes" e a linha de status
   (`ChargeStatus`). Ela mantém o id, o `data-scene="core"`, o `data-scene-hold="900"`, o `data-checkpoint` e as
@@ -241,6 +289,9 @@ evento, e o globo do fim da página fica bem mais calmo.
 
 ### Removed
 
+- A linha "// 1ª edição · Tecnologia, inovação e empreendedorismo" do topo do hero e o `HeroHud.astro`, que só ela
+  usava. No lugar entrou o selo de cursos.
+- A logo da UniCatólica do crédito do rodapé do hero (agora ela está no selo de cursos).
 - Da LP: o formulário, o lobby (`LobbyPanel`), o carregamento sob demanda do formulário (`mountRegistrationForm` e o
   seu teste) e o `RegistrationCtaController`, que rolava até o formulário, junto com o evento `registration:intent`.
 - A modalidade individual e os campos WhatsApp, curso, período e acessibilidade (dado sensível), do formulário à
@@ -262,6 +313,16 @@ evento, e o globo do fim da página fica bem mais calmo.
 
 ### Fixed
 
+- Ordem dos títulos em `/inscricao`: o aviso de inscrições, o título da tela de sucesso e o título que o
+  `ClosedLobby` monta viraram h2 (eram h3 logo abaixo do h1), sem mudar o visual. Lighthouse mobile de acessibilidade
+  em 100 de novo em `/inscricao`.
+- Hero pendendo para a direita no celular e no tablet: a coluna do conteúdo ficou presa na largura do container
+  (`minmax(0, 1fr)`). O espaçamento das letras dos chips do hero passou a ser mobile first (0,05em, 0,08em a partir de
+  360 px e 0,14em a partir de 421 px), e o chip do local cabe numa linha em 320 px.
+- Cards de "O evento" cortados em 320 px (`minmax(0, 1fr)` na grade).
+- Contraste da linha "INTELIGÊNCIA ARTIFICIAL" sobre o globo: a cor passou ao `--ink-violet` e o véu do selo ficou
+  mais largo a partir de 768 px. No pior ponto medido sobre o globo, o contraste foi de cerca de 2,4:1 para 6,2:1.
+- Fios da faixa de parceiros desalinhados em 1024 px.
 - Clique perdido em "Confirmar inscrição" ou "Adicionar integrante" logo depois de digitar (já acontecia na LP): a
   validação do campo, ao perder o foco, mostrava o erro acima e empurrava o botão entre o apertar e o soltar. Com um
   botão apertado, essa validação espera o clique (`PressGuard`), e o "Remover" descobre a linha do integrante na hora
@@ -287,6 +348,9 @@ evento, e o globo do fim da página fica bem mais calmo.
 
 ### Performance
 
+- LP conferida de novo depois da rodada 5 (Lighthouse mobile, 3 passadas no build de produção servido com gzip):
+  Acessibilidade, Boas práticas e SEO em 100, LCP de 2,2 a 2,3 s (o logo do H1 continua o LCP), CLS 0,001 e
+  Performance de 95 a 97, com o TBT oscilando de 0 a 200 ms. O README e o guia seguem com os números da rodada 4.
 - LP no build de produção, Lighthouse mobile (mediana de 3 em 12/10/2026, depois da rodada 4): Performance 98, LCP
   2,2 s, TBT 98 ms e CLS 0,001; JS inicial de 68,2 KB gzip (era 68,4 KB), já sem o formulário e o controlador do CTA.
   `/inscricao` e `/equipes`: Performance 99, LCP 2,0 s e TBT 0.

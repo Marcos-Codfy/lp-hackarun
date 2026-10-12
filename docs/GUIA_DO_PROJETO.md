@@ -29,8 +29,9 @@
 ## 2. O que é
 
 Landing page do **HackaRun 2026**, a 1ª edição do evento de tecnologia, inovação e empreendedorismo da
-**UniCatólica**, com o **Capim Dourado Shopping** como parceiro exclusivo da premiação. São 4 dias, de 11 a 14 de
-novembro de 2026, em Palmas, em duas frentes:
+**UniCatólica** (realização), com organização da **LAES** (Liga Acadêmica de Engenharia de Software e Inteligência
+Artificial) e o **Capim Dourado Shopping** como parceiro exclusivo da premiação. São 4 dias, de 11 a 14 de novembro
+de 2026, em Palmas, em duas frentes:
 
 - **Programação aberta** (11 a 13/11, a partir das 19h, no Bloco II da UniCatólica): 7 oficinas práticas, palestras e
   a exposição de produtos e soluções em até 10 estandes, para a comunidade de tecnologia e para alunos do 3º ano do
@@ -52,14 +53,16 @@ para cada seção. A v1 ficou só no histórico do Git.
 **Situação em 11/10/2026:** design v2 **aprovado**, código publicado no GitHub (`main`) e Lighthouse mobile com
 Performance 95 e Acessibilidade, Boas práticas e SEO em 100. O que falta para abrir as inscrições está na seção 19.
 
-**Em 12/10/2026** entraram três rodadas de ajustes pedidos pela organização, ainda sem versão fechada
+**Em 12/10/2026** entraram quatro rodadas de ajustes pedidos pela organização, ainda sem versão fechada
 (`[Unreleased]` no changelog). Na rodada 2, o site perdeu o som, o clímax da inscrição ficou mais curto e calmo e as
 equipes ganharam a página `/equipes`, com a foto ou a logo que cada uma sobe na inscrição. Na rodada 3, o conteúdo
 passou a seguir o documento do coordenador (duas frentes, programação em abas e a HackaRun Experience), a inscrição
 virou só de equipe, com a planilha em três abas, e o repositório ficou pronto para fork (`npm run setup`). Na rodada
 4, o formulário saiu da LP para a página `/inscricao` (ADR 0009), com rascunho na aba e volta ao mesmo ponto do evento,
-e o globo do fim da LP ficou bem mais calmo. Resumo na seção 18.1. O Lighthouse foi medido de novo depois da rodada 4:
-Performance 98 na LP e 99 em `/inscricao` e `/equipes` (seção 12.1).
+e o globo do fim da LP ficou bem mais calmo. Na rodada 5, o topo do hero ganhou o selo da UniCatólica com os cursos
+de Engenharia de Software e Inteligência Artificial, e a LAES entrou como Organização na faixa de parceiros. Resumo
+na seção 18.1. O Lighthouse foi medido de novo depois da rodada 4: Performance 98 na LP e 99 em `/inscricao` e
+`/equipes` (seção 12.1).
 
 ## 3. Decisões principais
 
@@ -511,12 +514,20 @@ Tudo em `src/infrastructure/content/`. Edite, rode `npm test` (os testes validam
 | `stations.json` | As 8 missões. `scoring` fica `null` até o regulamento; publicado (critérios somando 100), volta o painel de pontuação        |
 | `speakers.json` | Instrutores, mentores, palestra e banca (`name: null` = card "a revelar")                                                    |
 | `prizes.json`   | Prêmios (`reward: null` = "a revelar")                                                                                       |
-| `partners.json` | Realização e parceiros (nome, papel e link)                                                                                  |
+| `partners.json` | Faixa "Quem faz acontecer": nome, papel, link e, para sigla, `fullName` (vira legenda, alt e nome no JSON-LD)                |
 | `faq.json`      | Perguntas frequentes com `category` (Evento, Programação aberta, Hackathon, Inscrição); a `FAQPage` do JSON-LD sai daqui     |
 | `teams.json`    | Lista reserva de equipes (as oficiais vêm da planilha, ao vivo): só nome, quantidade de integrantes, status e foto           |
 
 Textos fixos de seção (títulos, chamadas) ficam nos próprios `.astro` em `presentation/sections/`. A grafia é
 "UniCatólica" (caixa alta só na faixa de "O evento").
+
+Os papéis do `partners.json` são `organizer` (Realização), `coorganizer` (Organização), `partner` (Parceria) e
+`supporter` (Apoio), e a faixa segue essa ordem (`ListPartners`). Hoje: UniCatólica (Realização), LAES (Organização,
+com `fullName` "Liga Acadêmica de Engenharia de Software e Inteligência Artificial") e Capim Dourado Shopping
+(Parceria). Parceiro novo pede também a logo branca em `src/assets/brand/` e uma entrada no `PARTNER_BRANDS`
+(`presentation/components/partners/partnerBrands.ts`), com a caixa do desenho (`ink`) medida pelo alfa do PNG e a
+altura ótica. O `partnersBand.test.ts` falha se um parceiro ficar sem entrada ou se o papel não existir. Os nomes
+dos cursos do selo do hero ficam em `presentation/sections/hero/courseLockup.ts`.
 
 ### 8.1 Programação (`event.json`)
 
@@ -802,8 +813,16 @@ só com o clímax e o CTA (seção 7.5). Todo CTA de inscrição do site leva pa
 
 - **Logo HackaRun:** `src/assets/brand/hackarun-logo.png`, a imagem oficial. Nunca redesenhe; os raios em volta são
   desenhados por código (`motion/animators/hero/lightning/`) num canvas 2D, só com o hero visível.
-- **Parceiros:** `unicatolica-white.png` e `capim-dourado-white.png` (versões brancas oficiais) aparecem discretas no
-  hero e grandes na faixa "Quem faz acontecer" antes do rodapé (`components/partners/`).
+- **Parceiros:** `unicatolica-white.png`, `laes-white.png` e `capim-dourado-white.png` (versões brancas). No hero, a
+  UniCatólica assina o selo de cursos acima do logo (`sections/hero/HeroCourses.astro`, com as réguas de HUD em
+  `HeroRule.astro`), e o Capim Dourado fica no crédito discreto do rodapé do hero ("Parceria"). Um teste garante que
+  só o selo usa a logo da UniCatólica no hero. As três aparecem grandes na faixa "Quem faz acontecer", antes do
+  rodapé (`components/partners/`: logo, caixa do desenho e legenda em `partnerBrands.ts`; rótulo, tom e as regras
+  de legenda e alt em `partnerMarks.ts`).
+- **LAES:** `laes-white.png` (520×483, PNG em tons de cinza com alfa) é a versão branca do logotipo geométrico da
+  liga, tirada dos arquivos originais da LAES, que trazem também o emblema circular e o logotipo em azul. Dentro
+  do PNG, o desenho tem mais folga em cima (73 px) que embaixo (28 px), e o `ink` do `partnerBrands.ts` compensa
+  isso: trocou o arquivo, meça a caixa do desenho de novo (pelo alfa).
 - **Compartilhamento:** `public/og-image.jpg` (1200×630), usada no Open Graph e no Twitter Card.
 - Imagens em `src/assets/` são otimizadas pelo Astro no build. Pedidos de arte em `docs/design/asset-brief.md`.
 - **Fotos das equipes** não ficam no repositório: vêm do Drive da organização pelo CDN do Google (seção 9.6).
@@ -1162,6 +1181,23 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
   em 68,2 KB (seção 12.1). Mídias do README refeitas (página de inscrição, globo final, `/equipes` com a
   sub-navegação).
 
+**12/10/2026, rodada 5 (em [Unreleased]):**
+
+- **Selo de cursos no hero:** no lugar da linha "// 1ª edição · Tecnologia, inovação e empreendedorismo", acima do
+  logo, a logo branca da UniCatólica, um fio e os cursos "ENGENHARIA DE SOFTWARE" (ciano) e "INTELIGÊNCIA
+  ARTIFICIAL" (violeta), entre as réguas de HUD (`hero/HeroCourses.astro`, `hero/HeroRule.astro` e
+  `hero/courseLockup.ts`). Entra uma vez, em cerca de 1,4 s, e fica parado com `prefers-reduced-motion`. O crédito
+  do rodapé do hero ficou só com o Capim Dourado, e o `HeroHud.astro` saiu.
+- **LAES na faixa "Quem faz acontecer":** Realização (UniCatólica), Organização (LAES) e Parceria (Capim Dourado
+  Shopping), nessa ordem, com o papel `coorganizer` e o `fullName` no `partners.json` (seção 8). Abaixo de 1024 px
+  a faixa fica em 2 + 1; a partir daí, em três colunas. No JSON-LD, a LAES entra no `organizer`.
+- **Revisão:** hero centralizado no celular e no tablet, hero inteiro na primeira tela de 1024×768 a 1920×1080,
+  cards de "O evento" sem corte em 320 px, títulos de `/inscricao` em ordem (h1 › h2), contraste da linha violeta
+  sobre o globo (token `--ink-violet`) e fios da faixa alinhados em 1024 px. Tokens novos: `--ink-violet` e
+  `--ink-gold`.
+- **Mídias do README** refeitas no build de produção: a prévia animada e o pôster, `hero-desktop.webp` e os quadros
+  do hero e do fim da página em `sections-desktop.jpg` e `mobile.jpg`.
+
 ## 19. Pendências
 
 ### 19.1 Da organização
@@ -1199,14 +1235,16 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 - [ ] Conta Google institucional dona da planilha e do Apps Script (cotas maiores, e os dados ficam com a
       instituição, não com uma pessoa).
 - [ ] Site oficial do Capim Dourado para o link da faixa de parceiros (`partners.json`, hoje `null`).
+- [ ] Link oficial da LAES (site ou perfil) para a faixa de parceiros, se houver (`partners.json`, hoje `null`).
 - [x] Apps Script novo publicado (os oito `.gs` e o `appsscript.json`), `configurarPlanilha()` rodado e acesso a
       dados externos liberado na planilha ("Permitir acesso", para o `=IMAGE()` da coluna Foto).
 - [ ] Confirmar que a conta institucional permite link público ("Qualquer pessoa com o link · Leitor") nos arquivos
       da pasta das fotos; senão as equipes aparecem só com as iniciais (seção 9.6).
 - [ ] Imagem de compartilhamento (`public/og-image.jpg`) com o subtítulo novo: a arte oficial ainda traz
       "Hackathon de Engenharia de Software e IA" sob o logo, e o evento agora se apresenta como "Tecnologia, inovação
-      e empreendedorismo". A faixa de datas e a de realização e parceria continuam certas. É arte da organização:
-      pedir a versão nova (ou o aval para trocar só o subtítulo).
+      e empreendedorismo". A faixa de datas continua certa, mas a dos créditos traz só a Realização e a Parceria,
+      sem a Organização (LAES). É arte da organização: pedir a versão nova (ou o aval para trocar o subtítulo e os
+      créditos).
 - [ ] Logos em SVG (opcional; as versões PNG oficiais já estão no site).
 - [ ] Domínio próprio (opcional).
 
