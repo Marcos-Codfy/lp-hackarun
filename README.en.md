@@ -4,7 +4,7 @@
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/Marcos-Codfy/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
-  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun cinematic scroll: the hero opens with the official logo and lightning over the particle globe; at each section the 3D particles become a new shape (stopwatch, neon question mark, mission map, synthwave terrain, stage with an LED wall, golden trophy and galaxy) and at the end they form the globe again, which charges up and releases a pulse of energy on the &quot;Sua vaga na corrida&quot; call to action." />
+  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun cinematic scroll: the hero opens with the official logo and lightning over the particle globe; at each section the 3D particles become a new shape (stopwatch, neon question mark, mission map, synthwave terrain, stage with an LED wall, golden trophy and galaxy) and at the end they form the globe again, now calm: it turns slowly behind the &quot;Sua vaga na corrida&quot; call to action, charges up, lights the &quot;Quero participar&quot; button and releases a soft pulse of light at its edge." />
 </picture>
 
 # HackaRun · Overdrive
@@ -16,7 +16,7 @@ story as you scroll: a single WebGL particle field turns into a different 3D obj
 registrations land straight in a Google Sheet.
 
 <sub>**Overdrive** is the codename of this page's cinematic v2: like the turbo boost in racing games, it speeds up from
-scene to scene and, at registration, the globe charges up and releases a pulse of energy.</sub>
+scene to scene and, at the finish, the globe charges up and releases a pulse of energy.</sub>
 
 [![CI](https://github.com/Marcos-Codfy/lp-hackarun/actions/workflows/ci.yml/badge.svg)](https://github.com/Marcos-Codfy/lp-hackarun/actions/workflows/ci.yml)
 ![Astro](https://img.shields.io/badge/Astro-7-FF5D01?logo=astro&logoColor=white)
@@ -50,14 +50,15 @@ scene to scene and, at registration, the globe charges up and releases a pulse o
   Palmas, Tocantins, Brazil, with two tracks: a program open to the public (7 workshops, talks and up to 10 exhibitor
   stands) and a hackathon for UniCatólica students only, an objective-based race in teams that ends at the HackaRun
   Experience, at the mall. The page covers the schedule in tabs, 8 missions, mentors, prizes, a hunt for 3 hidden
-  tokens, team registration and a page of its own for the confirmed teams, with each team's photo or logo, live. All
-  site content is in Brazilian Portuguese.
+  tokens, a team registration page (with a draft kept in the tab and a way back to the same spot on the landing page)
+  and another page for the confirmed teams, with each team's photo or logo, live. All site content is in Brazilian
+  Portuguese.
 - **What sets it apart:** 8 procedural 3D objects (globe, stopwatch, "?", holographic map, synthwave terrain, stage,
   trophy and galaxy) made of 9,000 to 42,000 particles, with no 3D models and no video
   ([ADR 0005](docs/adr/0005-procedural-particles-over-video.md)), plus cinematic post-processing and a choreographed
   camera for every transition.
 - **Fast:** Lighthouse mobile Performance **98** (up from 66), 2.2 s LCP and 0.001 CLS. Accessibility, Best practices
-  and SEO at **100**.
+  and SEO at **100**. The registration and teams pages, with no 3D, score 99.
 - **Accessible:** all content shows up without JavaScript and without WebGL (only submitting the registration needs
   JavaScript, and the page says so), `prefers-reduced-motion` is respected and there is a pause animations button
   (WCAG 2.2.2).
@@ -65,29 +66,29 @@ scene to scene and, at registration, the globe charges up and releases a pulse o
   inside the cell, members with one row per person and a live summary), with the team photo in Google Drive, one team
   per person, idempotent retries, rate limits, a concurrency lock and versioned LGPD (Brazil's data protection law)
   consent.
-- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 625 tests, CI on
-  GitHub Actions, Conventional Commits, 8 ADRs and an `npm run setup` for anyone who forks it.
+- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 765 tests, CI on
+  GitHub Actions, Conventional Commits, 9 ADRs and an `npm run setup` for anyone who forks it.
 
 ## Visuals
 
 <p align="center">
-  <img src="docs/media/sections-desktop.jpg" width="960" alt="Mosaic of nine desktop sections: the hero with the official logo, lightning and the countdown; From the classroom to the stage, with the stopwatch; the NPCs, with the neon question mark; 8 missions, with the 3D map; 4 days of schedule, with the day tabs and the synthwave terrain; the final at Capim Dourado Shopping, with the LED wall; the prizes, with the golden trophy; the teams, with the galaxy and the confirmed teams counter; and registration, with the globe." />
+  <img src="docs/media/sections-desktop.jpg" width="960" alt="Mosaic of nine desktop sections: the hero with the official logo, lightning and the countdown; From the classroom to the stage, with the stopwatch; the NPCs, with the neon question mark; 8 missions, with the 3D map; 4 days of schedule, with the day tabs and the synthwave terrain; the final at Capim Dourado Shopping, with the LED wall; the prizes, with the golden trophy; the teams, with the galaxy and the confirmed teams counter; and the end of the page, with the calm globe behind Sua vaga na corrida, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
   <br /><sub>Nine sections, nine moments of the same particle field. In the hero, the official logo is the H1 and the LCP element.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/mobile.jpg" width="960" alt="Five mobile screens side by side: the hero with the countdown, the NPCs with the 3D question mark and the NPC terminal, the missions with the particle map, the prizes with the golden trophy and the champion team card, and the final registration call with the globe." />
+  <img src="docs/media/mobile.jpg" width="960" alt="Five mobile screens side by side: the hero with the countdown, the NPCs with the 3D question mark and the NPC terminal, the missions with the particle map, the prizes with the golden trophy and the champion team card, and the end of the page with the globe, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
   <br /><sub>On a phone (390 px), at the same quality tier a recent device gets.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/teams-page.jpg" width="720" alt="The teams page on desktop: the Equipes inscritas title, a counter with 6 confirmed teams, a search by name and six cards with the logo or photo of each team (Byte do Cerrado, Café com Código, Capivara Stack, Jalapão Hackers, Null Pointers and Os Commitados), each with a confirmed badge and its number of members." />
-  <br /><sub>The <code>/equipes</code> page reads the confirmed teams from the Google Sheet. The teams and images in this capture are made up, for illustration only.</sub>
+  <img src="docs/media/teams-page.jpg" width="720" alt="The teams page on desktop: the sub-navigation with Voltar ao evento (back to the event) and the Inscrição and Equipes inscritas switch, the Equipes inscritas title, a counter with 6 confirmed teams, a search by name and six cards with the logo or photo of each team (Byte do Cerrado, Café com Código, Capivara Stack, Jalapão Hackers, Null Pointers and Os Commitados), each with a confirmed badge and its number of members." />
+  <br /><sub>The <code>/equipes</code> page reads the confirmed teams from the Google Sheet and shares its sub-navigation with the registration page. The teams and images in this capture are made up, for illustration only.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/registration.jpg" width="960" alt="The open registration form, desktop and phone side by side. On desktop, the preview of the team logo already converted to WebP (600 × 600 px, 15 KB), the Members step at 3 of 5 and member 1, the team contact, filled in. On the phone, members 2 and 3 with full name, student ID and email." />
-  <br /><sub>Registration open: the photo is resized right in the browser and each member gives a full name, student ID and email. Made-up data, on a test build with a simulated submission.</sub>
+  <img src="docs/media/registration.jpg" width="960" alt="The registration page with registration open, on one desktop screen and two phone screens. On desktop, the form with the team name Byte do Cerrado, the preview of the team logo already converted to WebP (600 × 600 px, 15 KB), the Members step at 3 of 5 and member 1, the team contact; beside it, the What you need to have ready panel and the Registration steps card with all 3 steps done and Draft saved in this tab. On the first phone, the top of the page: Back, the Inscrição and Equipes switch, the Inscreva sua equipe title, the Abertas (open) status, the collapsed checklist and the steps with check marks. On the second, members 2 and 3 with full name, student ID and email." />
+  <br /><sub>Registration has a page of its own, light and with no 3D: the photo is resized right in the browser, the steps show what is already done and the draft stays in the tab if someone leaves and comes back. Made-up data, on a test build with a simulated submission.</sub>
 </p>
 
 ## Visual script: one 3D scene per section
@@ -108,7 +109,7 @@ scrambling.
 | Grand final (`#final`)      | `stage`   | Show stage: 16:9 LED wall, truss, 8 light cannons and a bouncing crowd  |
 | Prizes (`#premios`)         | `trophy`  | Lathe-profile cup drawn in lines, tube handles and a star on top        |
 | Teams and FAQ               | `dust`    | A distant, calm galaxy with 2 spiral arms: a quiet backdrop for reading |
-| Registration (`#inscricao`) | `core`    | The globe returns, charges for 0.9 s and releases a pulse (the climax)  |
+| Registration (`#inscricao`) | `core`    | The globe returns calm, only breathes, charges for 0.9 s and pulses     |
 
 Orbitron, the brand's official font, has its tilde redrawn in Python with fontTools: in the original, "NÃO"
 (Portuguese for "no") looked like "NÀO" in large headings ([ADR 0006](docs/adr/0006-cinematic-v2-and-official-identity.md)).
@@ -189,7 +190,7 @@ Views that only bind the DOM. Modules talk through a typed `EventBus`
 ```mermaid
 flowchart TB
   P["First contentful paint (PaintGate)"] --> B["BootQueue: motion, views, controllers and animators"]
-  B --> Z["Section near the viewport (LazyMount): form, teams and the missions rail"]
+  B --> Z["Section near the viewport (LazyMount): teams showcase and the missions rail"]
   B --> L(["load + browser idle"])
   L --> X["three.js chunk"]
   L --> W["Shapes in a Web Worker"]
@@ -201,7 +202,15 @@ flowchart TB
 ```
 
 **Every 3D frame:** scroll → `SceneDirector` (continuous scene index) → `SceneMixer` (weights) → vertex shader (morph
-between targets) → `RenderPass` → bloom → cinematic pass → opaque canvas blended over the CSS aurora.
+between targets) → `RenderPass` → bloom → cinematic pass → opaque canvas blended over the CSS aurora. At the end of the
+page, a motion profile of its own ([`CoreMotion`](src/presentation/experience/scene/CoreMotion.ts)) calms the globe
+down: it turns slowly, only breathes, and the charge turns into light, not agitation.
+
+**Light pages:** `/inscricao` (registration) and `/equipes` (teams) use a separate boot
+([`LightApp`](src/presentation/app/LightApp.ts)) with no 3D, GSAP or Lenis. The form is only downloaded there, and only
+while registration is open. "Voltar ao evento" (back to the event,
+[`backToEvent.ts`](src/presentation/views/navigation/backToEvent.ts)) goes back through history, so the landing page
+reappears at the same spot, straight from the bfcache.
 
 <details>
 <summary><b>Design patterns and where they live</b></summary>
@@ -236,17 +245,17 @@ Lighthouse mobile on the production build, Brave headless, median of 3 runs on 2
 | Metric                                | Project target | Before   | Now         |
 | ------------------------------------- | -------------- | -------- | ----------- |
 | Performance                           | ≥ 90           | 66       | **98**      |
-| Total Blocking Time                   | –              | 1,600 ms | **83 ms**   |
+| Total Blocking Time                   | –              | 1,600 ms | **98 ms**   |
 | Largest Contentful Paint              | < 2.5 s        | 2.9 s    | **2.2 s**   |
 | First Contentful Paint                | –              | –        | 1.4 s       |
-| Speed Index                           | –              | –        | 2.4 s       |
+| Speed Index                           | –              | –        | 2.1 s       |
 | Cumulative Layout Shift               | < 0.05         | –        | **0.001**   |
 | Accessibility, Best practices and SEO | 100            | 100      | **100**     |
-| Initial JS (entry chunk, gzip)        | < 70 KB        | –        | **68.4 KB** |
+| Initial JS (entry chunk, gzip)        | < 70 KB        | –        | **68.2 KB** |
 
 <sub>Before: the score from the last report prior to the performance work. Dash: no target of its own or no earlier
 record. Initial JS: the entry script, the `App` chunk and their static imports, gzipped (1 KB = 1,024 bytes).
-`/equipes` scores 100 on Performance, with a 1.9 s LCP.</sub>
+`/inscricao` and `/equipes` score 99 on Performance, with a 2.0 s LCP and 0 TBT.</sub>
 
 Every target I set myself is met. What keeps it that way:
 
@@ -256,9 +265,10 @@ Every target I set myself is met. What keeps it that way:
   ([`PaintGate`](src/presentation/app/PaintGate.ts), with a 3 s cap), and the boot runs in short steps that yield the
   thread ([`BootQueue`](src/presentation/app/BootQueue.ts) with `scheduler.yield()`). Each section only sets up its
   animations when it gets close to the viewport, and a custom `LineSplit` replaces GSAP SplitText.
-- The registration form, the teams showcase and the missions rail counter are separate chunks, loaded by
+- The teams showcase and the missions rail counter are separate chunks, loaded by
   [`LazyMount`](src/presentation/app/LazyMount.ts) when the section gets close, when the page opens on or jumps to it,
-  when someone taps or focuses it, or when a CTA asks for it.
+  or when someone taps or focuses it. The form lives on the `/inscricao` page and is never downloaded on the landing
+  page.
 - three.js in its own chunk (592 KB, 152 KB gzip), imported after `load` and once the browser is idle. The shapes are
   built in a Web Worker, the WebGL context is only created once frames are back on the display's pace
   ([`FrameSettle`](src/presentation/experience/FrameSettle.ts)), and the shaders compile in parallel.
@@ -268,14 +278,15 @@ Every target I set myself is met. What keeps it that way:
 - `content-visibility: auto` on far sections, with `contain-intrinsic-size` measured at 390 and 1440 px, without
   breaking anchors ([`anchorcheck.mjs`](scripts/qa/anchorcheck.mjs) verifies it).
 - 3D rendering pauses when the tab is hidden, and the logo lightning only runs while the hero is visible.
-- `/equipes` has no 3D, GSAP or Lenis. Photos come at 600 px from Google's CDN with `loading="lazy"`,
-  `decoding="async"` and a fixed width and height (no layout shift); on upload, the browser already brings each photo
-  down to ~300 KB.
+- `/inscricao` and `/equipes` have no 3D, GSAP or Lenis (14 KB of initial JS). Photos come at 600 px from Google's CDN
+  with `loading="lazy"`, `decoding="async"` and a fixed width and height (no layout shift); on upload, the browser
+  already brings each photo down to ~300 KB.
+- The calm globe at the end costs no extra render pass: 4 uniforms on the particles, 1 on the lens pass and a blend of
+  a few numbers per frame.
 - Immutable caching for one year on `/_astro/*` and HTML always revalidated ([`public/_headers`](public/_headers)).
 
-<sub>The measurements above are from 2026-10-11, before the 2026-10-12 tweaks (sound removed, calmer climax, the teams
-page, the schedule in tabs and team-only registration). The landing page and `/equipes` are still due a new
-measurement on a production build.</sub>
+<sub>Measured again on 2026-10-12, after the registration page and the calm final globe, on the production build served
+with gzip. TBT varies between runs (68 to 245 ms across these three), always from boot tasks and the 3D chunk.</sub>
 
 ## Accessibility
 
@@ -292,11 +303,17 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
 - The schedule uses the WAI-ARIA tabs pattern (roving tabindex, arrow keys, Home/End and automatic activation).
   Without JavaScript, the tab bar is hidden and the 4 days are stacked.
 - A step-by-step form with one `fieldset` per member: adding or removing someone moves focus and announces the team
-  size ("Integrante 3 adicionado. A equipe tem 3 de 5 integrantes."). It has an accessible error summary,
-  `aria-invalid` and `aria-describedby`, live regions for status and screen-reader copies of the "typed" or "decoded"
-  text. The photo field has a preview, a replace button, drag and drop and an announced status.
-- The `/equipes` page has a breadcrumb (`aria-current="page"`), a labeled search, a count announced in a live region
-  and "Foto ou logo da equipe X" alt text on every card. Lighthouse (measured in dev) scores its accessibility at 100.
+  size ("Integrante 3 adicionado. A equipe tem 3 de 5 integrantes."). The steps indicator uses `aria-current="step"`
+  and tells screen readers when a step has fields to fix. It has an error summary grouped by block, `aria-invalid` and
+  `aria-describedby`, live regions for status and screen-reader copies of the "typed" or "decoded" text. The photo
+  field has a preview, a replace button, drag and drop and an announced status. And a click on "Confirmar inscrição"
+  is not lost when a field error shows up above the button.
+- A sub-navigation on `/inscricao` and `/equipes` with `aria-current="page"` and the full accessible name even when
+  the label shortens on phones; the link to the current page scrolls to the top and moves focus to the content
+  instead of reloading.
+- The `/equipes` page has a labeled search, a count announced in a live region and "Foto ou logo da equipe X" alt text
+  on every card. On the production build, Lighthouse scores accessibility at 100 on `/equipes` and on `/inscricao`
+  while registration is open.
 - Full content without JavaScript and without WebGL: the HTML is complete at build time, and the form says so when
   JavaScript is off.
 
@@ -312,6 +329,9 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
   names, student IDs or e-mails), and only after the organizers confirm the registration. Cards are built from a
   `<template>` using `textContent` (nothing from the sheet becomes HTML), and the photo URL is only built from an id in
   the Drive id format.
+- **Draft kept in the tab only:** what is typed on `/inscricao` lives in `sessionStorage` (gone when the tab closes,
+  on a successful submit or on "Limpar rascunho"), consent is never stored, and whatever comes back from storage is
+  checked (origin from a fixed list, a submission key in the server's format, a photo with a valid type and size).
 - **One team per person:** a team name, e-mail or student ID already used by another team comes back as a conflict,
   ignoring case and accents, and the site flags the right field. Each form session sends a UUID key, so a retry gets
   the same protocol code back, with no duplicate row.
@@ -332,7 +352,7 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
 
 | Item       | Status                                                                                                           |
 | ---------- | ---------------------------------------------------------------------------------------------------------------- |
-| Tests      | **625 tests in 83 files** (Vitest + happy-dom), split by layer, including 9 suites that run the real Apps Script |
+| Tests      | **765 tests in 98 files** (Vitest + happy-dom), split by layer, including 9 suites that run the real Apps Script |
 | Lint       | ESLint with no errors or warnings: layer rules, a 250 code-line cap per file, `import type`                      |
 | Types      | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check          |
 | Formatting | Prettier across the repository                                                                                   |
@@ -340,8 +360,8 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
 | Commits    | Husky + lint-staged on pre-commit and commitlint on commit-msg (a scope outside the list triggers a warning)     |
 | Browser QA | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow, Web Vitals, long tasks and Lighthouse     |
 
-**By the numbers:** 409 files and 30,223 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 89 files and 5,651
-lines are the 3D module; 83 test files and 8 helpers, with 7,915 lines; 959 lines of Apps Script in 8 files; 8 ADRs.
+**By the numbers:** 435 files and 33,019 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 90 files and 5,852
+lines are the 3D module; 98 test files and 10 helpers, with 9,653 lines; 999 lines of Apps Script in 8 files; 9 ADRs.
 
 ---
 
@@ -400,18 +420,19 @@ cp .env.example .env
 npm run dev
 ```
 
-Open `http://localhost:4321`. The page reloads on every save. With `PUBLIC_REGISTRATION_ENDPOINT` empty (the
-`.env.example` default), registration runs in **simulated mode**: nothing leaves your machine and no spreadsheet is
-touched. The form validates everything like the real one, and the "registered" teams show up as confirmed, with their
-photo, on `/equipes` and the landing page while the tab stays open (they live in `sessionStorage`). To see the error
-states, use a contact e-mail starting with `falha` (network error), `servidor` (script down) or `duplicado` (duplicate
-registration). A team name, e-mail or student ID repeated across the simulated teams gives the same field error as the
-real server.
+Open `http://localhost:4321`; the form is at `http://localhost:4321/inscricao` (no trailing slash). The page reloads
+on every save. With `PUBLIC_REGISTRATION_ENDPOINT` empty (the `.env.example` default), registration runs in
+**simulated mode**: nothing leaves your machine and no spreadsheet is touched. The form validates everything like
+the real one, and the "registered" teams show up as confirmed, with their photo, on `/equipes` and the landing page
+while the tab stays open (they live in `sessionStorage`). To see the error states, use a contact e-mail starting with
+`falha` (network error), `servidor` (script down) or `duplicado` (duplicate registration). A team name, e-mail or
+student ID repeated across the simulated teams gives the same field error as the real server.
 
-| URL parameter                    | Effect                                                              |
-| -------------------------------- | ------------------------------------------------------------------- |
-| `?quality=low\|medium\|high`     | Forces the 3D tier and turns off the automatic FPS-based adjustment |
-| `?now=2026-11-14T16:00:00-03:00` | Shifts the site clock to check the countdown milestones             |
+| URL parameter                    | Effect                                                               |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `?quality=low\|medium\|high`     | Forces the 3D tier and turns off the automatic FPS-based adjustment  |
+| `?now=2026-11-14T16:00:00-03:00` | Shifts the site clock to check the countdown milestones              |
+| `/inscricao?origem=hero`         | Registration origin (Origem column); anything off the list: `direct` |
 
 **5. Check before opening a PR**
 
@@ -480,6 +501,8 @@ your PR.
 | The commit is rejected                               | Husky runs commitlint and lint-staged: check the `type(scope): description` format and the ESLint errors. Do not use `--no-verify`.             |
 | I changed `.env` and nothing happened                | Variables are read at startup: stop `npm run dev` and start it again.                                                                           |
 | I want to clear the simulated teams                  | Close the tab or delete the `hackarun:dev:simulated-teams` key from `sessionStorage` (DevTools → Application).                                  |
+| The form comes back filled in                        | That is the tab's draft: use "Limpar rascunho" in the steps card or delete the `hackarun:registration-draft:v2*` keys from `sessionStorage`.    |
+| `/inscricao/` returns 404                            | URLs have no trailing slash (`trailingSlash: 'never'`): open `/inscricao`.                                                                      |
 | The 3D does not show up                              | Check that the browser has WebGL2 and that data saver is off. Try `?quality=low`. Without 3D, the page is still complete.                       |
 
 </details>
@@ -551,7 +574,7 @@ src/
 ├── shared/          # EventBus, Observable, Ticker and utilities
 ├── composition/     # composition roots (build and browser)
 ├── assets/          # official logos and Orbitron with the redrawn tilde
-└── pages/           # index, equipes (teams), privacidade (LGPD), 404 and the .ics calendar
+└── pages/           # index, inscricao (registration), equipes (teams), privacidade (LGPD), 404 and the .ics calendar
 apps-script/         # registration API, the three-tab sheet and photos in Drive (Google Apps Script) + setup guide
 design/              # briefing references and the teaser video (not shipped)
 public/              # og-image, favicon, _headers and robots
@@ -568,8 +591,10 @@ requirements.txt     # dependencies of the Python asset scripts
 - **Content** (the schedule's days, blocks and activities, missions, FAQ, prizes, mentors, partners) lives in
   `src/infrastructure/content/*.json`. It can be edited without coding; invalid data fails the build and the tests
   validate the real content.
-- **Registration** is team-only, 2 to 5 students, with each member's full name, student ID and e-mail. It goes to a
-  Google Sheet through Apps Script (`doPost`), and the team's photo or logo goes to a Google Drive folder. The script
+- **Registration** is team-only, 2 to 5 students, with each member's full name, student ID and e-mail, on the
+  `/inscricao` page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md), pt-BR). Every CTA on the site links
+  there with its origin in the URL (`?origem=hero`, `?origem=final`...), which lands in the Origem column. It goes to
+  a Google Sheet through Apps Script (`doPost`), and the team's photo or logo goes to a Google Drive folder. The script
   builds the sheet by itself (`configurarPlanilha()`): the **Equipes** tab has one row per team, with the photo
   thumbnail inside the cell (`=IMAGE()`) and the Status in a color-coded dropdown; the **Integrantes** tab has one row
   per person; and the **Resumo** tab has the counters and the confirmed teams' e-mails ready to paste. Equipes and
@@ -584,7 +609,7 @@ requirements.txt     # dependencies of the Python asset scripts
   [`SubmitRegistration.ts`](src/application/use-cases/SubmitRegistration.ts) and in
   [`Validation.gs`](apps-script/Validation.gs), and publish the script together with the site.
 - **Calendar:** the build generates `/hackarun-2026.ics` (RFC 5545) with one event per schedule block, downloaded from
-  the "Adicionar à agenda" (add to calendar) buttons in the registration area.
+  the "Adicionar à agenda" (add to calendar) buttons on the registration page.
 
 ### Contributing
 
@@ -630,6 +655,8 @@ options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - [x] Mobile LCP under 2.5 s (2.2 s on 2026-10-12)
 - [x] Initial JS under 70 KB gzip (68.4 KB)
 - [x] Apps Script deployed on the registration spreadsheet and tested end to end (photo in the cell, duplicates blocked)
+- [x] Registration on a page of its own, with a draft kept in the tab and a way back to the same spot on the landing page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md))
+- [x] A calmer globe at the end of the page: it turns slowly, breathes and releases a soft pulse
 - [ ] Registrations switched on in the official site, together with the Cloudflare launch
 - [ ] Official launch on Cloudflare Pages: on hold, by my decision
 - [ ] Rules and mission scoring: the organizers present them at the opening, on November 12, at 7:35 p.m.

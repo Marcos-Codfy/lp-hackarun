@@ -16,8 +16,8 @@ detalhes de arquitetura estão em [docs/GUIA_DO_PROJETO.md](docs/GUIA_DO_PROJETO
 
 2. Prepare o projeto com `npm run setup`: ele confere o Node (24 LTS, do `.nvmrc`), roda o `npm ci`, cria o `.env` e
    mostra os próximos passos. `npm run setup -- --qa` instala também os scripts de QA.
-3. Rode `npm run dev` e abra `http://localhost:4321`. Sem endpoint no `.env`, a inscrição roda em modo simulado e não
-   grava em planilha nenhuma.
+3. Rode `npm run dev` e abra `http://localhost:4321` (a inscrição fica em `/inscricao`). Sem endpoint no `.env`, ela
+   roda em modo simulado e não grava em planilha nenhuma.
 
 Quem tem acesso de escrita ao repositório original pode pular o fork e criar a branch direto nele.
 
@@ -68,7 +68,7 @@ Quem tem acesso de escrita ao repositório original pode pular o fork e criar a 
 | `application` | `src/application`: casos de uso, DTOs e portas                           |
 | `infra`       | `src/infrastructure` e `apps-script/`: JSON, repositórios, Apps Script   |
 | `ui`          | Componentes, layout, header, rodapé e estilos compartilhados             |
-| `sections`    | As seções da LP e da página `/equipes`                                   |
+| `sections`    | As seções da LP e das páginas `/inscricao` e `/equipes`                  |
 | `experience`  | O 3D (`src/presentation/experience`): formas, shaders, câmera, qualidade |
 | `motion`      | GSAP, Lenis, scroll, âncoras e animações de entrada                      |
 | `a11y`        | Acessibilidade                                                           |
@@ -137,9 +137,12 @@ O Husky valida a mensagem (commitlint) e roda ESLint e Prettier nos arquivos do 
 - [ ] Testado no celular (360 e 390px) e no desktop (1440px), com capturas das seções alteradas
       ([scripts de QA](scripts/qa/README.md): `shots`, `overflow` e `anchorcheck`)
 - [ ] Mexeu no 3D: conferido com `?quality=low` e `?quality=high`, sem erro no console
-- [ ] Mexeu em header, rodapé ou equipes: conferido também em `/equipes` (vazia e com equipes)
+- [ ] Mexeu em header, sub-navegação, rodapé ou equipes: conferido também em `/inscricao` e em `/equipes` (vazia e com
+      equipes)
+- [ ] Mexeu na navegação entre as páginas: o "Voltar ao evento" e o voltar do navegador devolvem a LP no mesmo ponto
 - [ ] Mexeu na programação: as 4 abas conferidas, com teclado, e a versão sem JavaScript (dias empilhados)
-- [ ] Mexeu no formulário: testado no modo simulado com 2 e com 5 integrantes, erros de campo e conflito de duplicado
+- [ ] Mexeu no formulário: testado no modo simulado com 2 e com 5 integrantes, erros de campo, conflito de duplicado e
+      o rascunho (preencher metade, ir à LP e voltar)
 - [ ] Teclado e leitor de tela ok; `prefers-reduced-motion` respeitado; "Pausar animações" para tudo
 - [ ] Lighthouse mobile sem regressão (acessibilidade, boas práticas e SEO em 100)
 - [ ] Mudança anotada em **[Unreleased]** no [CHANGELOG.md](CHANGELOG.md)

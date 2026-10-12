@@ -31,11 +31,13 @@
         "AbortController",
         "Fetch API",
         "localStorage",
-        "sessionStorage (inscrição simulada em dev)",
+        "sessionStorage (rascunho da inscrição e inscrição simulada em dev)",
         "matchMedia (prefers-reduced-motion, pointer)",
         "Network Information API (save-data)",
         "Page Visibility API",
         "History API",
+        "Navigation API (voltar ao evento no mesmo ponto)",
+        "Back/forward cache (bfcache)",
         "Canvas 2D (raios procedurais e contorno do logo)",
         "<details>/<summary> nativos",
         "iCalendar (.ics, RFC 5545)",
@@ -260,7 +262,7 @@
         "Shaders pré-compilados em paralelo",
         "Degradação progressiva por FPS",
         "Imagem reduzida no navegador antes do envio (~300 KB)",
-        "Página leve sem 3D (/equipes)"
+        "Páginas leves sem 3D (/inscricao e /equipes)"
       ]
     },
     {
@@ -272,7 +274,9 @@
         "Sitemap",
         "robots.txt",
         "URL canônica",
-        "Schema.org CollectionPage e BreadcrumbList (/equipes)"
+        "Schema.org CollectionPage e BreadcrumbList (/equipes)",
+        "Schema.org WebPage e BreadcrumbList (/inscricao)",
+        "URLs sem barra no fim (trailingSlash never)"
       ]
     },
     {
