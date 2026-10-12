@@ -6,6 +6,7 @@ import TextField from './TextField.astro';
 import ModeSwitch from './ModeSwitch.astro';
 import MemberList from './MemberList.astro';
 import ConsentField from './ConsentField.astro';
+import TeamImageField from './TeamImageField.astro';
 import RegistrationNotice from './RegistrationNotice.astro';
 import RegistrationSuccess from './RegistrationSuccess.astro';
 // css global com prefixo .regform (as linhas de integrante são clonadas em runtime)
@@ -78,7 +79,7 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
             <ul class="regform__summary-list" data-error-summary-list></ul>
           </div>
           <ModeSwitch min={min} max={max} />
-          <div class="regform__block" data-mode-only="team">
+          <div class="regform__block regform__team" data-mode-only="team">
             <TextField
               id="reg-team-name"
               field="teamName"
@@ -86,6 +87,7 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
               maxlength={40}
               autocomplete="off"
             />
+            <TeamImageField />
           </div>
           <fieldset class="regform__group">
             <legend class="regform__legend">Seus dados</legend>
@@ -171,7 +173,7 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
               Confirmar inscrição
             </Button>
             <p class="regform__privacy">
-              Seus dados ficam só com a organização. Nada de pessoal aparece no site.
+              Seus contatos ficam só com a organização. No site aparecem só nome, curso e foto da equipe.
             </p>
           </div>
         </fieldset>
@@ -188,6 +190,11 @@ const COURSES = ['Engenharia de Software', 'Ciência da Computação', 'Sistemas
 </div>
 
 <style>
+  .regform__team {
+    display: grid;
+    gap: var(--space-5);
+  }
+
   .regform__sensitive :global(.field__hint) {
     padding: var(--space-2) var(--space-3);
     border-inline-start: 2px solid var(--c-gold);

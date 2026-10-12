@@ -1,6 +1,7 @@
 ---
 // aceite do regulamento + LGPD; checkbox nativo com caixa custom de 24px num alvo de 44px.
-// o aviso abre em outra aba pra não perder o que já foi digitado
+// o aviso abre em outra aba pra não perder o que já foi digitado. A frase da foto só aparece no modo equipe
+// (a View esconde [data-mode-only]); mudou o texto, suba o CONSENT_VERSION
 ---
 
 <div class="consent">
@@ -21,6 +22,11 @@
         aviso de privacidade<span class="sr-only"> (abre em nova aba)</span>
       </a>{' '}
       (LGPD).
+      <span data-mode-only="team">
+        {' '}
+        Autorizo também a publicação da foto ou logo enviada na página de equipes do site e declaro que todas
+        as pessoas que aparecem nela concordaram.
+      </span>
     </span>
   </label>
   <p class="consent__error" id="reg-terms-error" data-error-for="acceptedTerms" hidden></p>

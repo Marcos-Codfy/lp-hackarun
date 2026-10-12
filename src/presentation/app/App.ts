@@ -65,7 +65,7 @@ export class App {
     );
     const ctx: AppContext = { bus, config, reducedMotion, coarsePointer: isCoarsePointer(), motion, scenes };
 
-    // 1) contador, formulário, som, equipes: funcionam mesmo sem 3D
+    // 1) contador, formulário, equipes: funcionam mesmo sem 3D
     attempt('views', () => mountViews(ctx, boot));
     // 2) header/menu, nav spy, HUD e aurora: não usam GSAP, então animador quebrado não leva eles junto
     attempt('controllers', () => mountControllers(ctx, boot));

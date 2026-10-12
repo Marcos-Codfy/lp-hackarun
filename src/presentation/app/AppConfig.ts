@@ -6,12 +6,9 @@ export interface AppConfig {
   registration: RegistrationDTO;
   // mesmo Web App do Apps Script, rota GET ?action=teams
   teamsEndpoint: string | null;
-  audioCueUrl: string | null;
 }
 
 export const APP_CONFIG_ID = 'app-config';
-
-const AUDIO_CUE_URL = '/audio/cta-globe.mp3';
 
 // roda no build (index e 404 montam o mesmo config)
 export function buildAppConfig(event: Pick<EventOverviewDTO, 'milestones' | 'registration'>): AppConfig {
@@ -19,7 +16,6 @@ export function buildAppConfig(event: Pick<EventOverviewDTO, 'milestones' | 'reg
     milestones: event.milestones,
     registration: event.registration,
     teamsEndpoint: event.registration.endpoint,
-    audioCueUrl: AUDIO_CUE_URL,
   };
 }
 

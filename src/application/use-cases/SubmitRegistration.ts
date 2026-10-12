@@ -14,7 +14,8 @@ import {
 const DEFAULT_META: SubmissionMeta = { honeypot: '', elapsedMs: 0 };
 
 // versão do aviso de privacidade (/privacidade) que o checkbox aceita; mudou o texto, suba a versão
-export const CONSENT_VERSION = '2026-10-v1';
+// mantenha igual ao CONSENT_VERSION do apps-script/Validation.gs (um teste confere)
+export const CONSENT_VERSION = '2026-10-v2';
 
 // mantenha igual ao MIN_ELAPSED_MS do apps-script/Validation.gs (um teste confere)
 export const MIN_FILL_MS = 3000;
@@ -139,6 +140,9 @@ export class SubmitRegistration {
       teamName: registration.teamName,
       leader: { ...registration.leader },
       members: registration.members.map((m) => ({ ...m })),
+      teamImage: registration.teamImage
+        ? { mimeType: registration.teamImage.mimeType, base64: registration.teamImage.base64 }
+        : null,
       accessibilityNeeds: registration.accessibilityNeeds,
       submittedAt: now,
       source: meta.source ?? 'landing-page',

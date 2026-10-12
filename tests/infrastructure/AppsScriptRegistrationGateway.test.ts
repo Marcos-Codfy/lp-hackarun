@@ -74,15 +74,21 @@ describe('AppsScriptRegistrationGateway', () => {
     });
   });
 
-  it('aborta depois de 15s', async () => {
+  it('dá 30s pro envio (a foto sobe junto) e depois aborta', async () => {
     vi.useFakeTimers();
+    let aborted = false;
     const { gateway } = gatewayWith(
       (_url, init) =>
         new Promise((_resolve, reject) => {
-          init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+          init?.signal?.addEventListener('abort', () => {
+            aborted = true;
+            reject(new DOMException('aborted', 'AbortError'));
+          });
         }),
     );
     const result = gateway.submit(payload).catch((e: unknown) => e);
+    await vi.advanceTimersByTimeAsync(15_000);
+    expect(aborted).toBe(false);
     await vi.advanceTimersByTimeAsync(15_000);
     await expect(result).resolves.toMatchObject({ kind: 'network', message: 'Timeout' });
   });

@@ -1,28 +1,25 @@
-// monta as Views MVVM (pausa das animações, contador, som, equipes, inscrição, HUD, NPCs) sobre o container
+// monta as Views MVVM (pausa das animações, contador, equipes, inscrição, HUD, NPCs) sobre o container
 import type { SlotsDTO } from '@application/index';
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { qs, qsa, readJsonAttr } from '@shared/utils/dom';
 import type { AppContext } from '@presentation/app/AppContext';
 import type { BootSteps } from '@presentation/app/BootQueue';
 import { CountdownViewModel } from '@presentation/view-models/countdown/CountdownViewModel';
-import { SoundViewModel } from '@presentation/view-models/sound/SoundViewModel';
 import { TeamsViewModel, type PublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
 import { RegistrationFormViewModel } from '@presentation/view-models/registration/RegistrationFormViewModel';
 import { HudViewModel } from '@presentation/view-models/hud/HudViewModel';
 import { NpcHuntViewModel } from '@presentation/view-models/npc/NpcHuntViewModel';
 import { MotionPreferenceViewModel } from '@presentation/view-models/motion/MotionPreferenceViewModel';
 import { CountdownView } from './CountdownView';
-import { SoundToggleView } from './SoundToggleView';
 import { TeamsView } from './TeamsView';
 import { RegistrationFormView } from './RegistrationFormView';
 import { RegistrationCtaController } from './RegistrationCtaController';
 import { ChargeRevealView } from './ChargeRevealView';
 import { HudView } from './HudView';
 import { NpcTokenView } from './NpcTokenView';
-import { SoundBusBinder } from './SoundBusBinder';
 import { MotionPreferenceView } from './motion/MotionPreferenceView';
 
-// guarda o container e os VMs que mais de uma View usa (som, NPC) entre os passos do boot
+// guarda o container e os VMs que mais de uma View usa (NPC, equipes) entre os passos do boot
 class ViewMounter {
   private c: ClientContainer | null = null;
   private npc: NpcHuntViewModel | null = null;
@@ -57,22 +54,6 @@ class ViewMounter {
     });
   }
 
-  sound(c: ClientContainer): void {
-    const { bus } = this.ctx;
-    const sound = new SoundViewModel({
-      store: c.preferences,
-      engine: c.audio,
-      cue: c.cue,
-      typing: c.typing,
-      bus,
-    });
-    qsa<HTMLButtonElement>('[data-sound-toggle]').forEach((button) =>
-      new SoundToggleView(button, sound).mount(),
-    );
-    SoundToggleView.unlockOnFirstGesture(sound);
-    new SoundBusBinder(bus, sound).mount();
-  }
-
   hud(): void {
     const root = qs('[data-hud]');
     if (!root || !this.npc) return;
@@ -100,6 +81,7 @@ class ViewMounter {
     const status = root.dataset['status'];
     const vm = new RegistrationFormViewModel({
       submit: c.submitRegistration,
+      prepareImage: c.prepareTeamImage,
       teamSize: this.ctx.config.registration.teamSize,
       isOpen: status === 'open' || status === 'closing',
       clock: c.clock,
@@ -145,10 +127,6 @@ export function mountViews(ctx: AppContext, boot: BootSteps): void {
   boot.add(
     'countdown',
     views.withContainer((c) => views.countdown(c)),
-  );
-  boot.add(
-    'sound',
-    views.withContainer((c) => views.sound(c)),
   );
   boot.add('hud', () => views.hud());
   boot.add('npc tokens', () => views.npcTokens());

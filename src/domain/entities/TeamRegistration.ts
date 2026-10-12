@@ -1,5 +1,6 @@
 import { TeamName } from '../value-objects/TeamName';
 import { Email, PersonName, Phone } from '../value-objects/ContactFields';
+import { TeamImage, type TeamImageInput } from '../value-objects/TeamImage';
 import { fail, ok, type Result } from '../shared/Result';
 import { DomainError } from '../shared/DomainError';
 
@@ -18,6 +19,8 @@ export interface RegistrationInput {
   members: ParticipantInput[];
   accessibilityNeeds: string;
   acceptedTerms: boolean;
+  // foto ou logo já preparada no navegador; obrigatória só pra equipe
+  teamImage?: TeamImageInput | null;
 }
 
 // chave = caminho do campo no formulário (ex.: "members.1.email")
@@ -41,6 +44,7 @@ export class TeamRegistration {
   readonly leader: Participant & { phone: string; semester: string };
   readonly members: readonly Participant[];
   readonly accessibilityNeeds: string;
+  readonly teamImage: TeamImage | null;
 
   private constructor(props: Omit<TeamRegistration, 'size'>) {
     this.mode = props.mode;
@@ -48,6 +52,7 @@ export class TeamRegistration {
     this.leader = props.leader;
     this.members = props.members;
     this.accessibilityNeeds = props.accessibilityNeeds;
+    this.teamImage = props.teamImage;
   }
 
   get size(): number {
@@ -65,6 +70,7 @@ export class TeamRegistration {
 
     const isTeam = input.mode === 'team';
     const teamName = isTeam ? (pick('teamName', TeamName.create(input.teamName))?.value ?? null) : null;
+    const teamImage = isTeam ? pick('teamImage', TeamImage.create(input.teamImage)) : null;
 
     const leaderName = pick('leader.name', PersonName.create(input.leader.name));
     const leaderEmail = pick('leader.email', Email.create(input.leader.email));
@@ -104,6 +110,7 @@ export class TeamRegistration {
         },
         members: parsedMembers,
         accessibilityNeeds: input.accessibilityNeeds.trim().slice(0, 500),
+        teamImage,
       }),
     );
   }

@@ -6,6 +6,7 @@ import type {
   RegistrationReceipt,
 } from '@application/index';
 import type { Clock } from '@application/index';
+import { TEAM_IMAGE } from './images';
 
 export const TEAM_SIZE = { min: 2, max: 5 };
 
@@ -36,6 +37,7 @@ export function teamInput(overrides: Partial<RegistrationInput> = {}): Registrat
     members: [{ name: 'Bruno Lima', email: 'bruno@exemplo.com', course: 'Ciência da Computação' }],
     accessibilityNeeds: '',
     acceptedTerms: true,
+    teamImage: TEAM_IMAGE,
     ...overrides,
   };
 }

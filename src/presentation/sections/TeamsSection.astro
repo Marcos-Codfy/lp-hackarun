@@ -1,8 +1,9 @@
 ---
+// seção de equipes da LP: vira chamada pra página própria (/equipes); a galáxia 3D continua passando aqui
 import type { LandingPageDTO } from '@application/index';
 import Icon from '@presentation/components/ui/Icon.astro';
-import TeamRoster from '@presentation/components/teams/TeamRoster.astro';
 import SectionHeader from './shared/SectionHeader.astro';
+import TeamsTeaser from './teams/TeamsTeaser.astro';
 import './sections.css';
 
 interface Props {
@@ -25,11 +26,11 @@ const { teams, event } = Astro.props.data;
       code="08"
       eyebrow="Equipes"
       title="Quem já está na <em>largada</em>"
-      lead="As equipes confirmadas aparecem aqui assim que a inscrição é validada pela organização."
+      lead="As equipes confirmadas têm uma página só delas, com a foto ou a logo de cada time. Veja quem já garantiu vaga."
     />
 
     <div data-reveal="up">
-      <TeamRoster teams={teams} slots={event.registration.slots} />
+      <TeamsTeaser teams={teams} registration={event.registration} />
     </div>
 
     <p class="section-note section-note--time" data-reveal="up">

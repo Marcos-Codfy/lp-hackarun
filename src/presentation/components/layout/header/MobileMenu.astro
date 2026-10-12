@@ -4,16 +4,13 @@ import Button from '@presentation/components/ui/Button.astro';
 import ButtonChevrons from '@presentation/components/ui/ButtonChevrons.astro';
 import PauseMotionSwitch from '@presentation/components/motion/PauseMotionSwitch.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
-import { NAV_LINKS } from '../navLinks';
+import { NAV_LINKS, navLinkAttrs, navLinksFor, pageHref, type SitePage } from '../navLinks';
 
 // overlay de tela cheia do mobile (padrão disclosure: o botão de fechar é o próprio toggle da barra)
 // abre/fecha pelo MobileMenuController: foco, Esc, scroll lock e resto da página inert
-interface Props {
-  id: string;
-  registration: RegistrationDTO;
-}
+type Props = { id: string; registration: RegistrationDTO; page?: SitePage };
 
-const { id, registration } = Astro.props;
+const { id, registration, page = 'home' } = Astro.props;
 const cta = new RegistrationCopy().cta(registration.status);
 // CTA de inscrição é interceptado pelo módulo de inscrição; o resto passa pelo smooth scroll
 const ctaAttrs = cta.isRegistration ? { registrationCta: 'menu' } : { 'data-nav-link': true };
@@ -27,9 +24,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </p>
     <nav aria-label="Menu principal">
       <ol class="mobile-menu__list" role="list">
-        {NAV_LINKS.map((link, index) => (
+        {navLinksFor(page).map((link, index) => (
           <li class="mobile-menu__item" style={`--i: ${index}`}>
-            <a class="mobile-menu__link" href={link.href} data-nav-link>
+            <a class="mobile-menu__link" {...navLinkAttrs(link)} data-nav-link>
               <span class="mobile-menu__num" aria-hidden="true">
                 {pad(index + 1)}
               </span>
@@ -44,7 +41,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </nav>
     <div class="mobile-menu__foot">
       <PauseMotionSwitch />
-      <Button size="lg" href={cta.href} class="mobile-menu__cta" {...ctaAttrs}>
+      <Button size="lg" href={pageHref(cta.href, page)} class="mobile-menu__cta" {...ctaAttrs}>
         {cta.label}
       </Button>
       <p class="mobile-menu__meta" aria-hidden="true">
@@ -155,13 +152,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   .mobile-menu__link:hover .mobile-menu__go,
   .mobile-menu__link:focus-visible .mobile-menu__go,
-  .mobile-menu__link[aria-current='true'] .mobile-menu__go {
+  .mobile-menu__link[aria-current] .mobile-menu__go {
     opacity: 1;
     transform: none;
   }
 
   .mobile-menu__link:hover .mobile-menu__label,
-  .mobile-menu__link[aria-current='true'] .mobile-menu__label {
+  .mobile-menu__link[aria-current] .mobile-menu__label {
     background: var(--grad-energy);
     -webkit-background-clip: text;
     background-clip: text;

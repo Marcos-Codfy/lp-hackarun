@@ -9,11 +9,11 @@ afterEach(() => {
 describe('LocalPreferenceStore', () => {
   it('grava com prefixo no localStorage', () => {
     const store = new LocalPreferenceStore();
-    store.set('sound', 'on');
-    expect(window.localStorage.getItem('hackarun:sound')).toBe('on');
-    expect(store.get('sound')).toBe('on');
-    store.remove('sound');
-    expect(store.get('sound')).toBeNull();
+    store.set('motion', 'paused');
+    expect(window.localStorage.getItem('hackarun:motion')).toBe('paused');
+    expect(store.get('motion')).toBe('paused');
+    store.remove('motion');
+    expect(store.get('motion')).toBeNull();
   });
 
   it('aba anônima / storage bloqueado: segue funcionando em memória', () => {

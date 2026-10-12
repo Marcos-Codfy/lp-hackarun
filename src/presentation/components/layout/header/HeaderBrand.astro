@@ -1,10 +1,22 @@
 ---
 import BrandLogo from '@presentation/components/ui/BrandLogo.astro';
+import type { SitePage } from '../navLinks';
 
 // logo oficial no header (~30px de altura visível); o link dá o nome acessível
+interface Props {
+  page?: SitePage;
+}
+
+const { page = 'home' } = Astro.props;
+const home = page === 'home';
 ---
 
-<a class="header-brand" href="#inicio" data-nav-link aria-label="HackaRun 2026, voltar ao início">
+<a
+  class="header-brand"
+  href={home ? '#inicio' : '/'}
+  data-nav-link
+  aria-label={home ? 'HackaRun 2026, voltar ao início' : 'HackaRun 2026, página inicial'}
+>
   <BrandLogo widths={[160, 320]} sizes="140px" class="header-brand__logo" />
 </a>
 

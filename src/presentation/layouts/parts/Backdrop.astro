@@ -1,0 +1,132 @@
+---
+// começo do <body> de toda página: link de pular pro conteúdo + aurora de fundo em CSS.
+// As cores da aurora mudam por cena na LP (--aurora-* via SceneThemeController); nas outras ficam no padrão
+---
+
+<a class="skip-link" href="#conteudo">
+  Pular para o conteúdo
+</a>
+
+<div class="aurora" data-aurora aria-hidden="true">
+  <span class="aurora__blob aurora__blob--a"></span>
+  <span class="aurora__blob aurora__blob--b"></span>
+  <span class="aurora__blob aurora__blob--c"></span>
+  <span class="aurora__vignette"></span>
+  <span class="aurora__grain"></span>
+</div>
+
+<style>
+  .skip-link {
+    position: fixed;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: var(--z-skip);
+    padding: var(--space-3) var(--space-4);
+    border-radius: 6px;
+    background: var(--c-gold);
+    color: var(--c-void);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  /* as --aurora-* são @property <color> (tokens.css): a troca de cena interpola em vez de pular */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-aurora);
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 70% at 50% -10%, rgb(11 18 66 / 0.9) 0%, transparent 60%),
+      radial-gradient(90% 60% at 50% 110%, rgb(10 8 40 / 0.8) 0%, transparent 70%), var(--c-void);
+    transition:
+      --aurora-a 1.8s var(--ease-in-out),
+      --aurora-b 1.8s var(--ease-in-out),
+      --aurora-c 1.8s var(--ease-in-out);
+  }
+
+  /* manchas sem filter: blur(): o próprio degradê (closest-side) já é macio e custa bem menos GPU */
+  .aurora__blob {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+  }
+
+  .aurora__blob--a {
+    top: -38vmax;
+    left: calc(50% - 45vmax);
+    width: 90vmax;
+    height: 70vmax;
+    background: radial-gradient(
+      closest-side,
+      var(--aurora-a) 0%,
+      color-mix(in srgb, var(--aurora-a) 50%, transparent) 42%,
+      transparent 100%
+    );
+    animation: aurora-drift 28s ease-in-out infinite alternate;
+  }
+
+  .aurora__blob--b {
+    bottom: -42vmax;
+    left: -30vmax;
+    width: 80vmax;
+    height: 80vmax;
+    background: radial-gradient(
+      closest-side,
+      var(--aurora-b) 0%,
+      color-mix(in srgb, var(--aurora-b) 45%, transparent) 45%,
+      transparent 100%
+    );
+    animation: aurora-drift 34s ease-in-out infinite alternate-reverse;
+  }
+
+  .aurora__blob--c {
+    bottom: -36vmax;
+    right: -32vmax;
+    width: 76vmax;
+    height: 76vmax;
+    background: radial-gradient(
+      closest-side,
+      var(--aurora-c) 0%,
+      color-mix(in srgb, var(--aurora-c) 45%, transparent) 45%,
+      transparent 100%
+    );
+    animation: aurora-drift 40s ease-in-out infinite alternate;
+  }
+
+  /* vinheta: bordas mais escuras puxam o olho pro centro */
+  .aurora__vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 120% 90% at 50% 45%, transparent 50%, rgb(0 0 4 / 0.7) 100%);
+  }
+
+  /* granulação de filme bem leve (svg inline, sem request); também quebra o banding dos degradês */
+  .aurora__grain {
+    position: absolute;
+    inset: -50%;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @keyframes aurora-drift {
+    from {
+      transform: translate3d(-4vw, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(5vw, 3vh, 0) scale(1.12);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora__blob {
+      animation: none;
+    }
+  }
+</style>

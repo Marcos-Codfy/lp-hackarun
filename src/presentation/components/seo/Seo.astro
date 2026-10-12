@@ -1,4 +1,6 @@
 ---
+import { safeJsonForScript } from '@shared/utils/json';
+
 export interface SeoProps {
   title: string;
   description: string;
@@ -11,8 +13,8 @@ const { title, description, path = '/', image = '/og-image.jpg', jsonLd } = Astr
 const site = Astro.site ?? new URL('https://lp-hackarun.pages.dev');
 const canonical = new URL(path, site).href;
 const imageUrl = new URL(image, site).href;
-// "<" vira \u003c: texto do conteúdo nunca fecha o <script> antes da hora
-const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : null;
+// texto do conteúdo nunca fecha o <script> antes da hora
+const jsonLdText = jsonLd ? safeJsonForScript(jsonLd) : null;
 ---
 
 <title>{title}</title>

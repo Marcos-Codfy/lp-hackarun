@@ -1,10 +1,12 @@
-import type { RegistrationMode } from '@domain/index';
+import type { RegistrationMode, TeamImageType } from '@domain/index';
 
 export interface RegistrationPayload {
   mode: RegistrationMode;
   teamName: string | null;
   leader: { name: string; email: string; phone: string; course: string; semester: string };
   members: { name: string; email: string; course: string }[];
+  // foto/logo da equipe em base64 (vai no mesmo POST text/plain, sem preflight); null na inscrição individual
+  teamImage: { mimeType: TeamImageType; base64: string } | null;
   accessibilityNeeds: string;
   submittedAt: string;
   source: string;

@@ -16,6 +16,7 @@ export * from './value-objects/Countdown';
 export * from './value-objects/Slots';
 export * from './value-objects/ScoringRule';
 export * from './value-objects/TeamName';
+export * from './value-objects/TeamImage';
 export * from './value-objects/ContactFields';
 export * from './value-objects/Milestone';
 export * from './value-objects/RegistrationWindow';

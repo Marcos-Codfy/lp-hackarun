@@ -12,7 +12,7 @@ export interface CtaCopy {
 // texto dos CTAs e da linha de status conforme o momento da inscrição
 export class RegistrationCopy {
   cta(status: Status): CtaCopy {
-    if (status === 'closed') return { label: 'Ver equipes', href: '#equipes', isRegistration: false };
+    if (status === 'closed') return { label: 'Ver equipes', href: '/equipes', isRegistration: false };
     if (status === 'soon') return { label: 'Quero participar', href: '#inscricao', isRegistration: true };
     return { label: 'Garantir minha vaga', href: '#inscricao', isRegistration: true };
   }

@@ -3,6 +3,9 @@ import type { TeamName } from '../value-objects/TeamName';
 
 export type TeamStatus = 'confirmed' | 'pending';
 
+// só https (Drive) ou data:image (simulação do dev): nada de javascript: ou http solto no src da foto
+const SAFE_IMAGE_URL = /^(?:https:\/\/|data:image\/(?:png|jpeg|webp);base64,)/;
+
 export interface TeamProps {
   id: string;
   name: TeamName;
@@ -12,6 +15,8 @@ export interface TeamProps {
   course: string | null;
   mentor: string | null;
   status: TeamStatus;
+  // foto ou logo pública (só aparece depois da confirmação)
+  imageUrl?: string | null;
 }
 
 export class Team extends Entity {
@@ -21,6 +26,7 @@ export class Team extends Entity {
   readonly course: string | null;
   readonly mentor: string | null;
   readonly status: TeamStatus;
+  readonly imageUrl: string | null;
 
   private constructor(props: TeamProps) {
     super(props.id);
@@ -30,6 +36,7 @@ export class Team extends Entity {
     this.course = props.course;
     this.mentor = props.mentor;
     this.status = props.status;
+    this.imageUrl = props.imageUrl && SAFE_IMAGE_URL.test(props.imageUrl) ? props.imageUrl : null;
   }
 
   static create(props: TeamProps): Team {

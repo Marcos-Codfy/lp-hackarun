@@ -1,0 +1,133 @@
+---
+// prévia da foto/logo escolhida, dentro da área do TeamImageField (o TeamImagePicker preenche e mostra)
+---
+
+<figure class="timg__preview" data-team-image-preview hidden>
+  <span class="timg__frame">
+    <img class="timg__backdrop" alt="" data-team-image-backdrop />
+    <img class="timg__img" alt="Prévia da foto ou logo da equipe" data-team-image-img />
+  </span>
+  <figcaption class="timg__info">
+    <span class="timg__ok">Imagem pronta</span>
+    <span class="timg__meta" data-team-image-meta></span>
+    <button type="button" class="timg__change" data-team-image-change>
+      Trocar imagem
+    </button>
+  </figcaption>
+</figure>
+
+<style>
+  .timg__preview {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-4);
+    margin: 0;
+    padding: var(--space-4);
+  }
+
+  /* logo nunca corta: contain por cima de uma cópia borrada dela mesma */
+  .timg__frame {
+    position: relative;
+    display: block;
+    width: clamp(6rem, 26vw, 8.5rem);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--c-cyan) 55%, transparent);
+    border-radius: 3px;
+    background: var(--c-night);
+    box-shadow: 0 0 26px color-mix(in srgb, var(--c-cyan) 22%, transparent);
+  }
+
+  .timg__frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .timg__backdrop {
+    object-fit: cover;
+    filter: blur(14px) saturate(1.3) brightness(0.7);
+    transform: scale(1.25);
+  }
+
+  .timg__img {
+    object-fit: contain;
+  }
+
+  .timg__info {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .timg__ok {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--c-success);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .timg__ok::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  .timg__meta {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    overflow-wrap: anywhere;
+  }
+
+  .timg__change {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--c-cyan) 55%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--c-cyan) 8%, transparent);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  .timg__change:hover {
+    box-shadow: 0 0 22px color-mix(in srgb, var(--c-cyan) 30%, transparent);
+  }
+
+  .timg__change:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  @media (min-width: 40rem) {
+    .timg__preview {
+      gap: var(--space-5);
+      padding: var(--space-5);
+    }
+
+    .timg__meta {
+      font-size: var(--fs-xs);
+    }
+
+    .timg__change {
+      padding-inline: var(--space-4);
+      letter-spacing: 0.06em;
+    }
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+// contador ao vivo de equipes confirmadas + vagas restantes (o TeamsView atualiza pelos data-*)
+import type { SlotsDTO } from '@application/index';
+import { confirmedLabel } from '@presentation/formatters/TeamLabels';
+
+interface Props {
+  count: number;
+  slots: SlotsDTO;
+}
+
+const { count, slots } = Astro.props;
+---
+
+<p class="counter">
+  <span class="counter__num" data-teams-count>
+    {count}
+  </span>
+  <span class="counter__text">
+    <span data-teams-count-label>{confirmedLabel(count)}</span>
+    <span class="counter__slots" data-teams-slots-text hidden={slots.remaining === null}>
+      <span data-teams-remaining>{slots.remaining}</span> vagas restantes
+    </span>
+  </span>
+</p>
+
+<style>
+  .counter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  /* montserrat aqui: o zero cortado da orbitron parecia ícone com o contador vazio */
+  .counter__num {
+    font-family: var(--font-body);
+    font-size: clamp(2.75rem, 2.2rem + 2vw, 3.75rem);
+    font-weight: 800;
+    line-height: 0.85;
+    font-variant-numeric: tabular-nums;
+    background: var(--grad-blue);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 18px rgb(0 229 255 / 0.5));
+  }
+
+  .counter__text {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: var(--space-4);
+    border-left: 1px solid rgb(0 229 255 / 0.3);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .counter__slots {
+    color: var(--ink-cyan);
+  }
+
+  :global([data-slots-level='last']) .counter__slots {
+    color: var(--c-orange);
+  }
+</style>

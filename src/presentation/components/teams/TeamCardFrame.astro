@@ -1,0 +1,157 @@
+---
+// quadro da foto do card de equipe: iniciais de reserva, foto em contain sobre a cópia borrada e o selo.
+// Sem número no canto: a posição na lista mudava a cada inscrição e na busca, e lia como ranking
+// O TeamCardRenderer recria as imgs na lista ao vivo, por isso os seletores de img são globais
+import { teamImageAlt, teamInitials } from '@presentation/formatters/TeamLabels';
+
+interface Props {
+  name: string;
+  imageUrl: string | null;
+}
+
+const { name, imageUrl } = Astro.props;
+// mesma largura que o driveImageUrl pede ao Google (=w600): reserva o espaço e evita pulo de layout
+const SIDE = 600;
+---
+
+<div class="team-card__frame" data-team-frame>
+  <span class="team-card__initials" aria-hidden="true" data-team-initials>
+    {name && teamInitials(name)}
+  </span>
+  {imageUrl && (
+    <img
+      class="team-card__backdrop"
+      src={imageUrl}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+      width={SIDE}
+      height={SIDE}
+    />
+  )}
+  {imageUrl && (
+    <img
+      class="team-card__img"
+      src={imageUrl}
+      alt={teamImageAlt(name)}
+      loading="lazy"
+      decoding="async"
+      width={SIDE}
+      height={SIDE}
+      data-team-img
+    />
+  )}
+  <span class="team-card__badge" aria-hidden="true">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2">
+      <path d="m3.5 8.5 3 3 6-7"></path>
+    </svg>
+    <span class="team-card__badge-text">Confirmada</span>
+  </span>
+</div>
+
+<style>
+  .team-card__frame {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background:
+      linear-gradient(rgb(0 229 255 / 0.07) 1px, transparent 1px) 0 0 / 18px 18px,
+      linear-gradient(90deg, rgb(0 229 255 / 0.07) 1px, transparent 1px) 0 0 / 18px 18px,
+      radial-gradient(circle at 50% 42%, rgb(18 100 255 / 0.42), rgb(148 27 255 / 0.12) 55%, transparent 75%),
+      var(--c-night);
+  }
+
+  /* fio de energia entre a foto e o texto */
+  .team-card__frame::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 2;
+    height: 1px;
+    background: var(--grad-line);
+  }
+
+  /* reserva sem foto: iniciais cheias com o degradê de energia. Montserrat e não Orbitron: na Orbitron
+     O, D, C e Q viram o mesmo retângulo arredondado e "OD" parecia duas caixas vazias */
+  .team-card__initials {
+    /* centralizado e do tamanho do texto: o degradê cobre só as letras, não o quadro inteiro */
+    position: absolute;
+    inset: 0;
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+    font-family: var(--font-body);
+    font-size: clamp(2.75rem, 1.8rem + 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 18px rgb(0 229 255 / 0.45));
+  }
+
+  /* imgs também nascem pelo TeamCardRenderer (sem o atributo de escopo do Astro): seletor global */
+  .team-card__frame :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .team-card__frame :global(.team-card__backdrop) {
+    object-fit: cover;
+    filter: blur(18px) saturate(1.35) brightness(0.62);
+    transform: scale(1.25);
+  }
+
+  .team-card__frame :global(.team-card__img) {
+    object-fit: contain;
+  }
+
+  :global(.is-image-missing) > .team-card__frame :global(img) {
+    display: none;
+  }
+
+  .team-card__badge {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 1.5rem;
+    padding: 0 0.45rem;
+    border-radius: 2px;
+    background: rgb(2 3 11 / 0.72);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid rgb(44 245 180 / 0.5);
+    color: var(--c-success);
+  }
+
+  .team-card__badge svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .team-card__badge-text {
+    display: none;
+  }
+
+  @media (min-width: 40rem) {
+    .team-card__badge-text {
+      display: inline;
+    }
+
+    .team-card__badge {
+      top: var(--space-3);
+      right: var(--space-3);
+    }
+  }
+</style>

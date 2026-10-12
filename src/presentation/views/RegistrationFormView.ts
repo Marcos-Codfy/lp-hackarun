@@ -11,6 +11,7 @@ import { ClosedLobby } from './registration/ClosedLobby';
 import { ErrorPresenter } from './registration/ErrorPresenter';
 import { MemberRows } from './registration/MemberRows';
 import { SubmitStatusPresenter } from './registration/SubmitStatusPresenter';
+import { TeamImagePicker } from './registration/TeamImagePicker';
 import { controlFor } from './registration/fieldLookup';
 
 // [data-registration-form]: liga o DOM ao VM; valores moram nos inputs, o VM só espelha
@@ -21,6 +22,7 @@ export class RegistrationFormView {
   private readonly status: SubmitStatusPresenter;
   private readonly lobby: ClosedLobby;
   private rows: MemberRows | null = null;
+  private image: TeamImagePicker | null = null;
   private lastFocusSeq = 0;
 
   constructor(root: HTMLElement, vm: RegistrationFormViewModel, bus: EventBus<AppEvents>) {
@@ -45,6 +47,7 @@ export class RegistrationFormView {
         remove: (i) => this.vm.removeMember(i),
       });
     }
+    this.image = new TeamImagePicker(form, (file) => void this.vm.chooseTeamImage(file));
     this.bindForm(form);
     this.restoreFromDom(form);
     this.vm.state.subscribe((state, prev) => this.render(state, prev === state ? null : prev));
@@ -73,7 +76,8 @@ export class RegistrationFormView {
         el instanceof HTMLInputElement ||
         el instanceof HTMLTextAreaElement ||
         el instanceof HTMLSelectElement;
-      if (!isControl) return;
+      // o arquivo da foto é do TeamImagePicker (change)
+      if (!isControl || (el instanceof HTMLInputElement && el.type === 'file')) return;
       const path = el.dataset['field'];
       if (!path) return;
       if (el instanceof HTMLInputElement && el.type === 'checkbox') this.vm.setAcceptedTerms(el.checked);
@@ -85,9 +89,10 @@ export class RegistrationFormView {
         this.vm.setMode(el.value as RegistrationMode);
       if (el instanceof HTMLSelectElement && el.dataset['field']) this.vm.blur(el.dataset['field']);
     });
+    // a foto não valida no blur: abrir o seletor de arquivo já tira o foco e o erro piscaria à toa
     form.addEventListener('focusout', (e) => {
       const path = e.target instanceof HTMLElement ? e.target.dataset['field'] : undefined;
-      if (path && path !== 'honeypot') this.vm.blur(path);
+      if (path && path !== 'honeypot' && path !== 'teamImage') this.vm.blur(path);
     });
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -111,6 +116,7 @@ export class RegistrationFormView {
     qsa<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[data-field]', form).forEach((el) => {
       const path = el.dataset['field'];
       if (!path) return;
+      if (el instanceof HTMLInputElement && el.type === 'file') return;
       if (el instanceof HTMLInputElement && el.type === 'checkbox') {
         if (el.checked) this.vm.setAcceptedTerms(true);
       } else if (el.value) {
@@ -132,6 +138,9 @@ export class RegistrationFormView {
       qsa('[data-mode-only="team"]', this.root).forEach((el) => (el.hidden = fields.mode !== 'team'));
     }
     this.renderCounters(state);
+    if (!prev || prev.imageStatus !== state.imageStatus || prev.fields.teamImage !== fields.teamImage) {
+      this.image?.render(state);
+    }
     this.errors.render(state.errors);
     this.errors.renderSummary(state.attempted, state.orderedErrors);
     if (!prev || prev.status !== state.status) this.status.render(state);

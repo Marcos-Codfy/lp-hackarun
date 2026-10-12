@@ -1,20 +1,22 @@
 ---
 import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
-import SoundToggle from '@presentation/components/sound/SoundToggle.astro';
 import PauseMotionToggle from '@presentation/components/motion/PauseMotionToggle.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import HeaderBrand from './header/HeaderBrand.astro';
 import HeaderNav from './header/HeaderNav.astro';
 import MenuToggle from './header/MenuToggle.astro';
 import MobileMenu from './header/MobileMenu.astro';
+import { pageHref, type SitePage } from './navLinks';
 
-// barra de vidro flutuante: transparente no topo, vidro depois de rolar (HeaderScrollController)
+// barra de vidro flutuante: transparente no topo, vidro depois de rolar (HeaderScrollController).
+// Fora da LP (page) os links de seção voltam pra LP (/#secao)
 interface Props {
   registration: RegistrationDTO;
+  page?: SitePage;
 }
 
-const { registration } = Astro.props;
+const { registration, page = 'home' } = Astro.props;
 const copy = new RegistrationCopy();
 const cta = copy.cta(registration.status);
 const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-nav-link': true };
@@ -23,13 +25,12 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-na
 <header class="site-header" data-site-header>
   {/* o vidro (backdrop-filter) fica na barra, nunca no <header>: senão o menu fixed perderia a tela */}
   <div class="site-header__bar">
-    <HeaderBrand />
-    <HeaderNav />
+    <HeaderBrand page={page} />
+    <HeaderNav page={page} />
     <div class="site-header__actions">
-      <SoundToggle />
       <PauseMotionToggle />
       <span class="site-header__cta">
-        <Button size="sm" href={cta.href} {...ctaAttrs}>
+        <Button size="sm" href={pageHref(cta.href, page)} {...ctaAttrs}>
           {copy.headerLabel(registration.status)}
         </Button>
       </span>
@@ -37,7 +38,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-na
     </div>
   </div>
 
-  <MobileMenu id="site-menu" registration={registration} />
+  <MobileMenu id="site-menu" registration={registration} page={page} />
 </header>
 
 <style>

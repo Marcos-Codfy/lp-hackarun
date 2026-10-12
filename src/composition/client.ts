@@ -1,48 +1,33 @@
 // composition root do browser: casos de uso + adapters do lado do cliente (three/gsap ficam de fora)
 import teamsData from '@infrastructure/content/teams.json';
 import type { RawTeam } from '@infrastructure/content/schema';
-import { GetCountdown, ListTeams, SubmitRegistration } from '@application/index';
+import { GetCountdown, ListTeams, PrepareTeamImage, SubmitRegistration } from '@application/index';
 import type { Clock, RegistrationGateway } from '@application/index';
-import type { AudioCue } from '@application/ports/AudioCue';
 import type { PreferenceStore } from '@application/ports/PreferenceStore';
-import type { TickSound } from '@application/ports/TickSound';
 import type { AppConfig } from '@presentation/app/AppConfig';
 import { SystemClock } from '@infrastructure/clock/SystemClock';
+import { CanvasImageCodec } from '@infrastructure/image/CanvasImageCodec';
 import { AppsScriptClient } from '@infrastructure/registration/AppsScriptClient';
 import { AppsScriptRegistrationGateway } from '@infrastructure/registration/AppsScriptRegistrationGateway';
 import { RetryingRegistrationGateway } from '@infrastructure/registration/RetryingRegistrationGateway';
 import { InMemoryRegistrationGateway } from '@infrastructure/registration/InMemoryRegistrationGateway';
 import { UnavailableRegistrationGateway } from '@infrastructure/registration/UnavailableRegistrationGateway';
+import { SimulatedTeamStore } from '@infrastructure/registration/SimulatedTeamStore';
 import { AppsScriptTeamRepository } from '@infrastructure/repositories/AppsScriptTeamRepository';
 import { FallbackTeamRepository } from '@infrastructure/repositories/FallbackTeamRepository';
+import { SimulatedTeamRepository } from '@infrastructure/repositories/SimulatedTeamRepository';
 import { StaticTeamRepository } from '@infrastructure/repositories/StaticContentRepositories';
 import { LocalPreferenceStore } from '@infrastructure/storage/LocalPreferenceStore';
-import { AudioEngine } from '@infrastructure/audio/AudioEngine';
-import { FileAudioCue } from '@infrastructure/audio/FileAudioCue';
-import { SynthAudioCue } from '@infrastructure/audio/SynthAudioCue';
-import { NullAudioCue } from '@infrastructure/audio/NullAudioCue';
-import { AudioSprite } from '@infrastructure/audio/AudioSprite';
-import { MinIntervalGate } from '@infrastructure/audio/MinIntervalGate';
-import { NullTickSound } from '@infrastructure/audio/NullTickSound';
-import { TypingSound } from '@infrastructure/audio/TypingSound';
-
-// sprite com 6 cliques de tecla de 0,09s colados a partir do zero (22050 Hz mono)
-const TYPING_SPRITE_URL = '/audio/ui-typing.wav';
-const TYPING_SLOTS = 6;
-const TYPING_SLOT_S = 0.09;
-const TYPING_GAIN = 0.18;
-const TYPING_MIN_GAP_MS = 35;
 
 export interface ClientContainer {
   clock: Clock;
   getCountdown: GetCountdown;
   submitRegistration: SubmitRegistration;
+  // foto/logo da equipe redimensionada no aparelho antes do envio
+  prepareTeamImage: PrepareTeamImage;
   // null = sem planilha configurada, fica só a lista do build
   listTeams: ListTeams | null;
   preferences: PreferenceStore;
-  audio: AudioEngine;
-  cue: AudioCue;
-  typing: TickSound;
 }
 
 // ?now=2026-11-14T16:00:00-03:00 desloca o relógio pra conferir a troca de marcos do contador
@@ -64,53 +49,39 @@ function createClock(): Clock {
   return Number.isNaN(target) ? new SystemClock() : new ShiftedClock(target - Date.now());
 }
 
-function createGateway(endpoint: string | null, dev: boolean): RegistrationGateway {
+function createGateway(endpoint: string | null, simulated: SimulatedTeamStore | null): RegistrationGateway {
   if (endpoint) {
     return new RetryingRegistrationGateway(new AppsScriptRegistrationGateway(new AppsScriptClient(endpoint)));
   }
   // dev sem planilha: simula o envio pra dar pra testar a UX local
-  return dev ? new InMemoryRegistrationGateway() : new UnavailableRegistrationGateway();
+  return simulated
+    ? new InMemoryRegistrationGateway({ store: simulated })
+    : new UnavailableRegistrationGateway();
 }
 
-function createListTeams(endpoint: string | null): ListTeams | null {
-  if (!endpoint) return null;
+function createListTeams(endpoint: string | null, simulated: SimulatedTeamStore | null): ListTeams | null {
+  if (!endpoint) return simulated ? new ListTeams(new SimulatedTeamRepository(simulated)) : null;
   const live = new AppsScriptTeamRepository(new AppsScriptClient(endpoint));
   const bundled = new StaticTeamRepository(teamsData as RawTeam[]);
   return new ListTeams(new FallbackTeamRepository(live, bundled));
 }
 
-function createCue(audio: AudioEngine, url: string | null): AudioCue {
-  if (!audio.isSupported) return new NullAudioCue();
-  const synth = new SynthAudioCue(audio);
-  return url ? new FileAudioCue(audio, url, synth) : synth;
-}
-
-function createTyping(audio: AudioEngine): TickSound {
-  if (!audio.isSupported) return new NullTickSound();
-  return new TypingSound(audio, TYPING_SPRITE_URL, {
-    sprite: AudioSprite.uniform(TYPING_SLOTS, TYPING_SLOT_S, { min: 0.92, max: 1.08 }),
-    gate: new MinIntervalGate(TYPING_MIN_GAP_MS),
-    gain: TYPING_GAIN,
-  });
-}
-
 export function createClientContainer(config: AppConfig, options: { dev: boolean }): ClientContainer {
   const clock = createClock();
-  const audio = new AudioEngine();
+  // dev sem planilha: inscrição e lista de equipes simuladas, ligadas entre si (dá pra ver a foto em /equipes)
+  const simulated = options.dev && !config.registration.endpoint ? new SimulatedTeamStore() : null;
   return {
     clock,
     getCountdown: new GetCountdown(clock, config.milestones),
     submitRegistration: new SubmitRegistration({
-      gateway: createGateway(config.registration.endpoint, options.dev),
+      gateway: createGateway(config.registration.endpoint, simulated),
       clock,
       teamSize: config.registration.teamSize,
       // prazo e vagas reavaliados no navegador: página gerada antes do prazo fecha o form depois dele
       window: config.registration,
     }),
-    listTeams: createListTeams(config.teamsEndpoint),
+    prepareTeamImage: new PrepareTeamImage(new CanvasImageCodec()),
+    listTeams: createListTeams(config.teamsEndpoint, simulated),
     preferences: new LocalPreferenceStore(),
-    audio,
-    cue: createCue(audio, config.audioCueUrl),
-    typing: createTyping(audio),
   };
 }

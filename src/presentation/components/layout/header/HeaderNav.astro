@@ -1,14 +1,21 @@
 ---
-import { NAV_LINKS } from '../navLinks';
+import { navLinkAttrs, navLinksFor, type SitePage } from '../navLinks';
 
-// navegação do desktop: sublinhado degradê que cresce do centro; o ativo vem do NavSpyController
+// navegação do desktop: sublinhado degradê que cresce do centro; na LP o ativo vem do NavSpyController
+// (âncoras e o link de página com seção na LP, via data-nav-spy), nas outras páginas o link da própria página
+// nasce com aria-current="page"
+interface Props {
+  page?: SitePage;
+}
+
+const { page = 'home' } = Astro.props;
 ---
 
 <nav class="header-nav" aria-label="Principal">
   <ul class="header-nav__list" role="list">
-    {NAV_LINKS.map((link) => (
+    {navLinksFor(page).map((link) => (
       <li>
-        <a class="header-nav__link" href={link.href} data-nav-link>
+        <a class="header-nav__link" {...navLinkAttrs(link)} data-nav-link>
           {link.label}
         </a>
       </li>
@@ -67,12 +74,12 @@ import { NAV_LINKS } from '../navLinks';
     transform: scaleX(0.6);
   }
 
-  .header-nav__link[aria-current='true'] {
+  .header-nav__link:is([aria-current='true'], [aria-current='page']) {
     color: var(--text);
     text-shadow: 0 0 14px rgb(0 229 255 / 0.55);
   }
 
-  .header-nav__link[aria-current='true']::after {
+  .header-nav__link:is([aria-current='true'], [aria-current='page'])::after {
     transform: scaleX(1);
   }
 

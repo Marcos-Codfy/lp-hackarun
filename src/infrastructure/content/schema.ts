@@ -79,6 +79,8 @@ export interface RawTeam {
   course?: string | null;
   mentor?: string | null;
   status?: TeamStatus;
+  // url https da foto/logo (a lista ao vivo monta a partir do id do Drive)
+  imageUrl?: string | null;
 }
 
 export interface RawSpeaker {

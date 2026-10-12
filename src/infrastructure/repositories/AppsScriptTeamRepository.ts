@@ -1,6 +1,7 @@
 import type { Team, TeamRepository } from '@domain/index';
 import type { AppsScriptClient } from '../registration/AppsScriptClient';
 import { ContentMapper } from '../mappers/ContentMapper';
+import { driveImageUrl } from './driveImageUrl';
 
 const TIMEOUT_MS = 6_000;
 
@@ -9,6 +10,8 @@ interface TeamRow {
   name?: unknown;
   course?: unknown;
   memberCount?: unknown;
+  // id do arquivo no Drive (coluna Imagem); vira URL pública só se tiver cara de id
+  imageId?: unknown;
 }
 
 // equipes confirmadas na planilha (GET ?action=teams); a planilha nunca manda dado pessoal
@@ -41,6 +44,7 @@ export class AppsScriptTeamRepository implements TeamRepository {
           // equipe confirmada tem pelo menos 1 pessoa, mesmo se a célula vier torta
           memberCount: Number.isFinite(count) && count > 0 ? Math.round(count) : 1,
           status: 'confirmed',
+          imageUrl: driveImageUrl(row.imageId),
         }),
       ];
     } catch {

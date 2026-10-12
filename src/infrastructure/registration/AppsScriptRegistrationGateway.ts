@@ -7,7 +7,8 @@ import {
 } from '@application/index';
 import { AppsScriptHttpError, type AppsScriptClient } from './AppsScriptClient';
 
-const TIMEOUT_MS = 15_000;
+// a foto da equipe sobe junto (até ~550 KB em base64): rede lenta de celular precisa de folga
+const TIMEOUT_MS = 30_000;
 
 // erros que o Code.gs devolve -> falhas que a aplicação entende
 const SERVER_ERRORS: Record<string, GatewayFailure> = {

@@ -1,11 +1,20 @@
 import { vi } from 'vitest';
-import { SubmitRegistration, type RegistrationWindowSnapshot } from '@application/index';
+import { ok, type Result } from '@domain/index';
+import {
+  SubmitRegistration,
+  type ImageFile,
+  type PreparedTeamImageDTO,
+  type RegistrationWindowSnapshot,
+} from '@application/index';
 import { RegistrationFormViewModel } from '@presentation/view-models/registration/RegistrationFormViewModel';
 import { FakeGateway, ManualClock, TEAM_SIZE } from '../../helpers/fixtures';
+import { preparedImage } from '../../helpers/images';
 
 export interface FormSetupOptions {
   isOpen?: boolean;
   window?: RegistrationWindowSnapshot;
+  // o que o "preparar imagem" responde (padrão: imagem pronta na hora)
+  prepare?: (file: ImageFile) => Promise<Result<PreparedTeamImageDTO, string>>;
 }
 
 // VM de verdade em cima do caso de uso de verdade; só o gateway, o relógio e a chave são falsos
@@ -23,14 +32,16 @@ export function setupForm(options: FormSetupOptions = {}) {
   });
   let keys = 0;
   const newKey = vi.fn(() => `chave-${String(++keys).padStart(4, '0')}`);
+  const prepareImage = { execute: vi.fn(options.prepare ?? (async () => ok(preparedImage()))) };
   const vm = new RegistrationFormViewModel({
     submit,
+    prepareImage,
     teamSize: TEAM_SIZE,
     isOpen: options.isOpen ?? true,
     clock,
     newKey,
   });
-  return { vm, gateway, clock, sleep, newKey };
+  return { vm, gateway, clock, sleep, newKey, prepareImage };
 }
 
 export const windowClosingAt = (closesAt: string): RegistrationWindowSnapshot => ({
@@ -47,5 +58,6 @@ export function fillValidTeam(vm: RegistrationFormViewModel): void {
   vm.setText('leader.course', 'Engenharia de Software');
   vm.setText('members.0.name', 'Bruno Lima');
   vm.setText('members.0.email', 'bruno@exemplo.com');
+  vm.setTeamImage(preparedImage());
   vm.setAcceptedTerms(true);
 }

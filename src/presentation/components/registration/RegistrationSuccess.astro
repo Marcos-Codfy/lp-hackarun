@@ -5,7 +5,7 @@ import Button from '@presentation/components/ui/Button.astro';
 const steps = [
   'Guarde o protocolo: é ele que identifica a sua inscrição.',
   'A organização confere os dados e confirma pelo e-mail ou WhatsApp informado.',
-  'Confirmada, a equipe aparece na lista de equipes aqui no site.',
+  'Confirmada, a equipe aparece com a foto ou a logo na página de equipes do site.',
   'Salve as datas na agenda pra não perder a largada.',
 ];
 ---
@@ -44,7 +44,7 @@ const steps = [
     <Button href="/hackarun-2026.ics" variant="time" download="hackarun-2026.ics">
       Adicionar à agenda
     </Button>
-    <Button href="#equipes" variant="ghost">
+    <Button href="/equipes" variant="ghost">
       Ver equipes
     </Button>
   </div>

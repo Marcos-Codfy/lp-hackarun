@@ -1,4 +1,5 @@
 import type { RegistrationErrors, RegistrationInput, RegistrationMode } from '@domain/index';
+import type { PreparedTeamImageDTO } from '@application/index';
 
 export interface LeaderFields {
   name: string;
@@ -19,6 +20,8 @@ export interface MemberFields {
 export interface RegistrationFields {
   mode: RegistrationMode;
   teamName: string;
+  // foto/logo já preparada no aparelho (null até a pessoa escolher uma que passe)
+  teamImage: PreparedTeamImageDTO | null;
   leader: LeaderFields;
   members: MemberFields[];
   accessibilityNeeds: string;
@@ -40,6 +43,7 @@ export function emptyFields(memberRows: number): RegistrationFields {
   return {
     mode: 'team',
     teamName: '',
+    teamImage: null,
     leader: { name: '', email: '', phone: '', course: '', semester: '' },
     members: Array.from({ length: memberRows }, (_, i) => emptyMember(i)),
     accessibilityNeeds: '',
@@ -77,6 +81,7 @@ export function toInput(fields: RegistrationFields): { input: RegistrationInput;
     input: {
       mode: fields.mode,
       teamName: fields.teamName,
+      teamImage: fields.teamImage && { mimeType: fields.teamImage.mimeType, base64: fields.teamImage.base64 },
       leader: { ...fields.leader },
       members: members.map(({ name, email, course }) => ({ name, email, course })),
       accessibilityNeeds: fields.accessibilityNeeds,
@@ -104,7 +109,7 @@ export function fieldOrder(fields: RegistrationFields): string[] {
       ? fields.members.flatMap((_, i) => MEMBER_KEYS.map((k) => `members.${i}.${k}`))
       : [];
   return [
-    ...(fields.mode === 'team' ? ['teamName'] : []),
+    ...(fields.mode === 'team' ? ['teamName', 'teamImage'] : []),
     ...LEADER_KEYS.map((k) => `leader.${k}`),
     ...rows,
     ...(fields.mode === 'team' ? ['members'] : []),

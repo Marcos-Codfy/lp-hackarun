@@ -30,7 +30,7 @@ export class ClosedLobby {
     const text = document.createElement('p');
     text.textContent = 'O prazo terminou. Valeu pelo interesse! Acompanhe quem vai correr.';
     const link = document.createElement('a');
-    link.href = '#equipes';
+    link.href = '/equipes';
     link.textContent = 'Ver equipes confirmadas';
     notice.append(title, text, link);
     this.root.insertBefore(notice, before && before.parentElement === this.root ? before : null);

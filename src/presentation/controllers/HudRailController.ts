@@ -23,6 +23,7 @@ export class HudRailController {
   }
 
   mount(): void {
+    this.watchFooter();
     const host = qs('[data-hud-ticks]', this.root);
     if (!host || this.sections.length === 0) return;
     this.ticks = this.sections.map(() => {
@@ -36,6 +37,15 @@ export class HudRailController {
     // pins e conteúdo carregado depois mudam a altura da página. A 1ª medida também vem daqui
     // (o observer avisa logo depois do próximo layout): ler agora forçaria um layout no boot
     new ResizeObserver(this.remeasure).observe(document.body);
+  }
+
+  // celular: a pílula fica por cima do texto do rodapé ("© 2026 HackaRun"); some enquanto ele está na tela
+  private watchFooter(): void {
+    const footer = qs('.site-footer');
+    if (!footer || !('IntersectionObserver' in window)) return;
+    new IntersectionObserver(([entry]) => {
+      this.root.classList.toggle('is-footer', entry?.isIntersecting ?? false);
+    }).observe(footer);
   }
 
   // tudo que mede antes de qualquer escrita: ler e escrever alternado recalculava o estilo a cada tique

@@ -5,7 +5,9 @@ const TEAM_SIZE = { min: 2, max: 5 };
 // mantenha igual ao MIN_FILL_MS do src/application/use-cases/SubmitRegistration.ts (um teste confere)
 const MIN_ELAPSED_MS = 3000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const CONSENT_VERSION_PATTERN = /^[A-Za-z0-9][\w.-]{0,31}$/;
+// versão vigente do aviso de privacidade (/privacidade). Mantenha igual ao CONSENT_VERSION do
+// src/application/use-cases/SubmitRegistration.ts (um teste confere): aceite de aviso antigo não vale
+const CONSENT_VERSION = '2026-10-v2';
 // UUID do navegador; sem hífen na frente (vai pra planilha) e com teto de tamanho
 const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9-]{7,63}$/;
 
@@ -46,7 +48,9 @@ function validateRegistration_(body) {
   }
   const team = mode === 'team' ? validateTeam_(body, leader.email) : { teamName: '', members: [] };
   const consent = parseConsent_(body);
-  if (!team || !consent) return null;
+  // equipe manda foto ou logo (Images.gs confere tipo, tamanho e os bytes); individual não manda
+  const image = mode === 'team' ? parseTeamImage_(body.teamImage) : null;
+  if (!team || !consent || (mode === 'team' && !image)) return null;
 
   return {
     mode: mode,
@@ -57,6 +61,7 @@ function validateRegistration_(body) {
     source: clean_(body.source, 40) || 'landing-page',
     consent: consent,
     idempotencyKey: parseIdempotencyKey_(body.idempotencyKey),
+    image: image,
   };
 }
 
@@ -81,7 +86,7 @@ function validateTeam_(body, leaderEmail) {
 function parseConsent_(body) {
   const version = clean_(body.consentVersion, 32);
   const at = Date.parse(clean_(body.consentAt, 40));
-  if (!CONSENT_VERSION_PATTERN.test(version) || Number.isNaN(at)) return '';
+  if (version !== CONSENT_VERSION || Number.isNaN(at)) return '';
   return version + ' · ' + new Date(at).toISOString();
 }
 

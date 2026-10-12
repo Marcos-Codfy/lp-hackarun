@@ -41,7 +41,7 @@ export class SubmitStatusPresenter {
     const form = qs('[data-reg-form]', this.root);
     const success = qs('[data-reg-success]', this.root);
     if (!form || !success) return;
-    // cópia fiel pro leitor de tela; a visível "decodifica" com clique de tecla
+    // cópia fiel pro leitor de tela; a visível "decodifica"
     const code = qs('[data-reg-protocol]', success);
     if (code) code.textContent = protocol;
     const typed = qs('[data-reg-protocol-typed]', success);
@@ -49,7 +49,7 @@ export class SubmitStatusPresenter {
     success.hidden = false;
     this.announce(`Inscrição recebida. Protocolo ${protocol}.`);
     qs('[data-reg-success-title]', success)?.focus();
-    if (typed) new ProtocolReveal(typed, this.bus).play(protocol);
+    if (typed) new ProtocolReveal(typed).play(protocol);
     this.bus.emit('registration:submitted', { protocol });
   }
 }

@@ -15,7 +15,6 @@ const appConfig: AppConfig = {
   milestones: event.milestones,
   registration: event.registration,
   teamsEndpoint: event.registration.endpoint,
-  audioCueUrl: '/audio/cta-globe.mp3',
 };
 
 const seo = {
@@ -61,7 +60,7 @@ const seo = {
           <h2>O que coletamos</h2>
           <ul>
             <li>Do líder: nome completo, e-mail, WhatsApp, curso e período.</li>
-            <li>Da equipe: nome da equipe e nome, e-mail e curso de cada integrante.</li>
+            <li>Da equipe: nome, foto ou logo e o nome, e-mail e curso de cada integrante.</li>
             <li>Necessidade de acessibilidade, se você contar (opcional).</li>
             <li>Data e hora da inscrição e do aceite, com a versão deste aviso.</li>
           </ul>
@@ -73,16 +72,26 @@ const seo = {
             <li>Falar com você sobre o HackaRun (e-mail e WhatsApp).</li>
             <li>Credenciamento nos dias do evento.</li>
             <li>
-              Divulgar as equipes confirmadas no site, só com{' '}
-              <strong>nome da equipe, curso e quantidade</strong> de integrantes. Nome, e-mail e telefone
-              nunca aparecem.
+              Divulgar as equipes confirmadas na <a href="/equipes">página de equipes</a>, só com{' '}
+              <strong>nome da equipe, curso, quantidade de integrantes e a foto ou logo</strong> enviada.
+              Nome, e-mail e telefone nunca aparecem.
             </li>
           </ul>
 
           <h2>Base legal</h2>
           <p>
             <strong>Consentimento</strong> (LGPD, art. 7º, I), dado quando você marca a caixa de aceite. Para
-            o dado de acessibilidade, consentimento específico e destacado (art. 11, I).
+            o dado de acessibilidade, consentimento específico e destacado (art. 11, I). Na inscrição de
+            equipe, o aceite inclui a publicação da foto ou logo.
+          </p>
+
+          <h2>Foto ou logo da equipe</h2>
+          <p>
+            Quem inscreve a equipe autoriza a publicação da imagem e declara que{' '}
+            <strong>todas as pessoas que aparecem nela concordaram</strong>. A imagem é ajustada no seu
+            aparelho antes do envio e só aparece no site{' '}
+            <strong>depois que a organização confirma a inscrição</strong>. Quer trocar ou tirar do ar? É só
+            pedir pelo contato abaixo, com o protocolo: a imagem sai do site e é apagada.
           </p>
 
           <h2>Dado sensível de acessibilidade</h2>
@@ -94,21 +103,24 @@ const seo = {
           <h2>Com quem compartilhamos</h2>
           <p>
             As inscrições ficam numa planilha do <strong>Google</strong>, que atua como operador: hospeda a
-            planilha e roda o script que recebe o formulário. O acesso é restrito à organização. O site é
-            hospedado na Cloudflare, que recebe só os dados técnicos de acesso (como o IP) para entregar as
-            páginas.
+            planilha e roda o script que recebe o formulário. O acesso é restrito à organização. As fotos das
+            equipes ficam numa pasta do Google Drive da organização, com link público só para aparecer no site
+            (o endereço só é divulgado depois da confirmação). O site é hospedado na Cloudflare, que recebe só
+            os dados técnicos de acesso (como o IP) para entregar as páginas.
           </p>
 
           <h2>Por quanto tempo</h2>
           <p>
-            Até <strong>6 meses depois do evento</strong>. Depois disso, os dados são excluídos.
+            Até <strong>6 meses depois do evento</strong>. Depois disso, os dados e as fotos são excluídos e a
+            página de equipes sai do ar.
           </p>
 
           <h2>Seus direitos</h2>
           <p>
-            Você pode pedir <strong>acesso, correção ou exclusão</strong> dos seus dados e{' '}
-            <strong>revogar</strong> o consentimento quando quiser (sem os dados, não dá para manter a
-            inscrição). Informe o protocolo <span class="privacy__mono">HR26-XXXXXX</span> para agilizar.
+            Você pode pedir <strong>acesso, correção ou exclusão</strong> dos seus dados, a{' '}
+            <strong>retirada da foto</strong> da equipe e <strong>revogar</strong> o consentimento quando
+            quiser (sem os dados, não dá para manter a inscrição). Informe o protocolo{' '}
+            <span class="privacy__mono">HR26-XXXXXX</span> para agilizar.
           </p>
           <p class="section-note section-note--time">
             <Icon name="clock" size={18} />
@@ -119,8 +131,8 @@ const seo = {
 
           <h2>No seu navegador</h2>
           <p>
-            Sem cookies de rastreamento nem analytics. A preferência de som e o progresso da caça aos NPCs
-            ficam salvos só no seu navegador.
+            Sem cookies de rastreamento nem analytics. A escolha de pausar as animações e o progresso da caça
+            aos NPCs ficam salvos só no seu navegador.
           </p>
         </div>
 

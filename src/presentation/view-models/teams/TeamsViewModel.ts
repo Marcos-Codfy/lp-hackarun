@@ -9,6 +9,8 @@ export interface PublicTeam {
   name: string;
   course: string | null;
   memberCount: number;
+  // foto/logo aprovada junto com a equipe; null = card com as iniciais
+  imageUrl: string | null;
 }
 
 export type TeamsStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -33,7 +35,14 @@ export const toPublicTeam = (t: TeamDTO): PublicTeam => ({
   name: t.name,
   course: t.course,
   memberCount: t.memberCount,
+  imageUrl: t.imageUrl,
 });
+
+// vitrine da LP: até `limit` equipes, as com foto primeiro (a ordem entre elas se mantém)
+export function pickFaces(teams: readonly PublicTeam[], limit: number): PublicTeam[] {
+  const withImage = teams.filter((t) => t.imageUrl);
+  return [...withImage, ...teams.filter((t) => !t.imageUrl)].slice(0, Math.max(0, limit));
+}
 
 const matches = (team: PublicTeam, needle: string): boolean =>
   !needle || normalizeSearch(`${team.name} ${team.course ?? ''}`).includes(needle);

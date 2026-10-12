@@ -1,13 +1,11 @@
 // smoke: as Views montam no DOM e reagem ao básico (o resto é coberto nos VMs)
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { EventBus } from '@shared/core/EventBus';
 import type { AppEvents } from '@presentation/app/AppEvents';
 import { MemoryPreferenceStore } from '@infrastructure/storage/MemoryPreferenceStore';
 import { NpcHuntViewModel } from '@presentation/view-models/npc/NpcHuntViewModel';
-import { SoundViewModel } from '@presentation/view-models/sound/SoundViewModel';
 import { TeamsViewModel } from '@presentation/view-models/teams/TeamsViewModel';
 import { NpcTokenView } from '@presentation/views/NpcTokenView';
-import { SoundToggleView } from '@presentation/views/SoundToggleView';
 import { TeamsView } from '@presentation/views/TeamsView';
 
 beforeEach(() => {
@@ -27,24 +25,6 @@ describe('views (smoke)', () => {
     expect(button.disabled).toBe(false);
   });
 
-  it('SoundToggleView aparece e alterna aria-pressed', () => {
-    document.body.innerHTML =
-      '<button data-sound-toggle aria-pressed="false" hidden>Som <span data-sound-state>desligado</span></button>';
-    const button = document.querySelector('button') as HTMLButtonElement;
-    const engine = { isSupported: true, unlock: vi.fn(async () => true), suspend: vi.fn() };
-    const vm = new SoundViewModel({
-      store: new MemoryPreferenceStore(),
-      engine,
-      cue: { play: async () => undefined },
-      bus: new EventBus<AppEvents>(),
-    });
-    new SoundToggleView(button, vm).mount();
-    expect(button.hidden).toBe(false);
-    button.click();
-    expect(button.getAttribute('aria-pressed')).toBe('true');
-    expect(button.textContent).toContain('ligado');
-  });
-
   it('TeamsView mostra o estado vazio e a busca só quando tem equipe', () => {
     document.body.innerHTML = `
       <div data-teams>
@@ -54,7 +34,7 @@ describe('views (smoke)', () => {
         <p data-teams-noresults hidden><span data-teams-query></span></p>
         <div data-teams-empty></div>
         <p data-teams-live></p>
-        <template data-teams-template><li><span data-team-rank></span><p data-team-name></p>
+        <template data-teams-template><li><p data-team-name></p>
           <p data-team-course></p><span data-team-pips></span><span data-team-count></span></li></template>
       </div>`;
     const root = document.querySelector('[data-teams]') as HTMLElement;

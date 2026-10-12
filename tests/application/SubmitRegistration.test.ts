@@ -9,6 +9,7 @@ import {
 } from '@application/index';
 import { FixedClock } from '@infrastructure/clock/SystemClock';
 import { FakeGateway, TEAM_SIZE, teamInput } from '../helpers/fixtures';
+import { TEAM_IMAGE } from '../helpers/images';
 
 const NOW = new Date('2026-11-01T12:00:00Z');
 const META = { honeypot: '', elapsedMs: 8000 };
@@ -71,6 +72,24 @@ describe('SubmitRegistration', () => {
     const { gateway, useCase } = setup();
     await useCase.execute(teamInput(), META);
     expect(gateway.calls[0]).toMatchObject({ consentVersion: CONSENT_VERSION, consentAt: NOW.toISOString() });
+  });
+
+  it('a foto da equipe vai no mesmo envio (base64, sem o tamanho em pixels); individual manda null', async () => {
+    const { gateway, useCase } = setup();
+    await useCase.execute(teamInput(), META);
+    expect(gateway.calls[0]?.teamImage).toEqual(TEAM_IMAGE);
+    await useCase.execute(
+      teamInput({ mode: 'solo', leader: { ...teamInput().leader, email: 'b@exemplo.com' } }),
+      META,
+    );
+    expect(gateway.calls[1]?.teamImage).toBeNull();
+  });
+
+  it('equipe sem foto nem chega no gateway', async () => {
+    const { gateway, useCase } = setup();
+    const result = await useCase.execute(teamInput({ teamImage: null }), META);
+    expect(result.status === 'invalid' && result.errors['teamImage']).toBeTruthy();
+    expect(gateway.calls).toHaveLength(0);
   });
 
   it('aceita outra versão do aviso injetada', async () => {

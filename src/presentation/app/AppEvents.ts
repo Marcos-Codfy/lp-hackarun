@@ -12,15 +12,12 @@ export interface AppEvents extends Record<string, unknown> {
   'experience:fallback': { reason: string };
   // seção com data-scene-hold entrou: o globo começa a carregar por durationMs
   'experience:charging': { durationMs: number };
-  // globo final terminou a carga (dispara som + revela o CTA); emitido mesmo sem webgl
+  // globo final terminou a carga (pulso de energia + revela o CTA); emitido mesmo sem webgl
   'experience:charged': undefined;
-  'sound:changed': { enabled: boolean };
   // pausou ou retomou as animações (WCAG 2.2.2); o estado atual é a classe is-motion-paused do <html>
   'motion:paused': { paused: boolean };
   'npc:found': { id: string; found: number; total: number };
   // alguém clicou num CTA de inscrição
   'registration:intent': { source: string };
   'registration:submitted': { protocol: string };
-  // um caractere "digitado" na tela (terminal do NPC, protocolo da inscrição): clique de tecla se o som estiver ligado
-  'ui:type': undefined;
 }

@@ -1,0 +1,192 @@
+---
+// grade de equipes confirmadas da página /equipes: HTML do build + lista ao vivo da planilha (TeamsView)
+import type { SlotsDTO, TeamDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { toPublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
+import TeamCard from './TeamCard.astro';
+import TeamCounter from './TeamCounter.astro';
+import LineupSlots from './LineupSlots.astro';
+
+interface Props {
+  teams: TeamDTO[];
+  slots: SlotsDTO;
+}
+
+const { teams, slots } = Astro.props;
+// só o que é público vai pro HTML (nada de nome de integrante)
+const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam);
+---
+
+<div
+  class="gallery"
+  data-teams
+  data-teams-initial={JSON.stringify(confirmed)}
+  data-teams-slots={JSON.stringify(slots)}
+  data-slots-level={slots.level}
+>
+  <div class="gallery__bar">
+    <TeamCounter count={confirmed.length} slots={slots} />
+    <div class="gallery__search" data-teams-search-wrap hidden>
+      <label class="gallery__search-label" for="team-search">
+        Buscar equipe
+      </label>
+      <span class="gallery__search-field">
+        <Icon name="search" size={18} />
+        <input
+          id="team-search"
+          class="gallery__search-input"
+          type="search"
+          autocomplete="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          placeholder="Nome da equipe ou curso"
+          data-teams-search
+        />
+      </span>
+    </div>
+  </div>
+
+  <p class="sr-only" aria-live="polite" data-teams-live></p>
+
+  <ol role="list" class="gallery__grid" data-teams-list hidden={confirmed.length === 0}>
+    {confirmed.map((t) => (
+      <TeamCard name={t.name} course={t.course} memberCount={t.memberCount} imageUrl={t.imageUrl} />
+    ))}
+  </ol>
+
+  <p class="gallery__noresults" data-teams-noresults hidden>
+    Nenhuma equipe com “<span data-teams-query></span>”. Confira a grafia ou busque pelo curso.
+  </p>
+
+  <div class="gallery__empty" data-teams-empty hidden={confirmed.length > 0}>
+    <LineupSlots />
+    <div class="gallery__empty-cta">
+      <p class="gallery__empty-text">
+        Nenhuma equipe confirmada ainda. <strong>A sua pode abrir o grid de largada.</strong>
+      </p>
+      <Button href="/#inscricao">Inscrever minha equipe</Button>
+    </div>
+  </div>
+
+  <template data-teams-template>
+    <TeamCard />
+  </template>
+</div>
+
+<style>
+  .gallery {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .gallery__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+
+  .gallery__search {
+    display: grid;
+    gap: var(--space-2);
+    width: min(100%, 22rem);
+  }
+
+  .gallery__search-label {
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .gallery__search-field {
+    position: relative;
+    display: block;
+    color: var(--text-dim);
+  }
+
+  .gallery__search-field :global(.icon) {
+    position: absolute;
+    top: 50%;
+    left: var(--space-4);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .gallery__search-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 var(--space-4) 0 calc(var(--space-4) * 2 + 18px);
+    border: 1px solid var(--control-line);
+    border-radius: 3px;
+    background: var(--control-bg);
+    font-size: max(16px, var(--fs-base));
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  /* transparente (e não none): no alto contraste o box-shadow some e o contorno aparece */
+  .gallery__search-input:focus-visible {
+    outline: 2px solid transparent;
+    border-color: var(--c-cyan);
+    box-shadow:
+      0 0 0 3px rgb(0 229 255 / 0.18),
+      0 0 24px rgb(0 229 255 / 0.25);
+  }
+
+  /* celular: 2 por linha (cara de grid de largada); cresce até 4 */
+  .gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .gallery__grid[aria-busy='true'] {
+    opacity: 0.7;
+  }
+
+  .gallery__noresults {
+    color: var(--text-muted);
+  }
+
+  .gallery__empty {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .gallery__empty-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-6);
+  }
+
+  .gallery__empty-text {
+    max-width: 34rem;
+    color: var(--text-muted);
+  }
+
+  .gallery__empty-text strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  @media (min-width: 40rem) {
+    .gallery__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .gallery__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-5);
+    }
+  }
+</style>

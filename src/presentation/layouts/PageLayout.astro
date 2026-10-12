@@ -1,0 +1,39 @@
+---
+// layout leve (/equipes): mesmo head, aurora e tipografia da LP, sem o palco 3D e sem GSAP/Lenis.
+// O LightApp só liga header, menu, "Pausar animações" e as Views da página
+import DocumentHead from './parts/DocumentHead.astro';
+import Backdrop from './parts/Backdrop.astro';
+import type { SeoProps } from '@presentation/components/seo/Seo.astro';
+import { APP_CONFIG_ID, type AppConfig } from '@presentation/app/AppConfig';
+import { safeJsonForScript } from '@shared/utils/json';
+import '@presentation/styles/tokens.css';
+import '@presentation/styles/base.css';
+
+interface Props {
+  seo: SeoProps;
+  appConfig: AppConfig;
+}
+
+const { seo, appConfig } = Astro.props;
+
+// texto do conteúdo nunca fecha o <script> de dados antes da hora
+const configJson = safeJsonForScript(appConfig);
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <DocumentHead seo={seo} />
+  </head>
+  <body>
+    <Backdrop />
+
+    <slot />
+
+    <script type="application/json" id={APP_CONFIG_ID} set:html={configJson} />
+    <script>
+      import { LightApp } from '@presentation/app/LightApp';
+      LightApp.boot();
+    </script>
+  </body>
+</html>

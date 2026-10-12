@@ -1,10 +1,13 @@
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { FakeCache, FakeLock, FakeSheet, signedSha256, type Cell } from './fakes';
+import { FakeDrive, signedBytes, type FakeBlob } from './driveFakes';
+import { fakeImageBase64 } from '../images';
 
 const SCRIPT_DIR = new URL('../../../apps-script/', import.meta.url);
 // cada arquivo roda como script separado no mesmo contexto, igual ao editor do Apps Script
-export const SCRIPT_FILES = ['Code.gs', 'Validation.gs', 'Limits.gs'] as const;
+export const SCRIPT_FILES = ['Code.gs', 'Validation.gs', 'Limits.gs', 'Images.gs'] as const;
 
 export interface ScriptResponse {
   ok: boolean;
@@ -24,6 +27,7 @@ type Handler = (event: unknown) => TextOutput;
 export class AppsScriptSandbox {
   readonly cache = new FakeCache();
   readonly lock = new FakeLock();
+  readonly drive = new FakeDrive();
   readonly properties: Record<string, string> = {};
   readonly sheets = new Map<string, FakeSheet>();
   readonly errors: unknown[][] = [];
@@ -101,8 +105,12 @@ export class AppsScriptSandbox {
         getScriptProperties: () => ({
           getProperty: (key: string) => this.properties[key] ?? null,
           getProperties: () => ({ ...this.properties }),
+          setProperty: (key: string, value: string) => {
+            this.properties[key] = value;
+          },
         }),
       },
+      DriveApp: this.drive.api(),
       SpreadsheetApp: {
         newDataValidation: () => validation,
         getActiveSpreadsheet: () => ({
@@ -118,6 +126,13 @@ export class AppsScriptSandbox {
         DigestAlgorithm: { SHA_256: 'SHA_256' },
         Charset: { UTF_8: 'UTF_8' },
         computeDigest: (_algorithm: string, text: string) => signedSha256(text),
+        getUuid: () => randomUUID(),
+        base64Decode: (text: string) => signedBytes(text),
+        newBlob: (bytes: number[], contentType: string, name: string): FakeBlob => ({
+          bytes,
+          contentType,
+          name,
+        }),
       },
     };
   }
@@ -137,10 +152,11 @@ export function registrationBody(overrides: Record<string, unknown> = {}): Recor
       semester: '5º período',
     },
     members: [{ name: 'Bruno Lima', email: 'bruno@exemplo.com', course: 'Ciência da Computação' }],
+    teamImage: { mimeType: 'image/png', base64: fakeImageBase64('image/png') },
     accessibilityNeeds: '',
     submittedAt: '2026-10-20T15:00:00.000Z',
     source: 'landing-page',
-    consentVersion: '2026-10-v1',
+    consentVersion: '2026-10-v2',
     consentAt: '2026-10-20T15:00:00.000Z',
     honeypot: '',
     elapsedMs: 8000,

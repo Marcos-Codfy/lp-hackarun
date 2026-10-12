@@ -32,6 +32,7 @@ export class ContentMapper {
       course: raw.course ?? null,
       mentor: raw.mentor ?? null,
       status: raw.status ?? 'confirmed',
+      imageUrl: raw.imageUrl ?? null,
     });
   }
 

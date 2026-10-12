@@ -20,7 +20,7 @@ describe('Apps Script · validação do envio', () => {
     expect(cell('Integrantes')).toBe('Bruno Lima <bruno@exemplo.com> - Ciência da Computação');
     expect(cell('Qtde')).toBe(2);
     expect(cell('Status')).toBe('pendente');
-    expect(cell('Consentimento')).toBe('2026-10-v1 · 2026-10-20T15:00:00.000Z');
+    expect(cell('Consentimento')).toBe('2026-10-v2 · 2026-10-20T15:00:00.000Z');
     expect(script.lock.held).toBe(false);
   });
 
@@ -41,6 +41,7 @@ describe('Apps Script · validação do envio', () => {
     ['e-mail de integrante inválido', registrationBody({ members: [member('Bruno Lima', 'bruno@')] })],
     ['e-mail repetido na equipe', registrationBody({ members: [member('Bruno Lima', 'ANA@exemplo.com')] })],
     ['sem versão do consentimento', registrationBody({ consentVersion: '' })],
+    ['aceite de uma versão antiga do aviso', registrationBody({ consentVersion: '2026-10-v1' })],
     ['consentimento com data torta', registrationBody({ consentAt: 'ontem' })],
   ])('recusa %s', (_case, body) => {
     const script = new AppsScriptSandbox();

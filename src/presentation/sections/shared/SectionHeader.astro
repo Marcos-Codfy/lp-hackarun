@@ -9,7 +9,8 @@ interface Props {
   lead?: string;
   align?: 'start' | 'center';
   size?: 'sm' | 'md' | 'lg';
-  level?: 'h2' | 'h3';
+  // h1 só no título principal de uma página (ex.: /equipes)
+  level?: 'h1' | 'h2' | 'h3';
 }
 
 const { code, eyebrow, title, id, lead, align = 'start', size = 'md', level = 'h2' } = Astro.props;

@@ -1,18 +1,20 @@
 // HackaRun 2026: Web App que grava as inscrições do site na planilha e publica as equipes confirmadas.
-// Cole no editor do Apps Script da planilha (Extensões > Apps Script) junto com Validation.gs e Limits.gs.
+// Cole no editor do Apps Script da planilha (Extensões > Apps Script) junto com Validation.gs, Limits.gs e Images.gs.
 
 const SHEET_NAME = 'Inscricoes';
 // prettier-ignore
 const HEADERS = [
   'Protocolo', 'Data/hora', 'Modalidade', 'Equipe', 'Lider', 'E-mail', 'WhatsApp',
   'Curso', 'Periodo', 'Integrantes', 'Qtde', 'Acessibilidade', 'Status', 'Origem', 'Consentimento',
-  'Chave de envio',
+  'Chave de envio', 'Imagem',
 ];
 // posição (base 0) de cada coluna no array de HEADERS
-const COL = { protocol: 0, mode: 2, team: 3, email: 5, course: 7, size: 10, status: 12, key: 15 };
+const COL = { protocol: 0, mode: 2, team: 3, email: 5, course: 7, size: 10, status: 12, key: 15, image: 16 };
 const STATUS_OPTIONS = ['pendente', 'confirmado', 'recusado'];
-const TEAMS_CACHE_KEY = 'teams:v1';
+const TEAMS_CACHE_KEY = 'teams:v2';
 const TEAMS_CACHE_SECONDS = 60;
+// Propriedade do script com o segredo dos ids públicos das equipes (idSecret_)
+const ID_SECRET_PROPERTY = 'ID_SEGREDO';
 
 function doPost(e) {
   const body = parseBody_(e);
@@ -29,37 +31,56 @@ function doPost(e) {
   } catch (err) {
     return json_({ ok: false, error: 'rate-limited' });
   }
+  let result;
   try {
-    const cache = CacheService.getScriptCache();
-    // retry do mesmo envio recebe o mesmo protocolo (caminho rápido, sem ler a planilha)
-    const retryKey = 'sub:' + digest_(submissionId_(data, body));
-    const previous = cache.get(retryKey);
-    if (previous) return json_({ ok: true, protocol: previous });
-    if (rateLimited_(cache, digest_(data.leader.email), Date.now())) {
-      return json_({ ok: false, error: 'rate-limited' });
-    }
-
-    const sheet = getSheet_();
-    const rows = readRows_(sheet);
-    const existing = leaderRow_(rows, data.leader.email);
-    if (existing) {
-      // a resposta do primeiro envio se perdeu e o cache já foi: a chave gravada na linha reconhece o envio
-      if (!data.idempotencyKey || String(existing[COL.key]) !== data.idempotencyKey) {
-        return json_({ ok: false, error: 'duplicate' });
-      }
-      return accepted_(cache, retryKey, String(existing[COL.protocol]));
-    }
-    if (capacityReached_(config, rows)) return json_({ ok: false, error: 'closed' });
-    const protocol = newProtocol_(rows);
-    ensureHeaders_(sheet);
-    sheet.appendRow(toRow_(protocol, data));
-    return accepted_(cache, retryKey, protocol);
+    result = registerLocked_(data, body, config);
   } catch (err) {
     console.error(err);
-    return json_({ ok: false, error: 'server' });
+    result = { output: json_({ ok: false, error: 'server' }), photo: null, protocol: '' };
   } finally {
     lock.releaseLock();
   }
+  // compartilhar a foto é mais uma ida ao Drive: fica fora do lock pra fila de inscrições andar
+  if (result.photo) shareImage_(result.photo, result.protocol);
+  return result.output;
+}
+
+// a parte que precisa do lock: checagens de reenvio/repetido/capacidade, upload da foto e a linha nova.
+// Devolve a resposta e a foto recém-criada (o compartilhamento dela é do doPost, já sem o lock)
+function registerLocked_(data, body, config) {
+  const done = (output) => ({ output: output, photo: null, protocol: '' });
+  const cache = CacheService.getScriptCache();
+  // retry do mesmo envio recebe o mesmo protocolo (caminho rápido, sem ler a planilha)
+  const retryKey = 'sub:' + digest_(submissionId_(data, body));
+  const previous = cache.get(retryKey);
+  if (previous) return done(json_({ ok: true, protocol: previous }));
+  if (rateLimited_(cache, digest_(data.leader.email), Date.now())) {
+    return done(json_({ ok: false, error: 'rate-limited' }));
+  }
+
+  const sheet = getSheet_();
+  const rows = readRows_(sheet);
+  const existing = leaderRow_(rows, data.leader.email);
+  if (existing) {
+    // a resposta do primeiro envio se perdeu e o cache já foi: a chave gravada na linha reconhece o envio
+    if (!data.idempotencyKey || String(existing[COL.key]) !== data.idempotencyKey) {
+      return done(json_({ ok: false, error: 'duplicate' }));
+    }
+    return done(accepted_(cache, retryKey, String(existing[COL.protocol])));
+  }
+  if (capacityReached_(config, rows)) return done(json_({ ok: false, error: 'closed' }));
+  const protocol = newProtocol_(rows);
+  // a foto só sobe depois das checagens de reenvio e de repetido: retry nunca cria um segundo arquivo
+  const photo = saveTeamImage_(protocol, data.image);
+  const imageId = photo ? photo.getId() : '';
+  try {
+    ensureHeaders_(sheet);
+    sheet.appendRow(toRow_(protocol, data, imageId));
+  } catch (err) {
+    discardImage_(imageId);
+    throw err;
+  }
+  return { output: accepted_(cache, retryKey, protocol), photo: photo, protocol: protocol };
 }
 
 function doGet(e) {
@@ -70,13 +91,13 @@ function doGet(e) {
   return json_({ ok: false, error: 'unknown-action' });
 }
 
-// gatilho simples: mudou a coluna Status, a lista pública atualiza na hora (sem esperar o cache)
+// gatilho simples: mudou a coluna Status ou a Imagem, a lista pública atualiza na hora (sem esperar o cache)
 function onEdit(e) {
   try {
     const range = e && e.range;
     if (!range || range.getSheet().getName() !== SHEET_NAME) return;
-    const statusCol = COL.status + 1;
-    if (range.getColumn() <= statusCol && range.getLastColumn() >= statusCol) {
+    const touches = (col) => range.getColumn() <= col + 1 && range.getLastColumn() >= col + 1;
+    if (touches(COL.status) || touches(COL.image)) {
       CacheService.getScriptCache().remove(TEAMS_CACHE_KEY);
     }
   } catch (err) {
@@ -84,7 +105,7 @@ function onEdit(e) {
   }
 }
 
-// só o que é público: id derivado do protocolo, nome da equipe, curso e quantidade
+// só o que é público: id derivado do protocolo, nome da equipe, curso, quantidade e o id da foto no Drive
 function confirmedTeams_() {
   const cache = CacheService.getScriptCache();
   const hit = cache.get(TEAMS_CACHE_KEY);
@@ -92,10 +113,11 @@ function confirmedTeams_() {
   const teams = readRows_(getSheet_())
     .filter((r) => isConfirmed_(r[COL.status]) && String(r[COL.team]).trim())
     .map((r) => ({
-      id: 'team-' + digest_(String(r[COL.protocol])).slice(0, 10),
+      id: publicTeamId_(String(r[COL.protocol])),
       name: String(r[COL.team]).trim().slice(0, 40),
       course: String(r[COL.course]).trim().slice(0, 80) || null,
       memberCount: Number(r[COL.size]) || 1,
+      imageId: publicImageId_(r[COL.image]),
     }));
   cache.put(TEAMS_CACHE_KEY, JSON.stringify(teams), TEAMS_CACHE_SECONDS);
   return teams;
@@ -135,11 +157,14 @@ function leaderRow_(rows, email) {
   return rows.find((r) => String(r[COL.email]).trim().toLowerCase() === email) || null;
 }
 
-// planilha criada antes de uma coluna nova: completa o título dela na primeira gravação
+// planilha criada antes de uma coluna nova: completa os títulos que faltam na primeira gravação
+// (título que a organização renomeou fica como está)
 function ensureHeaders_(sheet) {
-  const last = HEADERS.length;
-  const title = sheet.getRange(1, last).getValues()[0][0];
-  if (title === '' || title == null) sheet.getRange(1, last).setValues([[HEADERS[last - 1]]]);
+  const range = sheet.getRange(1, 1, 1, HEADERS.length);
+  const current = range.getValues()[0];
+  const missing = (value) => value === '' || value == null;
+  if (!current.some(missing)) return;
+  range.setValues([HEADERS.map((title, i) => (missing(current[i]) ? title : current[i]))]);
 }
 
 // sem 0/O/1/I pra ninguém confundir ao ditar
@@ -155,7 +180,7 @@ function newProtocol_(rows) {
   throw new Error('Could not generate a unique protocol');
 }
 
-function toRow_(protocol, data) {
+function toRow_(protocol, data, imageId) {
   const members = data.members.map((m) => m.name + ' <' + m.email + '>' + (m.course ? ' - ' + m.course : ''));
   return [
     protocol,
@@ -174,11 +199,28 @@ function toRow_(protocol, data) {
     sheetSafe_(data.source),
     sheetSafe_(data.consent),
     data.idempotencyKey,
+    imageId || '',
   ];
 }
 
 function json_(payload) {
   return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// id público da equipe na lista do site. Só o hash do protocolo não bastava: dá pra testar os ~1 bilhão de
+// protocolos possíveis e achar o de cada equipe. Com o segredo do script (fora do código) não tem como
+function publicTeamId_(protocol) {
+  return 'team-' + digest_(idSecret_() + '|' + protocol).slice(0, 10);
+}
+
+// criado sozinho na 1ª vez e guardado nas Propriedades do script; trocar ou apagar muda os ids públicos
+function idSecret_() {
+  const props = PropertiesService.getScriptProperties();
+  const saved = String(props.getProperty(ID_SECRET_PROPERTY) || '');
+  if (saved) return saved;
+  const secret = Utilities.getUuid() + Utilities.getUuid();
+  props.setProperty(ID_SECRET_PROPERTY, secret);
+  return secret;
 }
 
 function digest_(text) {

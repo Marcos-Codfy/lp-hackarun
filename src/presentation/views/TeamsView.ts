@@ -1,9 +1,18 @@
-import { qs } from '@shared/utils/dom';
-import type { PublicTeam, TeamsState, TeamsViewModel } from '@presentation/view-models/teams/TeamsViewModel';
+import { qs, qsa } from '@shared/utils/dom';
+import {
+  pickFaces,
+  type PublicTeam,
+  type TeamsState,
+  type TeamsViewModel,
+} from '@presentation/view-models/teams/TeamsViewModel';
+import { confirmedLabel, foundLabel } from '@presentation/formatters/TeamLabels';
+import { fillTeamCard, watchTeamImage } from './teams/TeamCardRenderer';
 
-const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+// vitrine da LP: quantos rostos cabem antes do "+N"
+const FACES = 5;
 
-// [data-teams]: busca, lista via <template>, estado vazio e contador anunciado com calma
+// [data-teams]: contador ao vivo (LP e /equipes); na página de equipes também busca, grade de cards via
+// <template> e estado vazio; na LP, a vitrine de fotos. Elemento que não existe na página é só ignorado
 export class TeamsView {
   private readonly root: HTMLElement;
   private readonly vm: TeamsViewModel;
@@ -11,6 +20,7 @@ export class TeamsView {
   private readonly template: HTMLTemplateElement | null;
   private announceTimer: ReturnType<typeof setTimeout> | null = null;
   private renderedTeams: PublicTeam[] | null = null;
+  private renderedFaces: PublicTeam[] | null = null;
 
   constructor(root: HTMLElement, vm: TeamsViewModel) {
     this.root = root;
@@ -22,8 +32,10 @@ export class TeamsView {
   mount(): void {
     const input = qs<HTMLInputElement>('[data-teams-search]', this.root);
     input?.addEventListener('input', () => this.vm.setQuery(input.value));
-    // o SSR já desenhou a lista inicial: não refaz à toa
+    // o build já desenhou a lista inicial: não refaz à toa, só liga o "sem foto" dos cards prontos
     this.renderedTeams = this.vm.state.value.visible;
+    if (this.list) qsa('[data-team-card]', this.list).forEach(watchTeamImage);
+    this.renderFaces(this.vm.state.value.teams);
     this.vm.state.subscribe((state, prev) => this.render(state, prev));
     if (this.vm.isLive) this.refreshWhenVisible();
   }
@@ -37,58 +49,70 @@ export class TeamsView {
     this.toggle('[data-teams-noresults]', hasTeams && state.visible.length === 0);
     this.setText('[data-teams-query]', state.query.trim());
     this.setText('[data-teams-count]', String(state.teams.length));
-    this.setText(
-      '[data-teams-count-label]',
-      plural(state.teams.length, 'equipe confirmada', 'equipes confirmadas'),
-    );
+    this.setText('[data-teams-count-label]', confirmedLabel(state.teams.length));
     this.toggle('[data-teams-slots-text]', state.slots.remaining !== null);
     this.setText('[data-teams-remaining]', String(state.slots.remaining ?? ''));
     this.root.dataset['slotsLevel'] = state.slots.level;
+    // nome diferente do [data-teams-count] (o número na tela), senão um seletor da página pega a raiz
+    this.root.dataset['teamTotal'] = String(state.teams.length);
     this.list?.setAttribute('aria-busy', String(state.status === 'loading'));
     if (state.visible !== this.renderedTeams) this.renderList(state.visible);
+    if (state.teams !== prev.teams) this.renderFaces(state.teams);
     if (state.query !== prev.query) this.announce(state);
   }
 
-  // lista pequena: refaz tudo, sem diff; textContent evita injeção vinda da planilha
+  // lista pequena: refaz tudo, sem diff
   private renderList(teams: PublicTeam[]): void {
     this.renderedTeams = teams;
     if (!this.list || !this.template) return;
     const fragment = document.createDocumentFragment();
-    teams.forEach((team, i) => {
-      const card = this.template?.content.firstElementChild?.cloneNode(true);
-      if (!(card instanceof HTMLElement)) return;
-      this.fill(card, team, i + 1);
+    teams.forEach((team) => {
+      const card = this.clone(this.template);
+      if (!card) return;
+      fillTeamCard(card, team);
       fragment.append(card);
     });
     this.list.replaceChildren(fragment);
   }
 
-  private fill(card: HTMLElement, team: PublicTeam, rank: number): void {
-    const set = (sel: string, text: string) => {
-      const el = qs(sel, card);
-      if (el) el.textContent = text;
-    };
-    set('[data-team-rank]', `#${String(rank).padStart(2, '0')}`);
-    set('[data-team-name]', team.name);
-    set('[data-team-course]', team.course ?? '');
-    qs('[data-team-course]', card)?.toggleAttribute('hidden', !team.course);
-    set('[data-team-count]', `${team.memberCount} ${plural(team.memberCount, 'integrante', 'integrantes')}`);
-    qs('[data-team-pips]', card)?.style.setProperty('--count', String(team.memberCount));
+  private renderFaces(teams: PublicTeam[]): void {
+    const faces = qs('[data-teams-faces]', this.root);
+    const template = qs<HTMLTemplateElement>('template[data-teams-face-template]', this.root);
+    if (!faces || !template || teams === this.renderedFaces) return;
+    this.renderedFaces = teams;
+    const picked = pickFaces(teams, FACES);
+    const items = picked.flatMap((team) => {
+      const face = this.clone(template);
+      if (face) fillTeamCard(face, team);
+      return face ? [face] : [];
+    });
+    faces.replaceChildren(...items);
+    faces.hidden = items.length === 0;
+    this.setText('[data-teams-more]', teams.length > picked.length ? `+${teams.length - picked.length}` : '');
+    this.toggle('[data-teams-more]', teams.length > picked.length);
+  }
+
+  // importNode, não cloneNode: o clone do <template> nasce no documento inerte dele, onde a foto não carrega
+  // (complete = true, naturalWidth = 0) e o card caía nas iniciais a cada busca ou atualização da lista
+  private clone(template: HTMLTemplateElement | null): HTMLElement | null {
+    const source = template?.content.firstElementChild;
+    const node = source ? document.importNode(source, true) : null;
+    return node instanceof HTMLElement ? node : null;
   }
 
   // espera a pessoa parar de digitar pra anunciar o resultado
   private announce(state: TeamsState): void {
     if (this.announceTimer) clearTimeout(this.announceTimer);
     this.announceTimer = setTimeout(() => {
-      const n = state.visible.length;
+      const total = state.teams.length;
       const text = state.query.trim()
-        ? `${n} ${plural(n, 'equipe encontrada', 'equipes encontradas')}`
-        : `${state.teams.length} ${plural(state.teams.length, 'equipe confirmada', 'equipes confirmadas')}`;
+        ? foundLabel(state.visible.length)
+        : `${total} ${confirmedLabel(total)}`;
       this.setText('[data-teams-live]', text);
     }, 450);
   }
 
-  // só busca na planilha quando a seção chega perto da tela (e de novo se voltar depois de 1 min)
+  // só busca na planilha quando a lista chega perto da tela (e de novo se voltar depois de 1 min)
   private refreshWhenVisible(): void {
     if (!('IntersectionObserver' in window)) {
       void this.vm.refresh();

@@ -57,7 +57,7 @@ describe('RegistrationFormView · prazo conferido no navegador', () => {
     const title = notice?.querySelector<HTMLElement>('[data-reg-notice-title]');
     expect(title?.textContent).toBe('Inscrições encerradas');
     expect(title?.tabIndex).toBe(-1);
-    expect(notice?.querySelector('a')?.getAttribute('href')).toBe('#equipes');
+    expect(notice?.querySelector('a')?.getAttribute('href')).toBe('/equipes');
     expect(el('[data-reg-panel]')?.hidden).toBe(true);
   });
 

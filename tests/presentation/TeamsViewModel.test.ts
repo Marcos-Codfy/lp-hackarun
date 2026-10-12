@@ -5,8 +5,8 @@ import { TeamsViewModel, type PublicTeam } from '@presentation/view-models/teams
 import { teamName } from '../helpers/fixtures';
 
 const initial: PublicTeam[] = [
-  { id: '1', name: 'Café com Código', course: 'Engenharia de Software', memberCount: 4 },
-  { id: '2', name: 'Null Pointers', course: 'Ciência da Computação', memberCount: 3 },
+  { id: '1', name: 'Café com Código', course: 'Engenharia de Software', memberCount: 4, imageUrl: null },
+  { id: '2', name: 'Null Pointers', course: 'Ciência da Computação', memberCount: 3, imageUrl: null },
 ];
 const SLOTS: SlotsDTO = { capacity: 10, taken: 2, remaining: 8, level: 'plenty' };
 
@@ -54,7 +54,7 @@ describe('TeamsViewModel', () => {
     expect(s.teams.map((t) => t.id)).toEqual(['a', 'c']);
     expect(s.visible.map((t) => t.id)).toEqual(['c']);
     expect(s.slots).toEqual({ capacity: 10, taken: 2, remaining: 8, level: 'plenty' });
-    expect(s.teams[0]).toEqual({ id: 'a', name: 'Alfa Squad', course: null, memberCount: 5 });
+    expect(s.teams[0]).toEqual({ id: 'a', name: 'Alfa Squad', course: null, memberCount: 5, imageUrl: null });
   });
 
   it('erro é silencioso: a lista atual continua', async () => {

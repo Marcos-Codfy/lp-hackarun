@@ -3,6 +3,9 @@ import { fieldOrder, type RegistrationFields } from './RegistrationFields';
 
 export type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
+// foto/logo: nada escolhido, preparando no aparelho, pronta pro envio ou recusada (o erro diz o porquê)
+export type TeamImageStatus = 'empty' | 'processing' | 'ready' | 'invalid';
+
 export interface FieldError {
   path: string;
   message: string;
@@ -33,6 +36,7 @@ export interface RegistrationFormState {
   focus: FocusRequest | null;
   canAddMember: boolean;
   canRemoveMember: boolean;
+  imageStatus: TeamImageStatus;
 }
 
 // erros na ordem visual do formulário (o primeiro é quem ganha o foco)

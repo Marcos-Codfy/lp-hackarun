@@ -1,7 +1,14 @@
 // @vitest-environment node
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { MIN_FILL_MS, SubmitRegistration, type RegistrationPayload } from '@application/index';
+import {
+  CONSENT_VERSION,
+  MIN_FILL_MS,
+  SubmitRegistration,
+  type RegistrationPayload,
+} from '@application/index';
+import { TEAM_IMAGE_RULES } from '@domain/index';
 import { FixedClock } from '@infrastructure/clock/SystemClock';
 import { FakeGateway, teamInput } from '../../helpers/fixtures';
 import { AppsScriptSandbox } from '../../helpers/apps-script/sandbox';
@@ -29,21 +36,35 @@ const SEEDED = [
 ];
 
 describe('Apps Script · lista pública de equipes', () => {
-  it('expõe só {id, name, course, memberCount} das equipes confirmadas', () => {
+  it('expõe só {id, name, course, memberCount, imageId} das equipes confirmadas', () => {
     const script = new AppsScriptSandbox();
     script.seed(SEEDED);
     const res = script.get('teams');
     expect(res.ok).toBe(true);
     expect(res.teams).toHaveLength(1);
     const [team] = res.teams ?? [];
-    expect(Object.keys(team ?? {}).sort()).toEqual(['course', 'id', 'memberCount', 'name']);
+    expect(Object.keys(team ?? {}).sort()).toEqual(['course', 'id', 'imageId', 'memberCount', 'name']);
     expect(team).toMatchObject({ name: 'Os Brabos', course: 'Engenharia de Software', memberCount: 4 });
     expect(team?.['id']).toMatch(/^team-[0-9a-f]{10}$/);
-    // nada pessoal escapa, nem o protocolo (o id é um hash dele)
+    // nada pessoal escapa, nem o protocolo (o id é um hash dele com o segredo do script)
     const raw = JSON.stringify(res);
     ['ana@exemplo.com', '99999', 'Ana Souza', 'Bruno', 'Libras', 'HR26-'].forEach((secret) =>
       expect(raw).not.toContain(secret),
     );
+  });
+
+  it('o id público não sai só do hash do protocolo (dava pra achar testando todos): usa o segredo do script', () => {
+    const script = new AppsScriptSandbox();
+    script.seed(SEEDED);
+    const id = script.get('teams').teams?.[0]?.['id'];
+    const plainHash = createHash('sha256').update('HR26-AAAAAA', 'utf8').digest('hex').slice(0, 10);
+    expect(id).not.toBe(`team-${plainHash}`);
+    const secret = script.properties['ID_SEGREDO'] ?? '';
+    expect(secret.length).toBeGreaterThanOrEqual(64);
+    // o segredo fica guardado: o mesmo protocolo dá o mesmo id em toda leitura
+    script.cache.store.clear();
+    expect(script.get('teams').teams?.[0]?.['id']).toBe(id);
+    expect(script.properties['ID_SEGREDO']).toBe(secret);
   });
 
   it('usa o cache e o onEdit da coluna Status limpa ele na hora', () => {
@@ -75,6 +96,14 @@ describe('Apps Script · contrato com o site', () => {
 
   it('MIN_ELAPSED_MS do Validation.gs é igual ao MIN_FILL_MS do SubmitRegistration', () => {
     expect(new AppsScriptSandbox().evaluate<number>('MIN_ELAPSED_MS')).toBe(MIN_FILL_MS);
+  });
+
+  it('CONSENT_VERSION do Validation.gs é igual ao do SubmitRegistration', () => {
+    expect(new AppsScriptSandbox().evaluate<string>('CONSENT_VERSION')).toBe(CONSENT_VERSION);
+  });
+
+  it('MAX_IMAGE_BYTES do Images.gs é igual ao teto da foto no domínio', () => {
+    expect(new AppsScriptSandbox().evaluate<number>('MAX_IMAGE_BYTES')).toBe(TEAM_IMAGE_RULES.maxBytes);
   });
 
   // o navegador espera o mínimo antes de mandar: envio rápido de gente de verdade passa no filtro de robô
