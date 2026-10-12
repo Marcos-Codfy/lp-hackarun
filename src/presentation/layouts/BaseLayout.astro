@@ -37,8 +37,14 @@ const configJson = safeJsonForScript(appConfig);
 
     <script type="application/json" id={APP_CONFIG_ID} set:html={configJson} />
     <script>
-      import { App } from '@presentation/app/App';
-      App.boot();
+      import { afterFirstContentfulPaint } from '@presentation/app/PaintGate';
+
+      // o chunk do app só começa a baixar depois que o hero aparece (sem JS a página já é legível)
+      afterFirstContentfulPaint(() => {
+        import('@presentation/app/App')
+          .then(({ App }) => App.boot())
+          .catch((error: unknown) => console.error('[app] boot chunk failed', error));
+      });
     </script>
   </body>
 </html>

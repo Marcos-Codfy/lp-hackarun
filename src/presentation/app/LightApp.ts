@@ -1,16 +1,14 @@
 import { EventBus } from '@shared/core/EventBus';
-import { qs, qsa, readJsonAttr } from '@shared/utils/dom';
+import { qs, qsa } from '@shared/utils/dom';
 import { prefersReducedMotion } from '@shared/utils/env';
-import type { SlotsDTO } from '@application/index';
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { HeaderScrollController } from '@presentation/controllers/HeaderScrollController';
 import { MobileMenuController } from '@presentation/controllers/MobileMenuController';
 import { NativeScroll } from '@presentation/motion/core/NativeScroll';
 import { MotionPreferenceViewModel } from '@presentation/view-models/motion/MotionPreferenceViewModel';
-import { TeamsViewModel, type PublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
 import { MotionPreferenceView } from '@presentation/views/motion/MotionPreferenceView';
-import { TeamsView } from '@presentation/views/TeamsView';
-import { readAppConfig, type AppConfig } from './AppConfig';
+import { mountTeams } from '@presentation/views/teams/mountTeams';
+import { readAppConfig } from './AppConfig';
 import type { AppEvents } from './AppEvents';
 import { afterNextPaint, BootQueue } from './BootQueue';
 
@@ -32,17 +30,6 @@ function mountMotionToggle(c: ClientContainer, bus: EventBus<AppEvents>): void {
     reducedMotion: prefersReducedMotion(),
   });
   new MotionPreferenceView(vm, qsa<HTMLButtonElement>('[data-motion-toggle]')).mount();
-}
-
-function mountTeams(c: ClientContainer, config: AppConfig): void {
-  qsa('[data-teams]').forEach((root) => {
-    const vm = new TeamsViewModel({
-      initial: readJsonAttr<PublicTeam[]>(root, 'data-teams-initial', []),
-      slots: readJsonAttr<SlotsDTO>(root, 'data-teams-slots', config.registration.slots),
-      listTeams: c.listTeams,
-    });
-    new TeamsView(root, vm).mount();
-  });
 }
 
 // boot das páginas leves (/equipes): header, menu, "Pausar animações" e a lista de equipes ao vivo.
@@ -72,7 +59,7 @@ export class LightApp {
       container.current = createClientContainer(config, { dev: import.meta.env.DEV });
     });
     boot.add('motion', () => container.current && mountMotionToggle(container.current, bus));
-    boot.add('teams', () => container.current && mountTeams(container.current, config));
+    boot.add('teams', () => container.current && mountTeams(container.current, config.registration.slots));
     await boot.run();
   }
 }

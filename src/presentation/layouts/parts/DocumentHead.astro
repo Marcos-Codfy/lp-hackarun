@@ -1,5 +1,6 @@
 ---
-// <head> comum de todas as páginas: meta, fontes self-hosted (2 com preload) e SEO
+// <head> comum de todas as páginas: meta, fontes self-hosted e SEO. As 3 têm preload: o hero usa as três,
+// e a mono (HUD, chips) descoberta só pelo CSS virava uma cadeia CSS > estilo > fonte antes do 1º paint
 // orbitron com o til redesenhado (scripts/fonts/patch_orbitron_tilde.py): a original lê "NÀO"
 import displayFont from '../../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
 import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
@@ -31,5 +32,6 @@ const fontFaces = [
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
 <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={monoFont} as="font" type="font/woff2" crossorigin />
 <Seo {...seo} />
 <style is:inline set:html={fontFaces} />

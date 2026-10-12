@@ -1,5 +1,6 @@
 import type { AppContext } from '@presentation/app/AppContext';
 import { CanvasResizer } from './CanvasResizer';
+import { whenFramesSettle } from './FrameSettle';
 import { createContext, warmContext, type ContextAnswers } from './GpuContext';
 import type { ParticleBuffers } from './particles/ParticleBuffers';
 import { QualityDetector } from './quality/QualityDetector';
@@ -29,6 +30,8 @@ export async function startPrelude(canvas: HTMLCanvasElement, ctx: AppContext): 
   const source = new ShapeSource();
   const shapes: ShapeOrder = { source, count: guess.count, buffers: source.request(track.keys, guess.count) };
   try {
+    // as formas já saíram pro worker; o contexto espera a GPU largar o resto da página (FrameSettle)
+    await whenFramesSettle();
     CanvasResizer.presize(canvas, guess.maxDpr);
     const context = createContext(canvas);
     const answers = await warmContext(context);
