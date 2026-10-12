@@ -12,6 +12,10 @@ do Git.
 
 ## [Unreleased]
 
+Nada por enquanto.
+
+## [0.4.0] - 2026-10-12
+
 Ajustes pedidos pela organização depois da aprovação da v2, em quatro rodadas. Na rodada 2, o site deixa de ter som,
 o clímax da inscrição fica mais curto e calmo e as equipes ganham uma página própria, com a foto ou a logo de cada
 time. Na rodada 3, o conteúdo passa a seguir o documento do coordenador do evento (duas frentes, a programação real e
@@ -498,7 +502,8 @@ Fundação do projeto.
 - Bootstrap do cliente (`App`), contratos de eventos e o esqueleto das seções com a sequência de cenas do scroll.
 - Agenda `/hackarun-2026.ics` gerada no build.
 
-[Unreleased]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Marcos-Codfy/lp-hackarun/releases/tag/v0.1.0

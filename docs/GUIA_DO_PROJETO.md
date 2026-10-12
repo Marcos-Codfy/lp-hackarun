@@ -2,7 +2,7 @@
 
 > Documento de handoff: tudo que uma pessoa nova precisa pra rodar, entender, alterar e publicar a landing page.
 > Mantido junto do código. O PDF é gerado a partir deste arquivo com `npm run docs:pdf`.
-> Última atualização: 12/10/2026 (versão 0.3.0 + ajustes em [Unreleased], histórico na seção 18.1).
+> Última atualização: 12/10/2026 (versão 0.4.0, histórico na seção 18.1).
 
 ## 1. Links rápidos
 
@@ -1114,6 +1114,7 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 | 10/10/2026 | 0.1.0  | Fundação: Astro + TypeScript estrito, Clean Architecture/DDD, tokens e layout base      |
 | 10/10/2026 | 0.2.0  | Site v1: seções, 3D de partículas, inscrição via Apps Script, testes, docs e CI         |
 | 11/10/2026 | 0.3.0  | v2 cinematográfica: identidade oficial, pós-processamento, LGPD, performance, QA e a11y |
+| 12/10/2026 | 0.4.0  | Feedback da organização: programação real, inscrição em `/inscricao`, equipes, LAES     |
 
 **11/10/2026, v2 aprovada e publicada:**
 

@@ -1,6 +1,6 @@
 {
   "name": "lp-hackarun",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Landing page cinematográfica do HackaRun 2026, o evento de tecnologia, inovação e empreendedorismo da UniCatólica com o Capim Dourado Shopping (Palmas-TO), feita com Astro, Three.js e GSAP.",
   "keywords": [
