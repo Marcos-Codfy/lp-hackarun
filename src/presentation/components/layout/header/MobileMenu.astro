@@ -45,7 +45,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
         {cta.label}
       </Button>
       <p class="mobile-menu__meta" aria-hidden="true">
-        Unicatólica · Palmas – TO
+        UniCatólica · Palmas – TO
       </p>
     </div>
   </div>
@@ -68,15 +68,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
     animation: menu-in 0.45s var(--ease-out) both;
   }
 
+  /* o ritmo vertical acompanha a altura da tela: em 375x667 o CTA cabe sem rolar */
   .mobile-menu__inner {
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: clamp(var(--space-3), 2svh, var(--space-5));
     min-height: 100%;
     width: min(100% - 2 * var(--gutter), 40rem);
     margin-inline: auto;
-    padding-block: calc(var(--header-h) + var(--space-6))
-      calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+    padding-block: calc(var(--header-h) + clamp(var(--space-4), 3svh, var(--space-6)))
+      calc(clamp(var(--space-4), 3svh, var(--space-6)) + env(safe-area-inset-bottom, 0px));
   }
 
   .mobile-menu__eyebrow {
@@ -103,8 +104,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
     grid-template-columns: 2.25rem 1fr auto;
     align-items: center;
     gap: var(--space-3);
-    min-height: 64px;
-    padding-block: var(--space-3);
+    min-height: clamp(48px, 8svh, 64px);
+    padding-block: clamp(var(--space-2), 1.2svh, var(--space-3));
     color: var(--text);
     font-family: var(--font-display);
     /* "PROGRAMAÇÃO" (~9,6em) precisa caber em 360px */

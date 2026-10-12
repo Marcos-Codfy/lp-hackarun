@@ -23,19 +23,20 @@ export const MILESTONES: MilestoneDTO[] = [
   { key: 'ceremony', label: 'A premiação começa em', at: '2026-11-14T18:00:00-03:00' },
 ];
 
+export const MEMBER_ANA = { name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' };
+export const MEMBER_BRUNO = { name: 'Bruno Lima', studentId: '2024100456', email: 'bruno@exemplo.com' };
+
+// integrante válido número n (matrícula e e-mail únicos)
+export const member = (n: number) => ({
+  name: 'Pessoa Integrante',
+  studentId: `RA-${String(n).padStart(4, '0')}`,
+  email: `p${n}@exemplo.com`,
+});
+
 export function teamInput(overrides: Partial<RegistrationInput> = {}): RegistrationInput {
   return {
-    mode: 'team',
     teamName: 'Bug Busters',
-    leader: {
-      name: 'Ana Souza',
-      email: 'ana@exemplo.com',
-      phone: '(63) 99999-1234',
-      course: 'Engenharia de Software',
-      semester: '5º período',
-    },
-    members: [{ name: 'Bruno Lima', email: 'bruno@exemplo.com', course: 'Ciência da Computação' }],
-    accessibilityNeeds: '',
+    members: [{ ...MEMBER_ANA }, { ...MEMBER_BRUNO }],
     acceptedTerms: true,
     teamImage: TEAM_IMAGE,
     ...overrides,

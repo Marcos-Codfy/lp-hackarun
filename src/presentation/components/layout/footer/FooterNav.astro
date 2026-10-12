@@ -51,9 +51,11 @@ const { page = 'home' } = Astro.props;
     text-transform: uppercase;
   }
 
+  /* colunas do tamanho do texto: em 360px "03 Programação" não encosta no "04 Final" ao lado */
   .fnav__list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, max-content);
+    justify-content: space-between;
     gap: 0 var(--space-6);
   }
 

@@ -1,7 +1,7 @@
 /* render adiado: longe do topo, o navegador só monta a seção quando ela chega perto da tela.
    no celular o 1º layout (e o refeito a cada fonte que chega) fica bem mais leve.
    contain-intrinsic-size é a altura do CONTEÚDO (o padding da seção soma por cima): medido em 390 e 1440 px
-   (#inscricao com as inscrições abertas, o estado que mais tempo fica no ar).
+   (#inscricao com as inscrições abertas e #programacao com o 1º dia na aba, os estados que mais tempo ficam no ar).
    "auto" lembra a altura real depois da 1ª vez; o LayoutRefresher recalcula os gatilhos quando a seção monta */
 @layer base {
   #programacao,
@@ -16,48 +16,48 @@
   }
 
   #programacao {
-    contain-intrinsic-size: auto 3325px;
+    contain-intrinsic-size: auto 1307px;
   }
   #mentores {
-    contain-intrinsic-size: auto 1645px;
+    contain-intrinsic-size: auto 1778px;
   }
   #final {
-    contain-intrinsic-size: auto 890px;
+    contain-intrinsic-size: auto 1251px;
   }
   #premios {
-    contain-intrinsic-size: auto 1246px;
+    contain-intrinsic-size: auto 1295px;
   }
   #equipes {
     contain-intrinsic-size: auto 911px;
   }
   #faq {
-    contain-intrinsic-size: auto 1172px;
+    contain-intrinsic-size: auto 1765px;
   }
   #inscricao {
     contain-intrinsic-size: auto 4618px;
   }
   .site-footer {
-    contain-intrinsic-size: auto 1682px;
+    contain-intrinsic-size: auto 1298px;
   }
 
   @media (min-width: 1024px) {
     #programacao {
-      contain-intrinsic-size: auto 1762px;
+      contain-intrinsic-size: auto 1096px;
     }
     #mentores {
-      contain-intrinsic-size: auto 982px;
+      contain-intrinsic-size: auto 1042px;
     }
     #final {
-      contain-intrinsic-size: auto 912px;
+      contain-intrinsic-size: auto 1124px;
     }
     #premios {
-      contain-intrinsic-size: auto 1142px;
+      contain-intrinsic-size: auto 1167px;
     }
     #equipes {
       contain-intrinsic-size: auto 891px;
     }
     #faq {
-      contain-intrinsic-size: auto 838px;
+      contain-intrinsic-size: auto 1293px;
     }
     #inscricao {
       contain-intrinsic-size: auto 3994px;

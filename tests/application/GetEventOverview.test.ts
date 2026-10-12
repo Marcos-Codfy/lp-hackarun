@@ -17,7 +17,7 @@ import { teamName } from '../helpers/fixtures';
 const raw = eventData as RawEvent;
 
 const team = (id: string, status: 'confirmed' | 'pending') =>
-  Team.create({ id, name: teamName(`Equipe ${id}`), members: [], course: null, mentor: null, status });
+  Team.create({ id, name: teamName(`Equipe ${id}`), memberCount: 3, status });
 
 const teams = (list: Team[]): TeamRepository => ({ list: async () => list });
 
@@ -88,14 +88,16 @@ describe('GetEventOverview', () => {
 
   it('monta as estatísticas e as datas do evento', async () => {
     const dto = await overview(raw, []);
-    // minicursos contam por tópico (mínimo 1 por sessão)
+    // oficinas contam por horário (as "Oficinas 1, 2 e 3" do dia 13 valem três): 3 + 1 + 3 no documento
     const workshops = raw.days
-      .flatMap((d) => d.sessions)
-      .filter((s) => s.kind === 'workshop')
-      .reduce((acc, s) => acc + Math.max(1, s.topics?.length ?? 0), 0);
+      .flatMap((d) => d.sessions.flatMap((s) => s.activities))
+      .filter((a) => a.kind === 'workshop')
+      .reduce((acc, a) => acc + Math.max(1, a.parts?.length ?? 0), 0);
     expect(dto.stats.days).toBe(raw.days.length);
     expect(dto.stats.stations).toBe(2);
     expect(dto.stats.workshops).toBe(workshops);
+    expect(dto.stats.workshops).toBe(7);
+    expect(dto.stats.stands).toBe(10);
     expect(dto.firstDate).toBe('2026-11-11');
     expect(dto.lastDate).toBe('2026-11-14');
     expect(dto.milestones.map((m) => m.key)).toEqual(['kickoff', 'submission', 'ceremony']);

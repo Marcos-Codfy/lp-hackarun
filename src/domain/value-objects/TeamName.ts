@@ -9,6 +9,7 @@ export class TeamName extends ValueObject<{ value: string }> {
 
   static create(raw: string): Result<TeamName, string> {
     const value = raw.trim().replace(/\s+/g, ' ');
+    if (!value) return fail('Informe o nome da equipe.');
     if (value.length < TeamName.MIN || value.length > TeamName.MAX) {
       return fail(`O nome da equipe precisa ter de ${TeamName.MIN} a ${TeamName.MAX} caracteres.`);
     }

@@ -1,18 +1,16 @@
 // monta as Views MVVM (pausa das animações, contador, equipes, inscrição, HUD, NPCs) sobre o container
-import type { SlotsDTO } from '@application/index';
 import { createClientContainer, type ClientContainer } from '@composition/client';
-import { qs, qsa, readJsonAttr } from '@shared/utils/dom';
+import { qs, qsa } from '@shared/utils/dom';
 import type { AppContext } from '@presentation/app/AppContext';
 import type { BootSteps } from '@presentation/app/BootQueue';
+import { LazyMount } from '@presentation/app/LazyMount';
 import { CountdownViewModel } from '@presentation/view-models/countdown/CountdownViewModel';
-import { TeamsViewModel, type PublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
-import { RegistrationFormViewModel } from '@presentation/view-models/registration/RegistrationFormViewModel';
+import type { TeamsViewModel } from '@presentation/view-models/teams/TeamsViewModel';
 import { HudViewModel } from '@presentation/view-models/hud/HudViewModel';
 import { NpcHuntViewModel } from '@presentation/view-models/npc/NpcHuntViewModel';
 import { MotionPreferenceViewModel } from '@presentation/view-models/motion/MotionPreferenceViewModel';
 import { CountdownView } from './CountdownView';
-import { TeamsView } from './TeamsView';
-import { RegistrationFormView } from './RegistrationFormView';
+import type { RegistrationFormView } from './RegistrationFormView';
 import { RegistrationCtaController } from './RegistrationCtaController';
 import { ChargeRevealView } from './ChargeRevealView';
 import { HudView } from './HudView';
@@ -24,8 +22,11 @@ class ViewMounter {
   private c: ClientContainer | null = null;
   private npc: NpcHuntViewModel | null = null;
   private form: RegistrationFormView | null = null;
+  // origem do último CTA de inscrição (o VM do formulário nasce depois, quando o chunk chega)
+  private intent: string | null = null;
   // lista ao vivo das equipes: vagas esgotadas na planilha fecham o formulário
   private teamsVm: TeamsViewModel | null = null;
+  private teamsLazy: LazyMount | null = null;
 
   constructor(private readonly ctx: AppContext) {}
 
@@ -75,37 +76,40 @@ class ViewMounter {
     if (section) new ChargeRevealView(this.ctx, section).mount();
   }
 
+  // o formulário (VM, View, envio e foto) é o maior pedaço do JS e mora no fim da página: chunk à parte,
+  // carregado quando a seção chega perto da tela, quando a pessoa interage nele ou quando um CTA leva até lá
   registrationForm(c: ClientContainer): void {
     const root = qs('[data-registration-form]');
     if (!root) return;
-    const status = root.dataset['status'];
-    const vm = new RegistrationFormViewModel({
-      submit: c.submitRegistration,
-      prepareImage: c.prepareTeamImage,
-      teamSize: this.ctx.config.registration.teamSize,
-      isOpen: status === 'open' || status === 'closing',
-      clock: c.clock,
+    const lazy = new LazyMount(root.closest<HTMLElement>('section') ?? root, () => this.loadForm(c, root));
+    this.ctx.bus.on('registration:intent', ({ source }) => {
+      this.intent = source;
+      lazy.trigger();
     });
-    this.ctx.bus.on('registration:intent', ({ source }) => vm.setSource(source));
-    const view = new RegistrationFormView(root, vm, this.ctx.bus);
-    view.mount();
-    this.form = view;
-    this.teamsVm?.state.subscribe((state) => {
-      if (state.status === 'ready') vm.refreshAvailability(state.slots.taken);
-    });
+    lazy.watch();
   }
 
+  private async loadForm(c: ClientContainer, root: HTMLElement): Promise<void> {
+    const [{ mountRegistrationForm }, services] = await Promise.all([
+      import('./registration/mountRegistrationForm'),
+      c.loadRegistration(),
+      // as vagas ao vivo vêm da lista de equipes: sem ela o formulário monta mesmo assim
+      this.teamsLazy?.ensure().catch(() => undefined),
+    ]);
+    const { ctx, teamsVm: teams, intent: source } = this;
+    this.form = mountRegistrationForm({ root, ctx, services, clock: c.clock, teams, source });
+  }
+
+  // vitrine e contador ao vivo das equipes (bem abaixo da dobra): chunk à parte, quando a seção chega perto
   teams(c: ClientContainer): void {
-    const fallbackSlots: SlotsDTO = this.ctx.config.registration.slots;
-    qsa('[data-teams]').forEach((root) => {
-      const vm = new TeamsViewModel({
-        initial: readJsonAttr<PublicTeam[]>(root, 'data-teams-initial', []),
-        slots: readJsonAttr<SlotsDTO>(root, 'data-teams-slots', fallbackSlots),
-        listTeams: c.listTeams,
-      });
-      this.teamsVm ??= vm;
-      new TeamsView(root, vm).mount();
+    const roots = qsa('[data-teams]');
+    const first = roots[0];
+    if (!first) return;
+    this.teamsLazy = new LazyMount(first.closest<HTMLElement>('section') ?? first, async () => {
+      const { mountTeams } = await import('./teams/mountTeams');
+      this.teamsVm ??= mountTeams(c, this.ctx.config.registration.slots, roots)[0] ?? null;
     });
+    this.teamsLazy.watch();
   }
 
   // passo que precisa do container: sem ele (config quebrada) não monta

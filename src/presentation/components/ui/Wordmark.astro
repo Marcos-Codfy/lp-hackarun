@@ -4,10 +4,12 @@ import BrandLogo from './BrandLogo.astro';
 // logo oficial em tamanhos fixos (header, rodapé, 404). Decorativo: quem usa dá o nome acessível
 interface Props {
   size?: 'sm' | 'md' | 'xl';
+  // no header das páginas sem hero o logo é o LCP: sem lazy e com fetchpriority alta
+  priority?: boolean;
   class?: string;
 }
 
-const { size = 'sm', class: className } = Astro.props;
+const { size = 'sm', priority = false, class: className } = Astro.props;
 
 const SOURCES = {
   sm: { widths: [160, 320], sizes: '160px' },
@@ -18,7 +20,7 @@ const source = SOURCES[size];
 ---
 
 <span class:list={['wordmark', `wordmark--${size}`, className]} aria-hidden="true">
-  <BrandLogo widths={[...source.widths]} sizes={source.sizes} />
+  <BrandLogo widths={[...source.widths]} sizes={source.sizes} priority={priority} />
 </span>
 
 <style>

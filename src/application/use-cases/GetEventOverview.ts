@@ -37,10 +37,7 @@ export class GetEventOverview {
     const registration = event.registration.withSlots(Slots.create(event.registration.slots.capacity, taken));
     const status = this.policy.statusAt(this.clock.now(), registration);
 
-    const workshops = event.days
-      .flatMap((d) => d.sessions)
-      .filter((s) => s.kind === 'workshop')
-      .reduce((acc, s) => acc + Math.max(1, s.topics.length), 0);
+    const workshops = event.days.flatMap((d) => d.sessions).reduce((acc, s) => acc + s.workshopCount, 0);
 
     return {
       name: event.name,
@@ -53,7 +50,7 @@ export class GetEventOverview {
       venues: event.venues.map(toVenueDTO),
       milestones: event.milestones.map(toMilestoneDTO),
       registration: toRegistrationDTO(registration, status),
-      stats: { days: event.days.length, stations: stations.length, workshops },
+      stats: { days: event.days.length, stations: stations.length, workshops, stands: event.maxStands },
     };
   }
 }

@@ -35,7 +35,7 @@ describe('views (smoke)', () => {
         <div data-teams-empty></div>
         <p data-teams-live></p>
         <template data-teams-template><li><p data-team-name></p>
-          <p data-team-course></p><span data-team-pips></span><span data-team-count></span></li></template>
+          <span data-team-pips></span><span data-team-count></span></li></template>
       </div>`;
     const root = document.querySelector('[data-teams]') as HTMLElement;
     const vm = new TeamsViewModel({

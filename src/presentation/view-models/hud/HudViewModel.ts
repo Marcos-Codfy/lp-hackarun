@@ -10,9 +10,9 @@ export interface HudState {
   progress: number;
 }
 
-// "03/11 · MISSÕES"
+// "03 de 11 · MISSÕES": com barra ("03/11") a página toda em dd/mm lia o contador como data
 export const formatCheckpoint = (s: Pick<HudState, 'index' | 'total' | 'label'>): string =>
-  `${pad2(s.index + 1)}/${pad2(s.total)} · ${s.label.toLocaleUpperCase('pt-BR')}`;
+  `${pad2(s.index + 1)} de ${pad2(s.total)} · ${s.label.toLocaleUpperCase('pt-BR')}`;
 
 // HUD da corrida: em qual checkpoint a pessoa está e quanto falta
 export class HudViewModel {

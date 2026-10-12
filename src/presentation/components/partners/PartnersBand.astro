@@ -24,7 +24,7 @@ const partner = partners.find((p) => p.role === 'partner');
     <div class="partners__row">
       <PartnerLogo
         logo={unicatolicaLogo}
-        name={organizer?.name ?? 'Unicatólica'}
+        name={organizer?.name ?? 'UniCatólica'}
         role="Realização"
         caption="Cursos de Engenharia de Software e Inteligência Artificial"
         url={organizer?.url ?? null}
@@ -36,7 +36,7 @@ const partner = partners.find((p) => p.role === 'partner');
         logo={capimLogo}
         name={partner?.name ?? 'Capim Dourado Shopping'}
         role="Parceria"
-        caption="Palco da grande final, com telão e banda ao vivo"
+        caption="Parceiro exclusivo da premiação e palco da HackaRun Experience"
         url={partner?.url ?? null}
         tone="gold"
         width={16}
@@ -83,29 +83,30 @@ const partner = partners.find((p) => p.role === 'partner');
     transform: scaleX(-1);
   }
 
+  /* lado a lado desde o celular (empilhadas, as duas logos ocupavam mais de uma tela no rodapé) */
   .partners__row {
     display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: start;
     justify-items: center;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .partners__divider {
-    width: 8rem;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgb(140 160 255 / 0.4), transparent);
+    align-self: center;
+    width: 1px;
+    height: 8rem;
+    background: linear-gradient(180deg, transparent, rgb(140 160 255 / 0.45), transparent);
   }
 
   @media (min-width: 768px) {
     .partners__row {
-      grid-template-columns: 1fr auto 1fr;
       align-items: center;
       gap: var(--space-6);
     }
 
     .partners__divider {
-      width: 1px;
       height: 10rem;
-      background: linear-gradient(180deg, transparent, rgb(140 160 255 / 0.45), transparent);
     }
   }
 </style>

@@ -1,16 +1,21 @@
 import type { AppContext } from '@presentation/app/AppContext';
 import type { BootSteps } from '@presentation/app/BootQueue';
-import { qs } from '@shared/utils/dom';
+import { LazyMount } from '@presentation/app/LazyMount';
+import { qs, qsa } from '@shared/utils/dom';
+import { DayTabsController } from './DayTabsController';
 import { HeaderScrollController } from './HeaderScrollController';
 import { HudRailController } from './HudRailController';
 import { MobileMenuController } from './MobileMenuController';
 import { NavSpyController } from './NavSpyController';
+import { scheduleDates, todayForSchedule } from './scheduleToday';
 import { SceneThemeController } from './theme/SceneThemeController';
 
 // o App monta direto; a chamada antiga do mountAnimators na mesma fila vira no-op (sem header em dobro)
 const mounted = new WeakSet<BootSteps>();
+const EVENT_TIME_ZONE = 'America/Araguaina';
 
-// controladores de DOM que não são MVVM (header, menu, nav spy, HUD, aurora); funcionam sem GSAP.
+// controladores de DOM que não são MVVM (header, menu, abas da programação, trilho das missões no celular,
+// nav spy, HUD, aurora); sem GSAP.
 // Links internos ficam com o AnchorNavigator (motion/core). Header e menu primeiro: são o que a pessoa toca logo
 export function mountControllers(ctx: AppContext, boot: BootSteps): void {
   if (mounted.has(boot)) return;
@@ -23,6 +28,24 @@ export function mountControllers(ctx: AppContext, boot: BootSteps): void {
     const toggle = qs<HTMLButtonElement>('[data-menu-toggle]');
     const panel = qs('[data-menu-panel]');
     if (toggle && panel) new MobileMenuController({ header, toggle, panel, motion: ctx.motion }).mount();
+  });
+
+  // antes dos animadores: a programação já mede com um dia só (o LayoutRefresher refaz os gatilhos)
+  boot.add('day tabs', () => {
+    const roots = qsa('[data-day-tabs]');
+    if (roots.length === 0) return;
+    const today = todayForSchedule(scheduleDates(roots), new Date(), EVENT_TIME_ZONE);
+    roots.forEach((root) => new DayTabsController(root, { today }).mount());
+  });
+
+  // contador do trilho de deslizar do celular: chunk à parte, baixado só perto da seção (fora do JS inicial)
+  boot.add('missions rail', () => {
+    const missions = qs('[data-missions]');
+    if (!missions) return;
+    new LazyMount(missions, async () => {
+      const { MissionsRailController } = await import('./MissionsRailController');
+      new MissionsRailController(missions).mount();
+    }).watch();
   });
 
   boot.add('nav spy', () => new NavSpyController(ctx.bus).mount());

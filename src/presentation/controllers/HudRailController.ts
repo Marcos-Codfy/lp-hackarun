@@ -7,15 +7,21 @@ interface Tick {
 }
 
 const START_RATIO = 0.6;
+// celular: a pílula some rolando pra baixo e volta ao subir ou depois de um tempo parado
+const IDLE_MS = 1200;
+const DIRECTION_PX = 6;
 
-// desenha um tique por checkpoint no trilho do HUD e marca passados/atual pelo scroll
-// (o texto, a barra e os NPCs continuam com a HudView; aqui é só a régua)
+// desenha um tique por checkpoint no trilho do HUD e marca passados/atual pelo scroll; no celular, tira a
+// pílula da frente do texto (o texto, a barra e os NPCs continuam com a HudView)
 export class HudRailController {
   private readonly root: HTMLElement;
   private readonly sections: HTMLElement[];
   private ticks: Tick[] = [];
   private current = -2;
   private frame = 0;
+  private lastY = 0;
+  private tucked = false;
+  private idle = 0;
 
   constructor(root: HTMLElement) {
     this.root = root;
@@ -23,7 +29,9 @@ export class HudRailController {
   }
 
   mount(): void {
-    this.watchFooter();
+    // a pílula fica por cima do texto do rodapé ("© 2026 HackaRun") e dos erros do formulário: some ali
+    this.hideOver('.site-footer', 'is-footer');
+    this.hideOver('#inscricao-lobby', 'is-form');
     const host = qs('[data-hud-ticks]', this.root);
     if (!host || this.sections.length === 0) return;
     this.ticks = this.sections.map(() => {
@@ -39,13 +47,29 @@ export class HudRailController {
     new ResizeObserver(this.remeasure).observe(document.body);
   }
 
-  // celular: a pílula fica por cima do texto do rodapé ("© 2026 HackaRun"); some enquanto ele está na tela
-  private watchFooter(): void {
-    const footer = qs('.site-footer');
-    if (!footer || !('IntersectionObserver' in window)) return;
+  // marca a classe enquanto o alvo está na tela (o desktop ignora: lá o HUD é o trilho da borda)
+  private hideOver(selector: string, className: string): void {
+    const target = qs(selector);
+    if (!target || !('IntersectionObserver' in window)) return;
     new IntersectionObserver(([entry]) => {
-      this.root.classList.toggle('is-footer', entry?.isIntersecting ?? false);
-    }).observe(footer);
+      this.root.classList.toggle(className, entry?.isIntersecting ?? false);
+    }).observe(target);
+  }
+
+  // mesma lógica do header: rolando pra baixo recolhe; subindo, ou ~1,2 s parado, volta
+  private tuck(scrollY: number): void {
+    const delta = scrollY - this.lastY;
+    if (Math.abs(delta) < DIRECTION_PX) return;
+    this.lastY = scrollY;
+    this.setTucked(delta > 0);
+    window.clearTimeout(this.idle);
+    if (delta > 0) this.idle = window.setTimeout(() => this.setTucked(false), IDLE_MS);
+  }
+
+  private setTucked(next: boolean): void {
+    if (next === this.tucked) return;
+    this.tucked = next;
+    this.root.classList.toggle('is-tucked', next);
   }
 
   // tudo que mede antes de qualquer escrita: ler e escrever alternado recalculava o estilo a cada tique
@@ -70,7 +94,9 @@ export class HudRailController {
     if (!this.frame) {
       this.frame = requestAnimationFrame(() => {
         this.frame = 0;
-        this.render(window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
+        const scrollY = window.scrollY;
+        this.tuck(scrollY);
+        this.render(scrollY, document.documentElement.scrollHeight - window.innerHeight);
       });
     }
   };

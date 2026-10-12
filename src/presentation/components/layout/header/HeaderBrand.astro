@@ -2,7 +2,8 @@
 import BrandLogo from '@presentation/components/ui/BrandLogo.astro';
 import type { SitePage } from '../navLinks';
 
-// logo oficial no header (~30px de altura visível); o link dá o nome acessível
+// logo oficial no header (~30px de altura visível); o link dá o nome acessível.
+// Fora da home ele é o LCP: carrega na hora e com prioridade (na LP a prioridade é do logo do hero)
 interface Props {
   page?: SitePage;
 }
@@ -17,7 +18,7 @@ const home = page === 'home';
   data-nav-link
   aria-label={home ? 'HackaRun 2026, voltar ao início' : 'HackaRun 2026, página inicial'}
 >
-  <BrandLogo widths={[160, 320]} sizes="140px" class="header-brand__logo" />
+  <BrandLogo widths={[160, 320]} sizes="140px" class="header-brand__logo" priority={!home} />
 </a>
 
 <style>

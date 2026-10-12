@@ -21,15 +21,12 @@ const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
   <PartnersBand partners={partners} />
 
   <div class="container site-footer__main">
-    <FooterBrand
-      meta={`${dates} · ${event.city} · Hackathon de Engenharia de Software e IA`}
-      home={page === 'home'}
-    />
+    <FooterBrand meta={`${dates} · ${event.city} · ${event.tagline}`} home={page === 'home'} />
     <FooterNav page={page} />
   </div>
 
   <div class="container site-footer__bottom">
-    <p>© 2026 HackaRun · Unicatólica</p>
+    <p>© 2026 HackaRun · UniCatólica</p>
     <a class="site-footer__top" href={topHref(page)} data-nav-link>
       Voltar ao topo
       <span class="site-footer__top-icon" aria-hidden="true">

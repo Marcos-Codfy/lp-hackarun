@@ -9,7 +9,6 @@ import { HeroIntroAnimator } from './HeroIntroAnimator';
 import { MissionsTrackAnimator } from './MissionsTrackAnimator';
 import { SpotlightAnimator } from './SpotlightAnimator';
 import { TerminalTypeAnimator } from './TerminalTypeAnimator';
-import { TimelineAnimator } from './TimelineAnimator';
 
 // entradas das seções, um passo do boot cada (os controladores de DOM o App monta antes, em passo próprio)
 export function mountAnimators(ctx: AppContext, boot: BootSteps): void {
@@ -24,7 +23,6 @@ export function mountAnimators(ctx: AppContext, boot: BootSteps): void {
       new FadeUpAnimator(),
       new CounterAnimator(),
       new BarGrowAnimator(),
-      new TimelineAnimator(),
       new TerminalTypeAnimator(),
       new SpotlightAnimator(),
     )

@@ -17,16 +17,18 @@ describe('AppsScriptTeamRepository', () => {
     const { fetchFn, repo } = repoReturning({
       ok: true,
       teams: [
-        { id: 'team-1', name: 'Os Brabos', course: 'ES', memberCount: 4 },
-        { id: 'team-2', name: 'Solo', course: '', memberCount: 'x' },
+        { id: 'team-1', name: 'Os Brabos', memberCount: 4, course: 'ES', email: 'ana@exemplo.com' },
+        { id: 'team-2', name: 'Solo', memberCount: 'x' },
       ],
     });
     const teams = await repo.list();
     expect(fetchFn.mock.calls[0]?.[0]).toBe(`${ENDPOINT}?action=teams`);
-    expect(teams.map((t) => [t.id, t.name.value, t.course, t.size, t.status])).toEqual([
-      ['team-1', 'Os Brabos', 'ES', 4, 'confirmed'],
-      ['team-2', 'Solo', null, 1, 'confirmed'],
+    expect(teams.map((t) => [t.id, t.name.value, t.size, t.status])).toEqual([
+      ['team-1', 'Os Brabos', 4, 'confirmed'],
+      ['team-2', 'Solo', 1, 'confirmed'],
     ]);
+    // campo a mais que vier da planilha (servidor antigo) não passa pra entidade
+    expect(JSON.stringify(teams)).not.toMatch(/ES|ana@/);
   });
 
   it('linha torta é ignorada em vez de derrubar a lista', async () => {

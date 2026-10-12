@@ -13,7 +13,7 @@ export class ListMissions {
     const [stations, scoring] = await Promise.all([this.stations.list(), this.stations.scoring()]);
     return {
       stations: [...stations].sort((a, b) => a.order - b.order).map(toStationDTO),
-      scoring: toScoringDTO(scoring),
+      scoring: scoring ? toScoringDTO(scoring) : null,
     };
   }
 }

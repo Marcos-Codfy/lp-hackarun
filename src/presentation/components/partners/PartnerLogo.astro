@@ -44,8 +44,9 @@ const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer
     display: grid;
     justify-items: center;
     align-content: start;
-    gap: var(--space-5);
-    padding: var(--space-6) var(--space-5);
+    gap: var(--space-4);
+    width: 100%;
+    padding: var(--space-4) var(--space-1);
     border-radius: 4px;
     color: inherit;
     text-align: center;
@@ -77,16 +78,20 @@ const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer
     color: #ffd88a;
   }
 
+  /* celular: as duas logos numa caixa da mesma altura, pra as legendas começarem na mesma linha */
   .partner__mark {
     display: grid;
     place-items: center;
-    width: min(var(--w), 70vw);
-    min-height: 8rem;
+    width: min(var(--w), 100%);
+    height: 8.5rem;
   }
 
+  /* cabe na caixa pela largura ou pela altura, o que vier primeiro (proporção da logo intacta) */
   .partner__img {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     height: auto;
+    max-height: 100%;
     opacity: 0.88;
     transition:
       opacity var(--dur) var(--ease-out),
@@ -104,9 +109,30 @@ const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer
   .partner__caption {
     max-width: 22rem;
     color: var(--text-muted);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
     line-height: 1.5;
     text-wrap: balance;
+  }
+
+  @media (min-width: 768px) {
+    .partner {
+      gap: var(--space-5);
+      padding: var(--space-6) var(--space-5);
+    }
+
+    .partner__mark {
+      height: auto;
+      min-height: 8rem;
+    }
+
+    .partner__img {
+      width: 100%;
+      max-height: none;
+    }
+
+    .partner__caption {
+      font-size: var(--fs-sm);
+    }
   }
 
   .partner:focus-visible {

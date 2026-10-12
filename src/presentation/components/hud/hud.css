@@ -19,8 +19,11 @@
   transform: none;
 }
 
-/* rodapé na tela: a pílula sai da frente do texto (o HudRailController marca .is-footer) */
-.hud.is-ready.is-footer {
+/* a pílula sai da frente do texto: rodapé ou formulário na tela, ou rolando pra baixo (o HudRailController
+   marca .is-footer, .is-form e .is-tucked) */
+.hud.is-ready.is-footer,
+.hud.is-ready.is-form,
+.hud.is-ready.is-tucked {
   opacity: 0;
   transform: translateY(8px);
 }
