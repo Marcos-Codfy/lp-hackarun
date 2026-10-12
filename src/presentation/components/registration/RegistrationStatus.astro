@@ -1,0 +1,153 @@
+---
+// selo de status da página de inscrição (em breve, abertas, encerrando, encerradas) + o contador da largada.
+// Se o prazo passar com a página aberta, a View troca o selo pra "Encerradas" (data-reg-status).
+// Celular e tablet: uma linha só embaixo do título (o lead já diz o tamanho da equipe e a LP mostra o contador);
+// desktop: o card completo ao lado do título
+import type { MilestoneDTO, RegistrationDTO } from '@application/index';
+import Countdown from '@presentation/components/countdown/Countdown.astro';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+
+interface Props {
+  status: RegistrationDTO['status'];
+  teamSize: { min: number; max: number };
+  milestones: MilestoneDTO[];
+}
+
+const { status, teamSize, milestones } = Astro.props;
+const copy = new RegistrationCopy();
+const team = `Equipes de ${teamSize.min} a ${teamSize.max} pessoas, só alunos da UniCatólica`;
+---
+
+{/* vidro sólido: no desktop o halo de HUD passa atrás do card e os tiques não podem aparecer através dele */}
+<div class="regstatus sx-glass sx-glass--solid" data-reg-status data-state={status}>
+  <p class="regstatus__label" id="reg-status-label">
+    Status da inscrição
+  </p>
+  <p class="regstatus__value">
+    <span class="regstatus__dot" aria-hidden="true"></span>
+    <span data-reg-status-badge>{copy.statusBadge(status)}</span>
+  </p>
+  <p class="regstatus__team">{team}</p>
+  {status !== 'closed' && (
+    <div class="regstatus__countdown" data-reg-status-countdown>
+      <Countdown milestones={milestones} variant="compact" />
+    </div>
+  )}
+</div>
+
+<style>
+  .regstatus {
+    --state: var(--c-success);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-self: start;
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .regstatus[data-state='soon'] {
+    --state: var(--c-gold);
+  }
+
+  .regstatus[data-state='closing'] {
+    --state: var(--c-orange);
+  }
+
+  .regstatus[data-state='closed'] {
+    --state: var(--c-danger);
+  }
+
+  .regstatus__label {
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .regstatus__value {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .regstatus__dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    background: var(--state);
+    box-shadow: 0 0 14px var(--state);
+    transform: rotate(45deg);
+  }
+
+  /* nas últimas horas o ponto pisca (loop listado no motion-pause.css) */
+  .regstatus[data-state='closing'] .regstatus__dot {
+    animation: regstatus-pulse 1.4s var(--ease-in-out) infinite;
+  }
+
+  .regstatus__team {
+    display: none;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .regstatus__countdown {
+    display: none;
+    justify-items: start;
+    margin-top: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--surface-line);
+  }
+
+  @media (min-width: 64rem) {
+    .regstatus {
+      display: grid;
+      justify-self: stretch;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-5) var(--space-5);
+    }
+
+    .regstatus__value {
+      gap: var(--space-3);
+      font-size: var(--fs-xl);
+    }
+
+    .regstatus__dot {
+      width: 10px;
+      height: 10px;
+    }
+
+    .regstatus__team {
+      display: block;
+    }
+
+    .regstatus__countdown {
+      display: grid;
+    }
+  }
+
+  @keyframes regstatus-pulse {
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .regstatus[data-state='closing'] .regstatus__dot {
+      animation: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .regstatus__dot {
+      background: CanvasText;
+    }
+  }
+</style>

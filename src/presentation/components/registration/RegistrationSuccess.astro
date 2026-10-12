@@ -1,7 +1,9 @@
 ---
-// tela de sucesso: emblema + protocolo "decodificando" + canal oficial (e-mail) + próximos passos.
-// A View preenche o protocolo e o e-mail do contato e foca o título
+// tela de sucesso: emblema + protocolo "decodificando" + onde a equipe aparece + canal oficial (e-mail) +
+// próximos passos. A View preenche o protocolo e o e-mail do contato e foca o título
 import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { EVENT_RETURN_HREF } from '@presentation/components/layout/navLinks';
 import MailNotice from './MailNotice.astro';
 
 const steps = [
@@ -32,6 +34,9 @@ const steps = [
       <span aria-hidden="true" data-reg-protocol-typed></span>
     </p>
   </div>
+  <p class="success__teams">
+    Sua equipe aparece em <a href="/equipes">Equipes</a> depois da confirmação.
+  </p>
   <MailNotice compact>
     A confirmação e todos os avisos do HackaRun chegam por e-mail em{' '}
     <strong class="success__mail" data-reg-contact-email>
@@ -57,6 +62,10 @@ const steps = [
       Ver equipes
     </Button>
   </div>
+  <a class="success__back" href={EVENT_RETURN_HREF} data-back-to-event>
+    <Icon name="arrow-left" size={16} />
+    Voltar ao evento
+  </a>
 </div>
 
 <style>
@@ -140,6 +149,33 @@ const steps = [
     letter-spacing: 0.1em;
     text-shadow: 0 0 18px color-mix(in srgb, var(--c-success) 55%, transparent);
     user-select: all;
+  }
+
+  .success__teams {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .success__teams a,
+  .success__back {
+    color: var(--ink-cyan);
+  }
+
+  .success__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .success__back:hover {
+    color: var(--text);
   }
 
   .success__mail {

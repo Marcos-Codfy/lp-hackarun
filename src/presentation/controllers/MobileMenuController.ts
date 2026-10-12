@@ -38,6 +38,8 @@ export class MobileMenuController {
     window.matchMedia(DESKTOP_QUERY).addEventListener('change', (event) => {
       if (event.matches) this.close({ restoreFocus: false });
     });
+    // saiu da página com o menu aberto (gesto de voltar): quem volta pelo bfcache não acha a tela travada
+    window.addEventListener('pagehide', () => this.close({ restoreFocus: false }));
   }
 
   open(): void {

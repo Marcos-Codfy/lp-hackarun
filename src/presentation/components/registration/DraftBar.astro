@@ -1,0 +1,78 @@
+---
+// faixa do rascunho da aba ("Rascunho salvo nesta aba" + "Limpar rascunho"); o DraftKeeper liga e mostra
+import Icon from '@presentation/components/ui/Icon.astro';
+---
+
+<div class="draft" data-draft hidden>
+  <span class="draft__icon" aria-hidden="true">
+    <Icon name="save" size={16} />
+  </span>
+  <p class="draft__text">
+    <span data-draft-text>Rascunho salvo nesta aba</span>
+    <span class="draft__note" data-draft-note hidden></span>
+  </p>
+  <button type="button" class="draft__clear" data-draft-clear>
+    <Icon name="trash" size={16} />
+    Limpar rascunho
+  </button>
+</div>
+
+<style>
+  /* faixa do rascunho: o que foi digitado fica só nesta aba */
+  .draft {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--surface-line);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .draft__icon {
+    color: var(--c-success);
+  }
+
+  .draft__text {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .draft__note {
+    color: var(--ink-orange);
+  }
+
+  .draft__clear {
+    grid-column: 1 / -1;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding-inline: var(--space-2);
+    margin-left: calc(var(--space-2) * -1);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .draft__clear:hover:not(:disabled) {
+    color: var(--ink-danger);
+  }
+
+  /* enviando: espera a resposta da planilha */
+  .draft__clear:disabled {
+    opacity: 0.45;
+    cursor: progress;
+  }
+
+  .draft__clear:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+</style>

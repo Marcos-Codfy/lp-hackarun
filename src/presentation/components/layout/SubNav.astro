@@ -1,0 +1,211 @@
+---
+// barra fina embaixo do header nas páginas leves (/inscricao e /equipes): "← Voltar ao evento" à esquerda e
+// o seletor entre as duas páginas à direita. O voltar é um link pro fim da LP; com JS, quem veio da LP volta
+// no histórico pro mesmo ponto (views/navigation/backToEvent.ts). No celular estreito os rótulos encurtam,
+// e o nome acessível continua o completo. A barra tem a largura e o recuo da barra do header logo acima: as
+// duas linhas de navegação começam e terminam juntas
+import Icon from '@presentation/components/ui/Icon.astro';
+import { EVENT_RETURN_HREF, subNavLinksFor, type SubNavPage } from './navLinks';
+
+interface Props {
+  page: SubNavPage;
+}
+
+const { page } = Astro.props;
+const links = subNavLinksFor(page);
+---
+
+<nav class="subnav" aria-label="Inscrição e equipes">
+  <a class="subnav__back" href={EVENT_RETURN_HREF} data-back-to-event>
+    <span class="subnav__back-icon" aria-hidden="true">
+      <Icon name="arrow-left" size={16} />
+    </span>
+    <span>
+      Voltar<span class="subnav__long">&nbsp;ao evento</span>
+    </span>
+  </a>
+  <ul class="subnav__switch" role="list">
+    {links.map((link) => (
+      <li>
+        <a class="subnav__tab" href={link.href} aria-current={link.ariaCurrent}>
+          {link.short === link.label ? (
+            link.label
+          ) : (
+            <>
+              {link.short}
+              <span class="subnav__long">&nbsp;{link.label.slice(link.short.length).trim()}</span>
+            </>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .subnav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: min(100% - 2 * var(--gutter), 84rem);
+    min-height: 3.5rem;
+    margin-inline: auto;
+    padding-block: var(--space-2);
+  }
+
+  /* fio de energia embaixo da barra, como o do rodapé */
+  .subnav::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgb(0 229 255 / 0.45), rgb(148 27 255 / 0.25) 55%, transparent);
+  }
+
+  .subnav__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .subnav__back-icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid rgb(0 229 255 / 0.45);
+    border-radius: 3px;
+    color: var(--c-cyan);
+    transition:
+      translate var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .subnav__back:hover {
+    color: var(--text);
+  }
+
+  .subnav__back:hover .subnav__back-icon {
+    translate: -3px 0;
+    box-shadow: 0 0 18px rgb(0 229 255 / 0.4);
+  }
+
+  /* trilho do seletor: as duas abas inclinadas lado a lado, a atual acesa */
+  .subnav__switch {
+    display: flex;
+    flex: none;
+    padding: 3px;
+    border-radius: 3px;
+    background: var(--surface-well);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+  }
+
+  .subnav__tab {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding-inline: 0.7rem;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .subnav__tab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 2px;
+    transform: skewX(var(--skew));
+    transition:
+      background var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .subnav__tab:hover {
+    color: var(--text);
+  }
+
+  .subnav__tab:hover::before {
+    background: rgb(0 229 255 / 0.06);
+  }
+
+  .subnav__tab[aria-current='page'] {
+    color: var(--text);
+    text-shadow: 0 0 14px rgb(0 229 255 / 0.45);
+  }
+
+  .subnav__tab[aria-current='page']::before {
+    background: linear-gradient(100deg, rgb(0 229 255 / 0.26), rgb(18 100 255 / 0.3));
+    box-shadow:
+      inset 0 0 0 1px rgb(0 229 255 / 0.65),
+      0 0 18px rgb(0 229 255 / 0.25);
+  }
+
+  .subnav__tab:focus-visible,
+  .subnav__back:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* celular estreito: o resto do rótulo some da tela mas continua no nome acessível */
+  .subnav__long {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 30rem) {
+    .subnav__long {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+    }
+
+    .subnav__tab {
+      padding-inline: 1rem;
+      font-size: 0.6875rem;
+    }
+  }
+
+  /* desktop: o header recua o logo e o CTA dentro da barra; aqui o mesmo recuo */
+  @media (min-width: 1024px) {
+    .subnav {
+      padding-inline: var(--space-5) var(--space-4);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .subnav__tab[aria-current='page']::before {
+      background: Highlight;
+    }
+
+    .subnav__tab[aria-current='page'] {
+      color: HighlightText;
+    }
+  }
+</style>

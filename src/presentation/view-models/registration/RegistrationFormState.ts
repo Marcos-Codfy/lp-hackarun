@@ -1,5 +1,6 @@
 import type { RegistrationErrors } from '@domain/index';
 import { fieldOrder, type RegistrationFields } from './RegistrationFields';
+import { NO_STEP_DONE, type StepCompletion } from './registrationSteps';
 
 export type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -40,6 +41,8 @@ export interface RegistrationFormState {
   imageStatus: TeamImageStatus;
   // aviso pro leitor de tela ao somar ou tirar integrante; seq muda a cada aviso
   announcement: Announcement | null;
+  // etapas sem nenhum erro de validação (indicador de progresso), tocadas ou não
+  steps: StepCompletion;
 }
 
 export interface Announcement {
@@ -55,6 +58,17 @@ export function orderErrors(errors: RegistrationErrors, fields: RegistrationFiel
     .map(([path, message]) => ({ path, message }))
     .sort((a, b) => rank(a.path) - rank(b.path));
 }
+
+// envio saindo: limpa a falha e os erros da tentativa anterior (o resumo volta só se a resposta trouxer erro)
+export const submittingState = (s: RegistrationFormState): RegistrationFormState => ({
+  ...s,
+  status: 'submitting',
+  attempted: true,
+  failure: null,
+  retryable: false,
+  errors: {},
+  orderedErrors: [],
+});
 
 // formulário recém-montado: vazio, sem erro à vista e com o status do build
 export function initialState(
@@ -75,6 +89,7 @@ export function initialState(
     focus: null,
     imageStatus: 'empty',
     announcement: null,
+    steps: NO_STEP_DONE,
     ...bounds,
   };
 }

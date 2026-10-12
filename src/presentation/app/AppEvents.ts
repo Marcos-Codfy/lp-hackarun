@@ -17,7 +17,5 @@ export interface AppEvents extends Record<string, unknown> {
   // pausou ou retomou as animações (WCAG 2.2.2); o estado atual é a classe is-motion-paused do <html>
   'motion:paused': { paused: boolean };
   'npc:found': { id: string; found: number; total: number };
-  // alguém clicou num CTA de inscrição
-  'registration:intent': { source: string };
   'registration:submitted': { protocol: string };
 }

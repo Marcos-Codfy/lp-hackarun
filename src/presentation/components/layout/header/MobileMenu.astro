@@ -4,16 +4,16 @@ import Button from '@presentation/components/ui/Button.astro';
 import ButtonChevrons from '@presentation/components/ui/ButtonChevrons.astro';
 import PauseMotionSwitch from '@presentation/components/motion/PauseMotionSwitch.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
-import { NAV_LINKS, navLinkAttrs, navLinksFor, pageHref, type SitePage } from '../navLinks';
+import { headerCtaAttrs, NAV_LINKS, navLinkAttrs, navLinksFor, type SitePage } from '../navLinks';
 
 // overlay de tela cheia do mobile (padrão disclosure: o botão de fechar é o próprio toggle da barra)
 // abre/fecha pelo MobileMenuController: foco, Esc, scroll lock e resto da página inert
 type Props = { id: string; registration: RegistrationDTO; page?: SitePage };
 
 const { id, registration, page = 'home' } = Astro.props;
-const cta = new RegistrationCopy().cta(registration.status);
-// CTA de inscrição é interceptado pelo módulo de inscrição; o resto passa pelo smooth scroll
-const ctaAttrs = cta.isRegistration ? { registrationCta: 'menu' } : { 'data-nav-link': true };
+const cta = new RegistrationCopy().cta(registration.status, 'menu');
+// CTA de inscrição: a página /inscricao (com a origem); na própria página ele é o item atual
+const ctaAttrs = headerCtaAttrs(cta, page, 'menu');
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
@@ -41,7 +41,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </nav>
     <div class="mobile-menu__foot">
       <PauseMotionSwitch />
-      <Button size="lg" href={pageHref(cta.href, page)} class="mobile-menu__cta" {...ctaAttrs}>
+      <Button size="lg" class="mobile-menu__cta" {...ctaAttrs}>
         {cta.label}
       </Button>
       <p class="mobile-menu__meta" aria-hidden="true">

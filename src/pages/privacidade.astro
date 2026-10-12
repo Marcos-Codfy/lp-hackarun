@@ -8,6 +8,7 @@ import PrivacyNotice from '@presentation/components/privacy/PrivacyNotice.astro'
 import { CONSENT_VERSION } from '@application/index';
 import { serverContainer } from '@composition/server';
 import type { AppConfig } from '@presentation/app/AppConfig';
+import { registrationHref } from '@presentation/view-models/registration/registrationOrigin';
 import '@presentation/sections/sections.css';
 
 const { event } = await serverContainer().getLandingPage.execute();
@@ -54,7 +55,13 @@ const seo = {
 
         <PrivacyNotice />
 
-        <Button size="lg" href="/#inscricao" class="privacy__cta">
+        <p class="privacy__draft">
+          Enquanto você preenche a inscrição, o rascunho (nome da equipe, integrantes e a foto já preparada)
+          fica guardado só nesta aba do navegador, para nada se perder se você sair e voltar, e some quando a
+          aba é fechada, quando a inscrição é enviada ou quando você toca em “Limpar rascunho”.
+        </p>
+
+        <Button size="lg" href={registrationHref('privacidade')} class="privacy__cta">
           Ir para a inscrição
           <Icon slot="icon" name="arrow-right" />
         </Button>
@@ -93,6 +100,13 @@ const seo = {
   .privacy__lead {
     color: var(--text-muted);
     font-size: var(--fs-lg);
+  }
+
+  .privacy__draft {
+    padding-left: var(--space-4);
+    border-left: 2px solid color-mix(in srgb, var(--c-cyan) 45%, transparent);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
   }
 
   .privacy__frame :global(.privacy__cta) {

@@ -50,4 +50,14 @@ describe('SubmissionSession', () => {
     session.complete();
     expect(session.meta('')).toMatchObject({ elapsedMs: 2000, idempotencyKey: 'k-0002' });
   });
+
+  it('retoma a chave do rascunho (só no formato que o servidor aceita) até a inscrição entrar', () => {
+    const session = new SubmissionSession(new ManualClock('2026-11-01T12:00:00Z'), () => 'nova-0001');
+    session.resume('chave com espaço');
+    expect(session.key).toBe('nova-0001');
+    session.resume('3f0c9a52-6d1e-4b7a-9c3e-2a5b8d7e1f40');
+    expect(session.meta('').idempotencyKey).toBe('3f0c9a52-6d1e-4b7a-9c3e-2a5b8d7e1f40');
+    session.complete();
+    expect(session.key).toBe('nova-0001');
+  });
 });

@@ -6,9 +6,11 @@ interface Props {
   item: FaqItemDTO;
   number: number;
   withToken?: boolean;
+  // atalho no fim da resposta (ex.: "Como faço a inscrição?" leva pra /inscricao)
+  link?: { href: string; label: string } | null;
 }
 
-const { item, number, withToken = false } = Astro.props;
+const { item, number, withToken = false, link = null } = Astro.props;
 ---
 
 <details class="faq-entry">
@@ -21,6 +23,14 @@ const { item, number, withToken = false } = Astro.props;
   </summary>
   <div class="faq-entry__answer">
     <p>{item.answer}</p>
+    {link && (
+      <p>
+        <a class="faq-entry__link" href={link.href}>
+          {link.label}
+          <span aria-hidden="true"> →</span>
+        </a>
+      </p>
+    )}
     {withToken && (
       <p class="faq-entry__token">
         <NpcToken id="npc-3" label="Token NPC escondido no FAQ" />
@@ -162,6 +172,15 @@ const { item, number, withToken = false } = Astro.props;
 
   .faq-entry[open] .faq-entry__answer {
     animation: faq-reveal var(--dur-slow) var(--ease-out);
+  }
+
+  .faq-entry__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-cyan);
+    font-weight: 600;
+    text-underline-offset: 4px;
   }
 
   .faq-entry__token {

@@ -12,6 +12,7 @@
 | Branch de produção      | `main`                                                                                    |
 | Hospedagem              | Cloudflare Pages, plano gratuito (`https://lp-hackarun.pages.dev` depois de conectar)     |
 | Inscrições              | Formulário do site (só equipe), Apps Script (Web App) e Google Sheets em 3 abas (seção 9) |
+| Página de inscrição     | `/inscricao` (`src/pages/inscricao.astro`): o formulário, com etapas e rascunho na aba    |
 | Aviso de privacidade    | `/privacidade` (`src/pages/privacidade.astro`), linkado no consentimento e no rodapé      |
 | Equipes inscritas       | `/equipes` (`src/pages/equipes.astro`), com foto ou logo; link no header e na LP          |
 | Fotos das equipes       | Pasta do Google Drive gravada pelo Apps Script (`apps-script/Images.gs`, seção 9.6)       |
@@ -22,7 +23,7 @@
 | Como contribuir         | `CONTRIBUTING.md`: fork, branch, Conventional Commits e checklist do PR (seção 15)        |
 | Changelog               | `CHANGELOG.md` (Keep a Changelog + SemVer; seção 18)                                      |
 | Especificação de design | `docs/design/design-spec.md` (v2, vigente)                                                |
-| Decisões de arquitetura | `docs/adr/` (0001 a 0008)                                                                 |
+| Decisões de arquitetura | `docs/adr/` (0001 a 0009)                                                                 |
 | Stack e padrões (PDF)   | `docs/pdf/HackaRun_LP_Stack_e_Padroes.pdf`                                                |
 
 ## 2. O que é
@@ -42,8 +43,8 @@ A fonte dos fatos (datas, horários, locais, públicos e miniementas) é o docum
 fica em `src/infrastructure/content/event.json`, e um teste confere o que foi copiado (seção 8.1).
 
 Objetivos da página: explicar o evento, mostrar a programação e as missões, mostrar as equipes confirmadas (na
-página `/equipes`, com a foto ou a logo de cada time) e **converter em inscrições**. Slogan oficial: **"Desvende.
-Programe. Conquiste."**
+página `/equipes`, com a foto ou a logo de cada time) e **converter em inscrições** (na página `/inscricao`, para onde
+levam todos os CTAs). Slogan oficial: **"Desvende. Programe. Conquiste."**
 
 A versão atual é a **v2 cinematográfica** (ADR 0006): identidade oficial, pós-processamento real e um objeto 3D novo
 para cada seção. A v1 ficou só no histórico do Git.
@@ -51,12 +52,14 @@ para cada seção. A v1 ficou só no histórico do Git.
 **Situação em 11/10/2026:** design v2 **aprovado**, código publicado no GitHub (`main`) e Lighthouse mobile com
 Performance 95 e Acessibilidade, Boas práticas e SEO em 100. O que falta para abrir as inscrições está na seção 19.
 
-**Em 12/10/2026** entraram duas rodadas de ajustes pedidos pela organização, ainda sem versão fechada
+**Em 12/10/2026** entraram três rodadas de ajustes pedidos pela organização, ainda sem versão fechada
 (`[Unreleased]` no changelog). Na rodada 2, o site perdeu o som, o clímax da inscrição ficou mais curto e calmo e as
 equipes ganharam a página `/equipes`, com a foto ou a logo que cada uma sobe na inscrição. Na rodada 3, o conteúdo
 passou a seguir o documento do coordenador (duas frentes, programação em abas e a HackaRun Experience), a inscrição
-virou só de equipe, com a planilha em três abas, e o repositório ficou pronto para fork (`npm run setup`). Resumo na
-seção 18.1. As medições do Lighthouse acima são de 11/10, antes desses ajustes.
+virou só de equipe, com a planilha em três abas, e o repositório ficou pronto para fork (`npm run setup`). Na rodada
+4, o formulário saiu da LP para a página `/inscricao` (ADR 0009), com rascunho na aba e volta ao mesmo ponto do evento,
+e o globo do fim da LP ficou bem mais calmo. Resumo na seção 18.1. O Lighthouse foi medido de novo depois da rodada 4:
+Performance 98 na LP e 99 em `/inscricao` e `/equipes` (seção 12.1).
 
 ## 3. Decisões principais
 
@@ -70,6 +73,7 @@ seção 18.1. As medições do Lighthouse acima são de 11/10, antes desses ajus
 | Hospedagem  | Cloudflare Pages (grátis)                                 | Banda e requisições ilimitadas pra estático, CDN no Brasil       |
 | Inscrições  | Google Sheets via Apps Script, só de equipe, em 3 abas    | Gratuito, a organização já usa Google, planilha vira o painel    |
 | Fotos       | Google Drive + CDN `lh3.googleusercontent.com`            | Grátis, fica com a organização, só aparece depois da confirmação |
+| Formulário  | Página própria `/inscricao`, leve, com rascunho na aba    | Tarefa focada, link próprio, sem o 3D rodando por trás           |
 | Arquitetura | Clean Architecture + DDD + MVVM                           | Camadas claras, regras testáveis, fácil de dividir entre pessoas |
 | QA          | Playwright + Brave instalado, Lighthouse (`scripts/qa`)   | Captura visual em várias larguras e métricas reais de GPU        |
 
@@ -94,12 +98,14 @@ do que está instalado), cria o `.env` a partir do `.env.example` e mostra os pr
 os scripts de QA (seção 13), e com `--check` só confere, sem instalar nem criar nada. Sem o script: `npm ci` e
 `cp .env.example .env`.
 
-Abra `http://localhost:4321`. Sem `PUBLIC_REGISTRATION_ENDPOINT` o formulário roda em **modo simulado** no
-ambiente de desenvolvimento: não grava em lugar nenhum, aplica as mesmas regras do servidor (inclusive nome de
-equipe, e-mail e matrícula repetidos entre as equipes simuladas), e as equipes inscritas aparecem já confirmadas,
-com a foto, em `/equipes` e na LP enquanto a aba estiver aberta (`sessionStorage`, chave
-`hackarun:dev:simulated-teams`; apague a chave para ver os estados vazios). E-mail de contato começando com `falha`
-simula erro de rede, `servidor` o script caindo e `duplicado` inscrição repetida.
+Abra `http://localhost:4321` (o formulário fica em `http://localhost:4321/inscricao`, sem barra no fim; com a barra
+o dev responde 404). Sem `PUBLIC_REGISTRATION_ENDPOINT` o formulário roda em **modo simulado** no ambiente de
+desenvolvimento: não grava em lugar nenhum, aplica as mesmas regras do servidor (inclusive nome de equipe, e-mail e
+matrícula repetidos entre as equipes simuladas), e as equipes inscritas aparecem já confirmadas, com a foto, em
+`/equipes` e na LP enquanto a aba estiver aberta (`sessionStorage`, chave `hackarun:dev:simulated-teams`; apague a
+chave para ver os estados vazios). E-mail de contato começando com `falha` simula erro de rede, `servidor` o script
+caindo e `duplicado` inscrição repetida. O que é digitado em `/inscricao` fica no rascunho da aba (`sessionStorage`,
+chaves `hackarun:registration-draft:v2` e `…:v2:image`; seção 9.8).
 
 Para testar o envio de verdade, publique o Apps Script numa planilha **sua** (`apps-script/README.md`) e coloque a URL
 `/exec` só no `.env`, nunca no `event.json` (ele vai para o Git e levaria a URL junto no PR).
@@ -121,6 +127,8 @@ Parâmetros de URL para testar:
 - `?quality=low`, `?quality=medium` ou `?quality=high`: força o tier do 3D e trava o ajuste automático por FPS.
 - `?now=2026-11-14T16:00:00-03:00`: desloca o relógio do site (troca de marcos do contador, estado da inscrição). A
   aba inicial da programação segue o relógio real (fuso `America/Araguaina`).
+- `/inscricao?origem=hero`: de onde a pessoa veio (o CTA põe sozinho). Só valores da lista do `registrationOrigin.ts`
+  passam; o resto vira `direct`. Vai para a coluna Origem da planilha.
 
 Os scripts de assets em Python (seção 10) pedem Python 3.11 ou mais novo: `python -m pip install -r requirements.txt`
 (fonttools, brotli e Pillow).
@@ -145,11 +153,12 @@ src/
                        SEO e aurora de fundo em comum)
     sections/          uma seção por arquivo; subcomponentes em pastas (hero/, about/, schedule/, final/,
                        missions/, teams/, shared/...)
-    components/        ui/, layout/, hud/, countdown/, registration/, teams/, partners/, privacy/,
-                       npc/, motion/ (pausar animações), seo/
+    components/        ui/, layout/ (header, rodapé, SubNav e PageHalo), hud/, countdown/, registration/,
+                       teams/, partners/, privacy/, npc/, motion/ (pausar animações), seo/
     controllers/       header, menu mobile, nav spy, abas da programação, trilhos (missões, HUD), theme/ (aurora)
     view-models/       ViewModels (MVVM): estado e lógica de tela, sem DOM
-    views/             Views (MVVM): ligam DOM e ViewModel
+    views/             Views (MVVM): ligam DOM e ViewModel; navigation/ ("Voltar ao evento", link da página
+                       atual) e registration/ (formulário, rascunho, etapas e PressGuard)
     formatters/        textos e datas da interface
     motion/            core/ (Lenis, ScrollTrigger, SceneDirector, AnchorNavigator) e animators/
                        (entradas, raios)
@@ -160,14 +169,14 @@ src/
       post/            pipelines de render, bloom, passe cinematográfico e looks por cena
       camera/          enquadramentos, voos entre cenas e câmera na mão
       layers/          estrelas, bokeh e anel de choque
-      scene/           SceneMixer, SceneLayout, ChargeController e ShapeSpin
+      scene/           SceneMixer, SceneLayout, ChargeController, ShapeSpin e CoreMotion (calma do clímax)
       quality/         tiers, detector de GPU e ajuste por FPS
       input/           ponteiro (parallax e repulsão)
     styles/            tokens.css (design tokens), base.css, deferred-sections.css (render adiado)
                        e motion-pause.css (o que para com "Pausar animações")
   shared/              utilitários sem regra de negócio (Observable, EventBus, Ticker, math, dom)
   composition/         composition roots: server.ts (build) e client.ts (browser)
-  pages/               rotas do Astro (index, equipes, privacidade, 404, .ics)
+  pages/               rotas do Astro (index, inscricao, equipes, privacidade, 404, .ics)
 apps-script/           Google Apps Script: 8 .gs + appsscript.json (inscrições, planilha em 3 abas e fotos no
                        Drive) + passo a passo
 public/                servido como está: og-image.jpg, favicon, _headers, robots
@@ -187,14 +196,20 @@ Páginas geradas no build:
 | Rota                 | Arquivo                      | O que é                                                           |
 | -------------------- | ---------------------------- | ----------------------------------------------------------------- |
 | `/`                  | `pages/index.astro`          | A landing page                                                    |
+| `/inscricao`         | `pages/inscricao.astro`      | Formulário de inscrição da equipe; página leve, sem 3D (ADR 0009) |
 | `/equipes`           | `pages/equipes.astro`        | Equipes confirmadas com foto ou logo; página leve, sem 3D         |
 | `/privacidade`       | `pages/privacidade.astro`    | Aviso de privacidade (LGPD) com a versão vigente do aviso         |
 | `/404`               | `pages/404.astro`            | Página de erro, no mesmo visual                                   |
 | `/hackarun-2026.ics` | `pages/hackarun-2026.ics.ts` | Agenda com um evento por bloco da programação (área de inscrição) |
 
-O "Adicionar à agenda" aparece no aviso de inscrições em breve, no lobby do formulário e na tela de sucesso. O botão
-que ficava na programação saiu a pedido da organização. Todas as páginas entram no sitemap (a integração só exclui
-404 e 500).
+O "Adicionar à agenda" aparece em `/inscricao`: no rodapé do formulário, no aviso de inscrições em breve e na tela
+de sucesso. O botão que ficava na programação saiu a pedido da organização. Todas as páginas entram no sitemap (a
+integração só exclui 404 e 500).
+
+Os endereços não têm barra no fim (`trailingSlash: 'never'` no `astro.config.mjs`), e o build gera um arquivo por
+página (`build.format: 'file'`: `inscricao.html`, `equipes.html`, `privacidade.html`). Assim a Cloudflare Pages
+serve `/inscricao` direto, sem o redirecionamento 308 para `/inscricao/` a cada clique, e o sitemap fica igual ao
+canonical. O código do cliente trata `/inscricao` e `/inscricao/` como a mesma página.
 
 ## 6. Arquitetura
 
@@ -234,10 +249,10 @@ quebra não derruba os seguintes. Ordem:
 
 1. `mountMotion`: Lenis (smooth scroll), ScrollTrigger, o **SceneDirector** (acompanha as seções com `data-scene`) e
    o `AnchorNavigator` (links `#secao`). Se GSAP ou Lenis quebrar, a página segue no scroll nativo (`NativeScroll`).
-2. `mountViews`: Views MVVM (pausar animações, contador, HUD, tokens NPC, CTAs de inscrição, equipes ao vivo e
-   formulário). Funcionam sem 3D. O formulário e a vitrine de equipes são chunks à parte, carregados pelo `LazyMount`
-   (`app/LazyMount.ts`) quando a seção fica a até duas telas, quando a página abre ou salta para ela (`/#id`, link
-   para o `#id`), quando a pessoa foca ou toca nela, ou quando um CTA pede.
+2. `mountViews`: Views MVVM (pausar animações, contador, HUD, tokens NPC, a revelação do CTA do clímax e equipes ao
+   vivo). Funcionam sem 3D. A vitrine de equipes é um chunk à parte, carregado pelo `LazyMount` (`app/LazyMount.ts`)
+   quando a seção fica a até duas telas, quando a página abre ou salta para ela (`/#id`, link para o `#id`) ou quando
+   a pessoa foca ou toca nela. O formulário não está mais na LP: mora em `/inscricao` (seção 9.8).
 3. `mountControllers`: controladores de DOM (header e menu primeiro, abas da programação, trilho das missões no
    celular, também pelo `LazyMount`, nav spy, trilho do HUD e aurora). Não usam GSAP, então um animador quebrado não
    leva eles junto.
@@ -250,12 +265,31 @@ quebra não derruba os seguintes. Ordem:
    dela travavam a thread por 40 a 130 ms. Sem WebGL2, com `save-data` ou se algo falhar, ele emite
    `experience:fallback` e o brilho em CSS continua.
 
-**Páginas leves** (`/equipes`): usam o `PageLayout` e o `LightApp.boot()`, que roda a mesma `BootQueue` só com header
-e menu, "Pausar animações" e a lista de equipes ao vivo (`TeamsView`). Nada de GSAP, Lenis, ScrollTrigger nem
-three.js: o menu trava o scroll nativo (`NativeScroll`) e, no lugar do objeto 3D, fica um halo de HUD estático em CSS.
-Os links da LP no header e no rodapé viram `/#secao` fora da home (`navLinksFor` em `components/layout/navLinks.ts`), e
-o item da página atual recebe `aria-current="page"`. `/privacidade` e `/404` ainda usam o boot completo e podem migrar
-para o `PageLayout` depois.
+**Páginas leves** (`/inscricao` e `/equipes`): usam o `PageLayout` e o `LightApp.boot()`, que roda a mesma
+`BootQueue` com header e menu, a navegação (`AnchorNavigator` sobre o scroll nativo, "Voltar ao evento" e o link da
+página atual), "Pausar animações", os contadores, a lista de equipes ao vivo (`TeamsView`) e, só em `/inscricao` e
+com as inscrições abertas ou encerrando, o chunk do formulário (`mountRegistrationPage`, baixado na hora: é o conteúdo
+da página). Em breve ou encerrada, o HTML do build basta e nada de envio ou de foto é baixado. Nada de GSAP, Lenis,
+ScrollTrigger nem three.js: o menu trava o scroll nativo (`NativeScroll`) e, no lugar do objeto 3D, fica um halo de
+HUD estático em CSS (`PageHalo`, que apaga a metade de baixo do mostrador). Os links da LP no header e no rodapé viram
+`/#secao` fora da home (`navLinksFor` em `components/layout/navLinks.ts`), e o item da página atual recebe
+`aria-current="page"`. `/privacidade` e `/404` ainda usam o boot completo e podem migrar para o `PageLayout` depois.
+
+**Sub-navegação** (`components/layout/SubNav.astro`), no topo de `/inscricao` e `/equipes`, com a largura e o recuo da
+barra do header: "← Voltar ao evento" à esquerda e a chave [Inscrição | Equipes inscritas] à direita, com
+`aria-current="page"` na página atual. Abaixo de 480 px os rótulos encurtam ("Voltar", "Equipes") e o nome acessível
+continua o inteiro; cabe de 320 a 1440 px sem estourar.
+
+- **"Voltar ao evento"** (`views/navigation/backToEvent.ts`): quem veio da LP nesta aba volta pelo histórico, e o
+  navegador devolve a pessoa no mesmo ponto da página (pelo bfcache ou pela restauração do scroll). Onde existe a
+  Navigation API (Chromium), ele acha a entrada da LP mesmo duas páginas atrás (LP › inscrição › equipes). Quem chegou
+  direto, e quem está sem JavaScript, vai para `/#inscricao`, que para com o clímax ocupando a tela (o
+  `data-anchor-offset="0"` da seção, lido pelo `ScrollDriver`, e o `scroll-margin-top` dela no pulo nativo).
+- **Link da página atual** (`views/navigation/currentPageLinks.ts`): em vez de recarregar (e perder o que foi
+  digitado), sobe para o topo e leva o foco para o `#conteudo`.
+- **bfcache:** a LP volta do back/forward cache com o 3D, o Lenis e o CTA aceso, sem código de `pageshow`. Para não
+  perder isso, nada de listener de `unload`/`beforeunload` nem de conexão aberta que fique viva na LP. O menu do
+  celular fecha ao sair da página, para nunca voltar aberto do cache.
 
 ### 6.4 MVVM
 
@@ -272,8 +306,12 @@ Em `presentation/controllers`, montados por `mountControllers` (não são MVVM e
 `HudRailController` (tiques do trilho do HUD e, no celular, a pílula que sai da frente do texto) e
 `SceneThemeController` (cores da aurora por cena).
 
-No celular a pílula do HUD some enquanto o rodapé ou o formulário de inscrição estão na tela (`.is-footer` e
-`.is-form`) e recolhe rolando para baixo, como o header (`.is-tucked`); volta ao subir ou depois de ~1,2 s parado. No
+O header recolhe rolando para baixo depois de 90% da altura da tela e volta em qualquer subida. Uma descida de menos de
+30 px sem roda, toque, tecla ou clique nos últimos 300 ms não conta: é o navegador ajustando o scroll sozinho (scroll
+anchoring), não a pessoa.
+
+No celular a pílula do HUD some enquanto o rodapé ou os CTAs do clímax estão na tela (`.is-footer` e `.is-cta`) e
+recolhe rolando para baixo, como o header (`.is-tucked`); volta ao subir ou depois de ~1,2 s parado. No
 desktop o trilho vertical da borda fica sempre visível. O contador diz "01 de 11 · Largada": com barra ("01/11") ele
 lia como data numa página toda em dd/mm.
 
@@ -301,8 +339,9 @@ Os módulos conversam pelo `EventBus` tipado (`presentation/app/AppEvents.ts`):
 | `experience:charged`     | Fim da carga: pulso suave do globo e o CTA acende (emitido mesmo sem WebGL)       |
 | `motion:paused`          | O usuário pausou ou retomou as animações (seção 6.7)                              |
 | `npc:found`              | Um token NPC foi encontrado                                                       |
-| `registration:intent`    | Clique num CTA de inscrição (guarda a origem)                                     |
 | `registration:submitted` | Inscrição enviada com sucesso (protocolo)                                         |
+
+O `registration:intent` saiu na rodada 4: a origem do CTA agora vai no endereço (`/inscricao?origem=…`, seção 9.8).
 
 O terminal do NPC e o protocolo da inscrição continuam "digitando" na tela, mas em silêncio: o site não tem som.
 
@@ -393,22 +432,44 @@ Em `experience/post/`, escolhido pelo nível de efeitos do tier:
 
 ### 7.5 Clímax da inscrição
 
-A seção `#inscricao` tem `data-scene="core"` e `data-scene-hold="900"`. Quando ela entra, o `SceneHoldWatcher` emite
+A seção `#inscricao` é o fim da LP: o globo volta, carrega e acende o CTA que leva para `/inscricao` (o formulário
+mora lá, seção 9.8). Ela tem `data-scene="core"` e `data-scene-hold="900"`. Quando entra, o `SceneHoldWatcher` emite
 `experience:charging` e conta 0,9 s **em tempo** (o scroll nunca é travado). Atributo vazio ou inválido cai no
 `DEFAULT_HOLD_MS` (900 ms, via `holdDuration()`). Com `prefers-reduced-motion` a carga é instantânea.
 
-- **Carga:** o `ChargeController` junta energia em curva (fitas um pouco mais agitadas e quentes) e a câmera se
-  aproxima devagar. Ao mesmo tempo, o `ChargeRevealView` põe `is-charging` e `--charge-ms` na seção, então a barra do
-  CTA enche no mesmo tempo do globo.
-- **`experience:charged`:** o globo solta um **pulso suave**. A luz (`swell`) sobe em 0,22 s e apaga devagar, o pulso
-  radial é quase igual para todas as partículas (o globo respira inteiro, as fitas não viram nuvem), o anel abre até
-  cerca de 2,6 vezes o raio do globo e some, e tudo assenta num brilho calmo. Sem flash branco e sem tremor de câmera.
-  O CTA acende no mesmo evento (`charge-glow`).
+- **Conteúdo:** um palco alto (160svh) com o miolo `sticky`, então o globo fica no centro enquanto a pessoa rola. Por
+  cima: o título "Sua vaga na _corrida_", o contador, a lista curta "Tenha em mãos" (`PrepChecklist`, 4 itens; some
+  com as inscrições encerradas), o botão principal (`RegistrationCopy.actionLabel`: "Quero participar" em breve,
+  "Inscrever minha equipe" aberta, para `/inscricao?origem=final`), "Ver as equipes" e a linha de status. Tudo cabe
+  numa tela de 360×740.
+- **Globo calmo** (`experience/scene/CoreMotion.ts`): cada cena tem um perfil de movimento. `BASE_MOTION` é o de
+  sempre (hero incluído) e `FINALE_MOTION` é o do fim: gira a 0,06 rad/s (o hero, a 0,12), as fitas fluem a 0,4× da
+  velocidade e com metade da amplitude, e o globo só **respira**: o raio cresce cerca de 1,6% e o brilho cerca de
+  10%, com ease-in-out, num ciclo de 3,6 s (`BREATH_PERIOD_S`). Os dois perfis se misturam por um peso
+  (`finaleWeight`) que vale 1 na seção com `data-scene-hold` e na travessia até ela, e 0 no resto. A deriva da
+  câmera, o empurrão do ponteiro, o respiro do scroll e o redemoinho da travessia (0,22×) também diminuem só aí, e a
+  chegada do FAQ vira uma onda limpa. Sem seção com `data-scene-hold` (a 404, por exemplo), o perfil calmo não liga
+  (`finaleIndexOf` em `SceneTrack.ts`). A fase do ruído é somada frame a frame, então mudar a velocidade não faz as
+  fitas saltarem.
+- **Carga:** o `ChargeController` só soma **luz** (calor, bloom dentro dos tetos `MAX_CHARGE_BLOOM` e
+  `MAX_CHARGE_EXPOSURE`) e contrai o globo 2,5%; não acelera nem agita as fitas. A câmera se aproxima pouco. Ao mesmo
+  tempo, o `ChargeRevealView` põe `is-charging` e `--charge-ms` na seção, e o fio de energia logo abaixo do botão
+  principal enche no mesmo tempo do globo.
+- **`experience:charged`:** um **pulso suave**. A luz (`swell`) sobe em 0,45 s e apaga em cerca de 2,3 s, o globo se
+  afasta cerca de 5% do raio e volta, e um anel (`ShockwaveRing`) nasce logo fora da borda do globo e abre até cerca
+  de 1,6 vez o raio em 2,6 s, sem cruzar o título, o contador nem o CTA. A ondulação do passe cinematográfico segue a
+  borda do globo. Depois, só o respiro. Sem flash branco e sem tremor de câmera. O CTA acende no mesmo evento
+  (`charge-glow`).
 - **Segurança:** se o evento não chegar, o CTA aparece sozinho em carga + 2,5 s (ou 6 s depois de a seção entrar na
-  tela). Sem WebGL o evento sai do mesmo jeito. Se a pessoa sai da seção no meio, a carga descarrega.
-- **Linha de status** (`.charge__status`): fica numa placa escura com contorno fino para manter o contraste sobre o
-  anel, e as duas partes, separadas por " · ", empilham abaixo de 640 px. Mudou o `RegistrationCopy.statusLine`?
-  Mantenha o " · " como separador.
+  tela). Sem WebGL o evento sai do mesmo jeito. Se a pessoa sai da seção no meio, a carga descarrega. Pausar
+  animações congela o globo, e com `prefers-reduced-motion` ele fica parado.
+- **Linha de status** (`sections/registration/ChargeStatus.astro`): fica numa placa escura com contorno fino para
+  manter o contraste sobre o globo aceso, e as duas partes, separadas por " · ", empilham no celular. Mudou o
+  `RegistrationCopy.statusLine`? Mantenha o " · " como separador.
+- **Contrato com o resto da página:** o id, o `data-scene`, o `data-scene-hold`, o `data-checkpoint`, o
+  `[data-charge-reveal]`, as classes `is-awaiting-charge`, `is-charging` e `is-charged` e os eventos
+  `experience:charging` e `experience:charged` são lidos pelo 3D, pelo HUD e pelo `ChargeRevealView`. Mexeu na seção?
+  Mantenha todos.
 
 ### 7.6 Tiers de qualidade
 
@@ -480,13 +541,14 @@ Textos fixos de seção (títulos, chamadas) ficam nos próprios `.astro` em `pr
 
 ## 9. Inscrições (Google Sheets)
 
-Fluxo: formulário (só equipe: nome, foto ou logo e, de cada integrante, nome completo, matrícula e e-mail) →
-validação no navegador (regras do domínio) → `POST` para o Web App do Apps Script → uma linha na aba **Equipes** com
-protocolo `HR26-XXXXXX`, uma linha por pessoa na aba **Integrantes** e a foto numa pasta do Drive (seção 9.6). Para a
-equipe aparecer no site, a organização muda a coluna **Status** para `confirmado`: ela entra em `/equipes` e no
-contador da LP. O site lê `?action=teams`, que expõe **só** um id público (hash do protocolo com um segredo), o nome da
-equipe, a quantidade de integrantes e o id da foto. A comunicação oficial com as equipes é por e-mail (o formulário e a
-tela de sucesso avisam), e a aba **Resumo** junta os e-mails das equipes confirmadas (seção 9.7).
+Fluxo: formulário na página `/inscricao` (só equipe: nome, foto ou logo e, de cada integrante, nome completo,
+matrícula e e-mail) → validação no navegador (regras do domínio) → `POST` para o Web App do Apps Script → uma linha
+na aba **Equipes** com protocolo `HR26-XXXXXX`, uma linha por pessoa na aba **Integrantes** e a foto numa pasta do
+Drive (seção 9.6). Para a equipe aparecer no site, a organização muda a coluna **Status** para `confirmado`: ela entra
+em `/equipes` e no contador da LP. O site lê `?action=teams`, que expõe **só** um id público (hash do protocolo com
+um segredo), o nome da equipe, a quantidade de integrantes e o id da foto. A comunicação oficial com as equipes é por
+e-mail (o formulário e a tela de sucesso avisam), e a aba **Resumo** junta os e-mails das equipes confirmadas (seção
+9.7).
 
 Passo a passo completo em `apps-script/README.md`. Depois de publicar o Web App, coloque a URL em
 `PUBLIC_REGISTRATION_ENDPOINT` (variável de ambiente na Cloudflare ou o `.env` local). O `registration.endpoint` do
@@ -543,7 +605,8 @@ mais:
 
 ### 9.3 Consentimento (LGPD)
 
-- O checkbox do formulário linka o aviso em `/privacidade` (abre em nova aba), que também está no rodapé. O texto do
+- O checkbox do formulário linka o aviso em `/privacidade`, que também está no rodapé. O link abre na mesma aba: o
+  rascunho (seção 9.8) devolve o que foi digitado quando a pessoa volta. O texto do
   aviso fica em `components/privacy/PrivacyNotice.astro`, em 9 seções: quem cuida dos dados, o que coletamos (nome da
   equipe, foto e, de cada integrante, nome completo, matrícula e e-mail; nada de telefone, curso ou dado sensível),
   para que usamos, base legal, foto ou logo da equipe, com quem compartilhamos, retenção (até 6 meses depois do
@@ -565,7 +628,9 @@ aceite`. Sem isso a inscrição não entra.
 ### 9.4 Idempotência (reenvio sem linha duplicada)
 
 - Cada sessão do formulário gera uma **chave de envio** (UUID, `view-models/registration/idempotencyKey.ts`) que vale
-  para todo reenvio até a inscrição entrar (`SubmissionSession`).
+  para todo reenvio até a inscrição entrar (`SubmissionSession`). A chave vai junto no rascunho da aba e volta com ele
+  (só no formato que o servidor aceita): recarregar depois de uma resposta perdida reenvia a mesma inscrição, sem cair
+  em "nome já inscrito".
 - No servidor, mesma chave + mesmo e-mail de contato devolve o **mesmo protocolo**: primeiro pelo cache (10 min) e,
   depois disso, pela coluna **Chave de envio** da aba Equipes. Mesmo e-mail com outra chave cai na checagem de
   duplicado (seção 9.5).
@@ -647,7 +712,8 @@ Numa planilha nova, a primeira aba vazia (`Página1` ou `Sheet1`) vira a aba Equ
 
 - **`Equipes`** (uma linha por equipe): Protocolo, Data/hora, Equipe, Integrantes (qtd), **Foto** (miniatura com
   `=IMAGE()`), **Status** (menu `pendente`/`confirmado`/`recusado`), E-mail de contato, E-mails da equipe (separados por
-  `; `), Link da foto (`=HYPERLINK()`), ID da foto, Origem, Consentimento e Chave de envio.
+  `; `), Link da foto (`=HYPERLINK()`), ID da foto, Origem (o `?origem=` do CTA que trouxe a equipe, ou `direct`),
+  Consentimento e Chave de envio.
 - **`Integrantes`** (uma linha por pessoa): Protocolo, Equipe, Nº, Nome completo, Matrícula, E-mail, Contato
   (`sim`/`não`) e Status da equipe (fórmula que busca o Status na aba Equipes).
 - **`Resumo`:** equipes inscritas, confirmadas, pendentes e recusadas, total de integrantes, vagas restantes (com
@@ -662,30 +728,73 @@ Numa planilha nova, a primeira aba vazia (`Página1` ou `Sheet1`) vira a aba Equ
 - Vindo da versão com a aba `Inscricoes` (modalidade individual, WhatsApp, curso): cole os oito arquivos e o
   manifesto, rode `configurarPlanilha()`, publique a nova versão e apague a aba antiga.
 
-### 9.8 Formulário no site
+### 9.8 Página de inscrição e formulário (`/inscricao`)
 
-- **Estrutura** (`components/registration/RegistrationForm.astro`): três etapas (`FormStep`): 01 Equipe (nome e foto),
-  02 Integrantes (`MemberList` e `MemberRow`, um `fieldset` por pessoa, e o aviso `MailNotice` de comunicação oficial
-  por e-mail) e 03 Confirmação (`ConsentField` e envio).
+Decisão registrada na ADR 0009. Até a rodada 3 o formulário ficava no fim da LP; agora mora na página leve
+`/inscricao` (`pages/inscricao.astro` + `sections/RegistrationPageSection.astro`), e a seção `#inscricao` da LP ficou
+só com o clímax e o CTA (seção 7.5). Todo CTA de inscrição do site leva para cá.
+
+- **Página:** header, sub-navegação (seção 6.3), título "Inscreva sua _equipe_", o cartão de status
+  (`RegistrationStatus`: Em breve, Abertas, Encerrando ou Encerradas, com o contador e o tamanho da equipe) e o
+  formulário com o "Adicionar à agenda" no rodapé (`AgendaRow`). SEO próprio em `components/seo/registrationPageSeo.ts`
+  (título, descrição, canonical, Open Graph e JSON-LD com `WebPage` e `BreadcrumbList` Início › Inscrição).
+- **Desktop (64rem ou mais):** formulário à esquerda e, à direita, o painel "O que você precisa ter em mãos"
+  (`RegistrationBrief`: 4 itens e 3 avisos curtos) e o cartão "Etapas da inscrição" (`FormProgress`), que fica preso
+  no alto da tela enquanto a pessoa rola o formulário.
+- **Celular e tablet (abaixo de 64rem):** o status vira um chip de uma linha (contador e tamanho da equipe só no
+  desktop), o painel vira o `<details>` recolhido "O que ter em mãos (4)" (`RegistrationBriefToggle`) e as etapas
+  ficam em linha. Abaixo de 40rem somem o título do cartão das etapas e a barra "Lobby online · Esquadrão". Em 390×844
+  o primeiro campo começa em 947 px da página (era 1.476 px).
+- **Estrutura do formulário** (`components/registration/RegistrationForm.astro`): três etapas (`FormStep`): 01 Equipe
+  (nome e foto), 02 Integrantes (`MemberList` e `MemberRow`, um `fieldset` por pessoa, e o aviso `MailNotice` de
+  comunicação oficial por e-mail) e 03 Confirmação (`ConsentField` e envio). O envio continua um só.
+- **Indicador de etapas** (`FormProgress`, `FormProgressSteps` e `views/registration/StepProgressView.ts`): etapa
+  pronta ganha um check e conta em "N de 3 prontas"; a atual é a que tem o foco (ou a primeira por terminar) e recebe
+  `aria-current="step"`; etapa com erro visível fica com `data-invalid` (número em vermelho) e o texto ", com campos a
+  ajustar" para leitor de tela. O link de cada etapa rola até ela sem criar entrada no histórico e leva o foco ao
+  primeiro controle que dá para usar (pula o que está escondido, `inert` ou desativado).
 - **Integrantes:** de `registration.teamSize.min` a `max` cards (hoje 2 a 5). O integrante 1 é o contato da equipe e
   nunca sai. Adicionar move o foco para o nome do card novo e anuncia ("Integrante 3 adicionado. A equipe tem 3 de 5
   integrantes."); remover leva o foco para o card que subiu ou para "Adicionar integrante". Com 5 de 5 o botão desativa
   e vira "Equipe completa · 5/5". Os cards do mínimo já saem no HTML (`MemberRow` com `memberKey` 0, 1...), então a
   etapa tem conteúdo antes do JS e na prévia "em breve"; o `MemberRows` adota esses cards pela chave e só clona os
-  extras do `<template>`, e o que alguém digitar neles antes do chunk chegar vai para o VM. Só o integrante 1 (o
-  contato, quem costuma preencher) tem `autocomplete="name"` e `"email"` (WCAG 1.3.5); os outros ficam em `off`.
-- **Erros no envio:** com mais de um erro, o foco vai para o resumo (`role="group"` com o título "Faltam ajustar N
-  campos:"), que rola até logo abaixo do header; os links dele levam a cada campo. Com um erro só, o foco vai direto
-  para o campo e o live region anuncia.
+  extras do `<template>`. Só o integrante 1 (o contato, quem costuma preencher) tem `autocomplete="name"` e `"email"`
+  (WCAG 1.3.5); os outros ficam em `off`.
+- **Erros no envio:** o resumo agrupa por bloco ("Equipe: nome e foto ou logo", "Integrante 2: nome, matrícula e
+  e-mail", `views/registration/errorGroups.ts`), então um envio vazio mostra 4 linhas em vez de 9; um bloco com um erro
+  só mantém a mensagem exata (um e-mail repetido, por exemplo). Com mais de um erro, o foco vai para o resumo
+  (`role="group"`, "Faltam ajustar N campos:"), que para logo abaixo do header, e os links dele levam a cada campo.
+  Com um erro só, o foco vai direto para o campo e o live region anuncia.
+- **Clique que não se perde** (`views/registration/PressGuard.ts`): digitar e ir direto em "Confirmar inscrição" ou
+  "Adicionar integrante" fazia o erro do campo (validado ao perder o foco) aparecer acima e empurrar o botão entre o
+  apertar e o soltar, e o clique se perdia. Enquanto o dedo ou o mouse estão num botão, essa validação espera o clique
+  (o envio valida tudo de qualquer jeito); se a pessoa arrasta para fora, ela roda depois de 1 s.
+- **Rascunho na aba** (`view-models/registration/RegistrationDraft.ts` e `views/registration/DraftKeeper.ts`): o que
+  foi digitado vai para o `sessionStorage` depois de uma pausa de 400 ms na digitação e ao sair da página. Os textos,
+  a origem e a chave de envio ficam em `hackarun:registration-draft:v2`; a foto já preparada fica em
+  `hackarun:registration-draft:v2:image` e só é regravada quando muda. Ao voltar para a página (pelo "Voltar", pelo
+  CTA ou recarregando), tudo é devolvido; se a foto não coube no armazenamento, o formulário pede para escolher de
+  novo. O **aceite sempre volta desmarcado**. O rascunho some ao fechar a aba, no envio com sucesso e em "Limpar
+  rascunho" (desligado durante o envio). Erro de armazenamento (aba anônima, cota cheia) nunca quebra o formulário. O
+  que é lido de volta é conferido: origem da lista, chave de envio no formato do servidor, foto com tipo e tamanho
+  válidos. Mudou o formato? Suba a versão da chave: rascunho antigo é ignorado em vez de quebrar a página. O aviso de
+  privacidade explica o rascunho, sem mudar o `CONSENT_VERSION` (a coleta é a mesma).
+- **Origem:** o CTA põe `?origem=<lugar>` no endereço (`view-models/registration/registrationOrigin.ts`: `header`,
+  `menu`, `hero`, `about`, `teams`, `faq`, `final`, `footer`, `equipes`, `subnav`, `404` e `privacidade`). Valor fora
+  da lista, ou nenhum, vira `direct`. Vai para a coluna Origem da planilha e fica no rascunho, para não se perder numa
+  volta.
+- **Sucesso:** o protocolo, o aviso do e-mail com o endereço do contato, "Sua equipe aparece em Equipes depois da
+  confirmação" (com link), "Adicionar à agenda" e "Voltar ao evento". O painel lateral (`[data-reg-aside]`) some antes
+  de o título receber o foco, sem pulo de conteúdo.
 - **Inscrições em breve** (produção sem endpoint): o aviso com "Adicionar à agenda" e só uma amostra curta e apagada
-  do formulário (22rem, some num degradê), ainda `inert`.
+  do formulário (22rem, 11rem abaixo de 40rem; some num degradê), ainda `inert`. Nesse estado, e com as inscrições
+  encerradas, o chunk do formulário nem é baixado.
 - **Regras** (domínio, `FullName`, `StudentId`, `Email`, `TeamMember` e `TeamRegistration`): nome completo com duas
   palavras ou mais, matrícula aparada e em maiúsculas, e-mail válido, e e-mail ou matrícula repetidos na equipe
   marcados no campo repetido ("já está no integrante N").
 - **Estado e tela:** `RegistrationFormViewModel` (estado e validação, sem DOM), `ServerConflicts` (conflitos do
-  servidor por campo), `memberNotices` (os anúncios) e as Views em `views/registration/`. Resumo de erros, honeypot,
-  regra dos 3 s, chave de envio e o clímax e o lobby continuam como antes. A tela de sucesso repete o aviso do e-mail
-  com o endereço do contato.
+  servidor por campo), `memberNotices` (os anúncios) e as Views em `views/registration/`, montadas por
+  `mountRegistrationPage`. Honeypot, regra dos 3 s e chave de envio continuam como antes.
 
 ## 10. Identidade e assets
 
@@ -757,28 +866,32 @@ arquivos, os PDFs caem nas fontes padrão (Helvetica/Courier).
 | Foto de equipe          | Envio: meta 300 KB, teto 400 KB; no site, 600 px e lazy    |
 | Partículas              | low 9k · medium 22k · high 42k                             |
 
-Situação em 12/10/2026 (Lighthouse mobile, build de produção servido com gzip, Brave headless, mediana de 3
-execuções; para repetir, `node lighthouse.mjs <url> --runs=3` em `scripts/qa/`, seção 13.2):
+Situação em 12/10/2026, depois da rodada 4 (Lighthouse mobile, build de produção servido com gzip, Brave headless,
+mediana de 3 execuções; para repetir, `node lighthouse.mjs <url> --runs=3` em `scripts/qa/`, seção 13.2):
 
-| Métrica                             | Antes da otimização | 11/10/2026 | 12/10/2026  |
-| ----------------------------------- | ------------------- | ---------- | ----------- |
-| Performance                         | 66                  | 95         | **98**      |
-| Total Blocking Time (TBT)           | 1.600 ms            | 18 ms      | 83 ms       |
-| Largest Contentful Paint (LCP)      | 2,9 s               | 2,6 s      | **2,2 s**   |
-| First Contentful Paint (FCP)        | não registrado      | 2,0 s      | 1,4 s       |
-| Speed Index                         | não registrado      | 2,5 s      | 2,4 s       |
-| Cumulative Layout Shift (CLS)       | não registrado      | 0,048      | **0,001**   |
-| Acessibilidade, Boas práticas e SEO | 100                 | 100        | 100         |
-| JS inicial (gzip)                   | não registrado      | 76,9 KB    | **68,4 KB** |
+| Métrica                             | Antes da otimização | 11/10/2026 | 12/10 (rodada 3) | 12/10 (rodada 4) |
+| ----------------------------------- | ------------------- | ---------- | ---------------- | ---------------- |
+| Performance                         | 66                  | 95         | 98               | **98**           |
+| Total Blocking Time (TBT)           | 1.600 ms            | 18 ms      | 83 ms            | 98 ms            |
+| Largest Contentful Paint (LCP)      | 2,9 s               | 2,6 s      | 2,2 s            | **2,2 s**        |
+| First Contentful Paint (FCP)        | não registrado      | 2,0 s      | 1,4 s            | 1,4 s            |
+| Speed Index                         | não registrado      | 2,5 s      | 2,4 s            | 2,1 s            |
+| Cumulative Layout Shift (CLS)       | não registrado      | 0,048      | 0,001            | **0,001**        |
+| Acessibilidade, Boas práticas e SEO | 100                 | 100        | 100              | 100              |
+| JS inicial (gzip)                   | não registrado      | 76,9 KB    | 68,4 KB          | **68,2 KB**      |
 
-`/equipes` no mesmo dia: Performance 100, LCP 1,9 s (o logo do header, carregado na hora e com `fetchpriority`
-alta), TBT 0 e CLS 0,001. O JS inicial é o script de entrada, o chunk do `App` e o que eles importam direto, em gzip
-(KB de 1.024 bytes; em kB decimais dá 70,0, então qualquer passo novo no boot precisa ir para um chunk à parte).
+As páginas leves no mesmo dia: `/inscricao` e `/equipes` com Performance 99, LCP de 2,0 s (o logo do header,
+carregado na hora e com `fetchpriority` alta), TBT 0 e CLS 0,001; Boas práticas e SEO em 100 nas duas e
+Acessibilidade 100 em `/equipes`. Em `/inscricao`, a Acessibilidade fica em 98 no estado "em breve" (o título do aviso
+é um `h3` logo depois do `h1`, seção 19.2) e em 100 com as inscrições abertas. O JS inicial dessas páginas é de 14,1 KB
+gzip. O JS inicial da LP é o script de entrada, o chunk do `App` e o que eles importam direto, em gzip (KB de 1.024
+bytes; em kB decimais dá 69,8, então qualquer passo novo no boot precisa ir para um chunk à parte).
 
 O LCP caiu com o `PaintGate` (o JS do app só baixa depois do 1º conteúdo pintado) e o `FrameSettle` (o contexto
-WebGL espera a GPU largar a página); o JS inicial, com o formulário, as equipes e o trilho das missões em chunks do
-`LazyMount` (seções 6.3 e 12.2). O Lighthouse simula 4G lento e CPU 4x mais lenta, mais duro que o "celular médio"
-da meta. O TBT varia entre execuções (13 a 194 ms nas últimas), sempre por tarefas do boot e do chunk do 3D.
+WebGL espera a GPU largar a página); o JS inicial, com a vitrine de equipes e o trilho das missões em chunks do
+`LazyMount` e o formulário fora da LP (seções 6.3 e 12.2). O Lighthouse simula 4G lento e CPU 4x mais lenta, mais
+duro que o "celular médio" da meta. O TBT varia entre execuções (de 68 a 245 ms nas três da rodada 4), sempre por
+tarefas do boot e do chunk do 3D.
 
 ### 12.2 Técnicas aplicadas
 
@@ -787,8 +900,9 @@ da meta. O TBT varia entre execuções (13 a 194 ms nas últimas), sempre por ta
 - **Boot fatiado depois do paint:** o chunk do `App` só baixa depois do primeiro conteúdo pintado (`PaintGate`, com
   teto de 3 s), e `App.boot()` roda a `BootQueue`, um passo curto por tarefa (seção 6.3): a primeira pintura não
   espera o JavaScript e o input não fica preso atrás do boot.
-- **Chunks sob demanda:** o formulário de inscrição, a vitrine de equipes e o contador do trilho das missões ficam
-  fora do JS inicial e carregam pelo `LazyMount` (seção perto da tela, salto por âncora, toque, foco ou CTA).
+- **Chunks sob demanda:** a vitrine de equipes e o contador do trilho das missões ficam fora do JS inicial e carregam
+  pelo `LazyMount` (seção perto da tela, salto por âncora, toque ou foco). O formulário mora em `/inscricao` e só é
+  baixado lá, com as inscrições abertas ou encerrando.
 - **Setup sob demanda:** animações de entrada montam quando a seção se aproxima da tela (`ApproachWatcher`); os
   títulos usam o `LineSplit` próprio em vez do SplitText do GSAP, que cria um `Intl.Segmenter` caro ao carregar.
 - **3D tardio e fora da thread principal:** o chunk do three.js só é importado depois do `load` e com o navegador
@@ -805,9 +919,11 @@ da meta. O TBT varia entre execuções (13 a 194 ms nas últimas), sempre por ta
 - **Qualidade adaptativa** (seção 7.6), DPR limitado por tier, pausa com a aba oculta, raios do logo só com o hero
   visível e versão leve em telas de toque.
 - **Fallbacks:** sem WebGL2 ou com `save-data`, o 3D não inicia e fica o brilho em CSS.
-- **Página de equipes leve:** `/equipes` não baixa three.js, GSAP nem Lenis (`LightApp`, seção 6.3). As fotos vêm em
-  600 px do CDN do Google, com `loading="lazy"` e largura e altura fixas (sem pulo de layout), e a lista ao vivo só
-  é buscada quando chega perto da tela.
+- **Páginas leves:** `/inscricao` e `/equipes` não baixam three.js, GSAP nem Lenis (`LightApp`, seção 6.3). As fotos
+  vêm em 600 px do CDN do Google, com `loading="lazy"` e largura e altura fixas (sem pulo de layout), e a lista ao vivo
+  só é buscada quando chega perto da tela.
+- **Clímax calmo sem custo:** o perfil de movimento do globo final (seção 7.5) não acrescenta passe de render: são 4
+  uniforms nas partículas, 1 no passe de lente e uma mistura de números por frame na CPU.
 - **Cache:** `/_astro/*` imutável (nome com hash) e HTML sempre revalidado (`public/_headers`).
 
 ## 13. QA
@@ -831,7 +947,7 @@ argumento; as saídas vão para `scripts/qa/out/` (fora do Git).
 | Script            | Uso                                                                    |
 | ----------------- | ---------------------------------------------------------------------- |
 | `shots.mjs`       | `node shots.mjs <url> 390 844 out/m390 "#sobre,#missoes@0.5" --mobile` |
-| `anchorcheck.mjs` | `node anchorcheck.mjs <url>`: links do header e CTAs param no alvo     |
+| `anchorcheck.mjs` | `node anchorcheck.mjs <url>`: links, CTAs e "Voltar ao evento" no alvo |
 | `overflow.mjs`    | `node overflow.mjs <url> --width=360 --width=390`: nada passa da tela  |
 
 - Capturas por seção em 360/390, 768, 1024, 1366/1440 e 1920 px, com emulação de celular (`--mobile`: `isMobile`,
@@ -839,10 +955,18 @@ argumento; as saídas vão para `scripts/qa/out/` (fora do Git).
 - O `shots.mjs` espera a classe `is-experience-ready` no `<html>` (o 3D desenhou) e lista os erros do console no fim.
 - Rode também com `?quality=low` e `?quality=high` na URL, com "reduzir movimento" ligado e com "Pausar animações"
   ligado.
-- Mexeu em equipes, header ou rodapé: confira também `/equipes`, vazia e com equipes (em dev, inscreva equipes no
-  modo simulado com fotos variadas: logo escura transparente, logo larga, foto grande, retrato).
-- Âncoras: o `anchorcheck.mjs` clica nos links e confere se o destino parou na folga do header (`scroll-padding-top`);
-  as seções com render adiado não podem errar o alvo. `anchorcheck` e `overflow` saem com código 1 quando falham.
+- Mexeu em equipes, header, sub-navegação ou rodapé: confira também `/equipes` (vazia e com equipes; em dev, inscreva
+  equipes no modo simulado com fotos variadas: logo escura transparente, logo larga, foto grande, retrato) e
+  `/inscricao`.
+- Âncoras: o `anchorcheck.mjs` clica nos links e confere se o destino parou na folga do header (`scroll-padding-top`,
+  ou o `data-anchor-offset` da seção); as seções com render adiado não podem errar o alvo. Ele também exige que os
+  CTAs do header e do hero abram `/inscricao?origem=header|hero` e que o "Voltar ao evento" de quem chegou direto
+  (em `/equipes` e em `/inscricao`) pare no `#inscricao` com o palco no topo; cada caso roda numa aba nova.
+  `anchorcheck` e `overflow` saem com código 1 quando falham.
+- Mexeu na navegação entre as páginas: confira as voltas em 390 e 1440 px, no build de produção (CTA do header e
+  "Voltar ao evento"; CTA do fim e o voltar do navegador; chamada de equipes → `/equipes` → "Inscrição" → "Voltar ao
+  evento"). Com bfcache a LP volta no mesmo ponto, com o 3D andando; sem ele, a restauração nativa do scroll erra por
+  algumas dezenas de px. Confira também o rascunho: preencha metade do formulário, vá à LP e volte.
 
 ### 13.2 Performance
 
@@ -944,7 +1068,9 @@ Cache e headers de segurança ficam em `public/_headers`.
 - [ ] Nenhum arquivo passou de 250 linhas (o ESLint avisa acima de 200); nenhum `console.log` esquecido.
 - [ ] Lighthouse mobile sem regressão (performance ≥ 90; acessibilidade, boas práticas e SEO em 100).
 - [ ] Mexeu na programação: as 4 abas conferidas com teclado e a versão sem JavaScript (dias empilhados).
-- [ ] Mexeu no formulário: testado no modo simulado com 2 e 5 integrantes, erros de campo e conflito de duplicado.
+- [ ] Mexeu no formulário: testado no modo simulado com 2 e 5 integrantes, erros de campo, conflito de duplicado e o
+      rascunho (preencher metade, ir à LP e voltar).
+- [ ] Mexeu na navegação entre a LP, `/inscricao` e `/equipes`: as voltas param no mesmo ponto (seção 13.1).
 - [ ] Mexeu em `apps-script/`: a nova versão do Web App sobe junto com o deploy do site (seção 9).
 - [ ] Mudança anotada em **[Unreleased]** no `CHANGELOG.md` (seção 18).
 
@@ -1018,6 +1144,24 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
   erros com foco, cards de integrante já no HTML, prévia "em breve" curta, abas da programação abrindo pelo
   `/#dia-NN`, sem costura entre as seções no desktop e o aceite do regulamento como ele é (apresentado na abertura).
 
+**12/10/2026, rodada 4 (em [Unreleased]):**
+
+- **Inscrição em página própria** (ADR 0009): o formulário saiu da LP para `/inscricao`, leve, com indicador de
+  etapas, painel "O que você precisa ter em mãos", rascunho na aba (`sessionStorage`, com a foto) e a origem do CTA no
+  endereço (`?origem=`). Todos os CTAs levam para lá (seção 9.8).
+- **Sub-navegação** em `/inscricao` e `/equipes`: "← Voltar ao evento" (volta pelo histórico, no mesmo ponto da LP;
+  quem chegou direto vai para `/#inscricao`) e [Inscrição | Equipes inscritas]. Conferido no build de produção, com e
+  sem bfcache (seção 6.3).
+- **Fim da LP:** a seção `#inscricao` ficou só com o clímax: contador, "Tenha em mãos", o CTA e "Ver as equipes".
+- **Globo final calmo:** gira devagar, só respira e solta um pulso suave que não cruza o texto; a carga só soma luz
+  (`CoreMotion`, seção 7.5).
+- **Correções:** clique perdido em "Confirmar inscrição" logo depois de digitar (`PressGuard`), resumo de erros por
+  bloco, layout enxuto da inscrição no celular, header que não recolhe com o scroll anchoring e endereços sem barra no
+  fim (`build.format: 'file'`).
+- **Medido de novo:** Lighthouse mobile com Performance 98 na LP e 99 em `/inscricao` e `/equipes`; JS inicial da LP
+  em 68,2 KB (seção 12.1). Mídias do README refeitas (página de inscrição, globo final, `/equipes` com a
+  sub-navegação).
+
 ## 19. Pendências
 
 ### 19.1 Da organização
@@ -1070,9 +1214,10 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 
 - [x] Lighthouse mobile ≥ 90 em performance: **98** em 12/10/2026 (seção 12.1).
 - [x] LCP do Lighthouse mobile abaixo de 2,5 s: 2,2 s em 12/10/2026 (`PaintGate` e `FrameSettle`, seção 6.3).
-- [x] JS inicial abaixo de 70 KB gzip: 68,4 KB, com o formulário, as equipes e o trilho das missões no `LazyMount`.
-- [x] Medir de novo o Lighthouse da LP e o de `/equipes` no build de produção: 98 e 100 de Performance, e 100 em
-      Acessibilidade, Boas práticas e SEO nas duas (seção 12.1).
+- [x] JS inicial abaixo de 70 KB gzip: 68,2 KB na rodada 4, com as equipes e o trilho das missões no `LazyMount` e o
+      formulário em `/inscricao`.
+- [x] Medir de novo o Lighthouse no build de produção depois da rodada 4: Performance 98 na LP e 99 em `/inscricao` e
+      `/equipes` (seção 12.1).
 - [x] Remover o `TimelineAnimator` (`[data-timeline]`), que ficou sem alvo com a programação nova.
 - [x] Versionar os scripts de QA (capturas, vitals, tarefas longas, trace, âncoras, overflow e Lighthouse) em
       `scripts/qa/`.
@@ -1090,9 +1235,14 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
       de permissão, trocar por `spreadsheets`, como está no `apps-script/README.md`), a autorização do Drive, o
       compartilhamento num domínio institucional e o `lh3.googleusercontent.com` servindo o link público. Hoje só os
       dublês dos testes cobrem.
-- [ ] Recapturar as imagens do README (`docs/media/`) e atualizar os textos alternativos: são de antes dos ajustes
-      de 12/10 (botão de som no header, títulos antigos de "O evento" e da grande final, a programação em rounds, a
-      seção de equipes antiga e o formulário com modalidades).
+- [x] Recapturar as imagens do README (`docs/media/`) e atualizar os textos alternativos: refeitas na rodada 4 (a
+      página de inscrição, o fim da LP com o globo calmo, a prévia animada e `/equipes` com a sub-navegação).
+- [ ] `/inscricao` no estado "em breve": o título do aviso (`RegistrationNotice`) é um `h3` logo depois do `h1`, e o
+      Lighthouse tira 2 pontos de acessibilidade (`heading-order`, 98). Com as inscrições abertas fica em 100.
+- [ ] Depois do deploy, confirmar com `curl -I` que `/inscricao`, `/equipes` e `/privacidade` respondem 200 sem
+      redirecionar (seção 5).
+- [ ] Reservar a altura do que aparece depois que monta no `#npcs` (a linha a mais da dica do terminal) e no
+      `#missoes` (contador e dica do trilho): é o que sobra de pulo de layout e de erro na volta sem bfcache.
 - [ ] Levar `/privacidade` e `/404` para o `PageLayout` leve (seção 6.3), se fizer sentido.
 - [ ] Proteger a `main` no GitHub, exigindo PR e CI verde (seção 15).
 - [ ] Cloudflare Turnstile no formulário, quando a organização gerar as chaves (`apps-script/README.md`).

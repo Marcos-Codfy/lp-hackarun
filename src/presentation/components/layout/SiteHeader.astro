@@ -7,10 +7,11 @@ import HeaderBrand from './header/HeaderBrand.astro';
 import HeaderNav from './header/HeaderNav.astro';
 import MenuToggle from './header/MenuToggle.astro';
 import MobileMenu from './header/MobileMenu.astro';
-import { pageHref, type SitePage } from './navLinks';
+import { headerCtaAttrs, type SitePage } from './navLinks';
 
 // barra de vidro flutuante: transparente no topo, vidro depois de rolar (HeaderScrollController).
-// Fora da LP (page) os links de seção voltam pra LP (/#secao)
+// Fora da LP (page) os links de seção voltam pra LP (/#secao). O CTA leva pra /inscricao (ou /equipes com as
+// inscrições encerradas) e, na própria página dele, vira o item atual (contorno em vez de cheio)
 interface Props {
   registration: RegistrationDTO;
   page?: SitePage;
@@ -18,8 +19,8 @@ interface Props {
 
 const { registration, page = 'home' } = Astro.props;
 const copy = new RegistrationCopy();
-const cta = copy.cta(registration.status);
-const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-nav-link': true };
+const cta = copy.cta(registration.status, 'header');
+const ctaAttrs = headerCtaAttrs(cta, page, 'header');
 ---
 
 <header class="site-header" data-site-header>
@@ -30,7 +31,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-na
     <div class="site-header__actions">
       <PauseMotionToggle />
       <span class="site-header__cta">
-        <Button size="sm" href={pageHref(cta.href, page)} {...ctaAttrs}>
+        <Button size="sm" {...ctaAttrs}>
           {copy.headerLabel(registration.status)}
         </Button>
       </span>
@@ -133,6 +134,12 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'header' } : { 'data-na
     .site-header__cta {
       display: inline-flex;
     }
+  }
+
+  /* menu aberto (tablet): o menu já tem o "Quero participar" grande, o do header sai pra não repetir (a barra
+     fica como a do celular: pausar e fechar lado a lado) */
+  .site-header:global(.is-menu-open) .site-header__cta {
+    display: none;
   }
 
   /* desktop: grade de 3 colunas pra nav ficar no centro exato da barra */

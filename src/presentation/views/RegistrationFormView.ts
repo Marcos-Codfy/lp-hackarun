@@ -9,6 +9,7 @@ import type {
 import { ClosedLobby } from './registration/ClosedLobby';
 import { ErrorPresenter } from './registration/ErrorPresenter';
 import { MemberRows } from './registration/MemberRows';
+import { PressGuard } from './registration/PressGuard';
 import { SubmitStatusPresenter } from './registration/SubmitStatusPresenter';
 import { TeamImagePicker } from './registration/TeamImagePicker';
 import { controlFor, pathOf } from './registration/fieldLookup';
@@ -49,36 +50,29 @@ export class RegistrationFormView {
     this.vm.refreshAvailability();
     const list = qs('[data-members-list]', this.root);
     const template = qs<HTMLTemplateElement>('template[data-member-template]', this.root);
+    const press = new PressGuard(form);
     if (list && template) {
       this.rows = new MemberRows(list, template, {
         input: (i, field, value) => this.vm.setText(`members.${i}.${field}`, value),
-        blur: (i, field) => this.vm.blur(`members.${i}.${field}`),
+        // a posição vale na hora de validar: o "Remover" segurado pelo PressGuard pode ter tirado a linha
+        // (ou subido as de baixo) entre o blur e a validação
+        blur: (i, field) => {
+          const row = list.children[i];
+          press.run(() => {
+            const index = Array.prototype.indexOf.call(list.children, row) as number;
+            if (index >= 0) this.vm.blur(`members.${index}.${field}`);
+          });
+        },
         remove: (i) => this.vm.removeMember(i),
       });
     }
     this.image = new TeamImagePicker(form, (file) => void this.vm.chooseTeamImage(file));
-    this.bindForm(form);
+    this.bindForm(form, press);
     this.restoreFromDom(form);
     this.vm.state.subscribe((state, prev) => this.render(state, prev === state ? null : prev));
   }
 
-  // foco de quem chega por um CTA; só foca se o alvo já estiver na tela (senão o foco "some")
-  focusEntry(): boolean {
-    const status = this.vm.state.value.status;
-    const target =
-      status === 'success'
-        ? qs('[data-reg-success-title]', this.root)
-        : this.vm.isOpen
-          ? controlFor(this.root, 'teamName')
-          : (qs('[data-reg-notice-title]', this.root) ?? qs('[data-reg-form]', this.root));
-    if (!target) return false;
-    const rect = target.getBoundingClientRect();
-    if (rect.bottom <= 0 || rect.top >= window.innerHeight) return false;
-    target.focus({ preventScroll: true });
-    return true;
-  }
-
-  private bindForm(form: HTMLFormElement): void {
+  private bindForm(form: HTMLFormElement, press: PressGuard): void {
     form.addEventListener('input', (e) => {
       const el = e.target;
       // o arquivo da foto é do TeamImagePicker (change); os integrantes são do MemberRows
@@ -91,7 +85,7 @@ export class RegistrationFormView {
     // a foto não valida no blur: abrir o seletor de arquivo já tira o foco e o erro piscaria à toa
     form.addEventListener('focusout', (e) => {
       const path = e.target instanceof HTMLElement ? e.target.dataset['field'] : undefined;
-      if (path && path !== 'honeypot' && path !== 'teamImage') this.vm.blur(path);
+      if (path && path !== 'honeypot' && path !== 'teamImage') press.run(() => this.vm.blur(path));
     });
     form.addEventListener('submit', (e) => {
       e.preventDefault();

@@ -25,8 +25,8 @@ const host = event.venues.find((v) => v.role === 'host')?.shortName ?? 'UniCató
 const finalVenue = event.venues.find((v) => v.role === 'final');
 const organizer = partners.find((p) => p.role === 'organizer')?.name ?? host;
 const partner = partners.find((p) => p.role === 'partner')?.name ?? finalVenue?.name ?? '';
-const cta = new RegistrationCopy().cta(event.registration.status);
-const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : { 'data-nav-link': true };
+const cta = new RegistrationCopy().cta(event.registration.status, 'hero');
+const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
 ---
 
 <section

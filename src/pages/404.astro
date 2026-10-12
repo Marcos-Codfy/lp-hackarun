@@ -6,11 +6,16 @@ import Wordmark from '@presentation/components/ui/Wordmark.astro';
 import HudCorners from '@presentation/components/ui/HudCorners.astro';
 import { serverContainer } from '@composition/server';
 import { buildAppConfig } from '@presentation/app/AppConfig';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import '@presentation/sections/sections.css';
 
 const { event } = await serverContainer().getLandingPage.execute();
 
 const appConfig = buildAppConfig(event);
+// segundo caminho: a inscrição (ou as equipes, com as inscrições encerradas)
+const copy = new RegistrationCopy();
+const cta = copy.cta(event.registration.status, '404');
+const secondary = copy.actionLabel(event.registration.status);
 
 const seo = {
   title: 'Página não encontrada · HackaRun 2026',
@@ -48,10 +53,20 @@ const seo = {
           Essa página não existe. Ou um NPC escondeu ela bem demais. De qualquer jeito, a corrida continua na
           largada.
         </p>
-        <Button size="lg" href="/">
-          Voltar para a largada
-          <Icon slot="icon" name="arrow-right" />
-        </Button>
+        <div class="lost__actions">
+          <Button size="lg" href="/">
+            Voltar para a largada
+            <Icon slot="icon" name="arrow-right" />
+          </Button>
+          <Button
+            size="lg"
+            variant="ghost"
+            href={cta.href}
+            registrationCta={cta.isRegistration ? '404' : undefined}
+          >
+            {secondary}
+          </Button>
+        </div>
       </div>
     </section>
   </main>
@@ -121,6 +136,19 @@ const seo = {
     .lost__frame :global(.btn) {
       --btn-px: 2.1rem;
       --btn-fs: clamp(0.875rem, 0.82rem + 0.22vw, 1.0625rem);
+    }
+  }
+
+  .lost__actions {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    max-width: 100%;
+  }
+
+  @media (min-width: 40rem) {
+    .lost__actions {
+      grid-auto-flow: column;
     }
   }
 

@@ -4,11 +4,16 @@ import { prefersReducedMotion } from '@shared/utils/env';
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { HeaderScrollController } from '@presentation/controllers/HeaderScrollController';
 import { MobileMenuController } from '@presentation/controllers/MobileMenuController';
+import { AnchorNavigator } from '@presentation/motion/core/AnchorNavigator';
 import { NativeScroll } from '@presentation/motion/core/NativeScroll';
+import { CountdownViewModel } from '@presentation/view-models/countdown/CountdownViewModel';
 import { MotionPreferenceViewModel } from '@presentation/view-models/motion/MotionPreferenceViewModel';
+import { CountdownView } from '@presentation/views/CountdownView';
 import { MotionPreferenceView } from '@presentation/views/motion/MotionPreferenceView';
+import { BackToEventLinks } from '@presentation/views/navigation/backToEvent';
+import { CurrentPageLinks } from '@presentation/views/navigation/currentPageLinks';
 import { mountTeams } from '@presentation/views/teams/mountTeams';
-import { readAppConfig } from './AppConfig';
+import { readAppConfig, type AppConfig } from './AppConfig';
 import type { AppEvents } from './AppEvents';
 import { afterNextPaint, BootQueue } from './BootQueue';
 
@@ -23,17 +28,45 @@ function mountHeader(): void {
     new MobileMenuController({ header, toggle, panel, motion: new NativeScroll() }).mount();
 }
 
-function mountMotionToggle(c: ClientContainer, bus: EventBus<AppEvents>): void {
-  const vm = new MotionPreferenceViewModel({
-    store: c.preferences,
-    bus,
-    reducedMotion: prefersReducedMotion(),
-  });
+// âncoras sem entrada nova no histórico (o "Voltar ao evento" depende dele), o voltar pra LP no mesmo ponto e
+// o link da própria página, que sobe em vez de recarregar
+function mountNavigation(reducedMotion: boolean): void {
+  new AnchorNavigator(new NativeScroll());
+  new BackToEventLinks().mount();
+  new CurrentPageLinks(reducedMotion).mount();
+}
+
+function mountMotionToggle(c: ClientContainer, bus: EventBus<AppEvents>, reducedMotion: boolean): void {
+  const vm = new MotionPreferenceViewModel({ store: c.preferences, bus, reducedMotion });
   new MotionPreferenceView(vm, qsa<HTMLButtonElement>('[data-motion-toggle]')).mount();
 }
 
-// boot das páginas leves (/equipes): header, menu, "Pausar animações" e a lista de equipes ao vivo.
-// Nada de GSAP, Lenis ou three.js: o HTML já chega pronto e o JS só liga o que é interativo
+function mountCountdowns(c: ClientContainer, reducedMotion: boolean): void {
+  qsa('[data-countdown]').forEach((root) => {
+    new CountdownView(root, new CountdownViewModel(c.getCountdown, c.clock), { calm: reducedMotion }).mount();
+  });
+}
+
+// formulário de inscrição (só em /inscricao): chunk à parte, baixado na hora (é o conteúdo da página). Em
+// breve ou encerrada o HTML do build já basta: nada de baixar envio e foto à toa
+const ACCEPTING = ['open', 'closing'];
+
+async function mountRegistration(
+  c: ClientContainer,
+  config: AppConfig,
+  bus: EventBus<AppEvents>,
+): Promise<void> {
+  const root = qs('[data-registration-form]');
+  if (!root || !ACCEPTING.includes(root.dataset['status'] ?? '')) return;
+  const [{ mountRegistrationPage }, services] = await Promise.all([
+    import('@presentation/views/registration/mountRegistrationPage'),
+    c.loadRegistration(),
+  ]);
+  mountRegistrationPage({ root, config, bus, services, container: c, reducedMotion: prefersReducedMotion() });
+}
+
+// boot das páginas leves (/equipes, /inscricao): header, navegação, "Pausar animações", contador, equipes ao
+// vivo e o formulário. Nada de GSAP, Lenis ou three.js: o HTML já chega pronto e o JS só liga o interativo
 export class LightApp {
   private static booted = false;
 
@@ -51,15 +84,40 @@ export class LightApp {
       console.error('[light-app] missing #app-config');
       return;
     }
+    const reducedMotion = prefersReducedMotion();
     const bus = new EventBus<AppEvents>();
     const boot = new BootQueue();
     const container: { current: ClientContainer | null } = { current: null };
+    const withContainer = (run: (c: ClientContainer) => void) => () => {
+      if (container.current) run(container.current);
+    };
     boot.add('header', mountHeader);
+    boot.add('navigation', () => mountNavigation(reducedMotion));
     boot.add('views container', () => {
       container.current = createClientContainer(config, { dev: import.meta.env.DEV });
     });
-    boot.add('motion', () => container.current && mountMotionToggle(container.current, bus));
-    boot.add('teams', () => container.current && mountTeams(container.current, config.registration.slots));
+    boot.add(
+      'motion',
+      withContainer((c) => mountMotionToggle(c, bus, reducedMotion)),
+    );
+    boot.add(
+      'countdown',
+      withContainer((c) => mountCountdowns(c, reducedMotion)),
+    );
+    boot.add(
+      'teams',
+      withContainer((c) => {
+        mountTeams(c, config.registration.slots);
+      }),
+    );
+    boot.add(
+      'registration',
+      withContainer((c) => {
+        mountRegistration(c, config, bus).catch((error: unknown) =>
+          console.error('[light-app] registration failed', error),
+        );
+      }),
+    );
     await boot.run();
   }
 }

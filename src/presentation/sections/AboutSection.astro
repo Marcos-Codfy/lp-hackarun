@@ -16,8 +16,8 @@ interface Props {
 const { event } = Astro.props.data;
 const { stats } = event;
 const stands = stats.stands;
-const cta = new RegistrationCopy().cta(event.registration.status);
-const ctaAttrs = cta.isRegistration ? { registrationCta: 'about' } : { 'data-nav-link': true };
+const cta = new RegistrationCopy().cta(event.registration.status, 'about');
+const ctaAttrs = cta.isRegistration ? { registrationCta: 'about' } : {};
 
 const ticker = [
   'Oficinas',

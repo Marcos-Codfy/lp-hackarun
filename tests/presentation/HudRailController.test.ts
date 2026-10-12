@@ -1,4 +1,4 @@
-// pílula do HUD no celular: sai da frente do texto do rodapé enquanto ele está na tela
+// pílula do HUD no celular: sai da frente do texto do rodapé e dos CTAs do clímax enquanto eles estão na tela
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HudRailController } from '@presentation/controllers/HudRailController';
 
@@ -31,11 +31,11 @@ class FakeObserver {
   }
 }
 
-function mount(withFooter = true, withLobby = false) {
+function mount(withFooter = true, withCta = false) {
   document.body.innerHTML = `
     <div class="hud is-ready" data-hud><span data-hud-ticks></span></div>
     <main><section data-checkpoint="Largada"></section>
-    ${withLobby ? '<div id="inscricao-lobby"></div>' : ''}</main>
+    ${withCta ? '<div class="charge" data-charge-reveal></div>' : ''}</main>
     ${withFooter ? '<footer class="site-footer"></footer>' : ''}`;
   const hud = document.querySelector<HTMLElement>('[data-hud]') as HTMLElement;
   new HudRailController(hud).mount();
@@ -71,13 +71,13 @@ describe('HudRailController · rodapé', () => {
 });
 
 describe('HudRailController · pílula fora da frente do texto', () => {
-  it('marca .is-form enquanto o formulário de inscrição aparece', () => {
+  it('marca .is-cta enquanto os CTAs do clímax (fim da LP) aparecem', () => {
     const hud = mount(true, true);
-    const lobby = FakeObserver.watching('#inscricao-lobby') as FakeObserver;
-    lobby.show(true);
-    expect(hud.classList.contains('is-form')).toBe(true);
-    lobby.show(false);
-    expect(hud.classList.contains('is-form')).toBe(false);
+    const cta = FakeObserver.watching('[data-charge-reveal]') as FakeObserver;
+    cta.show(true);
+    expect(hud.classList.contains('is-cta')).toBe(true);
+    cta.show(false);
+    expect(hud.classList.contains('is-cta')).toBe(false);
   });
 
   it('rolando pra baixo recolhe; subindo ou parado ~1,2 s, volta', () => {

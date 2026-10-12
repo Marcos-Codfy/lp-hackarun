@@ -1,6 +1,7 @@
 // ícones de traço (viewBox 24, stroke 1.5): só paths, o <svg> fica no Icon.astro
 export const ICONS = {
   'arrow-right': 'M5 12h14M13 6l6 6-6 6',
+  'arrow-left': 'M19 12H5M11 6l-6 6 6 6',
   'arrow-up': 'M12 19V5M6 11l6-6 6 6',
   'arrow-down': 'M12 5v14M6 13l6 6 6-6',
   chevrons: 'M5 6l5 6-5 6M12 6l5 6-5 6',
@@ -34,6 +35,12 @@ export const ICONS = {
   code: 'M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16',
   cap: 'M2 9l10-5 10 5-10 5zM6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6',
   scale: 'M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z',
+  image: 'M4 5h16v14H4zM4 15.5l4.5-4.5 4 4 2.5-2.5 5 5M15.5 9.5h.01',
+  mail: 'M3.5 6.5h17v11h-17zM3.5 7l8.5 6.5L20.5 7',
+  'id-card':
+    'M3 6h18v12H3zM8.5 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5.5 16c.5-1.4 1.6-2.2 3-2.2s2.5.8 3 2.2M14 10h4M14 13.5h3',
+  save: 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6',
+  trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
   route:
     'M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 15V9a3 3 0 0 1 3-3h7M18 9v6a3 3 0 0 1-3 3H8',
 } as const;

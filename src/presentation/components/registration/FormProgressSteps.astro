@@ -1,0 +1,170 @@
+---
+// as 3 etapas do indicador (FormProgress): cada uma é um link pro fieldset dela. A StepProgressView liga
+// data-current (a atual, com aria-current="step"), data-done (pronta: o número vira o check) e data-invalid
+// (com erro à vista: o número acende em vermelho). Celular: em linha; desktop: em coluna, com a dica
+import Icon from '@presentation/components/ui/Icon.astro';
+import { REGISTRATION_STEPS } from '@presentation/view-models/registration/registrationSteps';
+---
+
+<ol class="progress__steps" role="list">
+  {REGISTRATION_STEPS.map((step, i) => (
+    <li class="progress__step" data-step-item={i} data-current={i === 0 ? '' : undefined}>
+      <a class="progress__link" href={`#${step.id}`} aria-current={i === 0 ? 'step' : undefined}>
+        <span class="progress__node" aria-hidden="true">
+          <span class="progress__num">{step.index}</span>
+          <Icon name="check" size={14} class="progress__check" />
+        </span>
+        <span class="progress__text">
+          <span class="progress__label">{step.title}</span>
+          <span class="progress__hint">{step.hint}</span>
+        </span>
+        <span class="sr-only" data-step-sr></span>
+      </a>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .progress__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .progress__link {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-2) var(--space-1);
+    border-radius: 3px;
+    color: var(--text-muted);
+    text-align: center;
+    text-decoration: none;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out);
+  }
+
+  .progress__link:hover {
+    color: var(--text);
+    background: rgb(0 229 255 / 0.05);
+  }
+
+  /* número numa casca inclinada (a mesma das etapas do formulário); pronta vira o check verde */
+  .progress__node {
+    position: relative;
+    isolation: isolate;
+    display: inline-grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 1.9rem;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+  }
+
+  .progress__node::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid var(--surface-line);
+    border-radius: 2px;
+    background: var(--surface-well);
+    transform: skewX(var(--skew));
+    transition:
+      border-color var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out),
+      background var(--dur) var(--ease-out);
+  }
+
+  .progress__label {
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .progress__text {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .progress__hint {
+    display: none;
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+  }
+
+  .progress__step[data-current] :is(.progress__link, .progress__node) {
+    color: var(--text);
+  }
+
+  .progress__step[data-current] .progress__node::before {
+    border-color: var(--c-cyan);
+    background: linear-gradient(100deg, rgb(0 229 255 / 0.2), rgb(18 100 255 / 0.18));
+    box-shadow: 0 0 18px rgb(0 229 255 / 0.3);
+  }
+
+  .progress__step[data-done] .progress__node {
+    color: var(--c-success);
+  }
+
+  .progress__step[data-done] .progress__node::before {
+    border-color: color-mix(in srgb, var(--c-success) 70%, transparent);
+    background: color-mix(in srgb, var(--c-success) 12%, transparent);
+  }
+
+  /* etapa com erro à vista (depois de um envio ou de sair de um campo): o número acende em vermelho */
+  .progress__step[data-invalid]:not([data-done]) .progress__node {
+    color: var(--ink-danger);
+  }
+
+  .progress__step[data-invalid]:not([data-done]) .progress__node::before {
+    border-color: color-mix(in srgb, var(--c-danger) 75%, transparent);
+    background: color-mix(in srgb, var(--c-danger) 12%, transparent);
+  }
+
+  /* pronta: o número dá lugar ao check */
+  .progress__step:not([data-done]) .progress__node :global(.progress__check),
+  .progress__step[data-done] .progress__num {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .progress__steps {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-1);
+    }
+
+    .progress__link {
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-items: start;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-2) var(--space-3);
+      text-align: left;
+    }
+
+    .progress__label {
+      font-size: var(--fs-xs);
+    }
+
+    .progress__hint {
+      display: block;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .progress__node::before {
+      border-color: CanvasText;
+    }
+
+    .progress__step[data-current] .progress__node::before {
+      border-width: 3px;
+    }
+  }
+</style>

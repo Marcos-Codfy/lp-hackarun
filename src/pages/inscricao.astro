@@ -1,0 +1,31 @@
+---
+// página de inscrição da equipe: leve (sem 3D, GSAP ou Lenis), no mesmo visual de /equipes, com a SubNav
+// que troca entre as duas e volta pro evento. O formulário é o da LP de antes, agora com etapas, painel do
+// que ter em mãos e rascunho na aba. A origem do CTA chega em ?origem= (coluna "Origem" da planilha)
+import PageLayout from '@presentation/layouts/PageLayout.astro';
+import SiteHeader from '@presentation/components/layout/SiteHeader.astro';
+import SiteFooter from '@presentation/components/layout/SiteFooter.astro';
+import SubNav from '@presentation/components/layout/SubNav.astro';
+import RegistrationPageSection from '@presentation/sections/RegistrationPageSection.astro';
+import { serverContainer } from '@composition/server';
+import { buildAppConfig } from '@presentation/app/AppConfig';
+import {
+  registrationPageJsonLd,
+  registrationPageSeo,
+} from '@presentation/components/seo/registrationPageSeo';
+
+const data = await serverContainer().getLandingPage.execute();
+const { event } = data;
+
+const page = registrationPageSeo(event.registration.teamSize);
+const seo = { ...page, jsonLd: registrationPageJsonLd(Astro.site?.href ?? '', page.title, page.description) };
+---
+
+<PageLayout seo={seo} appConfig={buildAppConfig(event)}>
+  <SiteHeader registration={event.registration} page="registration" />
+  <main id="conteudo">
+    <SubNav page="registration" />
+    <RegistrationPageSection data={data} />
+  </main>
+  <SiteFooter data={data} page="registration" />
+</PageLayout>

@@ -1,6 +1,7 @@
 import type { RegistrationErrors } from '@domain/index';
 import { qs, qsa } from '@shared/utils/dom';
 import type { FieldError } from '@presentation/view-models/registration/RegistrationFormViewModel';
+import { groupErrors, joinParts, type ErrorGroup } from './errorGroups';
 import { controlFor, labelFor, pathOf } from './fieldLookup';
 
 const setAttr = (el: Element, name: string, value: string | null) => {
@@ -42,18 +43,25 @@ export class ErrorPresenter {
     if (summary.hidden) return;
     const title = qs('[data-error-summary-title]', this.root);
     if (title) title.textContent = this.summaryTitle(errors.length);
-    list.replaceChildren(
-      ...errors.map((e) => {
-        const item = document.createElement('li');
-        const link = document.createElement('a');
-        const control = controlFor(this.root, e.path);
-        link.href = control?.id ? `#${control.id}` : '#';
-        link.dataset['focusPath'] = e.path;
-        link.textContent = `${labelFor(this.root, e.path)}: ${e.message}`;
-        item.append(link);
-        return item;
-      }),
-    );
+    list.replaceChildren(...groupErrors(errors).map((group) => this.item(group)));
+  }
+
+  // um item por bloco, com link pro 1º campo dele. Bloco com um erro só (o e-mail já inscrito, por exemplo)
+  // mantém a frase exata; com vários, só os nomes dos campos ("Integrante 2: nome, matrícula e e-mail")
+  private item(group: ErrorGroup): HTMLLIElement {
+    const [first] = group.errors;
+    const item = document.createElement('li');
+    if (!first) return item;
+    const link = document.createElement('a');
+    const control = controlFor(this.root, first.path);
+    link.href = control?.id ? `#${control.id}` : '#';
+    link.dataset['focusPath'] = first.path;
+    link.textContent =
+      group.errors.length > 1 && group.title
+        ? `${group.title}: ${joinParts(group.parts)}`
+        : `${labelFor(this.root, first.path)}: ${first.message}`;
+    item.append(link);
+    return item;
   }
 
   private summaryTitle(count: number): string {

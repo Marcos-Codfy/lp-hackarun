@@ -1,20 +1,18 @@
 ---
+// clímax da LP: o globo carrega (data-scene-hold) e o CTA acende. O formulário mora na página /inscricao;
+// aqui ficam o contador, o que a equipe precisa ter em mãos, os dois caminhos e o status da inscrição
 import type { LandingPageDTO } from '@application/index';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
-import { EventStampFormatter } from '@presentation/formatters/EventStampFormatter';
+import PrepChecklist from '@presentation/components/registration/PrepChecklist.astro';
 import SectionHeader from './shared/SectionHeader.astro';
 import ChargeCta from './registration/ChargeCta.astro';
-import LobbyPanel from './registration/LobbyPanel.astro';
 import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { event } = Astro.props.data;
-const kickoffAt = event.milestones.find((m) => m.key === 'kickoff')?.at ?? null;
-const kickoff = kickoffAt ? new EventStampFormatter(event.timezone).format(kickoffAt) : null;
-const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()}` : null;
+const { registration, milestones } = Astro.props.data.event;
 ---
 
 <section
@@ -23,6 +21,7 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
   data-scene="core"
   data-scene-hold="900"
   data-checkpoint="Inscrição"
+  data-anchor-offset="0"
   aria-labelledby="inscricao-title"
 >
   {/* palco alto com miolo sticky: o globo fica no centro enquanto rola, sem travar o scroll */}
@@ -39,21 +38,23 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
           size="lg"
         />
         <div class="registration__countdown">
-          <Countdown milestones={event.milestones} variant="compact" />
+          <Countdown milestones={milestones} variant="compact" />
         </div>
-        <ChargeCta registration={event.registration} />
+        {registration.status !== 'closed' && (
+          <PrepChecklist teamSize={registration.teamSize} id="inscricao-prep" />
+        )}
+        <ChargeCta registration={registration} />
       </div>
     </div>
-  </div>
-
-  <div class="container--narrow registration__lobby">
-    <LobbyPanel registration={event.registration} kickoffLabel={kickoffLabel} />
   </div>
 </section>
 
 <style>
+  /* /#inscricao (o "Voltar ao evento" de quem chegou direto) para com o palco colado no topo: o miolo sticky
+     já desconta o header. O pulo nativo usa o scroll-margin; o do app, o data-anchor-offset */
   .registration {
     padding-top: 0;
+    scroll-margin-top: calc(-1 * (var(--header-h) + var(--space-4)));
   }
 
   .registration__stage {
@@ -66,7 +67,7 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
     display: grid;
     align-items: center;
     min-height: 100svh;
-    padding-block: calc(var(--header-h) + var(--space-5)) var(--space-6);
+    padding-block: calc(var(--header-h) + var(--space-3)) var(--space-3);
   }
 
   /* véu só no miolo: o globo continua aparecendo em volta */
@@ -83,11 +84,23 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
     );
   }
 
+  /* celular: o miolo inteiro (título, contador, lista e CTAs) cabe numa tela de 360x740 */
   .registration__center {
     display: grid;
     justify-items: center;
-    gap: var(--space-6);
+    gap: var(--space-4);
     text-align: center;
+  }
+
+  /* título mais junto do selo no celular (o globo aparece em volta) */
+  .registration__center :global(.sx-head) {
+    gap: var(--space-3);
+  }
+
+  @media (min-height: 46rem) {
+    .registration__center {
+      gap: var(--space-5);
+    }
   }
 
   .registration__countdown {
@@ -96,8 +109,19 @@ const kickoffLabel = kickoff ? `${kickoff.date} às ${kickoff.hour.toLowerCase()
     width: 100%;
   }
 
-  .registration__lobby {
-    position: relative;
-    margin-top: calc(var(--space-9) * -0.5);
+  @media (min-width: 640px) {
+    .registration__sticky {
+      padding-block: calc(var(--header-h) + var(--space-5)) var(--space-6);
+    }
+
+    .registration__center :global(.sx-head) {
+      gap: var(--space-5);
+    }
+  }
+
+  @media (min-width: 640px) and (min-height: 46rem) {
+    .registration__center {
+      gap: var(--space-6);
+    }
   }
 </style>

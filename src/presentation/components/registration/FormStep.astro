@@ -1,6 +1,9 @@
 ---
 // etapa do formulário (Equipe, Integrantes, Confirmação): fieldset com número, título e uma linha de energia.
 // O número fica fora do nome acessível: o leitor de tela ouve só "Equipe", "Integrantes"...
+// O id e o data-step ligam a etapa ao indicador de progresso (REGISTRATION_STEPS)
+import { REGISTRATION_STEPS } from '@presentation/view-models/registration/registrationSteps';
+
 interface Props {
   index: string;
   title: string;
@@ -10,11 +13,17 @@ interface Props {
 }
 
 const { index, title, lead, describedby, class: className } = Astro.props;
+const step = REGISTRATION_STEPS.findIndex((s) => s.index === index);
 const leadId = lead ? `reg-step-${index}-lead` : undefined;
 const description = [leadId, describedby].filter(Boolean).join(' ') || undefined;
 ---
 
-<fieldset class:list={['step', className]} aria-describedby={description}>
+<fieldset
+  class:list={['step', className]}
+  id={REGISTRATION_STEPS[step]?.id}
+  data-step={step >= 0 ? step : undefined}
+  aria-describedby={description}
+>
   <legend class="step__legend">
     <span class="step__index" aria-hidden="true">
       {index}
@@ -42,6 +51,7 @@ const description = [leadId, describedby].filter(Boolean).join(' ') || undefined
     margin: 0;
     padding: 0;
     border: 0;
+    /* o link do indicador de etapas para logo abaixo do header: o scroll-padding do html já desconta ele */
   }
 
   /* legend com float: é o jeito estável de pôr um legend dentro do grid */

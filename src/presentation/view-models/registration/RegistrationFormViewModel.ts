@@ -4,24 +4,28 @@ import type { Clock, ImageFile, PreparedTeamImageDTO, SubmitRegistration } from 
 import {
   emptyFields,
   emptyMember,
-  shiftMemberPath,
+  fieldsFromDraft,
   toInput,
   withText,
   type RegistrationFields,
+  type RestoredFields,
   type TextPath,
 } from './RegistrationFields';
 import {
   initialState,
   orderErrors,
+  submittingState,
   type RegistrationFormState,
   type TeamImageStatus,
 } from './RegistrationFormState';
+import { FieldErrors } from './FieldErrors';
 import { addedNotice, removedNotice } from './memberNotices';
-import { ServerConflicts } from './ServerConflicts';
+import { stepCompletion } from './registrationSteps';
 import { SubmissionSession } from './SubmissionSession';
 import { TeamImageSlot, type TeamImagePreparer } from './TeamImageSlot';
 
 export type { FieldError, FormStatus, RegistrationFormState, TeamImageStatus } from './RegistrationFormState';
+export type { RestoredFields } from './RegistrationFields';
 
 export interface RegistrationFormDeps {
   submit: Pick<SubmitRegistration, 'validate' | 'execute' | 'currentStatus'>;
@@ -41,12 +45,11 @@ export class RegistrationFormViewModel {
   private readonly deps: RegistrationFormDeps;
   private readonly minRows: number;
   private readonly maxRows: number;
-  private touched = new Set<string>();
   private nextKey: number;
   private seq = 0;
   private readonly session: SubmissionSession;
   private readonly image: TeamImageSlot;
-  private readonly conflicts = new ServerConflicts();
+  private readonly errors: FieldErrors;
 
   constructor(deps: RegistrationFormDeps) {
     this.deps = deps;
@@ -55,6 +58,7 @@ export class RegistrationFormViewModel {
     this.nextKey = this.minRows;
     this.session = new SubmissionSession(deps.clock, deps.newKey);
     this.image = new TeamImageSlot(deps.prepareImage);
+    this.errors = new FieldErrors(deps.submit, this.image);
     const fields = emptyFields(this.minRows);
     this.state = new Observable(initialState(fields, deps.isOpen, this.bounds(fields)));
   }
@@ -69,6 +73,11 @@ export class RegistrationFormViewModel {
 
   setSource(source: string): void {
     this.session.setSource(source);
+  }
+
+  // chave do envio: vai pro rascunho e volta com ele (a resposta perdida não vira "nome já inscrito")
+  get sessionKey(): string {
+    return this.session.key;
   }
 
   // a página pode ter sido gerada antes do prazo: confere de novo no navegador. Só fecha, nunca reabre
@@ -86,26 +95,50 @@ export class RegistrationFormViewModel {
 
   // arquivo escolhido: prepara no aparelho; recusado (tipo, peso, resolução) vira o erro do campo
   chooseTeamImage(file: ImageFile): Promise<void> {
-    this.touched.add('teamImage');
+    this.errors.touch('teamImage');
     const run = this.image.choose(file, (image) => this.patch({ ...this.fields, teamImage: image }));
     this.patch(this.fields);
     return run;
   }
 
-  // imagem já preparada, sem passar pelo preparo: hoje só os testes usam (atalho pra montar um envio válido)
+  // imagem já preparada, sem passar pelo preparo (rascunho recuperado e testes)
   setTeamImage(image: PreparedTeamImageDTO): void {
     this.image.accept();
     this.patch({ ...this.fields, teamImage: image });
   }
 
+  // rascunho da aba: volta o que foi digitado, dentro do tamanho da equipe, com o aceite desmarcado, e a chave
+  // do envio (se a resposta se perdeu, o reenvio é o mesmo envio)
+  restore(draft: RestoredFields & { sessionKey?: string | null }): void {
+    if (draft.sessionKey) this.session.resume(draft.sessionKey);
+    const fields = fieldsFromDraft(draft, this.minRows, this.maxRows);
+    this.nextKey = Math.max(this.nextKey, fields.members.length);
+    if (fields.teamImage) this.image.accept();
+    this.patch(fields);
+  }
+
+  // "Limpar rascunho": formulário do zero, sem erro à vista. Os conflitos do servidor ficam: o nome ou o
+  // e-mail recusado continua recusado se for digitado de novo. Com o envio em andamento não zera (false)
+  reset(): boolean {
+    if (this.state.value.status === 'submitting') return false;
+    this.image.accept();
+    this.errors.forgetTouched();
+    const fields = emptyFields(this.minRows);
+    this.state.update((s) => ({
+      ...initialState(fields, s.open, this.bounds(fields)),
+      focus: { path: 'teamName', seq: ++this.seq, reason: 'move' },
+    }));
+    return true;
+  }
+
   setAcceptedTerms(accepted: boolean): void {
-    this.touched.add('acceptedTerms');
+    this.errors.touch('acceptedTerms');
     this.patch({ ...this.fields, acceptedTerms: accepted });
   }
 
   // valida o campo quando a pessoa sai dele
   blur(path: string): void {
-    this.touched.add(path);
+    this.errors.touch(path);
     this.patch(this.fields);
   }
 
@@ -120,7 +153,7 @@ export class RegistrationFormViewModel {
   removeMember(index: number): void {
     if (index < 1 || !this.state.value.canRemoveMember || !this.fields.members[index]) return;
     const members = this.fields.members.filter((_, i) => i !== index);
-    this.touched = new Set([...this.touched].flatMap((p) => shiftMemberPath(p, index) ?? []));
+    this.errors.memberRemoved(index);
     const target = members[index] ? `members.${index}.name` : 'members.add';
     this.patch({ ...this.fields, members }, target);
     this.announce(removedNotice(index + 1, members.length, this.maxRows));
@@ -132,18 +165,10 @@ export class RegistrationFormViewModel {
     while (this.image.busy) await this.image.settled();
     const current = this.state.value;
     if (!current.open || current.status === 'submitting' || current.status === 'success') return;
-    const errors = this.allErrors(current.fields);
+    const errors = this.errors.all(current.fields);
     if (Object.keys(errors).length > 0) return this.showErrors(errors);
 
-    this.state.update((s) => ({
-      ...s,
-      status: 'submitting',
-      attempted: true,
-      failure: null,
-      retryable: false,
-      errors: {},
-      orderedErrors: [],
-    }));
+    this.state.update(submittingState);
     const result = await this.deps.submit.execute(
       toInput(current.fields),
       this.session.meta(current.fields.honeypot),
@@ -154,9 +179,8 @@ export class RegistrationFormViewModel {
     } else if (result.status === 'invalid') {
       this.showErrors(result.errors);
     } else if (result.status === 'conflict') {
-      // nome, e-mail ou matrícula já inscritos: o erro fica no campo até a pessoa trocar o valor
-      this.conflicts.record(result.errors, current.fields);
-      this.showErrors(this.allErrors(this.fields));
+      this.errors.recordConflicts(result.errors, current.fields);
+      this.showErrors(this.errors.all(this.fields));
     } else {
       const { message, retryable } = result;
       this.state.update((s) => ({ ...s, status: 'error', failure: message, retryable }));
@@ -177,18 +201,21 @@ export class RegistrationFormViewModel {
       attempted: true,
       errors: all,
       orderedErrors: ordered,
+      steps: stepCompletion(this.errors.all(this.fields), this.fields),
       focus: first ? { path: first, seq: ++this.seq, reason: 'invalid' } : s.focus,
     }));
   }
 
   private patch(fields: RegistrationFields, focusPath?: string): void {
-    const errors = this.visibleErrors(fields);
+    const all = this.errors.all(fields);
+    const errors = this.errors.visible(all, this.state.value.attempted);
     this.state.update((s) => ({
       ...s,
       fields,
       errors,
       orderedErrors: orderErrors(errors, fields),
       imageStatus: this.imageStatus(fields),
+      steps: stepCompletion(all, fields),
       ...this.bounds(fields),
       ...(focusPath && { focus: { path: focusPath, seq: ++this.seq, reason: 'move' as const } }),
     }));
@@ -202,27 +229,6 @@ export class RegistrationFormViewModel {
     if (this.image.busy) return 'processing';
     if (fields.teamImage) return 'ready';
     return this.image.problem ? 'invalid' : 'empty';
-  }
-
-  // conflitos do servidor + regras do domínio (que ganham) + o motivo do último arquivo recusado.
-  // Foto preparando ainda não tem veredito: nada de "envie uma foto" com o spinner girando
-  private allErrors(fields: RegistrationFields): RegistrationErrors {
-    const errors = { ...this.conflicts.active(fields), ...this.deps.submit.validate(toInput(fields)) };
-    if (this.image.busy) delete errors['teamImage'];
-    else if (!fields.teamImage && this.image.problem) errors['teamImage'] = this.image.problem;
-    return errors;
-  }
-
-  // valida tudo (é barato) e mostra só o que já foi tocado
-  private visibleErrors(fields: RegistrationFields): RegistrationErrors {
-    const all = this.allErrors(fields);
-    if (this.state.value.attempted) return all;
-    const touchedMembers = [...this.touched].some((p) => p.startsWith('members.'));
-    return Object.fromEntries(
-      Object.entries(all).filter(
-        ([path]) => this.touched.has(path) || (path === 'members' && touchedMembers),
-      ),
-    );
   }
 
   private bounds(fields: RegistrationFields): { canAddMember: boolean; canRemoveMember: boolean } {

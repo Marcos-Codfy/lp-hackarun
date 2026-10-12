@@ -1,6 +1,7 @@
 ---
-// lobby de inscrição (RegistrationFormView + RegistrationFormViewModel); grava na planilha via Apps Script.
-// Só equipe: 01 Equipe (nome + foto), 02 Integrantes (nome, matrícula e e-mail), 03 Confirmação
+// formulário da página /inscricao (RegistrationFormView + RegistrationFormViewModel); grava na planilha via
+// Apps Script. Só equipe, num envio só: 01 Equipe (nome + foto), 02 Integrantes (nome, matrícula e e-mail),
+// 03 Confirmação
 import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import TextField from './TextField.astro';
@@ -8,6 +9,7 @@ import FormStep from './FormStep.astro';
 import MemberList from './MemberList.astro';
 import ConsentField from './ConsentField.astro';
 import TeamImageField from './TeamImageField.astro';
+import { formStatus } from './formStatus';
 import RegistrationNotice from './RegistrationNotice.astro';
 import RegistrationSuccess from './RegistrationSuccess.astro';
 // css global com prefixo .regform (os cards de integrante são clonados em runtime)
@@ -21,9 +23,7 @@ interface Props {
 const { registration } = Astro.props;
 const { min, max } = registration.teamSize;
 // dev sem planilha: libera o formulário com o gateway em memória pra testar a UX
-const simulated = import.meta.env.DEV && registration.status === 'soon' && !registration.endpoint;
-const status = simulated ? 'open' : registration.status;
-const isOpen = status === 'open' || status === 'closing';
+const { status, simulated, isOpen } = formStatus(registration);
 ---
 
 <div class="regform" data-registration-form data-status={status} data-team-min={min} data-team-max={max}>
@@ -58,7 +58,7 @@ const isOpen = status === 'open' || status === 'closing';
         class="regform__form"
         data-reg-form
         method="post"
-        action="#inscricao"
+        action="/inscricao"
         novalidate
         inert={!isOpen}
         aria-label="Inscrição da equipe no HackaRun"

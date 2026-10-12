@@ -1,7 +1,12 @@
 /* render adiado: longe do topo, o navegador só monta a seção quando ela chega perto da tela.
    no celular o 1º layout (e o refeito a cada fonte que chega) fica bem mais leve.
-   contain-intrinsic-size é a altura do CONTEÚDO (o padding da seção soma por cima): medido em 390 e 1440 px
-   (#inscricao com as inscrições abertas e #programacao com o 1º dia na aba, os estados que mais tempo ficam no ar).
+   contain-intrinsic-size é a altura do CONTEÚDO (o padding da seção soma por cima) depois de montada (com o
+   JS de cada seção já ligado, como estava quando a pessoa passou por ela): medido em 390, 768/834 (tablet,
+   média das duas) e 1440 px (#programacao com o 1º dia na aba, o estado que mais tempo fica no ar).
+   Placeholder certo = a volta sem bfcache cai no mesmo ponto e a seção que monta não empurra o scroll (o
+   tablet usava os números do celular, centenas de px a mais). O #inscricao virou só o palco do
+   clímax (o formulário mora em /inscricao): o conteúdo é o palco de 160svh, igual em toda largura
+   (1350 px em 390x844 e 1440 px em 1440x900).
    "auto" lembra a altura real depois da 1ª vez; o LayoutRefresher recalcula os gatilhos quando a seção monta */
 @layer base {
   #programacao,
@@ -19,13 +24,13 @@
     contain-intrinsic-size: auto 1307px;
   }
   #mentores {
-    contain-intrinsic-size: auto 1778px;
+    contain-intrinsic-size: auto 1752px;
   }
   #final {
-    contain-intrinsic-size: auto 1251px;
+    contain-intrinsic-size: auto 1284px;
   }
   #premios {
-    contain-intrinsic-size: auto 1295px;
+    contain-intrinsic-size: auto 1319px;
   }
   #equipes {
     contain-intrinsic-size: auto 911px;
@@ -34,10 +39,34 @@
     contain-intrinsic-size: auto 1765px;
   }
   #inscricao {
-    contain-intrinsic-size: auto 4618px;
+    contain-intrinsic-size: auto 160svh;
   }
   .site-footer {
-    contain-intrinsic-size: auto 1298px;
+    contain-intrinsic-size: auto 1341px;
+  }
+
+  @media (min-width: 48rem) {
+    #programacao {
+      contain-intrinsic-size: auto 1085px;
+    }
+    #mentores {
+      contain-intrinsic-size: auto 1454px;
+    }
+    #final {
+      contain-intrinsic-size: auto 962px;
+    }
+    #premios {
+      contain-intrinsic-size: auto 998px;
+    }
+    #equipes {
+      contain-intrinsic-size: auto 909px;
+    }
+    #faq {
+      contain-intrinsic-size: auto 1541px;
+    }
+    .site-footer {
+      contain-intrinsic-size: auto 1322px;
+    }
   }
 
   @media (min-width: 1024px) {
@@ -48,7 +77,7 @@
       contain-intrinsic-size: auto 1042px;
     }
     #final {
-      contain-intrinsic-size: auto 1124px;
+      contain-intrinsic-size: auto 1177px;
     }
     #premios {
       contain-intrinsic-size: auto 1167px;
@@ -58,9 +87,6 @@
     }
     #faq {
       contain-intrinsic-size: auto 1293px;
-    }
-    #inscricao {
-      contain-intrinsic-size: auto 3994px;
     }
     .site-footer {
       contain-intrinsic-size: auto 1103px;

@@ -3,44 +3,49 @@ import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+import ChargeStatus from './ChargeStatus.astro';
 
 // CTA que "carrega" junto com o globo: a seção recebe is-awaiting-charge, is-charging (com --charge-ms)
-// e por fim is-charged; sem JS nenhuma classe entra e o CTA fica simplesmente visível
+// e por fim is-charged; sem JS nenhuma classe entra e o CTA fica simplesmente visível. A barra de energia é
+// um fio logo embaixo do botão principal, que enche no tempo do globo.
+// O principal leva pra página de inscrição (o rótulo segue o status: "Quero participar" antes de abrir); o
+// secundário, pras equipes. Encerrada, sobra só "Ver as equipes"
 interface Props {
   registration: RegistrationDTO;
 }
 
 const { registration } = Astro.props;
 const copy = new RegistrationCopy();
-const cta = copy.cta(registration.status);
-const href = cta.isRegistration ? '#inscricao-lobby' : cta.href;
-const ctaAttrs = cta.isRegistration ? { registrationCta: 'final' } : { 'data-nav-link': true };
-// no celular cada trecho vira uma linha (sem o "·" sobrando na quebra)
-const statusParts = copy.statusLine(registration).split(' · ');
+const cta = copy.cta(registration.status, 'final');
+const open = cta.isRegistration;
 ---
 
 <div class="charge" data-charge-reveal>
-  <div class="charge__meter" aria-hidden="true">
-    <span class="charge__label">Carregando energia</span>
-    <span class="charge__bar">
-      <span class="charge__fill"></span>
-    </span>
+  <div class="charge__actions">
+    <div class="charge__button">
+      <span class="charge__ring" aria-hidden="true"></span>
+      {open ? (
+        <Button size="lg" href={cta.href} registrationCta="final">
+          {copy.actionLabel(registration.status)}
+          <Icon slot="icon" name="arrow-right" />
+        </Button>
+      ) : (
+        <Button size="lg" href="/equipes">
+          Ver as equipes
+          <Icon slot="icon" name="arrow-right" />
+        </Button>
+      )}
+      <span class="charge__meter" aria-hidden="true">
+        <span class="charge__fill"></span>
+      </span>
+    </div>
+    {open && (
+      <Button size="lg" variant="ghost" href="/equipes" class="charge__secondary">
+        Ver as equipes
+      </Button>
+    )}
   </div>
-  <div class="charge__button">
-    <span class="charge__ring" aria-hidden="true"></span>
-    <Button size="lg" href={href} {...ctaAttrs}>
-      {cta.label}
-      <Icon slot="icon" name="arrow-down" />
-    </Button>
-  </div>
-  <p class:list={['charge__status', copy.isUrgent(registration.status) && 'charge__status--urgent']}>
-    {statusParts.map((part, index) => (
-      <>
-        {index > 0 && <span class="charge__sep"> · </span>}
-        <span class="charge__part">{part}</span>
-      </>
-    ))}
-  </p>
+  <ChargeStatus registration={registration} />
 </div>
 
 <style>
@@ -48,35 +53,21 @@ const statusParts = copy.statusLine(registration).split(' · ');
     display: grid;
     justify-items: center;
     gap: var(--space-5);
-    transition:
-      opacity var(--dur-slow) var(--ease-out),
-      transform var(--dur-slow) var(--ease-out),
-      filter var(--dur-slow) var(--ease-out);
   }
 
-  /* medidor de energia: invisível até a carga começar */
+  /* medidor de energia: fio segmentado logo embaixo do botão, invisível até a carga começar (não ocupa
+     altura: no celular o miolo inteiro precisa caber numa tela) */
   .charge__meter {
-    display: grid;
-    justify-items: center;
-    gap: var(--space-2);
-    opacity: 0;
-    transition: opacity var(--dur) var(--ease-out);
-  }
-
-  .charge__label {
-    color: var(--ink-cyan);
-    font-family: var(--font-mono);
-    font-size: var(--fs-hud);
-    letter-spacing: var(--tracking-hud);
-    text-transform: uppercase;
-  }
-
-  .charge__bar {
-    position: relative;
-    width: min(18rem, 70vw);
-    height: 4px;
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 12%;
+    right: 12%;
+    height: 3px;
     overflow: hidden;
     background: rgb(143 243 255 / 0.12);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur) var(--ease-out);
     -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
     mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
   }
@@ -89,8 +80,63 @@ const statusParts = copy.statusLine(registration).split(' · ');
     transform-origin: left center;
   }
 
+  /* celular: um embaixo do outro, os dois na mesma largura (o secundário mais baixo); a partir de 640px lado
+     a lado */
+  .charge__actions {
+    display: grid;
+    justify-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .charge__actions :global(.btn) {
+    width: 100%;
+  }
+
+  .charge__actions :global(.charge__secondary) {
+    --btn-h: 46px;
+  }
+
+  /* 360px: "Inscrever minha equipe →" numa linha só dentro do paralelogramo */
+  .charge__actions :global(.btn--lg) {
+    --btn-px: 1.1rem;
+    --btn-fs: 0.8125rem;
+  }
+
+  @media (min-width: 25rem) {
+    .charge__actions :global(.btn--lg) {
+      --btn-px: 1.6rem;
+      --btn-fs: 0.875rem;
+    }
+  }
+
   .charge__button {
     position: relative;
+    display: grid;
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out),
+      filter var(--dur-slow) var(--ease-out);
+  }
+
+  @media (min-width: 640px) {
+    .charge__actions {
+      grid-auto-flow: column;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .charge__actions :global(.btn) {
+      width: auto;
+    }
+
+    .charge__actions :global(.charge__secondary) {
+      --btn-h: 56px;
+    }
+
+    .charge__actions :global(.btn--lg) {
+      --btn-px: 2.1rem;
+      --btn-fs: clamp(0.875rem, 0.82rem + 0.22vw, 1.0625rem);
+    }
   }
 
   /* onda que abre em volta do botão quando carrega */
@@ -101,41 +147,6 @@ const statusParts = copy.statusLine(registration).split(' · ');
     border-radius: 4px;
     opacity: 0;
     pointer-events: none;
-  }
-
-  /* plaquinha escura: a linha fica embaixo do globo aceso e o texto miúdo precisa de 4.5:1 */
-  .charge__status {
-    padding: 0.35rem 0.75rem;
-    border-radius: 3px;
-    background: color-mix(in srgb, var(--c-void) 72%, transparent);
-    box-shadow: inset 0 0 0 1px var(--surface-line);
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .charge__part {
-    display: block;
-  }
-
-  .charge__sep {
-    display: none;
-  }
-
-  @media (min-width: 640px) {
-    .charge__part {
-      display: inline;
-    }
-
-    .charge__sep {
-      display: inline;
-    }
-  }
-
-  .charge__status--urgent {
-    color: var(--ink-orange);
   }
 
   /* aguardando a carga: CTA apagado e a barra vazia; carregando, ela enche no tempo do globo */
@@ -151,13 +162,6 @@ const statusParts = copy.statusLine(registration).split(' · ');
 
   :global(.is-charging) .charge__fill {
     animation: charge-fill var(--charge-ms, 900ms) cubic-bezier(0.55, 0, 0.9, 0.6) forwards;
-  }
-
-  .charge__button {
-    transition:
-      opacity var(--dur-slow) var(--ease-out),
-      transform var(--dur-slow) var(--ease-out),
-      filter var(--dur-slow) var(--ease-out);
   }
 
   /* carregou: o botão acende com um brilho que sobe e assenta + anel que abre e some */

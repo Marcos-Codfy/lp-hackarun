@@ -11,7 +11,11 @@ import { SCENE_LOOKS } from '@presentation/experience/post/SceneLooks';
 
 function light(input: Partial<PostInput>) {
   const director = new PostDirector(['core']);
-  const camera = new PerspectiveCamera();
+  // câmera base olhando a origem de z = 6 (como o palco)
+  const camera = new PerspectiveCamera(40, 16 / 10);
+  camera.position.set(0, 0, 6);
+  camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld();
   director.update(
     {
       weights: new Float32Array([1]),
@@ -23,6 +27,7 @@ function light(input: Partial<PostInput>) {
       velocity: 0,
       time: 0,
       pivot: new Vector3(),
+      radius: 1,
       ...input,
     },
     camera,
@@ -47,5 +52,16 @@ describe('PostDirector', () => {
   it('assentado, o brilho calmo soma pouco', () => {
     const state = light({ afterglow: 1 });
     expect(state.bloomStrength - SCENE_LOOKS.core.bloom).toBeLessThanOrEqual(0.1 + 1e-6);
+  });
+
+  it('a onda do pós nasce na silhueta do globo (raio na tela, em alturas de tela)', () => {
+    const state = light({ shockPhase: 0, radius: 1.5 });
+    // meia altura visível a z = 6 com fov 40: 6 * tan(20°)
+    const expected = (1.5 / (6 * Math.tan((20 * Math.PI) / 180))) * 0.5;
+    expect(state.shockRadius).toBeCloseTo(expected, 3);
+  });
+
+  it('sem anel, o raio da onda fica como estava', () => {
+    expect(light({ shockPhase: -1, radius: 3 }).shockRadius).toBeCloseTo(0.4);
   });
 });

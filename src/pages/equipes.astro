@@ -1,9 +1,10 @@
 ---
-// página das equipes inscritas: leve (sem 3D, GSAP ou Lenis), mesmo header/rodapé da LP.
-// Lista do build + a lista ao vivo da planilha (TeamsView), só com equipes confirmadas
+// página das equipes inscritas: leve (sem 3D, GSAP ou Lenis), mesmo header/rodapé da LP e a SubNav que
+// troca com a página de inscrição. Lista do build + a lista ao vivo da planilha (TeamsView), só confirmadas
 import PageLayout from '@presentation/layouts/PageLayout.astro';
 import SiteHeader from '@presentation/components/layout/SiteHeader.astro';
 import SiteFooter from '@presentation/components/layout/SiteFooter.astro';
+import SubNav from '@presentation/components/layout/SubNav.astro';
 import TeamsDirectorySection from '@presentation/sections/TeamsDirectorySection.astro';
 import { serverContainer } from '@composition/server';
 import { buildAppConfig } from '@presentation/app/AppConfig';
@@ -19,7 +20,12 @@ const seo = { ...TEAMS_PAGE, jsonLd: teamsPageJsonLd(site) };
 <PageLayout seo={seo} appConfig={buildAppConfig(event)}>
   <SiteHeader registration={event.registration} page="teams" />
   <main id="conteudo">
-    <TeamsDirectorySection teams={teams} slots={event.registration.slots} />
+    <SubNav page="teams" />
+    <TeamsDirectorySection
+      teams={teams}
+      slots={event.registration.slots}
+      registrationOpen={event.registration.status !== 'closed'}
+    />
   </main>
   <SiteFooter data={data} page="teams" />
 </PageLayout>

@@ -1,6 +1,7 @@
 ---
 import type { FaqItemDTO, LandingPageDTO } from '@application/index';
 import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
+import { registrationHref } from '@presentation/view-models/registration/registrationOrigin';
 import SectionHeader from './shared/SectionHeader.astro';
 import FaqEntry from './faq/FaqEntry.astro';
 import './sections.css';
@@ -23,6 +24,11 @@ for (const item of faq) groups.set(item.category, [...(groups.get(item.category)
 // token npc-3 mora na resposta sobre os NPCs (só aparece pra quem abre); senão vai na última
 const tokenId = faq.find((item) => item.id === 'npcs')?.id ?? faq.at(-1)?.id;
 const numberOf = (item: FaqItemDTO) => faq.indexOf(item) + 1;
+// a inscrição mora na própria página: a resposta sobre ela leva até lá (fechada, não tem pra onde levar)
+const signupLink =
+  Astro.props.data.event.registration.status === 'closed'
+    ? null
+    : { href: registrationHref('faq'), label: 'Ir para a página de inscrição' };
 ---
 
 <section
@@ -56,7 +62,12 @@ const numberOf = (item: FaqItemDTO) => faq.indexOf(item) + 1;
           </h3>
           <div class="faq__entries">
             {items.map((item) => (
-              <FaqEntry item={item} number={numberOf(item)} withToken={item.id === tokenId} />
+              <FaqEntry
+                item={item}
+                number={numberOf(item)}
+                withToken={item.id === tokenId}
+                link={item.id === 'signup' ? signupLink : null}
+              />
             ))}
           </div>
         </div>

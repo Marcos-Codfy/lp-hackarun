@@ -12,13 +12,54 @@ do Git.
 
 ## [Unreleased]
 
-Ajustes pedidos pela organização depois da aprovação da v2, em duas rodadas. Na primeira, o site deixa de ter som, o
+Ajustes pedidos pela organização depois da aprovação da v2, em três rodadas. Na rodada 2, o site deixa de ter som, o
 clímax da inscrição fica mais curto e calmo e as equipes ganham uma página própria, com a foto ou a logo de cada time.
-Na segunda, o conteúdo passa a seguir o documento do coordenador do evento (duas frentes, a programação real e a
+Na rodada 3, o conteúdo passa a seguir o documento do coordenador do evento (duas frentes, a programação real e a
 HackaRun Experience), a inscrição vira só de equipe, com uma planilha organizada, e o repositório fica pronto para
-fork.
+fork. Na rodada 4, o formulário sai da LP para a página `/inscricao`, com rascunho na aba e volta ao mesmo ponto do
+evento, e o globo do fim da página fica bem mais calmo.
 
 ### Added
+
+- Página `/inscricao` (ADR 0009), leve como a `/equipes` (`PageLayout` + `LightApp`, sem 3D, GSAP nem Lenis), com
+  título, descrição, canonical, Open Graph e JSON-LD próprios (`BreadcrumbList` Início › Inscrição) e entrada no
+  sitemap. Traz o cartão de status (Em breve, Abertas, Encerrando ou Encerradas) com o contador, o formulário de
+  sempre e o "Adicionar à agenda".
+- Indicador de etapas (01 Equipe, 02 Integrantes, 03 Confirmação, `StepProgressView`): etapa pronta ganha um check,
+  a atual segue o foco (ou é a primeira por terminar), etapa com erro fica com o número em vermelho e o texto ", com
+  campos a ajustar" para leitor de tela, e o link de cada etapa rola até ela sem criar entrada no histórico. O envio
+  continua um só.
+- Painel "O que você precisa ter em mãos" (`RegistrationBrief`): ao lado do formulário no desktop, com o cartão das
+  etapas fixo; abaixo de 64rem vira o `<details>` recolhido "O que ter em mãos (4)" (`RegistrationBriefToggle`).
+- Sub-navegação de `/inscricao` e `/equipes` (`SubNav`): "← Voltar ao evento" e a chave [Inscrição | Equipes
+  inscritas] com `aria-current`. Abaixo de 480 px os rótulos encurtam sem mudar o nome acessível, e cabe de 320 a
+  1440 px sem estourar. O link da página atual sobe para o topo e leva o foco ao conteúdo em vez de recarregar
+  (`CurrentPageLinks`).
+- "Voltar ao evento" (`views/navigation/backToEvent.ts`): quem veio da LP nesta aba volta pelo histórico, no mesmo
+  ponto da página (bfcache ou restauração do scroll); onde existe a Navigation API, acha a LP mesmo duas páginas
+  atrás (LP › inscrição › equipes). Quem chegou direto, e quem está sem JavaScript, vai para `/#inscricao`, que agora
+  para com o clímax ocupando a tela (`data-anchor-offset` no `ScrollDriver`).
+- Rascunho da inscrição na aba (`sessionStorage`, `RegistrationDraft` e `DraftKeeper`): os textos ficam em
+  `hackarun:registration-draft:v2`, gravados depois de uma pausa na digitação e ao sair da página, e a foto preparada
+  numa chave à parte (`…:v2:image`), regravada só quando muda. Tudo volta quando a pessoa retorna à página; se a foto
+  não coube, o formulário pede para escolher de novo. O aceite volta sempre desmarcado, a chave de envio volta junto
+  (recarregar depois de uma resposta perdida reenvia a mesma inscrição) e o rascunho some no envio com sucesso ou em
+  "Limpar rascunho". Erro de armazenamento nunca quebra o formulário.
+- Origem de cada inscrição no endereço: todo CTA leva para `/inscricao?origem=<lugar>` (header, menu, hero, "O
+  evento", equipes, FAQ, fim da LP, rodapé, `/equipes`, sub-navegação, 404 e privacidade). O valor é conferido contra
+  uma lista fixa (`registrationOrigin.ts`; o resto vira `direct`) e gravado na coluna Origem da planilha.
+- Link "Inscrição" no rodapé, botão de inscrição na 404 e "Voltar ao evento" na tela de sucesso, que agora avisa que a
+  equipe aparece em Equipes depois da confirmação.
+- `RegistrationCopy.actionLabel(status)`: "Quero participar" com as inscrições em breve, "Inscrever minha equipe" com
+  elas abertas e "Ver as equipes" depois de encerradas. Vale para o fim da LP, a chamada de equipes e a 404.
+- `experience/scene/CoreMotion.ts`: perfil de movimento por cena, com `BASE_MOTION` (o movimento de sempre, hero
+  incluído) e `FINALE_MOTION` (o globo do fim), misturados por um peso que vale 1 na seção com `data-scene-hold` e na
+  travessia até ela. Sem essa seção (a 404), o globo segue como antes.
+- ADR 0009: inscrição numa página própria.
+- Testes do rascunho (gravação, leitura, foto à parte e versões), do `DraftKeeper`, do `PressGuard`, das etapas, do
+  resumo de erros por bloco, do "Voltar ao evento", dos links da página atual, da origem, da página de inscrição (vagas
+  esgotadas, encerrada, sem buscar equipes quando não há capacidade, painel escondido no sucesso), do `CoreMotion` e do
+  pulso novo no `ChargeController`, no `ShockwaveRing` e no `PostDirector`.
 
 - Programação real em abas, uma por dia (11/11 Oficinas, 12/11 Abertura, 13/11 Mercado e 14/11 Final), no padrão de
   abas WAI-ARIA (`DayTabsController`: tabindex móvel, setas, Home/End e ativação automática; no dia do evento abre na
@@ -87,6 +128,48 @@ fork.
 
 ### Changed
 
+- O formulário saiu da LP. A seção `#inscricao` virou só o clímax: contador, a lista curta "Tenha em mãos", o botão
+  principal ("Quero participar" ou "Inscrever minha equipe", conforme o status), "Ver as equipes" e a linha de status
+  (`ChargeStatus`). Ela mantém o id, o `data-scene="core"`, o `data-scene-hold="900"`, o `data-checkpoint` e as
+  classes da carga. A barra de energia virou um fio logo abaixo do botão principal, e tudo cabe numa tela de 360×740.
+- Globo do fim da LP bem mais calmo, a pedido da organização: gira a 0,06 rad/s (o hero segue em 0,12) e só respira,
+  com o raio crescendo cerca de 1,6% e o brilho cerca de 10% num ciclo de 3,6 s; as fitas fluem a 0,4× da velocidade
+  e com metade da amplitude. A carga não acelera nem agita mais nada (antes o ruído ia a 6,6×, as fitas a 1,7× e o
+  giro a 16×, e a agitação crescia quanto mais tempo a página ficava aberta): ela só soma luz, dentro dos tetos de
+  antes, e contrai o globo 2,5%.
+- Pulso do clímax: um anel suave que nasce logo fora da borda do globo e abre até cerca de 1,6 vez o raio em 2,6 s,
+  sem passar pelo título, pelo contador nem pelo CTA (era uma elipse inclinada que chegava a 2,6 vezes e cobria a
+  tela). A luz sobe em 0,45 s e apaga em cerca de 2,3 s, o globo se afasta 5% do raio (eram 15%) e a ondulação do
+  passe cinematográfico acompanha a borda do globo, não o centro da tela. Na chegada do FAQ, o redemoinho da
+  travessia cai para 0,22×; a deriva da câmera, o empurrão do ponteiro, o respiro do scroll e a aproximação na carga
+  também diminuem, só nessa cena. A fase do ruído passou a ser somada frame a frame, então mudar a velocidade não faz
+  as fitas saltarem.
+- Todos os CTAs de inscrição levam para `/inscricao`. O do header aparece com contorno (página atual) em `/inscricao`
+  e some com o menu aberto entre 640 e 1023 px.
+- `/equipes`: a trilha de navegação deu lugar à sub-navegação, e o estado vazio leva para `/inscricao`.
+- Resumo de erros agrupado por bloco ("Equipe: nome e foto ou logo", "Integrante 2: nome, matrícula e e-mail"): um
+  envio vazio mostra 4 linhas em vez de 9, e um bloco com um erro só mantém a mensagem exata.
+- `/inscricao` abaixo de 64rem: status numa linha só (o contador e a linha do tamanho da equipe ficam no desktop),
+  "O que ter em mãos (4)" recolhido e, abaixo de 40rem, sem o título do cartão das etapas nem a barra "Lobby online ·
+  Esquadrão"; a prévia "em breve" do formulário tem 11rem. Em 390×844, o primeiro campo desceu de 1.476 para 947 px.
+- O link do aviso de privacidade, no consentimento, abre na mesma aba (o rascunho guarda o que foi digitado).
+- O HUD esconde a pílula sobre os CTAs do clímax (`.is-cta` no lugar de `.is-form`).
+- FAQ "Como faço a inscrição no hackathon?" fala da página de inscrição, e `/privacidade` explica o rascunho na aba. A
+  coleta não mudou, então o `CONSENT_VERSION` continua `2026-10-v3`.
+- O header não recolhe numa descida de menos de 30 px sem roda, toque, tecla ou clique nos últimos 300 ms (era o
+  scroll anchoring do navegador).
+- `astro.config`: `trailingSlash: 'never'` e `build.format: 'file'`. O build gera `inscricao.html`, `equipes.html` e
+  `privacidade.html`, a Cloudflare Pages serve `/inscricao` sem redirecionar e o sitemap fica igual aos canonicals.
+- `contain-intrinsic-size` medido de novo depois que cada seção monta, com um degrau novo em 48rem; o `#inscricao`
+  passou a 160svh.
+- A `SubNav` usa a largura e o recuo da barra do header; o `PageHalo` apaga a metade de baixo do mostrador; a faixa
+  de parceiros ganhou um fundo que entra em degradê (sem fio no topo), e o fio do rodapé ficou a 35%.
+- `scripts/qa/anchorcheck.mjs`: os CTAs do header e do hero precisam abrir `/inscricao?origem=…`, e o "Voltar ao
+  evento" de quem chegou direto precisa parar no `#inscricao` (em `/equipes` e em `/inscricao`); cada caso roda numa
+  aba nova.
+- README (pt-BR e inglês), guia, design spec, CONTRIBUTING e mídias do README (`registration.jpg`,
+  `sections-desktop.jpg`, `mobile.jpg`, `teams-page.jpg` e a prévia animada com o pôster) atualizados para a página de
+  inscrição e o globo final calmo.
 - O evento passa a ser apresentado como no documento do coordenador: o 1º HackaRun, de tecnologia, inovação e
   empreendedorismo, com uma programação aberta ao público (11 a 13/11, a partir das 19h, no Bloco II) e um hackathon
   só para alunos da UniCatólica, em equipes. Título e descrição da página, HUD do hero, faixa de "O evento" e textos
@@ -113,8 +196,8 @@ fork.
 - A seção de equipes da LP virou uma chamada para `/equipes`: contador ao vivo, até 5 fotos, "Ver as equipes" e
   "Inscrever minha equipe".
 - Clímax da inscrição mais curto e suave: a carga dura 0,9 s (era 1,5 s; `DEFAULT_HOLD_MS`), o estouro virou um pulso
-  em que o globo respira inteiro, o anel abre até cerca de 2,6 vezes o raio do globo (era 4,3) e o brilho que a carga
-  soma tem teto (`MAX_CHARGE_BLOOM` 0,3 e `MAX_CHARGE_EXPOSURE` 0,08).
+  em que o globo respira inteiro, o anel abre até cerca de 2,6 vezes o raio do globo (era 4,3; na rodada 4, cerca de
+  1,6) e o brilho que a carga soma tem teto (`MAX_CHARGE_BLOOM` 0,3 e `MAX_CHARGE_EXPOSURE` 0,08).
 - A barra do CTA do clímax enche junto com a carga do globo, e o botão acende com a animação `charge-glow`.
 - A linha de status do clímax ganhou uma placa escura para manter o contraste sobre o anel, e as duas partes empilham
   abaixo de 640 px.
@@ -158,6 +241,8 @@ fork.
 
 ### Removed
 
+- Da LP: o formulário, o lobby (`LobbyPanel`), o carregamento sob demanda do formulário (`mountRegistrationForm` e o
+  seu teste) e o `RegistrationCtaController`, que rolava até o formulário, junto com o evento `registration:intent`.
 - A modalidade individual e os campos WhatsApp, curso, período e acessibilidade (dado sensível), do formulário à
   planilha, com o `ContactFields` (`PersonName` e `Phone`) e o `ModeSwitch`. A aba antiga `Inscricoes` deixa de ser
   usada.
@@ -177,6 +262,18 @@ fork.
 
 ### Fixed
 
+- Clique perdido em "Confirmar inscrição" ou "Adicionar integrante" logo depois de digitar (já acontecia na LP): a
+  validação do campo, ao perder o foco, mostrava o erro acima e empurrava o botão entre o apertar e o soltar. Com um
+  botão apertado, essa validação espera o clique (`PressGuard`), e o "Remover" descobre a linha do integrante na hora
+  em que ela roda.
+- O link "02 Integrantes" leva o foco ao primeiro campo que dá para usar (antes podia parar num controle escondido,
+  `inert` ou desativado).
+- A etapa atual não fica presa depois de um envio vazio, e a origem e a chave de envio lidas do rascunho são
+  conferidas antes de valer.
+- O painel lateral some no sucesso antes de o título receber o foco, sem pulo de conteúdo.
+- Rolagem dobrada ao saltar para uma etapa (`scroll-margin-top` repetido no `.step` e no painel).
+- O menu do celular fecha ao sair da página, para nunca voltar aberto pelo bfcache.
+- O chunk do formulário não é baixado com as inscrições em breve ou encerradas.
 - A etapa Integrantes vinha vazia na prévia "em breve": os cards do mínimo da equipe já saem no HTML, e a View adota
   esses cards (e o que foi digitado neles) em vez de clonar outros.
 - O integrante 1 (contato) tem `autocomplete="name"` e `"email"` de novo (WCAG 1.3.5).
@@ -188,8 +285,18 @@ fork.
 - O logo do header é o LCP fora da home e carrega sem lazy, com `fetchpriority` alta.
 - "UniCatólica" também no rodapé, no menu, no SEO de `/equipes`, no `package.json` e nos metadados dos PDFs.
 
+### Performance
+
+- LP no build de produção, Lighthouse mobile (mediana de 3 em 12/10/2026, depois da rodada 4): Performance 98, LCP
+  2,2 s, TBT 98 ms e CLS 0,001; JS inicial de 68,2 KB gzip (era 68,4 KB), já sem o formulário e o controlador do CTA.
+  `/inscricao` e `/equipes`: Performance 99, LCP 2,0 s e TBT 0.
+- O globo calmo não acrescenta passe de render: são 4 uniforms novos nas partículas, 1 no passe de lente e uma mistura
+  de números por frame na CPU.
+
 ### Security
 
+- O rascunho da inscrição fica só na aba (`sessionStorage`, some ao fechar), nunca guarda o aceite e confere o que lê
+  de volta: origem da lista, chave de envio no formato do servidor e foto com tipo e tamanho válidos.
 - Menos dado pessoal: a inscrição não pede telefone, curso nem dado sensível, e a lista pública não tem curso, nome de
   pessoa nem e-mail.
 - Escopos mínimos no `appsscript.json`: só a planilha do próprio script (`spreadsheets.currentonly`) e o Drive, com um

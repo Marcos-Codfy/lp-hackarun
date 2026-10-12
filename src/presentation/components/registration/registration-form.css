@@ -1,4 +1,5 @@
-/* lobby de inscrição: global de propósito, tudo com prefixo .regform (os cards de integrante são clonados em runtime) */
+/* formulário de inscrição: global de propósito, tudo com prefixo .regform (os cards de integrante são clonados
+   em runtime) */
 .regform {
   position: relative;
   isolation: isolate;
@@ -6,32 +7,13 @@
   /* minmax(0): botão nowrap não pode alargar a trilha e vazar a tela em 360px */
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
-  transition: transform var(--dur-slow) var(--ease-out);
 }
 
-/* brilho atrás do painel: pseudo-elemento, porque filter no pai quebraria o vidro */
-.regform::before {
-  content: '';
-  position: absolute;
-  inset: 4% 0;
-  z-index: -1;
-  background: radial-gradient(
-    closest-side,
-    color-mix(in srgb, var(--c-cyan) 30%, transparent),
-    color-mix(in srgb, var(--c-violet) 12%, transparent) 60%,
-    transparent
-  );
-  filter: blur(50px);
-  opacity: 0;
-  transition: opacity 1.2s var(--ease-out);
-  pointer-events: none;
-}
-
-/* sem vidro próprio: a moldura (LobbyPanel) é de quem hospeda */
+/* sem vidro próprio: a moldura é de quem hospeda (o painel da página de inscrição) */
 .regform__panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 
 /* no form o rótulo do botão quebra linha em vez de empurrar o layout */
@@ -59,15 +41,20 @@
 }
 
 @media (min-width: 40rem) {
+  .regform__panel {
+    gap: var(--space-6);
+  }
+
   .regform .btn--lg {
     --btn-px: 2.1rem;
     --btn-fs: clamp(0.875rem, 0.82rem + 0.22vw, 1.0625rem);
   }
 }
 
-/* barra de status do esquadrão, estilo lobby de jogo */
+/* barra de status do esquadrão, estilo lobby de jogo. No celular sai (o "Integrantes 2/5" do bloco 02 já conta
+   o esquadrão): o primeiro campo sobe pra perto do topo da tela */
 .regform__squad {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
@@ -173,6 +160,10 @@
   .regform__actions {
     justify-items: start;
     gap: var(--space-4);
+  }
+
+  .regform__squad {
+    display: flex;
   }
 }
 

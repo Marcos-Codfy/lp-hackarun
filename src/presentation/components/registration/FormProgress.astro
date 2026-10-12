@@ -1,0 +1,95 @@
+---
+// indicador das 3 etapas (um envio só) + o status do rascunho da aba. A StepProgressView marca as etapas
+// prontas e a atual (aria-current="step"); o DraftKeeper liga a faixa do rascunho e o "Limpar rascunho".
+// Celular: as etapas em linha, acima do formulário. Desktop: em coluna, no painel fixo ao lado
+import { REGISTRATION_STEPS } from '@presentation/view-models/registration/registrationSteps';
+import DraftBar from './DraftBar.astro';
+import FormProgressSteps from './FormProgressSteps.astro';
+---
+
+<div class="progress sx-glass" data-form-progress>
+  <nav class="progress__nav" aria-labelledby="reg-progress-title">
+    <div class="progress__head">
+      <p class="progress__title" id="reg-progress-title">
+        Etapas da inscrição
+      </p>
+      <p class="progress__count" aria-hidden="true">
+        <span data-step-done>0</span> de {REGISTRATION_STEPS.length} prontas
+      </p>
+    </div>
+    <span class="progress__bar" aria-hidden="true">
+      <span class="progress__fill" data-step-fill></span>
+    </span>
+    <FormProgressSteps />
+  </nav>
+  <DraftBar />
+</div>
+
+<style>
+  .progress,
+  .progress__nav {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .progress {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  /* celular: as três etapas já se explicam e o título sai da tela (o aria-labelledby ainda nomeia o nav) */
+  .progress__head {
+    display: none;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 40rem) {
+    .progress {
+      padding: var(--space-4);
+    }
+
+    .progress__head {
+      display: flex;
+    }
+  }
+
+  .progress__title,
+  .progress__count {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .progress__title {
+    color: var(--ink-cyan);
+    font-weight: 600;
+  }
+
+  .progress__bar {
+    position: relative;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: rgb(143 243 255 / 0.12);
+  }
+
+  .progress__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--grad-energy);
+    box-shadow: 0 0 12px rgb(0 229 255 / 0.6);
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left center;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  @media (min-width: 64rem) {
+    .progress {
+      padding: var(--space-5);
+    }
+  }
+</style>

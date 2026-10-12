@@ -1,32 +1,24 @@
-// monta as Views MVVM (pausa das animações, contador, equipes, inscrição, HUD, NPCs) sobre o container
+// monta as Views MVVM da LP (pausa das animações, contador, equipes, clímax da inscrição, HUD, NPCs) sobre o
+// container. O formulário mora na página /inscricao (LightApp): aqui não baixa nada dele
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { qs, qsa } from '@shared/utils/dom';
 import type { AppContext } from '@presentation/app/AppContext';
 import type { BootSteps } from '@presentation/app/BootQueue';
 import { LazyMount } from '@presentation/app/LazyMount';
 import { CountdownViewModel } from '@presentation/view-models/countdown/CountdownViewModel';
-import type { TeamsViewModel } from '@presentation/view-models/teams/TeamsViewModel';
 import { HudViewModel } from '@presentation/view-models/hud/HudViewModel';
 import { NpcHuntViewModel } from '@presentation/view-models/npc/NpcHuntViewModel';
 import { MotionPreferenceViewModel } from '@presentation/view-models/motion/MotionPreferenceViewModel';
 import { CountdownView } from './CountdownView';
-import type { RegistrationFormView } from './RegistrationFormView';
-import { RegistrationCtaController } from './RegistrationCtaController';
 import { ChargeRevealView } from './ChargeRevealView';
 import { HudView } from './HudView';
 import { NpcTokenView } from './NpcTokenView';
 import { MotionPreferenceView } from './motion/MotionPreferenceView';
 
-// guarda o container e os VMs que mais de uma View usa (NPC, equipes) entre os passos do boot
+// guarda o container e o VM que mais de uma View usa (NPC) entre os passos do boot
 class ViewMounter {
   private c: ClientContainer | null = null;
   private npc: NpcHuntViewModel | null = null;
-  private form: RegistrationFormView | null = null;
-  // origem do último CTA de inscrição (o VM do formulário nasce depois, quando o chunk chega)
-  private intent: string | null = null;
-  // lista ao vivo das equipes: vagas esgotadas na planilha fecham o formulário
-  private teamsVm: TeamsViewModel | null = null;
-  private teamsLazy: LazyMount | null = null;
 
   constructor(private readonly ctx: AppContext) {}
 
@@ -69,35 +61,10 @@ class ViewMounter {
     qsa<HTMLButtonElement>('[data-npc-token]').forEach((b) => new NpcTokenView(b, npc).mount());
   }
 
-  // CTAs moram no hero e no header: entram cedo; o formulário (lá embaixo) chega depois
-  registrationCta(): void {
-    new RegistrationCtaController(this.ctx, () => this.form?.focusEntry() ?? false).mount();
+  // clímax: o CTA da inscrição acende quando o globo termina de carregar (os CTAs são links pra /inscricao)
+  chargeReveal(): void {
     const section = qs('#inscricao');
     if (section) new ChargeRevealView(this.ctx, section).mount();
-  }
-
-  // o formulário (VM, View, envio e foto) é o maior pedaço do JS e mora no fim da página: chunk à parte,
-  // carregado quando a seção chega perto da tela, quando a pessoa interage nele ou quando um CTA leva até lá
-  registrationForm(c: ClientContainer): void {
-    const root = qs('[data-registration-form]');
-    if (!root) return;
-    const lazy = new LazyMount(root.closest<HTMLElement>('section') ?? root, () => this.loadForm(c, root));
-    this.ctx.bus.on('registration:intent', ({ source }) => {
-      this.intent = source;
-      lazy.trigger();
-    });
-    lazy.watch();
-  }
-
-  private async loadForm(c: ClientContainer, root: HTMLElement): Promise<void> {
-    const [{ mountRegistrationForm }, services] = await Promise.all([
-      import('./registration/mountRegistrationForm'),
-      c.loadRegistration(),
-      // as vagas ao vivo vêm da lista de equipes: sem ela o formulário monta mesmo assim
-      this.teamsLazy?.ensure().catch(() => undefined),
-    ]);
-    const { ctx, teamsVm: teams, intent: source } = this;
-    this.form = mountRegistrationForm({ root, ctx, services, clock: c.clock, teams, source });
   }
 
   // vitrine e contador ao vivo das equipes (bem abaixo da dobra): chunk à parte, quando a seção chega perto
@@ -105,11 +72,11 @@ class ViewMounter {
     const roots = qsa('[data-teams]');
     const first = roots[0];
     if (!first) return;
-    this.teamsLazy = new LazyMount(first.closest<HTMLElement>('section') ?? first, async () => {
+    const lazy = new LazyMount(first.closest<HTMLElement>('section') ?? first, async () => {
       const { mountTeams } = await import('./teams/mountTeams');
-      this.teamsVm ??= mountTeams(c, this.ctx.config.registration.slots, roots)[0] ?? null;
+      mountTeams(c, this.ctx.config.registration.slots, roots);
     });
-    this.teamsLazy.watch();
+    lazy.watch();
   }
 
   // passo que precisa do container: sem ele (config quebrada) não monta
@@ -134,16 +101,9 @@ export function mountViews(ctx: AppContext, boot: BootSteps): void {
   );
   boot.add('hud', () => views.hud());
   boot.add('npc tokens', () => views.npcTokens());
-  boot.add(
-    'registration cta',
-    views.withContainer(() => views.registrationCta()),
-  );
+  boot.add('charge reveal', () => views.chargeReveal());
   boot.add(
     'teams',
     views.withContainer((c) => views.teams(c)),
-  );
-  boot.add(
-    'registration form',
-    views.withContainer((c) => views.registrationForm(c)),
   );
 }

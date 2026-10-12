@@ -1,0 +1,51 @@
+---
+// "Adicionar à agenda" no pé do formulário (o .ics da programação), como era no lobby da LP. Em breve e no
+// sucesso o próprio aviso já traz o botão: aqui some
+import type { EventOverviewDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { EventStampFormatter } from '@presentation/formatters/EventStampFormatter';
+
+interface Props {
+  event: Pick<EventOverviewDTO, 'milestones' | 'timezone'>;
+}
+
+const { event } = Astro.props;
+const kickoffAt = event.milestones.find((m) => m.key === 'kickoff')?.at ?? null;
+const kickoff = kickoffAt ? new EventStampFormatter(event.timezone).format(kickoffAt) : null;
+---
+
+<div class="agenda">
+  <Button variant="ghost" href="/hackarun-2026.ics" download="hackarun-2026.ics">
+    Adicionar à agenda
+    <Icon slot="icon" name="calendar" size={18} />
+  </Button>
+  {kickoff && (
+    <p class="agenda__hint">
+      Não perca a largada: {kickoff.date} às {kickoff.hour.toLowerCase()}.
+    </p>
+  )}
+</div>
+
+<style>
+  .agenda {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+    margin-top: var(--space-7);
+    padding-top: var(--space-5);
+    border-top: 1px solid rgb(140 160 255 / 0.12);
+  }
+
+  /* o sucesso e o "abrem em breve" já trazem o próprio "Adicionar à agenda" */
+  :global(.signup__panel:has([data-reg-success]:not([hidden]))) .agenda,
+  :global(.signup__panel:has([data-registration-form][data-status='soon'])) .agenda {
+    display: none;
+  }
+
+  .agenda__hint {
+    color: var(--text-dim);
+    font-size: var(--fs-sm);
+  }
+</style>

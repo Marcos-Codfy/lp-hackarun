@@ -16,3 +16,10 @@ export function newIdempotencyKey(
   const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
+
+// o mesmo formato que o servidor aceita (IDEMPOTENCY_KEY_PATTERN do apps-script/Validation.gs): chave lida do
+// rascunho só volta se passar
+const KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9-]{7,63}$/;
+
+export const isIdempotencyKey = (value: unknown): value is string =>
+  typeof value === 'string' && KEY_PATTERN.test(value);

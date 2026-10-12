@@ -1,6 +1,6 @@
 ---
-// layout leve (/equipes): mesmo head, aurora e tipografia da LP, sem o palco 3D e sem GSAP/Lenis.
-// O LightApp só liga header, menu, "Pausar animações" e as Views da página
+// layout leve (/equipes, /inscricao): mesmo head, aurora e tipografia da LP, sem o palco 3D e sem GSAP/Lenis.
+// O LightApp só liga header, menu, "Pausar animações", a SubNav e as Views da página
 import DocumentHead from './parts/DocumentHead.astro';
 import Backdrop from './parts/Backdrop.astro';
 import type { SeoProps } from '@presentation/components/seo/Seo.astro';
@@ -43,3 +43,10 @@ const configJson = safeJsonForScript(appConfig);
     </script>
   </body>
 </html>
+
+<style>
+  /* o header é fixo: o conteúdo (SubNav primeiro) começa logo abaixo dele */
+  :global(body > main) {
+    padding-top: calc(var(--header-h) + var(--space-1));
+  }
+</style>

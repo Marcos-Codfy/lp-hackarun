@@ -14,8 +14,8 @@ type Props = Omit<HTMLAttributes<'a'>, 'type'> & {
   disabled?: boolean;
   variant?: Variant;
   size?: Size;
-  // CTA de inscrição: o front intercepta e leva até o formulário
-  registrationCta?: string;
+  // CTA de inscrição: marca a origem no HTML (data-registration-cta, útil pro QA); o link é o /inscricao
+  registrationCta?: string | undefined;
   // ">>" do manual; o slot "icon" tem prioridade. Padrão: só nos botões cheios
   chevrons?: boolean;
 };

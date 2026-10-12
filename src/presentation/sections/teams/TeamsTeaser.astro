@@ -5,7 +5,9 @@ import type { RegistrationDTO, TeamDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import TeamCounter from '@presentation/components/teams/TeamCounter.astro';
 import TeamFaces from '@presentation/components/teams/TeamFaces.astro';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import { toPublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
+import { registrationHref } from '@presentation/view-models/registration/registrationOrigin';
 
 interface Props {
   teams: TeamDTO[];
@@ -15,6 +17,7 @@ interface Props {
 const { teams, registration } = Astro.props;
 const { slots } = registration;
 const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam);
+const ctaLabel = new RegistrationCopy().actionLabel(registration.status);
 ---
 
 <div
@@ -43,8 +46,8 @@ const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam
       Ver as equipes
     </Button>
     {registration.status !== 'closed' && (
-      <Button href="#inscricao" variant="ghost" size="lg" registrationCta="teams">
-        Inscrever minha equipe
+      <Button href={registrationHref('teams')} variant="ghost" size="lg" registrationCta="teams">
+        {ctaLabel}
       </Button>
     )}
   </div>

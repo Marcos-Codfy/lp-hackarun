@@ -1,11 +1,15 @@
-// boot das páginas leves (/equipes): header, "Pausar animações" e equipes ao vivo a partir do #app-config
+// boot das páginas leves (/equipes, /inscricao): header, "Pausar animações", equipes ao vivo e, em /inscricao,
+// o formulário (chunk à parte), a partir do #app-config
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryPreferenceStore } from '@infrastructure/storage/MemoryPreferenceStore';
 import type { AppConfig } from '@presentation/app/AppConfig';
 import type { PublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
 
-const container = vi.hoisted(() => ({ create: vi.fn() }));
+const container = vi.hoisted(() => ({ create: vi.fn(), mountPage: vi.fn(), load: vi.fn() }));
 vi.mock('@composition/client', () => ({ createClientContainer: container.create }));
+vi.mock('@presentation/views/registration/mountRegistrationPage', () => ({
+  mountRegistrationPage: container.mountPage,
+}));
 
 const SLOTS = { capacity: null, taken: 0, remaining: null, level: 'unknown' };
 const CONFIG = { milestones: [], registration: { slots: SLOTS }, teamsEndpoint: null };
@@ -38,7 +42,13 @@ describe('LightApp.boot', () => {
 
   beforeEach(() => {
     container.create.mockReset();
-    container.create.mockReturnValue({ preferences: new MemoryPreferenceStore(), listTeams: null });
+    container.mountPage.mockReset();
+    container.load.mockReset().mockResolvedValue({ submitRegistration: {}, prepareTeamImage: {} });
+    container.create.mockReturnValue({
+      preferences: new MemoryPreferenceStore(),
+      listTeams: null,
+      loadRegistration: container.load,
+    });
     error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 
@@ -54,6 +64,30 @@ describe('LightApp.boot', () => {
     const config = container.create.mock.calls[0]?.[0] as AppConfig;
     expect(config.registration.slots).toEqual(SLOTS);
     expect(document.querySelector('[data-teams-faces] [data-team-initials]')?.textContent).toBe('BB');
+  });
+
+  it('/equipes não baixa o formulário', async () => {
+    await boot(page());
+    await vi.waitFor(() => expect(container.create).toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(container.load).not.toHaveBeenCalled();
+    expect(container.mountPage).not.toHaveBeenCalled();
+  });
+
+  it('/inscricao baixa os serviços e monta o formulário da página', async () => {
+    await boot(`<div data-registration-form data-status="open"></div>${page()}`);
+    await vi.waitFor(() => expect(container.mountPage).toHaveBeenCalledTimes(1));
+    expect(container.load).toHaveBeenCalledTimes(1);
+    const deps = container.mountPage.mock.calls[0]?.[0] as { root: HTMLElement };
+    expect(deps.root.matches('[data-registration-form]')).toBe(true);
+  });
+
+  it('/inscricao em breve (formulário só de amostra): não baixa envio nem foto', async () => {
+    await boot(`<div data-registration-form data-status="soon"></div>${page()}`);
+    await vi.waitFor(() => expect(container.create).toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(container.load).not.toHaveBeenCalled();
+    expect(container.mountPage).not.toHaveBeenCalled();
   });
 
   it('sem #app-config avisa no console e não monta nada', async () => {

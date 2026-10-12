@@ -1,0 +1,134 @@
+---
+// celular e tablet: "o que ter em mãos" recolhido numa linha (a LP acabou de mostrar a lista), pra o formulário
+// começar mais perto do topo. Aberto, mostra a mesma lista do painel do desktop
+import PrepChecklist from '@presentation/components/registration/PrepChecklist.astro';
+import { prepChecklist } from '@presentation/components/registration/checklist';
+
+interface Props {
+  teamSize: { min: number; max: number };
+}
+
+const { teamSize } = Astro.props;
+const count = prepChecklist(teamSize).length;
+---
+
+<details class="brief-toggle sx-glass">
+  <summary class="brief-toggle__summary">
+    <span class="brief-toggle__title">
+      O que ter em mãos <span class="brief-toggle__count">({count})</span>
+    </span>
+    <span class="brief-toggle__icon" aria-hidden="true"></span>
+  </summary>
+  <div class="brief-toggle__body">
+    <PrepChecklist teamSize={teamSize} variant="panel" id="reg-brief-toggle-title" hideTitle />
+  </div>
+</details>
+
+<style>
+  .brief-toggle {
+    display: block;
+  }
+
+  .brief-toggle__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: 48px;
+    padding: var(--space-2) var(--space-4);
+    border-radius: 3px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .brief-toggle__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .brief-toggle__summary:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  .brief-toggle__title {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .brief-toggle__count {
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  /* "+" num losango que vira "−" ao abrir (o mesmo do FAQ) */
+  .brief-toggle__icon {
+    position: relative;
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid rgb(0 229 255 / 0.35);
+    border-radius: 2px;
+    transition:
+      transform var(--dur) var(--ease-out),
+      background var(--dur) var(--ease-out);
+  }
+
+  .brief-toggle__icon::before,
+  .brief-toggle__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 1.5px;
+    background: var(--c-cyan);
+    transform: translate(-50%, -50%);
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .brief-toggle__icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .brief-toggle[open] .brief-toggle__icon {
+    background: rgb(0 229 255 / 0.14);
+    border-color: var(--c-cyan);
+    transform: rotate(180deg);
+  }
+
+  .brief-toggle[open] .brief-toggle__icon::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  .brief-toggle__body {
+    padding: var(--space-4);
+    border-top: 1px solid var(--surface-line);
+  }
+
+  /* desktop: o painel completo (RegistrationBrief) fica fixo ao lado do formulário */
+  @media (min-width: 64rem) {
+    .brief-toggle {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brief-toggle__icon,
+    .brief-toggle__icon::before,
+    .brief-toggle__icon::after {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .brief-toggle__icon::before,
+    .brief-toggle__icon::after {
+      background: CanvasText;
+    }
+  }
+</style>

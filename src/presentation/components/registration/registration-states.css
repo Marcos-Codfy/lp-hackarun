@@ -1,4 +1,4 @@
-/* estados do lobby: erros, falha de envio, enviando, prévia "em breve" e o pico da carga do globo */
+/* estados do formulário: erros, falha de envio, enviando e a prévia "em breve" */
 .regform__summary {
   display: grid;
   gap: var(--space-2);
@@ -77,9 +77,10 @@
 }
 
 /* "em breve": só uma amostra curta e apagada do formulário, que some num degradê (o recado é o aviso e a
-   agenda). O form segue inert: nada do que fica cortado recebe foco nem vai pro leitor de tela */
+   agenda). No celular, só o começo da etapa 01; mais que isso parece um formulário quebrado. O form segue
+   inert: nada do que fica cortado recebe foco nem vai pro leitor de tela */
 .regform[data-status='soon'] .regform__form {
-  max-height: 22rem;
+  max-height: 11rem;
   overflow: clip;
   opacity: 0.4;
   filter: grayscale(0.5);
@@ -88,25 +89,10 @@
   mask-image: linear-gradient(180deg, #000 40%, transparent);
 }
 
-/* pico-fim: o globo carrega e o lobby acende. Só a decoração apaga (moldura, faixa e brilhos dos controles);
-   o texto fica com opacidade cheia pra não cair abaixo de 4.5:1 */
-.is-awaiting-charge .regform:not(:focus-within) {
-  transform: translateY(12px);
-}
-
-.is-awaiting-charge
-  .regform:not(:focus-within)
-  :is(.regform__squad, .member, .members__add, .field__control:not([aria-invalid='true'])) {
-  border-color: var(--surface-line);
-  box-shadow: none;
-}
-
-.is-awaiting-charge .regform:not(:focus-within) :is(.member__slot, .members__add-icon) {
-  opacity: 0.35;
-}
-
-.is-charged .regform::before {
-  opacity: 0.6;
+@media (min-width: 40rem) {
+  .regform[data-status='soon'] .regform__form {
+    max-height: 22rem;
+  }
 }
 
 @keyframes regform-spin {
@@ -118,9 +104,5 @@
 @media (prefers-reduced-motion: reduce) {
   .regform.is-submitting [data-reg-submit] .btn__label::after {
     animation-duration: 2.4s;
-  }
-
-  .is-awaiting-charge .regform:not(:focus-within) {
-    transform: none;
   }
 }

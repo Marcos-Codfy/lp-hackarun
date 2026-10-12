@@ -66,7 +66,10 @@ describe('navegação entre a LP e /equipes', () => {
   });
 
   it('inscrição encerrada: o CTA leva pra página de equipes', () => {
-    expect(new RegistrationCopy().cta('closed')).toMatchObject({ href: '/equipes', isRegistration: false });
+    expect(new RegistrationCopy().cta('closed', 'teams')).toMatchObject({
+      href: '/equipes',
+      isRegistration: false,
+    });
   });
 });
 

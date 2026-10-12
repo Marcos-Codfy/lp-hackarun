@@ -1,0 +1,231 @@
+---
+// "o que você precisa ter em mãos": compacta no fim da LP (só os títulos, em grade) e completa no painel
+// da página de inscrição (título + complemento). A lista sai do checklist.ts
+import Icon from '@presentation/components/ui/Icon.astro';
+import { prepChecklist } from './checklist';
+
+interface Props {
+  teamSize: { min: number; max: number };
+  variant?: 'compact' | 'panel';
+  // id do título que nomeia a lista
+  id: string;
+  // o título só pro leitor de tela (quem está em volta já mostra um: o resumo do <details> no celular)
+  hideTitle?: boolean;
+}
+
+const { teamSize, variant = 'compact', id, hideTitle = false } = Astro.props;
+const items = prepChecklist(teamSize);
+const Title = variant === 'panel' ? 'h2' : 'p';
+---
+
+<div class:list={['prep', `prep--${variant}`]}>
+  <Title class:list={['prep__title', hideTitle && 'sr-only']} id={id}>
+    {variant === 'panel' ? 'O que você precisa ter em mãos' : 'Tenha em mãos'}
+  </Title>
+  <ul class="prep__list" role="list" aria-labelledby={id}>
+    {items.map((item) => (
+      <li class="prep__item">
+        <span class="prep__icon" aria-hidden="true">
+          <Icon name={item.icon} size={variant === 'panel' ? 18 : 16} />
+        </span>
+        <span class="prep__text">
+          {variant === 'panel' ? (
+            <span class="prep__name">
+              <span class="prep__short">{item.short}</span>
+              <span class="prep__full">{item.title}</span>
+            </span>
+          ) : (
+            <span class="prep__name">{item.short}</span>
+          )}
+          {variant === 'panel' && <span class="prep__detail">{item.detail}</span>}
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .prep {
+    display: grid;
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  .prep__title {
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .prep__list {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .prep__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  /* losango de HUD com o ícone reto dentro, como o seletor da foto */
+  .prep__icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid color-mix(in srgb, var(--c-cyan) 50%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--c-cyan) 8%, transparent);
+    color: var(--c-cyan);
+    box-shadow: inset 0 0 12px color-mix(in srgb, var(--c-cyan) 18%, transparent);
+  }
+
+  .prep__text {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .prep__name {
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .prep__detail {
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+  }
+
+  /* fim da LP: placa escura em duas colunas (quatro no desktop), legível por cima do globo aceso */
+  .prep--compact {
+    justify-items: center;
+    padding: var(--space-3);
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--c-void) 70%, transparent);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+  }
+
+  .prep--compact .prep__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    width: 100%;
+    text-align: left;
+  }
+
+  .prep--compact .prep__item {
+    gap: var(--space-2);
+  }
+
+  .prep--compact .prep__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .prep--compact .prep__name {
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  /* painel da página de inscrição. Celular: bloco compacto (só os títulos, em duas colunas); do tablet pra
+     cima, título de verdade e o complemento de cada item */
+  .prep--panel {
+    gap: var(--space-4);
+  }
+
+  .prep--panel .prep__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--text);
+  }
+
+  .prep--panel .prep__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .prep--panel .prep__name {
+    font-size: var(--fs-xs);
+    line-height: 1.3;
+  }
+
+  .prep--panel :is(.prep__detail, .prep__full) {
+    display: none;
+  }
+
+  .prep--panel .prep__item {
+    gap: var(--space-2);
+  }
+
+  .prep--panel .prep__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  @media (min-width: 40rem) {
+    .prep--panel .prep__title {
+      font-size: var(--fs-sm);
+    }
+
+    .prep--panel .prep__list {
+      gap: var(--space-4) var(--space-5);
+    }
+
+    .prep--panel .prep__item {
+      align-items: start;
+    }
+
+    .prep--panel .prep__name {
+      font-size: var(--fs-sm);
+    }
+
+    .prep--panel .prep__item {
+      gap: var(--space-3);
+    }
+
+    .prep--panel .prep__icon {
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .prep--panel :is(.prep__detail, .prep__full) {
+      display: block;
+    }
+
+    .prep--panel .prep__short {
+      display: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .prep--panel .prep__list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .prep--compact {
+      width: auto;
+      padding: var(--space-3) var(--space-5) var(--space-4);
+    }
+
+    .prep--compact .prep__list {
+      grid-template-columns: repeat(4, auto);
+      gap: var(--space-5);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .prep__icon {
+      border-color: CanvasText;
+    }
+  }
+</style>

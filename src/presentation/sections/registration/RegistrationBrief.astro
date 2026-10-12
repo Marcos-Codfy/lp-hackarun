@@ -1,0 +1,89 @@
+---
+// painel "o que você precisa ter em mãos" da página de inscrição + três regras curtas (textos que o site já
+// usa). Só no desktop, ao lado do formulário; no celular e no tablet a lista vem recolhida
+// (RegistrationBriefToggle) e cada regra aparece no próprio formulário
+import type { EventDayDTO } from '@application/index';
+import Icon from '@presentation/components/ui/Icon.astro';
+import PrepChecklist from '@presentation/components/registration/PrepChecklist.astro';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
+
+interface Props {
+  teamSize: { min: number; max: number };
+  schedule: readonly EventDayDTO[];
+}
+
+const { teamSize, schedule } = Astro.props;
+const lookup = new ScheduleLookup(schedule);
+const rulebook = lookup.activity('rulebook');
+const rulebookAt = rulebook ? `${lookup.shortDate(rulebook.day)}, às ${lookup.startOf(rulebook)}` : null;
+---
+
+<div class="brief sx-glass">
+  <PrepChecklist teamSize={teamSize} variant="panel" id="reg-brief-title" />
+  <ul class="brief__notes" role="list" aria-label="Bom saber">
+    <li>
+      <Icon name="shield" size={16} />
+      <span>
+        A equipe aparece em <a href="/equipes">Equipes</a> depois que a organização confere os dados e a foto
+        e confirma a inscrição.
+      </span>
+    </li>
+    {rulebookAt && (
+      <li>
+        <Icon name="book" size={16} />
+        <span>O regulamento é apresentado na abertura, em {rulebookAt}.</span>
+      </li>
+    )}
+    <li>
+      <Icon name="lock" size={16} />
+      <span>
+        Os dados ficam só com a organização. No site aparecem só o nome, a foto e o número de integrantes.
+      </span>
+    </li>
+  </ul>
+</div>
+
+<style>
+  .brief {
+    display: none;
+    gap: var(--space-5);
+    padding: var(--space-5);
+  }
+
+  .brief__notes {
+    display: grid;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--surface-line);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+  }
+
+  .brief__notes li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .brief__notes :global(.icon) {
+    margin-top: 0.1em;
+    color: var(--ink-cyan);
+  }
+
+  .brief__notes a {
+    color: var(--ink-cyan);
+    font-weight: 600;
+  }
+
+  .brief__notes a:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  @media (min-width: 64rem) {
+    .brief {
+      display: grid;
+    }
+  }
+</style>

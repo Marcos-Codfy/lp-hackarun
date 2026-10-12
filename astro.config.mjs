@@ -8,7 +8,12 @@ export default defineConfig({
   site,
   integrations: [sitemap()],
   devToolbar: { enabled: false },
+  // endereços sem barra no fim (/inscricao, /equipes): o build gera inscricao.html, que o Cloudflare Pages
+  // serve em /inscricao direto (pasta/index.html custaria um redirect 308 pra /inscricao/ a cada clique) e o
+  // sitemap fica igual ao canonical
+  trailingSlash: 'never',
   build: {
+    format: 'file',
     // css pequeno vai inline, evita request bloqueante no primeiro paint
     inlineStylesheets: 'auto',
   },

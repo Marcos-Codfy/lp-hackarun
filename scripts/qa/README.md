@@ -115,12 +115,14 @@ Abra o `.json` no painel **Performance** do DevTools para ver a linha do tempo c
 node anchorcheck.mjs <url> [--tolerance=4]
 ```
 
-Clica nos links do header (desktop) e, no celular, no CTA do hero e no link do FAQ do rodapé, e confere se o topo da
-seção de destino para na folga do header (`scroll-padding-top` do `<html>`), com tolerância em px. Também testa a
-volta de `/equipes` para a LP (`/#programacao`, `/#inscricao`) e um endereço com âncora aberto direto (`/#faq`): no
-desktop o pin das missões abre espaço depois do pulo do navegador. As seções com render adiado
-(`content-visibility`) são as que mais erram o alvo. Sai com código 1 se alguma âncora errar, então
-serve em script de CI.
+Clica nos links do header (desktop) e, no celular, no link do FAQ do rodapé, e confere se o topo da seção de destino
+para na folga do header (`scroll-padding-top` do `<html>`, ou o `data-anchor-offset` do próprio alvo: o palco do
+clímax, `#inscricao`, para no topo), com tolerância em px. Os CTAs de inscrição (header no desktop, hero no celular)
+têm de abrir `/inscricao` com a origem no endereço (`?origem=header`, `?origem=hero`). Também testa a volta de
+`/equipes` para a LP (`/#programacao`), o "Voltar ao evento" de quem chegou direto em `/equipes` ou `/inscricao` (cai
+no clímax, `/#inscricao`) e um endereço com âncora aberto direto (`/#faq`): no desktop o pin das missões abre espaço
+depois do pulo do navegador. As seções com render adiado (`content-visibility`) são as que mais erram o alvo. Sai com
+código 1 se alguma âncora errar, então serve em script de CI.
 
 ### overflow.mjs
 

@@ -37,6 +37,23 @@ export function emptyFields(memberRows: number): RegistrationFields {
   };
 }
 
+// o que volta de um rascunho: textos e a foto já preparada (o aceite nunca volta marcado)
+export interface RestoredFields {
+  teamName: string;
+  members: readonly { name: string; studentId: string; email: string }[];
+  teamImage: PreparedTeamImageDTO | null;
+}
+
+// rascunho -> campos, dentro do tamanho da equipe (sobra corta, falta vira card vazio)
+export function fieldsFromDraft(draft: RestoredFields, min: number, max: number): RegistrationFields {
+  const rows = Math.min(max, Math.max(min, draft.members.length));
+  const members = Array.from({ length: rows }, (_, i) => {
+    const { name = '', studentId = '', email = '' } = draft.members[i] ?? {};
+    return { key: i, name, studentId, email };
+  });
+  return { ...emptyFields(0), teamName: draft.teamName, members, teamImage: draft.teamImage };
+}
+
 const MEMBER_PATH = /^members\.(\d+)\.(name|studentId|email)$/;
 
 // atualização imutável por caminho ("teamName", "members.1.email")

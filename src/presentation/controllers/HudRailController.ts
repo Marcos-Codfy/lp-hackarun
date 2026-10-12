@@ -29,9 +29,9 @@ export class HudRailController {
   }
 
   mount(): void {
-    // a pílula fica por cima do texto do rodapé ("© 2026 HackaRun") e dos erros do formulário: some ali
+    // a pílula fica por cima do texto do rodapé ("© 2026 HackaRun") e dos CTAs do clímax: some ali
     this.hideOver('.site-footer', 'is-footer');
-    this.hideOver('#inscricao-lobby', 'is-form');
+    this.hideOver('[data-charge-reveal]', 'is-cta');
     const host = qs('[data-hud-ticks]', this.root);
     if (!host || this.sections.length === 0) return;
     this.ticks = this.sections.map(() => {

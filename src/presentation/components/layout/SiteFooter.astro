@@ -44,7 +44,7 @@ const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
     background: linear-gradient(180deg, transparent, rgb(2 3 11 / 0.92) 22%, var(--c-void) 60%);
   }
 
-  /* filete de energia no topo do rodapé */
+  /* filete de energia no topo do rodapé, discreto: o globo do clímax ainda passa por trás dele */
   .site-footer::before {
     content: '';
     position: absolute;
@@ -53,6 +53,7 @@ const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
     left: 10%;
     height: 1px;
     background: var(--grad-line);
+    opacity: 0.35;
   }
 
   .site-footer__main {

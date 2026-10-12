@@ -11,7 +11,7 @@
   .hud.is-ready:not(.is-start),
   .hud.is-ready.is-start,
   .hud.is-ready.is-footer,
-  .hud.is-ready.is-form,
+  .hud.is-ready.is-cta,
   .hud.is-ready.is-tucked {
     opacity: 1;
     transform: translate(0, -50%);

@@ -1,5 +1,5 @@
-// o formulário de inscrição (o maior pedaço do JS) não entra no boot: chunk à parte, carregado quando a
-// seção chega perto ou um CTA leva até lá, com a origem do CTA e as vagas ao vivo das equipes
+// a LP não tem mais formulário (ele mora em /inscricao): o boot da LP não baixa o envio nem a foto, a vitrine
+// de equipes continua sob demanda e o clímax ainda acende o CTA, que é só um link pra página de inscrição
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventBus } from '@shared/core/EventBus';
 import { Observable } from '@shared/core/Observable';
@@ -9,15 +9,8 @@ import type { AppConfig } from '@presentation/app/AppConfig';
 import type { AppContext } from '@presentation/app/AppContext';
 import type { AppEvents } from '@presentation/app/AppEvents';
 
-const mocks = vi.hoisted(() => ({
-  mountRegistrationForm: vi.fn(),
-  mountTeams: vi.fn(),
-  loadRegistration: vi.fn(),
-}));
+const mocks = vi.hoisted(() => ({ mountTeams: vi.fn(), loadRegistration: vi.fn() }));
 
-vi.mock('@presentation/views/registration/mountRegistrationForm', () => ({
-  mountRegistrationForm: mocks.mountRegistrationForm,
-}));
 vi.mock('@presentation/views/teams/mountTeams', () => ({ mountTeams: mocks.mountTeams }));
 
 const SLOTS = { capacity: null, taken: 0, remaining: null, level: 'unknown' as const };
@@ -85,7 +78,7 @@ async function boot(): Promise<AppContext> {
   return ctx;
 }
 
-// o do LazyMount (folga de telas); o ChargeRevealView também observa a seção
+// o do LazyMount (folga de telas); o ChargeRevealView também observa a seção final
 const lazyObserverOf = (el: Element | null): FakeObserver | undefined =>
   FakeObserver.all.find((o) => el !== null && o.observed.includes(el) && Boolean(o.options.rootMargin));
 
@@ -93,10 +86,10 @@ beforeEach(() => {
   vi.stubGlobal('IntersectionObserver', FakeObserver);
   document.body.innerHTML = `
     <section id="equipes"><div data-teams data-teams-initial="[]"></div></section>
-    <section id="inscricao"><div data-registration-form data-status="open"></div></section>`;
-  mocks.loadRegistration.mockResolvedValue({ submitRegistration: {}, prepareTeamImage: {} });
-  mocks.mountRegistrationForm.mockReturnValue({ focusEntry: () => true });
-  mocks.mountTeams.mockReturnValue([{ id: 'teams-vm' }]);
+    <section id="inscricao" data-scene-hold="900">
+      <div data-charge-reveal><a href="/inscricao?origem=final" data-registration-cta="final">Inscrever</a></div>
+    </section>`;
+  mocks.mountTeams.mockReturnValue([]);
 });
 
 afterEach(() => {
@@ -106,40 +99,41 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe('formulário de inscrição sob demanda', () => {
-  it('no boot não baixa o formulário nem a lista de equipes', async () => {
+describe('LP sem formulário', () => {
+  it('o boot e a seção final chegando perto não baixam o envio nem a foto', async () => {
     await boot();
+    const section = document.getElementById('inscricao') as HTMLElement;
+    expect(lazyObserverOf(section)).toBeUndefined();
+    section.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     await flush();
-
     expect(mocks.loadRegistration).not.toHaveBeenCalled();
-    expect(mocks.mountRegistrationForm).not.toHaveBeenCalled();
-    expect(mocks.mountTeams).not.toHaveBeenCalled();
   });
 
-  it('CTA clicado: carrega na hora, com a origem do CTA e o VM das equipes (vagas ao vivo)', async () => {
-    const ctx = await boot();
-
-    ctx.bus.emit('registration:intent', { source: 'hero' });
-    await vi.waitFor(() => expect(mocks.mountRegistrationForm).toHaveBeenCalledTimes(1));
-
-    expect(mocks.loadRegistration).toHaveBeenCalledTimes(1);
-    expect(mocks.mountTeams).toHaveBeenCalledTimes(1);
-    expect(mocks.mountRegistrationForm).toHaveBeenCalledWith(
-      expect.objectContaining({ source: 'hero', teams: { id: 'teams-vm' } }),
-    );
-  });
-
-  it('seção chegando perto monta uma vez só', async () => {
+  it('o clique no CTA final segue o link (nada intercepta pra rolar até um formulário)', async () => {
     await boot();
-    const section = document.getElementById('inscricao');
+    const link = document.querySelector<HTMLAnchorElement>(
+      '[data-registration-cta="final"]',
+    ) as HTMLAnchorElement;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+    link.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(false);
+  });
 
-    lazyObserverOf(section)?.near(section as Element);
-    lazyObserverOf(section)?.near(section as Element);
-    await vi.waitFor(() => expect(mocks.mountRegistrationForm).toHaveBeenCalledTimes(1));
-    await flush();
+  it('o clímax continua: a seção final espera a carga do globo pra acender o CTA', async () => {
+    const ctx = await boot();
+    const section = document.getElementById('inscricao') as HTMLElement;
+    expect(section.classList.contains('is-awaiting-charge')).toBe(true);
+    ctx.bus.emit('experience:charged', undefined);
+    expect(section.classList.contains('is-charged')).toBe(true);
+  });
 
-    expect(mocks.mountRegistrationForm).toHaveBeenCalledTimes(1);
-    expect(mocks.mountRegistrationForm).toHaveBeenCalledWith(expect.objectContaining({ source: null }));
+  it('a vitrine de equipes continua sob demanda, uma vez só', async () => {
+    await boot();
+    const section = document.getElementById('equipes') as HTMLElement;
+    expect(mocks.mountTeams).not.toHaveBeenCalled();
+    lazyObserverOf(section)?.near(section);
+    lazyObserverOf(section)?.near(section);
+    await vi.waitFor(() => expect(mocks.mountTeams).toHaveBeenCalledTimes(1));
   });
 });
 

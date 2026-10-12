@@ -40,8 +40,16 @@ export function headerGap(): number {
   return toPx(style.getPropertyValue('--header-h')) || 64;
 }
 
+// alvo com folga própria (data-anchor-offset, em px): o palco sticky do clímax (#inscricao) para com o topo
+// colado na tela, senão o miolo, que já desconta o header, desceria e cortaria o fim
+function anchorOffset(el: HTMLElement): number | null {
+  const raw = el.dataset['anchorOffset'];
+  const value = raw === undefined ? NaN : Number.parseFloat(raw);
+  return Number.isFinite(value) ? value : null;
+}
+
 // y absoluto do alvo já descontando o header (offset do caller substitui a folga padrão)
 export function targetY(el: HTMLElement, currentScroll: number, offset?: number): number {
-  const gap = offset ?? -headerGap();
+  const gap = offset ?? anchorOffset(el) ?? -headerGap();
   return Math.max(0, el.getBoundingClientRect().top + currentScroll + gap);
 }

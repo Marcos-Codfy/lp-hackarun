@@ -1,0 +1,166 @@
+---
+// conteúdo da página /inscricao: título e status (com o contador), o que ter em mãos, as etapas e o
+// formulário. Desktop: formulário à esquerda e o painel (lista + etapas) fixo à direita. Celular e tablet: tudo
+// numa coluna e enxuto (status numa linha, lista recolhida, etapas em linha) pro formulário começar cedo
+import type { LandingPageDTO } from '@application/index';
+import PageHalo from '@presentation/components/layout/PageHalo.astro';
+import FormProgress from '@presentation/components/registration/FormProgress.astro';
+import RegistrationForm from '@presentation/components/registration/RegistrationForm.astro';
+import RegistrationStatus from '@presentation/components/registration/RegistrationStatus.astro';
+import { formStatus } from '@presentation/components/registration/formStatus';
+import SectionHeader from './shared/SectionHeader.astro';
+import AgendaRow from './registration/AgendaRow.astro';
+import RegistrationBrief from './registration/RegistrationBrief.astro';
+import RegistrationBriefToggle from './registration/RegistrationBriefToggle.astro';
+import './sections.css';
+
+interface Props {
+  data: LandingPageDTO;
+}
+
+const { event, schedule } = Astro.props.data;
+const { registration } = event;
+const { min, max } = registration.teamSize;
+const { status, isOpen } = formStatus(registration);
+---
+
+<section class="section signup tone-cyan" id="cadastro" aria-labelledby="cadastro-title">
+  <PageHalo />
+  <div class="container signup__wrap">
+    <div class="signup__head">
+      <SectionHeader
+        id="cadastro-title"
+        level="h1"
+        size="lg"
+        code="IN"
+        eyebrow="Inscrição de equipe"
+        title="Inscreva sua <em>equipe</em>"
+        lead={`Exclusivo para alunos da UniCatólica, em equipes de ${min} a ${max} pessoas. Três etapas, um envio só, e a confirmação chega por e-mail.`}
+      />
+      <RegistrationStatus status={status} teamSize={registration.teamSize} milestones={event.milestones} />
+    </div>
+
+    <div class="signup__layout">
+      {/* data-reg-aside: some com a inscrição enviada (a lista e as etapas já não servem) */}
+      <aside class="signup__aside" aria-label="Antes de começar" data-reg-aside>
+        <RegistrationBrief teamSize={registration.teamSize} schedule={schedule} />
+        <RegistrationBriefToggle teamSize={registration.teamSize} />
+        {isOpen && <FormProgress />}
+      </aside>
+      <div class="signup__panel sx-glass sx-corners" id="formulario">
+        <span class="signup__topline" aria-hidden="true"></span>
+        <RegistrationForm registration={registration} />
+        <AgendaRow event={event} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* primeira seção da página, logo abaixo da SubNav (o PageLayout já desconta o header fixo) */
+  .signup {
+    padding-top: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    overflow: clip;
+  }
+
+  .signup__wrap {
+    display: grid;
+    gap: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  }
+
+  .signup__head {
+    display: grid;
+    gap: var(--space-5);
+    animation: signup-in 0.8s var(--ease-out) both;
+  }
+
+  .signup__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .signup__aside {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+
+  /* a moldura de vidro do formulário (a que o LobbyPanel tinha na LP) */
+  .signup__panel {
+    --sx-border: linear-gradient(
+      160deg,
+      var(--c-cyan) 0%,
+      rgb(18 100 255 / 0.35) 30%,
+      rgb(148 27 255 / 0.2) 70%,
+      var(--c-magenta) 100%
+    );
+    padding: var(--space-5) var(--space-4) var(--space-6);
+    box-shadow:
+      0 0 0 1px rgb(0 229 255 / 0.05),
+      0 0 90px -30px rgb(0 229 255 / 0.45),
+      0 50px 100px -50px rgb(0 0 0 / 0.95);
+  }
+
+  .signup__topline {
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-cyan), var(--c-violet), transparent);
+    box-shadow: 0 0 18px var(--c-cyan);
+  }
+
+  @media (min-width: 40rem) {
+    .signup__panel {
+      padding: var(--space-6) var(--space-7);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .signup__head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+      align-items: end;
+      gap: var(--space-8);
+    }
+
+    /* formulário à esquerda; o painel acompanha a rolagem à direita (etapas primeiro, depois a lista) */
+    .signup__layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+      align-items: start;
+      gap: var(--space-7);
+    }
+
+    .signup__panel {
+      grid-row: 1;
+      grid-column: 1;
+    }
+
+    /* o painel ocupa a altura do formulário: a lista rola junto e as etapas (com o rascunho) ficam presas no
+       topo enquanto a pessoa preenche */
+    .signup__aside {
+      grid-column: 2;
+      align-self: stretch;
+      gap: var(--space-4);
+    }
+
+    .signup__aside :global([data-form-progress]) {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-4));
+    }
+  }
+
+  @keyframes signup-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .signup__head {
+      animation: none;
+    }
+  }
+</style>

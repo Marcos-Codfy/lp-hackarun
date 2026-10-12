@@ -4,6 +4,7 @@ import type { SlotsDTO, TeamDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { toPublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
+import { registrationHref } from '@presentation/view-models/registration/registrationOrigin';
 import TeamCard from './TeamCard.astro';
 import TeamCounter from './TeamCounter.astro';
 import LineupSlots from './LineupSlots.astro';
@@ -11,9 +12,11 @@ import LineupSlots from './LineupSlots.astro';
 interface Props {
   teams: TeamDTO[];
   slots: SlotsDTO;
+  // inscrições encerradas: o estado vazio não chama pra se inscrever
+  registrationOpen?: boolean;
 }
 
-const { teams, slots } = Astro.props;
+const { teams, slots, registrationOpen = true } = Astro.props;
 // só o que é público vai pro HTML (nada de nome de integrante)
 const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam);
 ---
@@ -65,7 +68,11 @@ const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam
       <p class="gallery__empty-text">
         Nenhuma equipe confirmada ainda. <strong>A sua pode abrir o grid de largada.</strong>
       </p>
-      <Button href="/#inscricao">Inscrever minha equipe</Button>
+      {registrationOpen && (
+        <Button href={registrationHref('equipes')} registrationCta="equipes">
+          Inscrever minha equipe
+        </Button>
+      )}
     </div>
   </div>
 

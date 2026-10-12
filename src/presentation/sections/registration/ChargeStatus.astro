@@ -1,0 +1,58 @@
+---
+// linha de status embaixo dos CTAs do clímax (em breve, abertas, últimas horas, encerradas): ninguém entra
+// na página de inscrição sem saber se ela está aberta. Mudou o RegistrationCopy.statusLine? Mantenha o " · "
+import type { RegistrationDTO } from '@application/index';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+
+interface Props {
+  registration: RegistrationDTO;
+}
+
+const { registration } = Astro.props;
+const copy = new RegistrationCopy();
+// no celular cada trecho vira uma linha (sem o "·" sobrando na quebra)
+const parts = copy.statusLine(registration).split(' · ');
+---
+
+<p class:list={['charge__status', copy.isUrgent(registration.status) && 'charge__status--urgent']}>
+  {parts.map((part, index) => (
+    <>
+      {index > 0 && <span class="charge__sep"> · </span>}
+      <span class="charge__part">{part}</span>
+    </>
+  ))}
+</p>
+
+<style>
+  /* plaquinha escura: a linha fica embaixo do globo aceso e o texto miúdo precisa de 4.5:1 */
+  .charge__status {
+    padding: 0.35rem 0.75rem;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--c-void) 72%, transparent);
+    box-shadow: inset 0 0 0 1px var(--surface-line);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .charge__part {
+    display: block;
+  }
+
+  .charge__sep {
+    display: none;
+  }
+
+  .charge__status--urgent {
+    color: var(--ink-orange);
+  }
+
+  @media (min-width: 640px) {
+    .charge__part,
+    .charge__sep {
+      display: inline;
+    }
+  }
+</style>

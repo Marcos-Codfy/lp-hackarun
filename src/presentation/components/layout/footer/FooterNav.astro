@@ -1,8 +1,8 @@
 ---
 import Icon from '@presentation/components/ui/Icon.astro';
-import { navLinksFor, type SitePage } from '../navLinks';
+import { footerLinksFor, type SitePage } from '../navLinks';
 
-// navegação numerada do rodapé + aviso de privacidade
+// navegação numerada do rodapé (as seções da LP, Equipes e Inscrição) + aviso de privacidade
 interface Props {
   page?: SitePage;
 }
@@ -16,7 +16,7 @@ const { page = 'home' } = Astro.props;
       // Navegação
     </p>
     <ul class="fnav__list" role="list">
-      {navLinksFor(page).map((link, i) => (
+      {footerLinksFor(page).map((link, i) => (
         <li>
           <a class="fnav__link" href={link.href} aria-current={link.ariaCurrent} data-nav-link>
             <span class="fnav__num" aria-hidden="true">

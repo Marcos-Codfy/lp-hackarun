@@ -23,7 +23,7 @@ export class ClosedLobby {
     notice.className = 'regform__failure';
     notice.dataset['regClosed'] = '';
     const title = document.createElement('h3');
-    // o CTA de inscrição foca aqui (RegistrationFormView.focusEntry)
+    // título focável: quem chega pelo teclado ou pelo leitor de tela acha o aviso
     title.dataset['regNoticeTitle'] = '';
     title.tabIndex = -1;
     title.textContent = 'Inscrições encerradas';
