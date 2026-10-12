@@ -629,7 +629,8 @@ options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - [x] A guide to run and contribute from a fork, with `npm run setup`
 - [x] Mobile LCP under 2.5 s (2.2 s on 2026-10-12)
 - [x] Initial JS under 70 KB gzip (68.4 KB)
-- [ ] Official registration endpoint wired to the site, deployed together with the Apps Script
+- [x] Apps Script deployed on the registration spreadsheet and tested end to end (photo in the cell, duplicates blocked)
+- [ ] Registrations switched on in the official site, together with the Cloudflare launch
 - [ ] Official launch on Cloudflare Pages: on hold, by my decision
 - [ ] Rules and mission scoring: the organizers present them at the opening, on November 12, at 7:35 p.m.
 - [ ] Prizes, mentors and judges: the organizers reveal them closer to the event

@@ -624,7 +624,8 @@ opções está na [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - [x] Guia para rodar e contribuir a partir de um fork, com `npm run setup`
 - [x] LCP mobile abaixo de 2,5 s (2,2 s em 12/10/2026)
 - [x] JS inicial abaixo de 70 KB gzip (68,4 KB)
-- [ ] Endpoint oficial de inscrições ligado ao site, junto com o deploy do Apps Script
+- [x] Apps Script publicado na planilha de inscrições e testado de ponta a ponta (foto na célula, duplicados barrados)
+- [ ] Inscrições ligadas no site oficial, junto com a publicação na Cloudflare
 - [ ] Publicação oficial na Cloudflare Pages: em espera, por decisão minha
 - [ ] Regulamento e pontuação das missões: a organização apresenta na abertura, em 12/11, às 19h35
 - [ ] Prêmios, mentores e banca: a organização revela mais perto do evento

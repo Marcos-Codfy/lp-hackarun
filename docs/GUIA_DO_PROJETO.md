@@ -1022,7 +1022,12 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 
 ### 19.1 Da organização
 
-- [ ] URL do Web App de inscrições (`PUBLIC_REGISTRATION_ENDPOINT`), publicado na conta da organização.
+- [x] Web App de inscrições publicado (12/10/2026) na planilha "Inscrições de Equipe" da conta do Marcos, com a
+      pasta de fotos dele em `FOTOS_PASTA_ID`, e testado de ponta a ponta: inscrição, foto dentro da célula, abas
+      Integrantes e Resumo e e-mail repetido barrado. A URL `/exec` fica só nas variáveis de ambiente do deploy
+      (`PUBLIC_REGISTRATION_ENDPOINT`), nunca no repositório.
+- [ ] Levar a planilha e o Apps Script para a conta institucional quando ela existir (mesmos passos do
+      `apps-script/README.md`; a URL muda e a variável de ambiente acompanha).
 - [ ] Prazo das inscrições (`registration.closesAt`) e capacidade de equipes (`registration.capacity`), repetidos
       nas Propriedades `CLOSES_AT` e `CAPACITY` do Apps Script (seção 9.1).
 - [ ] Tamanho mínimo e máximo da equipe (`registration.teamSize`, hoje 2 a 5 provisório; igual ao `TEAM_SIZE` do
@@ -1050,9 +1055,8 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 - [ ] Conta Google institucional dona da planilha e do Apps Script (cotas maiores, e os dados ficam com a
       instituição, não com uma pessoa).
 - [ ] Site oficial do Capim Dourado para o link da faixa de parceiros (`partners.json`, hoje `null`).
-- [ ] Publicar o Apps Script novo (os oito `.gs` e o `appsscript.json`), rodar `configurarPlanilha()` uma vez para
-      autorizar a planilha e o Drive e publicar uma nova versão junto com o deploy do site (seção 9). A aba antiga
-      `Inscricoes` pode ser apagada depois.
+- [x] Apps Script novo publicado (os oito `.gs` e o `appsscript.json`), `configurarPlanilha()` rodado e acesso a
+      dados externos liberado na planilha ("Permitir acesso", para o `=IMAGE()` da coluna Foto).
 - [ ] Confirmar que a conta institucional permite link público ("Qualquer pessoa com o link · Leitor") nos arquivos
       da pasta das fotos; senão as equipes aparecem só com as iniciais (seção 9.6).
 - [ ] Imagem de compartilhamento (`public/og-image.jpg`) com o subtítulo novo: a arte oficial ainda traz
