@@ -61,3 +61,16 @@ própria equipe na inscrição. Restrições:
 - Os testes cobrem o caminho todo com dublês do Drive (formato, teto, reenvio, compartilhamento bloqueado, Drive fora
   do ar, planilha que falha). A autorização real do Drive e o compartilhamento num domínio institucional só são
   verificados no primeiro deploy do script.
+
+## Atualização (2026-10-12, rodada 3)
+
+A decisão continua a mesma. Mudaram três detalhes, junto com a inscrição só de equipe (ADR 0008):
+
+- **Nome do arquivo:** o arquivo tem link público e o nome aparece para quem abre, então ele deixou de ser o protocolo
+  e virou um nome sorteado (`foto-<uuid>.webp`). A coluna **ID da foto** liga a linha ao arquivo (item 2).
+- **Foto na planilha:** a aba `Equipes` mostra a miniatura na própria célula (**Foto**, com `=IMAGE()`) e um link para o
+  Drive (**Link da foto**, com `=HYPERLINK()`). As duas fórmulas leem a coluna **ID da foto**, então tirar uma foto do
+  ar é apagar essa célula: a miniatura some e o site volta para as iniciais (item 3).
+- **Consentimento `2026-10-v3`** (item 6) e montagem pelo `configurarPlanilha()`, que também autoriza o Drive, cria a
+  pasta das fotos e o segredo dos ids públicos. O `prepararFotos()` continua existindo para quem seguiu o passo a passo
+  antigo.

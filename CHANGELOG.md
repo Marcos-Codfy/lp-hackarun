@@ -12,62 +12,158 @@ do Git.
 
 ## [Unreleased]
 
-Ajustes pedidos pela organização depois da aprovação da v2: o site deixa de ter som, o clímax da inscrição fica mais
-curto e calmo, e as equipes ganham uma página própria com a foto ou a logo de cada time.
+Ajustes pedidos pela organização depois da aprovação da v2, em duas rodadas. Na primeira, o site deixa de ter som, o
+clímax da inscrição fica mais curto e calmo e as equipes ganham uma página própria, com a foto ou a logo de cada time.
+Na segunda, o conteúdo passa a seguir o documento do coordenador do evento (duas frentes, a programação real e a
+HackaRun Experience), a inscrição vira só de equipe, com uma planilha organizada, e o repositório fica pronto para
+fork.
 
 ### Added
 
+- Programação real em abas, uma por dia (11/11 Oficinas, 12/11 Abertura, 13/11 Mercado e 14/11 Final), no padrão de
+  abas WAI-ARIA (`DayTabsController`: tabindex móvel, setas, Home/End e ativação automática; no dia do evento abre na
+  aba de hoje). Cada bloco mostra horário, local, selo de público e a linha "Público" do documento, e cada atividade
+  tem a miniementa num `<details>`, com o card "Em paralelo" e os marcadores "Hackathon", "Tema a definir" e
+  "Opcional". Sem JavaScript, os 4 dias aparecem empilhados.
+- Entidade `Activity`, value object `Audience` e a regra `TimeSlot.contains` (a atividade precisa caber no bloco).
+  `Session` ganha local, público, nota e atividades; `EventDay` ganha rótulo curto e etapa; o evento ganha
+  `maxStands`.
+- Dois cards em "O evento": "Programação aberta" (aberto ao público) e "Hackathon" (só alunos da UniCatólica), e os
+  números 04 dias, 07 oficinas, até 10 estandes e 01 final no Capim Dourado Shopping.
+- Roteiro da HackaRun Experience na grande final, em 6 chips lidos da programação, com a premiação oficial (19h15) em
+  destaque e o cosplay marcado como opcional.
+- Painel "As regras saem na abertura." nas missões, com os 5 tópicos do regulamento (12/11, 19h35) e o lançamento do
+  desafio às 19h55.
+- FAQ com 15 perguntas em 4 grupos (Evento, Programação aberta, Hackathon e Inscrição).
+- JSON-LD em `@graph`: o `Event` com um `subEvent` por bloco (local e público) e uma `FAQPage` gerada do `faq.json`. O
+  `.ics` tem um evento por bloco, com o local e a lista de atividades.
 - Página `/equipes` com as equipes confirmadas: um card por equipe com a foto ou a logo (a imagem inteira sobre uma
   cópia desfocada dela; iniciais quando não há foto ou ela não carrega), contador ao vivo, busca, grade de 2 a 4
   colunas, estado vazio com chamada para a inscrição e SEO próprio (canonical, Open Graph e JSON-LD com
   `CollectionPage` e `BreadcrumbList`).
 - Boot leve para páginas sem 3D (`LightApp` + `PageLayout`): liga só o header, o menu, o "Pausar animações" e a lista
   de equipes, sem baixar GSAP, Lenis nem three.js.
-- Campo obrigatório "Foto ou logo da equipe" na inscrição de equipe: JPEG, PNG ou WebP de até 10 MB, com o lado menor
-  de pelo menos 200 px, prévia com "Trocar imagem" e arrastar e soltar. O navegador reduz para 800 px no lado maior e
-  comprime em WebP (ou JPEG) até cerca de 300 KB, com teto de 400 KB; logo com fundo transparente ganha um fundo
-  sólido que contrasta.
+- Inscrição em três etapas (01 Equipe, 02 Integrantes, 03 Confirmação), com um card por integrante: nome completo,
+  matrícula e e-mail, de 2 a 5 pessoas, e o integrante 1 como contato da equipe. Adicionar ou remover um integrante
+  move o foco e é anunciado; com 5 de 5 o botão vira "Equipe completa · 5/5".
+- Value objects `FullName`, `StudentId`, `Email` e `TeamMember`.
+- Aviso "Comunicação oficial por e-mail" no formulário e na tela de sucesso.
+- Conflito apontado no campo certo: nome de equipe, e-mail ou matrícula que já estão em outra equipe
+  (`duplicate_team_name`, `duplicate_email` e `duplicate_student_id`, com a posição do integrante). A mensagem some
+  quando o valor muda e volta se o mesmo valor for digitado de novo.
+- Campo obrigatório "Foto ou logo da equipe": JPEG, PNG ou WebP de até 10 MB, com o lado menor de pelo menos 200 px,
+  prévia com "Trocar imagem" e arrastar e soltar. O navegador reduz para 800 px no lado maior e comprime em WebP (ou
+  JPEG) até cerca de 300 KB, com teto de 400 KB; logo com fundo transparente ganha um fundo sólido que contrasta.
 - Value object `TeamImage`, caso de uso `PrepareTeamImage`, porta `ImageCodec` e o adapter `CanvasImageCodec`
   (`createImageBitmap` + canvas, respeitando a orientação EXIF).
-- `apps-script/Images.gs`: grava a foto no Google Drive com o protocolo como nome, na pasta da Propriedade
-  `FOTOS_PASTA_ID` (criada uma vez se faltar), com link público só de leitura; função `prepararFotos()` para autorizar
-  o Drive e coluna **Imagem** na planilha.
+- Apps Script com oito arquivos: `Images.gs` (foto no Google Drive, na pasta da Propriedade `FOTOS_PASTA_ID`, com link
+  público só de leitura), `Sheets.gs`, `Registry.gs`, `Setup.gs` e `Summary.gs`, além do manifesto `appsscript.json`.
+- `configurarPlanilha()`: cria e formata as abas `Equipes` (uma linha por equipe, miniatura da foto com `=IMAGE()`,
+  link com `=HYPERLINK()` e Status em menu com cor por status), `Integrantes` (uma linha por pessoa, com o Status da
+  equipe por fórmula) e `Resumo` (contadores ao vivo, vagas restantes e os e-mails das equipes confirmadas prontos para
+  colar), com títulos fixos, filtros, faixas alternadas e proteção de aviso. É idempotente e roda sozinho na primeira
+  gravação ou quando a versão do layout muda.
 - `?action=teams` devolve o id da foto das equipes confirmadas, e o site monta o endereço no CDN de imagens do Google
   (`lh3.googleusercontent.com`, 600 px).
 - Link "Equipes" no header, no menu do celular e no rodapé, levando para `/equipes`.
-- Em `npm run dev` sem endpoint, as equipes da inscrição simulada aparecem já confirmadas em `/equipes` e na LP.
-- Testes do caminho da foto (domínio, caso de uso, campo, galeria e o `Images.gs` real com dublês do Drive) e da carga
-  do clímax (`SceneHoldWatcher`, `ChargeController`, `ChargeRevealView` e `PostDirector`).
-- ADR 0007: fotos das equipes no Drive, servidas pelo CDN do Google e publicadas só depois da confirmação.
+- Em `npm run dev` sem endpoint, a inscrição simulada aplica as mesmas regras de duplicado do servidor, e as equipes
+  aparecem já confirmadas em `/equipes` e na LP.
+- `npm run setup` (`scripts/setup.mjs`, só com módulos do Node): confere o Node contra o `.nvmrc` e o `engines`, roda
+  o `npm ci` se faltar, cria o `.env` a partir do `.env.example` e, com `--qa`, instala os scripts de QA; `--check` só
+  confere. `requirements.txt` com as dependências dos scripts de assets em Python.
+- README com o guia "Como rodar no seu PC" para quem faz fork (pré-requisitos, upstream, planilha de teste, fluxo de
+  PR e problemas comuns), e ADRs 0007 (fotos no Drive) e 0008 (inscrição só de equipe e planilha em três abas).
+- Testes da programação (regras do domínio, o conteúdo real contra o documento, as abas, o JSON-LD e o `.ics`), dos
+  campos de integrante, dos conflitos do servidor, das abas e fórmulas da planilha, dos duplicados, do contrato entre
+  o TypeScript e o Apps Script e dos escopos do manifesto, além do caminho da foto e da carga do clímax.
+- Missões em trilho de deslizar no celular (`scroll-snap` nativo, sem JS): o card seguinte aparece pela metade, e o
+  `MissionsRailController` (chunk à parte, pelo `LazyMount`) liga o contador 01/08 e deixa o trilho focável para as
+  setas. A partir de 640 px volta a grade, e no desktop o trilho preso.
+- Link para um dia da programação (`/#dia-11` a `/#dia-14`) abre a aba dele, também quando o hash muda com a página
+  aberta.
+- Testes dos cards de integrante vindos do HTML, do foco no resumo de erros, do `autocomplete` do contato, do HUD
+  (formato do contador, `.is-form` e `.is-tucked`), do trilho das missões, das abas por hash, do `.ics` e da grafia
+  "UniCatólica" nas páginas, no SEO e nos metadados.
 
 ### Changed
 
+- O evento passa a ser apresentado como no documento do coordenador: o 1º HackaRun, de tecnologia, inovação e
+  empreendedorismo, com uma programação aberta ao público (11 a 13/11, a partir das 19h, no Bloco II) e um hackathon
+  só para alunos da UniCatólica, em equipes. Título e descrição da página, HUD do hero, faixa de "O evento" e textos
+  das missões, dos mentores e dos prêmios foram reescritos.
+- A grande final virou a **HackaRun Experience**: a partir das 17h de 14/11, no Capim Dourado Shopping (parceiro
+  exclusivo da premiação), com a premiação oficial às 19h15.
+- Marcos do contador: abertura (11/11, 19h), fim do desenvolvimento presencial (14/11, 13h) e grande final (14/11,
+  17h).
+- Grafia "UniCatólica" no conteúdo, no SEO e nos dados (a faixa continua "UNICATÓLICA").
+- Pontuação das missões fora do ar até o regulamento (`scoring: null` no `stations.json`): as estações mostram
+  "?? pts", e o painel de pontuação volta sozinho quando o bloco for publicado.
+- A inscrição é só de equipe: o `TeamRegistration` virou `{ teamName, members[], teamImage }`, e o envio leva
+  `members[{ name, studentId, email }]`, com `members[0]` como contato.
+- A lista pública (`?action=teams`, cache `teams:v3`) devolve só id, nome, quantidade de integrantes e id da foto das
+  equipes confirmadas, e os cards de `/equipes` mostram só nome, foto e número de integrantes (o curso saiu).
+- Duplicados conferidos sem diferenciar caixa nem acento e ignorando equipes recusadas: recusar uma equipe libera o
+  nome, os e-mails e as matrículas. O limite por e-mail usa o hash do e-mail de contato.
+- A foto no Drive ganha um nome sorteado (`foto-<uuid>`), e a planilha liga linha e arquivo pela coluna "ID da foto":
+  apagar essa célula tira a foto do ar.
+- Consentimento na versão `2026-10-v3`: o aceite cobre os dados de cada integrante e a autorização para publicar a
+  foto. O `Validation.gs` espelha a constante (um teste confere) e só aceita a versão vigente.
+- Aviso de privacidade em 9 seções: nome da equipe, foto e, de cada integrante, nome, matrícula e e-mail (nada de
+  telefone, curso ou dado sensível), finalidades, base legal, retenção e como pedir a remoção por e-mail.
 - A seção de equipes da LP virou uma chamada para `/equipes`: contador ao vivo, até 5 fotos, "Ver as equipes" e
   "Inscrever minha equipe".
 - Clímax da inscrição mais curto e suave: a carga dura 0,9 s (era 1,5 s; `DEFAULT_HOLD_MS`), o estouro virou um pulso
   em que o globo respira inteiro, o anel abre até cerca de 2,6 vezes o raio do globo (era 4,3) e o brilho que a carga
   soma tem teto (`MAX_CHARGE_BLOOM` 0,3 e `MAX_CHARGE_EXPOSURE` 0,08).
-- A barra do CTA do clímax enche junto com a carga do globo (antes já estava cheia quando a pessoa chegava), e o botão
-  acende com a animação `charge-glow`.
+- A barra do CTA do clímax enche junto com a carga do globo, e o botão acende com a animação `charge-glow`.
 - A linha de status do clímax ganhou uma placa escura para manter o contraste sobre o anel, e as duas partes empilham
   abaixo de 640 px.
 - Header com logo, navegação, "Pausar animações" e "Participar"; no celular, logo, pausar e menu.
-- Textos: "Final no telão" virou "Final no Capim Dourado Shopping" (faixa, números de "O evento" e título da grande
-  final, agora num tamanho que não parte o nome do shopping), "Palmas–TO" virou "UNICATÓLICA" na faixa, o título de
-  "O evento" virou "Da sala de aula ao palco." e a chamada dos prêmios foi reescrita.
-- Consentimento na versão `2026-10-v2`: na inscrição de equipe inclui a autorização para publicar a foto e a declaração
-  de que todos que aparecem nela concordaram. O `Validation.gs` espelha a constante (um teste confere) e só aceita a
-  versão vigente.
-- Aviso de privacidade com a seção "Foto ou logo da equipe" (finalidade, base legal, link público do Drive, retenção e
-  pedido de retirada) e sem a preferência de som.
+- Textos da rodada 2: "Final no Capim Dourado Shopping" (no lugar de "Final no telão"), "UNICATÓLICA" na faixa (no
+  lugar de "Palmas–TO"), "Da sala de aula ao palco." no título de "O evento" e a chamada nova dos prêmios.
 - O envio da inscrição espera até 30 s (eram 15 s), porque a foto vai na mesma requisição.
+- `contain-intrinsic-size` medido de novo nas seções de programação, mentores, final, prêmios e FAQ.
 - Rodapé sem o card do repositório; no desktop o link de privacidade fecha a coluna da navegação.
 - `BaseLayout` montado sobre partes compartilhadas com a página de equipes (`DocumentHead` e `Backdrop`), sem mudar o
   HTML da LP.
-- README, guia, design spec e ADRs atualizados.
+- `.prettierignore` ignora só a pasta `design/` da raiz, então `docs/design/*.md` voltou a ser formatado.
+- `apps-script/README.md` reescrito como passo a passo (planilha, os oito arquivos e o manifesto, Propriedades,
+  autorização, Web App, nova versão, rotina da organização e clasp opcional).
+- README sem as seções "Bastidores" e "Desafios que resolvi", com "Roteiro visual: uma cena 3D por seção" no lugar de
+  "A corrida em 8 cenas" e o crédito da identidade visual atualizado. Guia, design spec, ADRs 0004 e 0007, manifesto da
+  stack, asset brief e CONTRIBUTING atualizados.
+- O aceite fala do regulamento como ele é: a equipe sabe que ele é apresentado na abertura (12/11, às 19h35) e se
+  compromete a segui-lo (era "Li e aceito o regulamento"). A versão segue `2026-10-v3`, que ainda não foi publicada.
+- Canal oficial: confirmação e avisos chegam só por e-mail; o regulamento e os resultados saem no evento (aviso de
+  privacidade e aviso do formulário).
+- Inscrições em breve: o lobby mostra o aviso com "Adicionar à agenda" e só uma amostra curta e apagada do formulário
+  (era o formulário inteiro, cerca de 2.800 px no celular).
+- Envio com mais de um erro leva o foco ao resumo, que para logo abaixo do header (antes o foco ia para o 1º campo e
+  o título do resumo ficava escondido).
+- HUD: o contador diz "01 de 11 · Largada" (com barra lia como data) e, no celular, a pílula sai da frente do
+  formulário e recolhe rolando para baixo, como o header.
+- Rodapé com o subtítulo do evento ("Tecnologia, inovação e empreendedorismo"), as logos da realização e da parceria
+  lado a lado desde o celular e a legenda do Capim Dourado como parceiro exclusivo da premiação.
+- Menu do celular com o ritmo vertical pela altura da tela: em 375x667 o "Quero participar" cabe sem rolar.
+- Textos conferidos com o documento: o prêmio principal vai para a equipe vencedora anunciada na premiação, a mentoria
+  sem "ou por vídeo", o card do hackathon com o desenvolvimento final de 14/11 (8h às 13h) e a descrição de
+  `/equipes` e do `package.json`.
+- `.ics`: atividade opcional ganha "(opcional)", e o bloco sem hora de fim avisa que o término está a confirmar.
+- Apps Script: o passo a passo do Resumo e o README mandam apagar o arquivo no Drive (e esvaziar a lixeira) num
+  pedido de remoção ou numa imagem imprópria; `SETUP_VERSION` 4 refaz o Resumo; a lista pública lê o segredo dos ids
+  uma vez por chamada (era uma leitura das Propriedades por equipe).
+- Números de performance e de testes do README e do guia medidos de novo (Lighthouse 98, LCP 2,2 s, JS inicial
+  68,4 KB).
+- `scripts/qa/overflow.mjs` trata o que rola na horizontal (o trilho das missões) como quem corta.
 
 ### Removed
 
+- A modalidade individual e os campos WhatsApp, curso, período e acessibilidade (dado sensível), do formulário à
+  planilha, com o `ContactFields` (`PersonName` e `Phone`) e o `ModeSwitch`. A aba antiga `Inscricoes` deixa de ser
+  usada.
+- Os números e promessas que dependem do regulamento: "100 pts por estação", a divisão 60/20/10/10, a entrega até as
+  15h, as "rotas rotativas" e "pontos no ranking / rota liberada". Os valores antigos ficam no histórico do Git.
+- Os 4 pilares de "O evento" (`PillarCard`) e a linha do tempo antiga da programação (`DayRound` e `SessionItem`).
 - Todo o áudio: o botão de som do header, o `AudioEngine`, o cue do globo (arquivo e versão sintetizada), o som de
   digitação, as portas `AudioCue` e `TickSound`, os eventos `sound:changed` e `ui:type`, a pasta `public/audio/` e o
   `scripts/audio/render_cues.py` (que pedia `numpy` e `lameenc`).
@@ -77,13 +173,33 @@ curto e calmo, e as equipes ganham uma página própria com a foto ou a logo de 
 - O aviso "Corra contra o relógio, não pelos corredores" da seção de NPCs: a regra vai ser passada no dia.
 - O link do repositório no rodapé.
 - A lista e a busca de equipes dentro da LP (`TeamRoster`), que foram para `/equipes`.
+- O `TimelineAnimator`, que ficou sem alvo com a programação nova.
+
+### Fixed
+
+- A etapa Integrantes vinha vazia na prévia "em breve": os cards do mínimo da equipe já saem no HTML, e a View adota
+  esses cards (e o que foi digitado neles) em vez de clonar outros.
+- O integrante 1 (contato) tem `autocomplete="name"` e `"email"` de novo (WCAG 1.3.5).
+- "Confirmar inscrição" e "Adicionar à agenda" quebravam em duas linhas em 360 e 390 px; a 404 vazava pela direita no
+  celular; "Trocar imagem" aparecia como "TROCARIMAGEM"; sobrava um espaço antes do ponto no aviso de sucesso; o 1 e
+  o 7 do "17H" da final se encostavam; "03 Programação" encostava no "04 Final" no rodapé em 360 px.
+- Costuras entre as seções no desktop: o véu lateral, a base do hero e os refletores da final esmaecem na borda.
+- Painel do dia da programação é uma `<section>` (`role="tabpanel"` não vale num `<article>`).
+- O logo do header é o LCP fora da home e carrega sem lazy, com `fetchpriority` alta.
+- "UniCatólica" também no rodapé, no menu, no SEO de `/equipes`, no `package.json` e nos metadados dos PDFs.
 
 ### Security
 
+- Menos dado pessoal: a inscrição não pede telefone, curso nem dado sensível, e a lista pública não tem curso, nome de
+  pessoa nem e-mail.
+- Escopos mínimos no `appsscript.json`: só a planilha do próprio script (`spreadsheets.currentonly`) e o Drive, com um
+  teste que confere os escopos contra os serviços que o código chama.
+- As únicas fórmulas da planilha são as do script (`IMAGE`, `HYPERLINK`, a busca do Status e o `Resumo`); texto
+  digitado que começa com `= + - @` continua virando texto puro.
 - CSP: `img-src` libera só `https://lh3.googleusercontent.com` além da própria origem e de `data:`. Saíram o
   `media-src` e o cache de `/audio/*`, sem mudar a política na prática (`default-src 'self'` cobre).
 - O servidor confere a foto pelos primeiros bytes (JPEG, PNG ou WebP), exige que o tipo declarado bata e recusa acima
-  de 400 KB; o arquivo nunca leva um nome digitado no formulário.
+  de 400 KB; o arquivo nunca leva um nome digitado no formulário nem o protocolo.
 - O id da foto só sai na lista pública para equipe confirmada e só com o formato de id do Drive, e a entidade `Team`
   só aceita URL `https` ou `data:image` no `src`.
 - O reenvio da inscrição não cria uma segunda foto: o upload acontece depois das checagens de duplicado e de
@@ -168,7 +284,7 @@ privacidade reforçadas, acessibilidade e um trabalho de performance que levou o
 ### Security
 
 - CSP estrita em `public/_headers` (`script-src 'self'`, sem script inline, `frame-ancestors 'none'`).
-- JSON embutido na página escapado (`<` vira `<`): texto do conteúdo nunca fecha o `<script>` antes da hora.
+- JSON embutido na página escapado (`<` vira `\u003c`): texto do conteúdo nunca fecha o `<script>` antes da hora.
 - Sem JavaScript, o formulário envia por POST: dados pessoais nunca vão na URL.
 - O limite por e-mail guarda só o hash do e-mail no `CacheService`, nunca o texto.
 - Valor inválido de prazo ou capacidade nas Propriedades do script fecha as inscrições em vez de deixá-las abertas.

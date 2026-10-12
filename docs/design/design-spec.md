@@ -2,11 +2,15 @@
 
 > **Versão 2 (vigente).** Fonte de verdade visual e de interação da landing page. Antes de mexer em seção, componente
 > ou 3D, leia isto. A v1 ("correta" demais: Big Shoulders, Inter, ciano #00CFFF, HUD no topo) está **obsoleta**; o que
-> mudou está resumido no fim, na seção 15. A decisão está registrada na ADR 0006.
+> mudou está resumido no fim, na seção 17. A decisão está registrada na ADR 0006.
 >
-> **Ajustes de 12/10/2026**, pedidos pela organização em cima da v2 aprovada: o site não tem mais som, o clímax da
-> inscrição ficou mais curto e calmo (seção 9) e as equipes ganharam a página `/equipes` (seção 14). A linguagem visual
-> é a mesma.
+> **Ajustes de 12/10/2026**, pedidos pela organização em cima da v2 aprovada, sem mudar a linguagem visual:
+>
+> - **Rodada 2:** o site não tem mais som, o clímax da inscrição ficou mais curto e calmo (seção 9) e as equipes
+>   ganharam a página `/equipes` (seção 14).
+> - **Rodada 3:** o conteúdo segue o documento do coordenador do evento. "O evento" mostra as duas frentes (programação
+>   aberta e hackathon), a programação virou abas por dia (seção 15), a grande final virou a **HackaRun Experience**
+>   e a inscrição é só de equipe, em etapas (seção 16).
 
 ## 1. Conceito: "a página é a corrida"
 
@@ -36,9 +40,9 @@ tela e contraste alto.
 | 1   | `#sobre`       | `orbit`                          | Cronômetro-giroscópio (mostrador, ponteiro, anéis em cardã) | ciano/azul, acento violeta   | Tempo: é uma corrida            |
 | 2   | `#npcs`        | `enigma`                         | "?" extrudado com faixa tracejada e auréola de HUD          | violeta + magenta, aro ciano | Mistério: onde estão os NPCs    |
 | 3   | `#missoes`     | `map`                            | Mapa em holograma: rota em espiral com 8 faróis             | ciano/azul, topo laranja     | A corrida em si; progresso      |
-| 4   | `#programacao` | `terrain`                        | Terreno synthwave: grade, montanhas e sol em faixas         | azul, sol magenta → laranja  | Os 4 dias como "rounds"         |
+| 4   | `#programacao` | `terrain`                        | Terreno synthwave: grade, montanhas e sol em faixas         | azul, sol magenta → laranja  | Os 4 dias, um por aba           |
 | 5   | `#mentores`    | `terrain`                        | (mantém o terreno; pausa visual)                            | idem                         | Autoridade                      |
-| 6   | `#final`       | `stage`                          | Palco: telão de LED, treliça, canhões de luz, plateia       | ciano/branco, feixes violeta | A final no Capim Dourado        |
+| 6   | `#final`       | `stage`                          | Palco: telão de LED, treliça, canhões de luz, plateia       | ciano/branco, feixes violeta | HackaRun Experience no shopping |
 | 7   | `#premios`     | `trophy`                         | Troféu de torno em linhas, alças e estrela                  | laranja/ouro                 | Desejo                          |
 | 8   | `#equipes`     | `dust`                           | Galáxia distante e calma                                    | azul-violeta suave           | Prova social: leva a `/equipes` |
 | 9   | `#faq`         | `dust`                           | Galáxia                                                     | idem                         | Tirar objeções                  |
@@ -60,18 +64,18 @@ Regras:
 Do manual HackaRun 2026, em `src/presentation/styles/tokens.css`. O azul domina; violeta/magenta = mistério e
 gamificação (NPCs); laranja/ouro = tempo, prazos e prêmios.
 
-| Cor               | Hex       | Token           | Uso                                                       |
-| ----------------- | --------- | --------------- | --------------------------------------------------------- |
-| Vazio             | `#02030B` | `--c-void`      | Fundo da página (`--bg`)                                  |
-| Azul Noturno      | `#060B24` | `--c-night`     | Superfícies elevadas                                      |
-| Índigo            | `#0B1242` | `--c-indigo`    | Brilho de fundo                                           |
-| Azul Elétrico     | `#1264FF` | `--c-electric`  | Energia principal, miolo dos botões, segunda cor do degradê |
-| Ciano Neon        | `#00E5FF` | `--c-cyan`      | Acento (`--accent`), contornos, HUD, cristas              |
-| Roxo Neon         | `#941BFF` | `--c-violet`    | Mistério (`--mystic`), NPCs                               |
-| Magenta           | `#ED28E8` | `--c-magenta`   | Ponta do degradê de energia, mistério                     |
-| Laranja Conquista | `#FF852F` | `--c-orange`    | Tempo e prazos (`--time`): contador, "15h"                |
-| Ouro              | `#FFC24A` | `--c-gold`      | Prêmios (`--prize`) e **foco do teclado** (`--focus`)     |
-| Branco Gelo       | `#F5F8FF` | `--c-ice`       | Texto (`--text`); secundário a 76% e 60%                  |
+| Cor               | Hex       | Token          | Uso                                                            |
+| ----------------- | --------- | -------------- | -------------------------------------------------------------- |
+| Vazio             | `#02030B` | `--c-void`     | Fundo da página (`--bg`)                                       |
+| Azul Noturno      | `#060B24` | `--c-night`    | Superfícies elevadas                                           |
+| Índigo            | `#0B1242` | `--c-indigo`   | Brilho de fundo                                                |
+| Azul Elétrico     | `#1264FF` | `--c-electric` | Energia principal, miolo dos botões, segunda cor do degradê    |
+| Ciano Neon        | `#00E5FF` | `--c-cyan`     | Acento (`--accent`), contornos, HUD, cristas                   |
+| Roxo Neon         | `#941BFF` | `--c-violet`   | Mistério (`--mystic`), NPCs                                    |
+| Magenta           | `#ED28E8` | `--c-magenta`  | Ponta do degradê de energia, mistério                          |
+| Laranja Conquista | `#FF852F` | `--c-orange`   | Tempo e prazos (`--time`): contador, horários, "Só equipes"    |
+| Ouro              | `#FFC24A` | `--c-gold`     | Prêmios (`--prize`), a final e **foco do teclado** (`--focus`) |
+| Branco Gelo       | `#F5F8FF` | `--c-ice`      | Texto (`--text`); secundário a 76% e 60%                       |
 
 Degradês: **energia** `#00E5FF → #1264FF → #941BFF → #ED28E8` (95°), azul, mistério, prêmio e tempo. Fio de 1px das
 bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-violet`, `--glow-orange`. Use só os tokens
@@ -96,8 +100,8 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 - **Slogan oficial:** "Desvende. Programe. Conquiste." Cada verbo na cor do seu papel: desvendar = violeta (mistério),
   programar = azul (energia), conquistar = ouro (prêmio). Linha de apoio: "Encontre os NPCs, decifre as pistas e
   codifique contra o relógio."
-- **Parceiros:** logos oficiais brancas da Unicatólica (Realização) e do Capim Dourado (Parceria), discretas no rodapé
-  do hero e grandes na faixa "Quem faz acontecer" antes do rodapé.
+- **Parceiros:** logos oficiais brancas da UniCatólica (Realização) e do Capim Dourado (parceiro exclusivo da
+  premiação), discretas no rodapé do hero e grandes na faixa "Quem faz acontecer" antes do rodapé.
 
 ## 7. Linguagem visual
 
@@ -153,7 +157,7 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
   (máscara de baixo pra cima).
 - Entradas: `y: 40 → 0`, `opacity 0 → 1`, `stagger 0.06`, `ease: expo.out`, `duration 0.9–1.2`.
 - Missões no desktop (≥ 1024px, sem reduced motion): **trilho horizontal com pin**; no mobile, lista vertical.
-- Números (vagas, pontos, dias) contam de 0 até o valor ao entrar na tela. Terminal do NPC e protocolo da inscrição
+- Números (dias, oficinas, estandes) contam de 0 até o valor ao entrar na tela. Terminal do NPC e protocolo da inscrição
   "digitam" caractere a caractere, em silêncio.
 - `prefers-reduced-motion`: sem Lenis, sem pin, sem morph contínuo (a cena troca inteira, render sob demanda),
   entradas viram fade simples, durações dos tokens zeradas.
@@ -163,13 +167,15 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 
 ## 11. Gatilhos de retenção e conversão (sempre discretos)
 
-- **Curiosidade:** NPCs misteriosos, mentores e prêmios "a revelar" (cards bloqueados com `???`).
-- **Urgência:** contador laranja para o próximo marco (largada → entrega 15h → premiação 18h).
+- **Curiosidade:** NPCs misteriosos, mentores e prêmios "a revelar" (cards bloqueados com `???`), pontos das estações
+  como "?? pts" e o painel "As regras saem na abertura." com os medidores vazios até o regulamento (12/11, 19h35).
+- **Urgência:** contador laranja para o próximo marco (abertura em 11/11 às 19h → fim do desenvolvimento em 14/11 às
+  13h → HackaRun Experience em 14/11 às 17h).
 - **Escassez:** "vagas limitadas à capacidade dos laboratórios" e contador de vagas quando a organização definir a
   capacidade.
 - **Prova social:** na LP, o contador de equipes confirmadas e uma vitrine com até 5 fotos levam para a página
   `/equipes`, onde cada equipe confirmada aparece com a foto ou a logo, em tempo real (planilha).
-- **Autoridade:** Unicatólica + Capim Dourado com logos oficiais, mentores egressos, banca.
+- **Autoridade:** UniCatólica + Capim Dourado com logos oficiais, mentores egressos, banca.
 - **Gamificação:** 3 tokens NPC escondidos na página; achar os 3 revela uma mensagem secreta no HUD.
 - **Microcompromisso:** "Adicionar à agenda" (.ics) no aviso de inscrições em breve, no lobby do formulário e na tela
   de sucesso. Na programação o botão saiu, a pedido da organização.
@@ -180,8 +186,10 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 
 HTML semântico com landmarks e hierarquia de títulos, skip link, foco visível em ouro, alvos de toque ≥ 44px, canvas
 e aurora `aria-hidden`, contador com texto estático para leitor de tela (os dígitos que mudam são `aria-hidden`),
-formulário com `label`, `aria-describedby`, `aria-invalid` e erros anunciados (`aria-live`), campo da foto com
-prévia, troca, arrastar e soltar e status anunciado, FAQ com `<details>`, tokens NPC como botões de verdade, botão
+formulário com `label`, `aria-describedby`, `aria-invalid` e erros anunciados (`aria-live`), cada integrante num
+`fieldset` com `legend`, foco e anúncio ao adicionar ou remover um integrante, campo da foto com prévia, troca,
+arrastar e soltar e status anunciado, programação em abas no padrão WAI-ARIA (tabindex móvel, setas, Home/End,
+ativação automática; sem JS, os 4 dias empilhados), FAQ com `<details>`, tokens NPC como botões de verdade, botão
 para pausar tudo que se mexe sozinho (2.2.2), `prefers-reduced-motion` respeitado, foco programático das seções com
 contorno transparente (continua visível em cores forçadas), conteúdo completo sem JS e sem WebGL. O site não toca
 som nenhum. Na página `/equipes`: trilha de navegação com `aria-current="page"`, busca com `label`, contagem
@@ -200,6 +208,15 @@ anunciada em região live e alt "Foto ou logo da equipe X" em cada card. Lightho
   tamanho menor do cabeçalho e uma largura máxima para nunca partir o nome do shopping.
 - **Faixa do "O evento":** a instituição aparece como "UNICATÓLICA", em caixa alta e com acento.
 - **Regras do dia a dia** (por exemplo, andar entre as estações) não entram na página: a organização passa no dia.
+- **Fonte dos fatos:** datas, horários, locais, públicos e miniementas vêm do documento do coordenador, sem inventar o
+  que falta. A premiação oficial é às **19h15** (nada de "18h"), a HackaRun Experience começa às **17h** e o prazo de
+  entrega é o do regulamento. Pontuação e regras só depois do regulamento: até lá, "?? pts" e "As regras saem na
+  abertura.".
+- **Duas frentes sempre claras:** todo bloco diz para quem é, com um selo de público: "Aberto ao público" (ciano),
+  "Hackathon" ou "Só alunos da UniCatólica" (violeta), "Só equipes e mentores" (laranja) e "Final com público" (ouro).
+- **Grafia:** "UniCatólica" no texto, no SEO e nos dados; caixa alta só na faixa ("UNICATÓLICA").
+- **Canal oficial:** a comunicação do hackathon é por e-mail, nunca por WhatsApp. O formulário e a tela de sucesso
+  dizem isso.
 
 ## 14. Página de equipes (`/equipes`)
 
@@ -212,23 +229,55 @@ anunciada em região live e alt "Foto ou logo da equipe X" em cada card. Lightho
 - **Grade:** 2 colunas no celular, 3 a partir de 640 px e 4 a partir de 1024 px.
 - **Card:** a foto ou logo aparece inteira (`object-fit: contain`) sobre uma cópia desfocada e escurecida dela mesma,
   então logo não corta e foto não ganha tarja preta. Sem imagem, ou se ela não carregar, o card mostra as iniciais do
-  nome. Por baixo: posição, nome, curso e a quantidade de integrantes.
+  nome. Por baixo: o nome da equipe e a quantidade de integrantes (em pontos e em texto).
 - **Estado vazio:** a grade de vagas (`LineupSlots`) com "Inscrever minha equipe", que leva para `/#inscricao`.
 - **Fundo:** a mesma aurora da LP, sem 3D. No desktop entra um halo de HUD estático em CSS, sem cobrir a busca nem o
   título.
 - **Foto na inscrição:** o campo mostra a prévia com "Trocar imagem". Logo com fundo transparente ganha um fundo
   sólido que contrasta com o traço, para não sumir no card escuro.
 
-## 15. Histórico: o que a v2 substituiu (obsoleto)
+## 15. Programação (`#programacao`)
 
-| Tema           | v1 (obsoleto, não use)                                       | v2 (vigente)                                                       |
-| -------------- | ------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Fundo          | `#07152C` / `#040B18`, scanlines                             | Vazio `#02030B` + aurora por cena + grão                           |
-| Acentos        | Ciano `#00CFFF`, azul `#1E7BFF`, âmbar `#FFB547`             | Paleta oficial do manual (seção 4)                                 |
-| Foco           | Âmbar                                                        | Ouro `#FFC24A`                                                     |
-| Tipografia     | Big Shoulders (display) + Inter (texto)                      | Orbitron com til corrigido + Montserrat; JetBrains Mono segue no HUD |
-| HUD            | Barra no topo ("03/11 · MISSÕES")                            | Trilho na borda direita (desktop) e pílula no rodapé (mobile)      |
-| Cenas          | `nebula`, `route`, `arena`, `screen`                          | `orbit`, `map`, `terrain`, `stage`                                 |
-| Brilho         | Halo "fake" no sprite (blending aditivo)                     | Bloom real + passe de lente; halo fake só no tier baixo            |
-| Logo           | Recortes provisórios do vídeo de referência                  | PNG oficial com raios procedurais                                  |
-| Parceiros      | Sem logos oficiais (pendência)                               | Logos oficiais brancas no hero e na faixa antes do rodapé          |
+- **Estrutura:** título "4 dias de programação." e um seletor de dias: 11/11 QUA Oficinas, 12/11 QUI Abertura, 13/11
+  SEX Mercado e 14/11 SÁB Final. As abas ficam numa fileira no celular e numa coluna fixa (`sticky`) ao lado do
+  conteúdo no desktop. No dia do evento, a aba de hoje (fuso de Palmas) já abre selecionada.
+- **Bloco:** cada bloco mostra a faixa de horário, o local, o selo de público e a linha "Público" do documento. Cada
+  atividade tem horário, título e uma linha; miniementa e detalhes ficam num `<details>`. Atividade paralela vai num
+  card "Em paralelo", e os marcadores "Hackathon", "Tema a definir" e "Opcional" usam o mesmo selo.
+- **14/11:** dois blocos. Desenvolvimento final das 8h às 13h, só equipes e mentores, em tom ouro-laranja; HackaRun
+  Experience a partir das 17h, em ouro.
+- **Sem JS:** a barra de abas não aparece e os 4 dias ficam empilhados como uma linha do tempo legível.
+- **Movimento:** a entrada do painel e a abertura dos detalhes rodam uma vez e respeitam o reduced motion. Nada de loop
+  infinito novo.
+- **Ao redor:** "O evento" tem dois cards de frente (Programação aberta, "Aberto ao público"; Hackathon, "Só alunos da
+  UniCatólica"), lado a lado no tablet e empilhados na coluna do texto no desktop. A grande final tem o carimbo
+  "14.11 17H", a linha "A partir das 17h · premiação oficial às 19h15" e o roteiro da noite em 6 chips lidos da
+  programação, com o chip da premiação aceso e o cosplay marcado como opcional.
+
+## 16. Formulário de inscrição
+
+- **Só equipe**, de 2 a 5 alunos da UniCatólica, em três etapas numeradas: **01 Equipe** (nome e foto ou logo),
+  **02 Integrantes** e **03 Confirmação** (consentimento e envio).
+- **Integrantes em cards:** cada card pede nome completo, matrícula e e-mail. O "Integrante 1 · contato da equipe" tem
+  um selo e nunca pode ser removido. "Adicionar integrante" leva o foco para o card novo; com 5 de 5, o botão
+  desativa e vira "Equipe completa · 5/5". A barra do esquadrão ("Lobby online", "Esquadrão N/5") cabe numa linha em
+  360 px.
+- **Aviso "Comunicação oficial por e-mail"** junto dos e-mails e, curto, na tela de sucesso, com o e-mail do contato.
+- **Erros no campo certo:** e-mail ou matrícula repetidos na equipe apontam o integrante ("já está no integrante N"), e
+  nome de equipe, e-mail ou matrícula que já estão em outra equipe aparecem no campo que o servidor apontou.
+- **Celular:** o aviso do e-mail empilha, e o botão da foto encurta para "Trocar" abaixo de 400 px (o leitor de tela
+  continua ouvindo "Trocar imagem").
+
+## 17. Histórico: o que a v2 substituiu (obsoleto)
+
+| Tema       | v1 (obsoleto, não use)                           | v2 (vigente)                                                         |
+| ---------- | ------------------------------------------------ | -------------------------------------------------------------------- |
+| Fundo      | `#07152C` / `#040B18`, scanlines                 | Vazio `#02030B` + aurora por cena + grão                             |
+| Acentos    | Ciano `#00CFFF`, azul `#1E7BFF`, âmbar `#FFB547` | Paleta oficial do manual (seção 4)                                   |
+| Foco       | Âmbar                                            | Ouro `#FFC24A`                                                       |
+| Tipografia | Big Shoulders (display) + Inter (texto)          | Orbitron com til corrigido + Montserrat; JetBrains Mono segue no HUD |
+| HUD        | Barra no topo ("03/11 · MISSÕES")                | Trilho na borda direita (desktop) e pílula no rodapé (mobile)        |
+| Cenas      | `nebula`, `route`, `arena`, `screen`             | `orbit`, `map`, `terrain`, `stage`                                   |
+| Brilho     | Halo "fake" no sprite (blending aditivo)         | Bloom real + passe de lente; halo fake só no tier baixo              |
+| Logo       | Recortes provisórios do vídeo de referência      | PNG oficial com raios procedurais                                    |
+| Parceiros  | Sem logos oficiais (pendência)                   | Logos oficiais brancas no hero e na faixa antes do rodapé            |

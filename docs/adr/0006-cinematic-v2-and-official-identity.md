@@ -21,7 +21,7 @@ impacto visual esperado de um evento com estética de e-sports. Três pontos con
 
 1. **Identidade oficial em tudo:** logo PNG oficial (nunca redesenhado, com raios procedurais por código em volta),
    paleta do manual nos tokens (`styles/tokens.css`), Orbitron nos títulos, Montserrat no texto, JetBrains Mono no HUD
-   e logos brancas oficiais da Unicatólica e do Capim Dourado.
+   e logos brancas oficiais da UniCatólica e do Capim Dourado.
 2. **Correção do til da Orbitron:** o script `scripts/fonts/patch_orbitron_tilde.py` (fontTools) redesenha o til em
    degraus, no estilo geométrico da fonte, nos pesos 400 a 900, e gera o woff2 servido pelo site. A fonte original
    continua vindo do Fontsource; o patch é reproduzível.
