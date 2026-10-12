@@ -4,6 +4,7 @@ import type { MotionHandle, SceneTrack } from '@presentation/app/AppContext';
 import type { BootSteps } from '@presentation/app/BootQueue';
 import { registerMotionPlugins, ScrollTrigger } from './gsap';
 import { AnchorNavigator } from './AnchorNavigator';
+import { landOnHash } from './HashLanding';
 import { LayoutRefresher } from './LayoutRefresher';
 import { NativeScroll } from './NativeScroll';
 import { SceneDirector } from './SceneDirector';
@@ -31,6 +32,8 @@ export function mountMotion(deps: { bus: EventBus<AppEvents>; reducedMotion: boo
   new LayoutRefresher();
   later.add('scenes', () => director.start());
   later.add('scene hold', () => new SceneHoldWatcher(bus, reducedMotion));
+  // veio de /equipes ou /privacidade com /#secao: o pin das missões muda a página depois do pulo do navegador
+  later.add('initial hash', () => landOnHash(driver, ScrollTrigger));
 
   return { motion: driver, scenes: director.track };
 }

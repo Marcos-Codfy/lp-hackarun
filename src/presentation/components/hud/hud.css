@@ -19,6 +19,12 @@
   transform: none;
 }
 
+/* rodapé na tela: a pílula sai da frente do texto (o HudRailController marca .is-footer) */
+.hud.is-ready.is-footer {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 /* o acento acompanha a cena (data-scene-theme vem do SceneThemeController) */
 :root[data-scene-theme='enigma'] .hud {
   --hud-accent: #d48bff;

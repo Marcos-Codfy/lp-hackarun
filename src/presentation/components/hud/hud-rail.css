@@ -9,7 +9,8 @@
   }
 
   .hud.is-ready:not(.is-start),
-  .hud.is-ready.is-start {
+  .hud.is-ready.is-start,
+  .hud.is-ready.is-footer {
     opacity: 1;
     transform: translate(0, -50%);
   }
