@@ -123,7 +123,7 @@ function writeRows_(sheet, firstRow, rows) {
   rows.forEach((pair, i) => {
     sheet.getRange(firstRow + i, 1).setValue(pair[0]);
     const cell = sheet.getRange(firstRow + i, 2);
-    if (typeof pair[1] === 'string' && pair[1].charAt(0) === '=') cell.setFormula(pair[1]);
+    if (typeof pair[1] === 'string' && pair[1].charAt(0) === '=') setScriptFormula_(cell, pair[1]);
     else cell.setValue(pair[1]);
   });
 }

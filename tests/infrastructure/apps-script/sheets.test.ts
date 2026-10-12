@@ -134,6 +134,28 @@ describe('Apps Script · planilha organizada', () => {
     expect(summary.protections).toEqual([expect.objectContaining({ type: 'SHEET', warningOnly: true })]);
   });
 
+  it('planilha em pt_BR: argumentos com ";" (vírgula dentro de texto fica) e o configurar conserta linhas antigas', () => {
+    const script = new AppsScriptSandbox();
+    script.book.locale = 'pt_BR';
+    script.post(registrationBody());
+    expect(script.teams.formulaAt(2, 5)).toBe(
+      '=IF(J2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&J2&"=w240"))',
+    );
+    expect(script.teams.formulaAt(2, 9)).toBe(
+      '=IF(J2="";"";HYPERLINK("https://drive.google.com/file/d/"&J2&"/view";"Abrir no Drive"))',
+    );
+    expect(script.members.formulaAt(3, 8)).toBe(
+      "=IFERROR(INDEX('Equipes'!$F:$F;MATCH($A3;'Equipes'!$A:$A;0));\"\")",
+    );
+    const summary = script.tab('Resumo');
+    expect(summary.formulaAt(14, 2)).toContain('TEXTJOIN("; ";TRUE;FILTER(');
+    script.teams.formulas.set('2,5', '=IF(J2="","",IMAGE("quebrada"))');
+    configure(script);
+    expect(script.teams.formulaAt(2, 5)).toBe(
+      '=IF(J2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&J2&"=w240"))',
+    );
+  });
+
   it('versão nova do layout refaz a formatação na próxima inscrição', () => {
     const script = new AppsScriptSandbox();
     configure(script);

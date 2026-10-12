@@ -2,7 +2,7 @@
 // Pode rodar quantas vezes quiser (não apaga dado nem duplica filtro, faixa ou proteção)
 
 // subiu o layout? suba a versão: a próxima inscrição refaz a formatação sozinha
-const SETUP_VERSION = '4';
+const SETUP_VERSION = '5';
 const SETUP_PROPERTY = 'PLANILHA_VERSAO';
 // primeira aba vazia de planilha nova ("Página1", "Sheet1"...) vira a aba Equipes
 const DEFAULT_SHEET_NAME = /^(p[áa]gina|sheet|planilha|folha|hoja|feuille)\s*1$/i;
@@ -46,6 +46,7 @@ function setupBook_(book, config) {
   const last = teams.getLastRow();
   if (last > 1) teams.setRowHeights(2, last - 1, PHOTO_ROW_HEIGHT);
   writeSummary_(summary, config);
+  refreshFormulas_(teams, members);
   PropertiesService.getScriptProperties().setProperty(SETUP_PROPERTY, SETUP_VERSION);
   return { teams: teams, members: members };
 }

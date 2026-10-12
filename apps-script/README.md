@@ -88,10 +88,17 @@ Em **Configurações do projeto > Propriedades do script > Adicionar propriedade
 4. Já vem tudo formatado: títulos fixos com fundo escuro, coluna da equipe congelada, filtro em todas as colunas,
    faixas alternadas, cor por status (pendente âmbar, confirmado verde, recusado vermelho, linha recusada apagada),
    data no formato `dd/MM/aaaa HH:mm`, matrícula como texto (o zero à esquerda não some) e aviso ao editar um título.
+5. Na primeira foto, a planilha mostra a faixa amarela **"algumas fórmulas estão tentando enviar e receber dados de
+   terceiros"**: clique em **Permitir acesso**. Sem isso a coluna Foto fica em `#REF!` (é o `=IMAGE()` buscando a
+   miniatura no Google). Basta uma vez por planilha.
 
 > Pode rodar `configurarPlanilha` de novo quando quiser (depois de mudar a `CAPACITY`, por exemplo): não apaga dado
-> nem duplica filtro, faixa ou proteção. Se esquecer de rodar, a primeira inscrição monta a planilha sozinha, mas a
-> autorização do Drive precisa ter sido feita antes (passo 2).
+> nem duplica filtro, faixa ou proteção, e refaz as fórmulas das linhas que já existem. Se esquecer de rodar, a
+> primeira inscrição monta a planilha sozinha, mas a autorização do Drive precisa ter sido feita antes (passo 2).
+>
+> As fórmulas saem no idioma da planilha: em português (e em todo idioma de vírgula decimal) o argumento se separa
+> com `;`, e o script troca a vírgula sozinho. Mudou o idioma em **Arquivo > Configurações**? Rode
+> `configurarPlanilha` de novo.
 
 ## 5. Publicar como Web App
 

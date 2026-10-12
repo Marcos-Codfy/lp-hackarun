@@ -1,6 +1,6 @@
 // layout da planilha (abas e colunas) e a gravação de cada inscrição: uma linha por equipe em "Equipes"
-// e uma por pessoa em "Integrantes". Fórmulas do próprio script usam nomes em inglês e vírgula (setFormula
-// entende assim em qualquer idioma da planilha); o que a pessoa digitou passa pelo sheetSafe_ (Validation.gs)
+// e uma por pessoa em "Integrantes". Fórmulas do próprio script usam nomes em inglês e o separador de argumento
+// do idioma da planilha (pt_BR usa ";", ver setScriptFormula_); o que a pessoa digitou passa pelo sheetSafe_
 
 const TEAMS_SHEET = 'Equipes';
 const MEMBERS_SHEET = 'Integrantes';
@@ -91,8 +91,8 @@ function appendTeam_(sheet, protocol, data, imageId) {
   values[COL.consent] = sheetSafe_(data.consent);
   values[COL.key] = data.idempotencyKey;
   sheet.appendRow(values);
-  sheet.getRange(row, COL.photo + 1).setFormula(photoFormula_(row));
-  sheet.getRange(row, COL.link + 1).setFormula(linkFormula_(row));
+  setScriptFormula_(sheet.getRange(row, COL.photo + 1), photoFormula_(row));
+  setScriptFormula_(sheet.getRange(row, COL.link + 1), linkFormula_(row));
   sheet.setRowHeight(row, PHOTO_ROW_HEIGHT);
 }
 
@@ -108,7 +108,7 @@ function appendMembers_(sheet, protocol, data) {
     values[MCOL.email] = sheetSafe_(member.email);
     values[MCOL.contact] = i === 0 ? 'sim' : 'não';
     sheet.appendRow(values);
-    sheet.getRange(first + i, MCOL.status + 1).setFormula(memberStatusFormula_(first + i));
+    setScriptFormula_(sheet.getRange(first + i, MCOL.status + 1), memberStatusFormula_(first + i));
   });
 }
 
@@ -134,4 +134,43 @@ function memberStatusFormula_(row) {
   const statusCol = teams + '$' + status + ':$' + status;
   const protocolCol = teams + '$' + protocol + ':$' + protocol;
   return '=IFERROR(INDEX(' + statusCol + ',MATCH(' + key + ',' + protocolCol + ',0)),"")';
+}
+
+// refaz as fórmulas das linhas que já existem (rodar o configurarPlanilha conserta uma planilha antiga)
+function refreshFormulas_(teams, members) {
+  for (let row = 2; row <= teams.getLastRow(); row++) {
+    setScriptFormula_(teams.getRange(row, COL.photo + 1), photoFormula_(row));
+    setScriptFormula_(teams.getRange(row, COL.link + 1), linkFormula_(row));
+  }
+  for (let row = 2; row <= members.getLastRow(); row++) {
+    setScriptFormula_(members.getRange(row, MCOL.status + 1), memberStatusFormula_(row));
+  }
+}
+
+// o setFormula lê a fórmula no idioma da planilha: em pt_BR (e nos idiomas de vírgula decimal) o argumento
+// se separa com ";". Os nomes das funções seguem em inglês; só a vírgula fora das aspas muda
+const COMMA_ARGUMENT_LOCALE = /^(en|ja|ko|zh|th|he|iw|hi|ms|fil|tl)(_|$)/i;
+let formulaSeparatorCache_ = null;
+
+function setScriptFormula_(range, formula) {
+  range.setFormula(localizeFormula_(formula, formulaSeparator_()));
+}
+
+function formulaSeparator_() {
+  if (formulaSeparatorCache_) return formulaSeparatorCache_;
+  const book = SpreadsheetApp.getActiveSpreadsheet();
+  const locale = String((book && book.getSpreadsheetLocale && book.getSpreadsheetLocale()) || 'en_US');
+  formulaSeparatorCache_ = COMMA_ARGUMENT_LOCALE.test(locale) ? ',' : ';';
+  return formulaSeparatorCache_;
+}
+
+function localizeFormula_(formula, separator) {
+  if (separator === ',') return formula;
+  let quoted = false;
+  let out = '';
+  for (const ch of formula) {
+    if (ch === '"') quoted = !quoted;
+    out += ch === ',' && !quoted ? separator : ch;
+  }
+  return out;
 }

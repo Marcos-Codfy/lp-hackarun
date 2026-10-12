@@ -185,6 +185,10 @@ export class FakeSheet {
 
 export class FakeBook {
   readonly sheets: FakeSheet[] = [];
+  // idioma da planilha: define o separador de argumento das fórmulas (pt_BR usa ";")
+  locale = 'en_US';
+
+  getSpreadsheetLocale = () => this.locale;
 
   getSheets = () => [...this.sheets];
   getSheetByName = (name: string) => this.sheets.find((s) => s.name === name) ?? null;
