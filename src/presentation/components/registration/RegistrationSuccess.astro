@@ -16,7 +16,7 @@ const steps = [
 
 <div class="success" data-reg-success hidden>
   <div class="success__emblem" aria-hidden="true">
-    <svg viewBox="0 0 48 48" fill="none">
+    <svg viewBox="0 0 48 48" width="100%" height="100%" fill="none">
       <path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" stroke="currentColor" stroke-width="1.5"></path>
       <path d="m15.5 24.5 6 6 11-12.5" stroke="currentColor" stroke-width="3" stroke-linecap="square"></path>
     </svg>
@@ -24,9 +24,9 @@ const steps = [
   <p class="success__code" aria-hidden="true">
     // inscrição recebida · checkpoint liberado
   </p>
-  <h3 class="success__title" tabindex="-1" data-reg-success-title>
+  <h2 class="success__title" tabindex="-1" data-reg-success-title>
     Tá dentro! Agora é com a organização.
-  </h3>
+  </h2>
   <div class="success__ticket">
     <p class="success__label">Protocolo da equipe</p>
     <p class="success__protocol">
@@ -85,21 +85,25 @@ const steps = [
     filter: drop-shadow(0 0 18px color-mix(in srgb, var(--c-success) 60%, transparent));
   }
 
-  .success__emblem svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .success__code {
-    color: var(--c-success);
+  /* rótulos de HUD do selo e do ticket */
+  .success__code,
+  .success__label {
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
   }
 
+  .success__code {
+    color: var(--c-success);
+  }
+
+  /* h2 logo abaixo do h1 da página (a lateral com o outro h2 some no sucesso), com o visual de h3 do base.css */
   .success__title {
     font-size: var(--fs-2xl);
+    font-weight: 700;
+    line-height: var(--lh-snug);
+    letter-spacing: 0.04em;
   }
 
   /* foco programático: transparente (e não none) pra reaparecer no alto contraste */
@@ -134,10 +138,6 @@ const steps = [
 
   .success__label {
     color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: var(--fs-hud);
-    letter-spacing: var(--tracking-hud);
-    text-transform: uppercase;
   }
 
   .success__protocol {

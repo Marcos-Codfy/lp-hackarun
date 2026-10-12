@@ -6,9 +6,12 @@ import Button from '@presentation/components/ui/Button.astro';
 interface Props {
   status: RegistrationStatus;
   simulated: boolean;
+  // nível do título no contexto: em /inscricao o aviso vem logo abaixo do h1 da página (h2)
+  level?: 'h2' | 'h3';
 }
 
-const { status, simulated } = Astro.props;
+const { status, simulated, level = 'h2' } = Astro.props;
+const Heading = level;
 ---
 
 {status === 'closing' && (
@@ -23,9 +26,9 @@ const { status, simulated } = Astro.props;
     <p class="notice__code" aria-hidden="true">
       // {status === 'soon' ? 'lobby em preparação' : 'lobby fechado'}
     </p>
-    <h3 class="notice__title" tabindex="-1" data-reg-notice-title>
+    <Heading class="notice__title" tabindex="-1" data-reg-notice-title>
       {status === 'soon' ? 'As inscrições abrem em breve' : 'Inscrições encerradas'}
-    </h3>
+    </Heading>
     {status === 'soon' ? (
       <>
         <p class="notice__text">Enquanto isso, salve as datas e já chama a sua equipe.</p>
@@ -97,8 +100,12 @@ const { status, simulated } = Astro.props;
     text-transform: uppercase;
   }
 
+  /* o visual é o mesmo em qualquer nível (o de h3 do base.css): só a semântica muda */
   .notice__title {
     font-size: var(--fs-2xl);
+    font-weight: 700;
+    line-height: var(--lh-snug);
+    letter-spacing: 0.04em;
   }
 
   /* foco programático: transparente (e não none) pra reaparecer no alto contraste */

@@ -40,7 +40,7 @@ describe('RegistrationFormView · prazo conferido no navegador', () => {
     const { root, el } = mount({
       window: CLOSED,
       extra:
-        '<div data-reg-closed hidden><h3 tabindex="-1" data-reg-notice-title>Inscrições encerradas</h3></div>',
+        '<div data-reg-closed hidden><h2 tabindex="-1" data-reg-notice-title>Inscrições encerradas</h2></div>',
     });
     expect(root.dataset['status']).toBe('closed');
     expect(el('[data-reg-panel]')?.hidden).toBe(true);
@@ -55,6 +55,7 @@ describe('RegistrationFormView · prazo conferido no navegador', () => {
     expect(notice?.hidden).toBe(false);
     const title = notice?.querySelector<HTMLElement>('[data-reg-notice-title]');
     expect(title?.textContent).toBe('Inscrições encerradas');
+    expect(title?.tagName).toBe('H2');
     expect(title?.tabIndex).toBe(-1);
     expect(notice?.querySelector('a')?.getAttribute('href')).toBe('/equipes');
     expect(el('[data-reg-panel]')?.hidden).toBe(true);

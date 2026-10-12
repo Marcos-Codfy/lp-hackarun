@@ -43,7 +43,7 @@ export const formMarkup = (extra = ''): string => `
         <div data-reg-failure hidden><p data-reg-failure-text></p><button type="button" data-reg-retry></button></div>
         <button type="submit" data-reg-submit><span class="btn__label">Confirmar inscrição</span></button>
       </form>
-      <div data-reg-success hidden><h3 tabindex="-1" data-reg-success-title></h3></div>
+      <div data-reg-success hidden><h2 tabindex="-1" data-reg-success-title></h2></div>
       <p data-reg-live></p>
     </div>
   </div>${extra}`;

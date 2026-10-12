@@ -22,7 +22,8 @@ export class ClosedLobby {
     const notice = document.createElement('div');
     notice.className = 'regform__failure';
     notice.dataset['regClosed'] = '';
-    const title = document.createElement('h3');
+    // h2, como o aviso pronto do servidor: logo abaixo do h1 da página
+    const title = document.createElement('h2');
     // título focável: quem chega pelo teclado ou pelo leitor de tela acha o aviso
     title.dataset['regNoticeTitle'] = '';
     title.tabIndex = -1;
