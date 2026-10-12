@@ -1,8 +1,10 @@
-import type { FaqItemDTO, LandingPageDTO, SessionDTO, VenueDTO } from '@application/index';
+import type { FaqItemDTO, LandingPageDTO, PartnerDTO, SessionDTO, VenueDTO } from '@application/index';
 
 // schema.org da LP: o Event (com um subEvent por bloco da programação) e o FAQPage, no mesmo @graph.
 // Tudo sai do conteúdo: mudou o event.json ou o faq.json, os dados estruturados acompanham
 type Node = Record<string, unknown>;
+
+const ORGANIZING: ReadonlySet<PartnerDTO['role']> = new Set(['organizer', 'coorganizer']);
 
 // America/Araguaina não tem horário de verão: -03:00 o ano todo
 const offsetOf = (timeZone: string): string => (timeZone === 'America/Araguaina' ? '-03:00' : 'Z');
@@ -30,6 +32,15 @@ function subEvent(date: string, session: SessionDTO, offset: string): Node {
     endDate: at(session.end),
     location: place(session.venue, session.place),
     ...(session.audienceNote && { audience: { '@type': 'Audience', audienceType: session.audienceNote } }),
+  };
+}
+
+// sigla com nome por extenso (LAES): o nome oficial vai no name e a sigla no alternateName
+function organization(partner: PartnerDTO): Node {
+  return {
+    '@type': 'Organization',
+    name: partner.fullName ?? partner.name,
+    alternateName: partner.fullName ? partner.name : undefined,
   };
 }
 
@@ -63,12 +74,11 @@ export function buildEventJsonLd(data: LandingPageDTO, siteUrl: string, descript
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: venues,
     image,
+    // realização e organização assinam o evento; parceria e apoio entram como patrocínio
     organizer: partners
-      .filter((p) => p.role === 'organizer')
-      .map((p) => ({ '@type': 'Organization', name: p.name, url: p.url ?? undefined })),
-    sponsor: partners
-      .filter((p) => p.role !== 'organizer')
-      .map((p) => ({ '@type': 'Organization', name: p.name })),
+      .filter((p) => ORGANIZING.has(p.role))
+      .map((p) => ({ ...organization(p), url: p.url ?? undefined })),
+    sponsor: partners.filter((p) => !ORGANIZING.has(p.role)).map((p) => organization(p)),
     subEvent: schedule.flatMap((day) => day.sessions.map((s) => subEvent(day.date, s, offset))),
     url: siteUrl || undefined,
     inLanguage: 'pt-BR',

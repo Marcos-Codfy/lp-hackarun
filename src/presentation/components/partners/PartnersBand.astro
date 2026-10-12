@@ -1,17 +1,18 @@
 ---
 import type { PartnerDTO } from '@application/index';
-import unicatolicaLogo from '../../../assets/brand/unicatolica-white.png';
-import capimLogo from '../../../assets/brand/capim-dourado-white.png';
 import PartnerLogo from './PartnerLogo.astro';
+import { PARTNER_BRANDS } from './partnerBrands';
 
-// faixa de autoridade antes do rodapé: quem realiza e quem é parceiro, com as logos oficiais
+// faixa de autoridade antes do rodapé: realização, organização e parceria, com as logos oficiais.
+// A ordem vem do ListPartners; só entra quem tem logo cadastrada em partnerBrands
 interface Props {
   partners: PartnerDTO[];
 }
 
-const { partners } = Astro.props;
-const organizer = partners.find((p) => p.role === 'organizer');
-const partner = partners.find((p) => p.role === 'partner');
+const items = Astro.props.partners.flatMap((partner) => {
+  const brand = PARTNER_BRANDS[partner.id];
+  return brand ? [{ partner, brand }] : [];
+});
 ---
 
 <section class="partners" aria-labelledby="partners-title">
@@ -21,27 +22,13 @@ const partner = partners.find((p) => p.role === 'partner');
       Quem faz acontecer
       <span class="partners__rule" aria-hidden="true"></span>
     </h2>
-    <div class="partners__row">
-      <PartnerLogo
-        logo={unicatolicaLogo}
-        name={organizer?.name ?? 'UniCatólica'}
-        role="Realização"
-        caption="Cursos de Engenharia de Software e Inteligência Artificial"
-        url={organizer?.url ?? null}
-        tone="blue"
-        width={10.5}
-      />
-      <span class="partners__divider" aria-hidden="true"></span>
-      <PartnerLogo
-        logo={capimLogo}
-        name={partner?.name ?? 'Capim Dourado Shopping'}
-        role="Parceria"
-        caption="Parceiro exclusivo da premiação e palco da HackaRun Experience"
-        url={partner?.url ?? null}
-        tone="gold"
-        width={16}
-      />
-    </div>
+    <ul class="partners__row" role="list">
+      {items.map(({ partner, brand }) => (
+        <li class="partners__item">
+          <PartnerLogo partner={partner} brand={brand} />
+        </li>
+      ))}
+    </ul>
   </div>
 </section>
 
@@ -55,14 +42,16 @@ const partner = partners.find((p) => p.role === 'partner');
     border-bottom: 1px solid rgb(140 160 255 / 0.1);
   }
 
+  /* um halo por papel, atrás de cada logo: ciano, violeta e dourado (2 + 1 no celular, 3 lado a lado depois) */
   .partners::before {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
     background:
-      radial-gradient(50% 80% at 25% 50%, rgb(18 100 255 / 0.1), transparent 70%),
-      radial-gradient(50% 80% at 75% 50%, rgb(255 194 74 / 0.06), transparent 70%),
+      radial-gradient(45% 40% at 25% 40%, rgb(18 100 255 / 0.1), transparent 70%),
+      radial-gradient(45% 40% at 75% 40%, rgb(148 27 255 / 0.08), transparent 70%),
+      radial-gradient(55% 35% at 50% 85%, rgb(255 194 74 / 0.06), transparent 70%),
       linear-gradient(180deg, rgb(2 3 11 / 0.4), rgb(6 11 36 / 0.6) 50%, rgb(2 3 11 / 0.4));
     -webkit-mask-image: linear-gradient(180deg, transparent, #000 10rem);
     mask-image: linear-gradient(180deg, transparent, #000 10rem);
@@ -96,30 +85,105 @@ const partner = partners.find((p) => p.role === 'partner');
     transform: scaleX(-1);
   }
 
-  /* lado a lado desde o celular (empilhadas, as duas logos ocupavam mais de uma tela no rodapé) */
+  /* celular e tablet: 2 + 1. Realização e organização lado a lado; a parceria embaixo, na largura toda
+     (as três empilhadas passavam de uma tela no rodapé). --mark-box = altura do desenho mais alto.
+     stretch: itens da mesma linha com a mesma altura, então os fios (no meio de cada item) ficam alinhados
+     mesmo quando uma legenda quebra numa linha a mais */
   .partners__row {
+    --mark-box: 8.25rem;
+    --mark-scale: 0.78;
+    --gap: var(--space-3);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
     justify-items: center;
-    gap: var(--space-3);
+    gap: var(--space-4) var(--gap);
   }
 
-  .partners__divider {
-    align-self: center;
+  .partners__item {
+    position: relative;
+    display: grid;
+    width: 100%;
+  }
+
+  /* fio vertical entre as duas colunas, na altura das logos */
+  .partners__item:nth-child(even)::before,
+  .partners__item:last-child:nth-child(odd):not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: calc(var(--gap) / -2);
     width: 1px;
     height: 8rem;
+    translate: 0 -50%;
     background: linear-gradient(180deg, transparent, rgb(140 160 255 / 0.45), transparent);
   }
 
-  @media (min-width: 768px) {
+  /* a sobra ímpar ocupa a linha toda, com o fio deitado em cima. No celular ela fica menor: sozinha na linha
+     e com a logo mais larga, a parceria lia como a marca principal da faixa (a realização é quem abre) */
+  .partners__item:last-child:nth-child(odd):not(:first-child) {
+    --mark-scale: 0.66;
+    grid-column: 1 / -1;
+    padding-top: var(--space-4);
+  }
+
+  .partners__item:last-child:nth-child(odd):not(:first-child)::before {
+    top: 0;
+    left: 50%;
+    width: min(18rem, 70%);
+    height: 1px;
+    translate: -50% 0;
+    background: linear-gradient(90deg, transparent, rgb(140 160 255 / 0.45), transparent);
+  }
+
+  @media (min-width: 48rem) {
     .partners__row {
-      align-items: center;
-      gap: var(--space-6);
+      --mark-scale: 0.88;
+      --gap: var(--space-6);
     }
 
-    .partners__divider {
+    .partners__item:last-child:nth-child(odd):not(:first-child) {
+      --mark-scale: inherit;
+    }
+
+    .partners__item:nth-child(even)::before {
       height: 10rem;
+    }
+  }
+
+  /* desktop: as três lado a lado, com o mesmo peso, e um fio entre cada uma */
+  @media (min-width: 64rem) {
+    .partners::before {
+      background:
+        radial-gradient(30% 70% at 18% 50%, rgb(18 100 255 / 0.1), transparent 70%),
+        radial-gradient(30% 70% at 50% 50%, rgb(148 27 255 / 0.08), transparent 70%),
+        radial-gradient(30% 70% at 82% 50%, rgb(255 194 74 / 0.06), transparent 70%),
+        linear-gradient(180deg, rgb(2 3 11 / 0.4), rgb(6 11 36 / 0.6) 50%, rgb(2 3 11 / 0.4));
+    }
+
+    .partners__row {
+      --mark-scale: 1;
+      --gap: var(--space-6);
+      grid-template-columns: none;
+      grid-auto-columns: minmax(0, 1fr);
+      grid-auto-flow: column;
+    }
+
+    .partners__item:last-child:nth-child(odd):not(:first-child) {
+      grid-column: auto;
+      padding-top: 0;
+    }
+
+    .partners__item + .partners__item::before,
+    .partners__item:last-child:nth-child(odd):not(:first-child)::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: calc(var(--gap) / -2);
+      width: 1px;
+      height: 10rem;
+      translate: 0 -50%;
+      background: linear-gradient(180deg, transparent, rgb(140 160 255 / 0.45), transparent);
     }
   }
 </style>

@@ -181,6 +181,7 @@ export interface PrizeDTO {
 export interface PartnerDTO {
   id: string;
   name: string;
+  fullName: string | null;
   role: PartnerRole;
   url: string | null;
   logo: string | null;

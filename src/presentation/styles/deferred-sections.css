@@ -42,7 +42,7 @@
     contain-intrinsic-size: auto 160svh;
   }
   .site-footer {
-    contain-intrinsic-size: auto 1341px;
+    contain-intrinsic-size: auto 1564px;
   }
 
   @media (min-width: 48rem) {
@@ -65,7 +65,7 @@
       contain-intrinsic-size: auto 1541px;
     }
     .site-footer {
-      contain-intrinsic-size: auto 1322px;
+      contain-intrinsic-size: auto 1583px;
     }
   }
 
@@ -89,7 +89,7 @@
       contain-intrinsic-size: auto 1293px;
     }
     .site-footer {
-      contain-intrinsic-size: auto 1103px;
+      contain-intrinsic-size: auto 1087px;
     }
   }
 }

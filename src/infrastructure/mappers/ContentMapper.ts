@@ -43,7 +43,12 @@ export class ContentMapper {
   }
 
   static toPartner(raw: RawPartner): Partner {
-    return Partner.create({ ...raw, url: raw.url ?? null, logo: raw.logo ?? null });
+    return Partner.create({
+      ...raw,
+      fullName: raw.fullName ?? null,
+      url: raw.url ?? null,
+      logo: raw.logo ?? null,
+    });
   }
 
   static toFaqItem(raw: RawFaqItem): FaqItem {

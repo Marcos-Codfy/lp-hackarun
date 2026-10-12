@@ -1,69 +1,35 @@
 ---
 import { Image } from 'astro:assets';
-import organizerLogo from '../../../assets/brand/unicatolica-white.png';
 import partnerLogo from '../../../assets/brand/capim-dourado-white.png';
 
-// autoridade discreta: logos oficiais brancos a ~60% de opacidade, acendem no hover
+// crédito discreto do parceiro da final: logo branco a ~60% de opacidade, acende no hover.
+// A UniCatólica assina o selo de cursos no topo do hero; repetir o logo aqui daria dois na mesma tela
+// (a realização continua grande na faixa "Quem faz acontecer", antes do rodapé)
 interface Props {
-  organizer: string;
   partner: string;
 }
 
-const { organizer, partner } = Astro.props;
+const { partner } = Astro.props;
 ---
 
-<ul class="hero-partners" role="list">
-  <li class="hero-partners__item">
-    <span class="hero-partners__role">
-      Realização<span class="sr-only">:</span>
-    </span>
-    <Image
-      src={organizerLogo}
-      alt={organizer}
-      width={52}
-      densities={[1, 2]}
-      class="hero-partners__logo hero-partners__logo--organizer"
-    />
-  </li>
-  <li class="hero-partners__item">
-    <span class="hero-partners__role">
-      Parceria<span class="sr-only">:</span>
-    </span>
-    <Image
-      src={partnerLogo}
-      alt={partner}
-      width={76}
-      densities={[1, 2]}
-      class="hero-partners__logo hero-partners__logo--partner"
-    />
-  </li>
-</ul>
+<p class="hero-partners">
+  <span class="hero-partners__role">
+    Parceria<span class="sr-only">:</span>
+  </span>
+  <Image src={partnerLogo} alt={partner} width={76} densities={[1, 2]} class="hero-partners__logo" />
+</p>
 
 <style>
   .hero-partners {
-    display: flex;
-    align-items: center;
-    gap: var(--space-5);
-    padding: 0;
-    list-style: none;
-  }
-
-  .hero-partners__item {
     display: grid;
-    justify-items: start;
+    justify-items: center;
     gap: 6px;
     opacity: 0.62;
     transition: opacity var(--dur) var(--ease-out);
   }
 
-  .hero-partners__item:hover {
+  .hero-partners:hover {
     opacity: 0.95;
-  }
-
-  /* fio vertical entre os dois */
-  .hero-partners__item + .hero-partners__item {
-    padding-left: var(--space-5);
-    border-left: 1px solid rgb(150 175 255 / 0.22);
   }
 
   .hero-partners__role {
@@ -78,20 +44,19 @@ const { organizer, partner } = Astro.props;
 
   .hero-partners :global(.hero-partners__logo) {
     width: auto;
-    height: 2.25rem;
-  }
-
-  .hero-partners :global(.hero-partners__logo--partner) {
     height: 1.9rem;
     margin-block: 0.175rem;
   }
 
+  /* desktop: alinha com a borda esquerda do hero */
+  @media (min-width: 1024px) {
+    .hero-partners {
+      justify-items: start;
+    }
+  }
+
   @media (min-width: 1440px) {
     .hero-partners :global(.hero-partners__logo) {
-      height: 2.6rem;
-    }
-
-    .hero-partners :global(.hero-partners__logo--partner) {
       height: 2.2rem;
       margin-block: 0.2rem;
     }

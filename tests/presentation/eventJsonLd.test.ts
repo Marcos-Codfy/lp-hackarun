@@ -28,7 +28,13 @@ describe('buildEventJsonLd', () => {
     });
     expect(event?.['organizer']).toEqual([
       { '@type': 'Organization', name: 'UniCatólica', url: 'https://www.catolica-to.edu.br' },
+      {
+        '@type': 'Organization',
+        name: 'Liga Acadêmica de Engenharia de Software e Inteligência Artificial',
+        alternateName: 'LAES',
+      },
     ]);
+    expect(event?.['sponsor']).toEqual([{ '@type': 'Organization', name: 'Capim Dourado Shopping' }]);
   });
 
   it('um subEvent por bloco, com horário de Palmas, local e público', async () => {

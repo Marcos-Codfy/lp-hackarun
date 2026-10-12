@@ -2,7 +2,8 @@ import type { PartnerRepository } from '@domain/index';
 import type { PartnerDTO } from '../dto';
 import { toPartnerDTO } from './mappers';
 
-const ROLE_ORDER = { organizer: 0, partner: 1, supporter: 2 } as const;
+// ordem da faixa: realização, organização, parceria, apoio
+const ROLE_ORDER = { organizer: 0, coorganizer: 1, partner: 2, supporter: 3 } as const;
 
 export class ListPartners {
   private readonly partners: PartnerRepository;

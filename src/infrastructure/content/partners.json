@@ -6,5 +6,13 @@
     "url": "https://www.catolica-to.edu.br",
     "logo": null
   },
+  {
+    "id": "laes",
+    "name": "LAES",
+    "fullName": "Liga Acadêmica de Engenharia de Software e Inteligência Artificial",
+    "role": "coorganizer",
+    "url": null,
+    "logo": null
+  },
   { "id": "capim-dourado", "name": "Capim Dourado Shopping", "role": "partner", "url": null, "logo": null }
 ]

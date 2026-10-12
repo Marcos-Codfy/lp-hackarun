@@ -1,33 +1,36 @@
 ---
 import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import type { PartnerDTO } from '@application/index';
+import type { PartnerBrand } from './partnerBrands';
+import { PARTNER_ROLES, markVars, markWidthRem, partnerCopy } from './partnerMarks';
 
-// um parceiro na faixa: logo oficial branca + papel + descrição; vira link quando tem site
+// um parceiro na faixa: papel + logo oficial branca + legenda; vira link quando tem site
 interface Props {
-  logo: ImageMetadata;
-  name: string;
-  role: string;
-  caption: string;
-  url?: string | null;
-  tone: 'blue' | 'gold';
-  // largura de exibição em rem (as logos têm proporções bem diferentes)
-  width: number;
+  partner: PartnerDTO;
+  brand: PartnerBrand;
 }
 
-const { logo, name, role, caption, url = null, tone, width } = Astro.props;
+const { partner, brand } = Astro.props;
+const { label, tone } = PARTNER_ROLES[partner.role];
+const { logo, ink, height } = brand;
+const { caption, alt } = partnerCopy(partner, brand);
+// largura no desktop (1x, 2x e 3x): a faixa só encolhe a logo daí pra baixo
+const widthRem = markWidthRem(logo, ink, height);
+const widths = [...new Set([1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 16 * d))))];
+const { url } = partner;
 const Tag = url ? 'a' : 'div';
 const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer' } : {};
 ---
 
 <Tag class:list={['partner', `partner--${tone}`]} {...linkAttrs}>
-  <span class="partner__role">{role}</span>
-  <span class="partner__mark" style={`--w: ${width}rem`}>
+  <span class="partner__role">{label}</span>
+  <span class="partner__mark" style={markVars(logo, ink, height)}>
     <Image
       class="partner__img"
       src={logo}
-      alt={name}
-      widths={[Math.round(width * 16), Math.round(width * 32)]}
-      sizes={`${width}rem`}
+      alt={alt}
+      widths={widths}
+      sizes={`${widthRem}rem`}
       loading="lazy"
     />
   </span>
@@ -40,13 +43,15 @@ const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer
 <style>
   .partner {
     --glow: rgb(0 229 255 / 0.55);
+    --role-ink: var(--ink-cyan);
     position: relative;
     display: grid;
     justify-items: center;
     align-content: start;
     gap: var(--space-4);
     width: 100%;
-    padding: var(--space-4) var(--space-1);
+    /* sem respiro lateral no celular: em 320px cada legenda tem só ~130px de coluna */
+    padding: var(--space-4) 0;
     border-radius: 4px;
     color: inherit;
     text-align: center;
@@ -54,8 +59,14 @@ const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer
     transition: background var(--dur) var(--ease-out);
   }
 
+  .partner--violet {
+    --glow: rgb(148 27 255 / 0.5);
+    --role-ink: var(--ink-violet);
+  }
+
   .partner--gold {
     --glow: rgb(255 194 74 / 0.5);
+    --role-ink: var(--ink-gold);
   }
 
   .partner:hover {
@@ -67,31 +78,32 @@ const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer
   }
 
   .partner__role {
-    color: #8ff3ff;
+    color: var(--role-ink);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
   }
 
-  .partner--gold .partner__role {
-    color: #ffd88a;
-  }
-
-  /* celular: as duas logos numa caixa da mesma altura, pra as legendas começarem na mesma linha */
+  /* toda logo numa caixa da mesma altura (a do desenho mais alto): as legendas começam na mesma linha.
+     --mark-box e --mark-scale vêm da faixa */
   .partner__mark {
+    --ink: calc(var(--h) * var(--mark-scale, 1));
     display: grid;
     place-items: center;
-    width: min(var(--w), 100%);
-    height: 8.5rem;
+    width: 100%;
+    height: calc(var(--mark-box, 8.25rem) * var(--mark-scale, 1));
   }
 
-  /* cabe na caixa pela largura ou pela altura, o que vier primeiro (proporção da logo intacta) */
+  /* a altura manda (proporção pelo width/height do PNG); as margens negativas tiram a borda transparente.
+     Se a coluna ficar mais estreita que a logo, o contain encolhe o desenho em vez de esticar */
   .partner__img {
     width: auto;
     max-width: 100%;
-    height: auto;
-    max-height: 100%;
+    height: calc(var(--ink) * var(--k));
+    margin: calc(var(--ink) * var(--mt)) calc(var(--ink) * var(--mr)) calc(var(--ink) * var(--mb))
+      calc(var(--ink) * var(--ml));
+    object-fit: contain;
     opacity: 0.88;
     transition:
       opacity var(--dur) var(--ease-out),
@@ -107,31 +119,28 @@ const linkAttrs = url ? { href: url, target: '_blank', rel: 'noopener noreferrer
   }
 
   .partner__caption {
-    max-width: 22rem;
+    max-width: 18rem;
     color: var(--text-muted);
     font-size: var(--fs-xs);
     line-height: 1.5;
     text-wrap: balance;
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
     .partner {
       gap: var(--space-5);
-      padding: var(--space-6) var(--space-5);
-    }
-
-    .partner__mark {
-      height: auto;
-      min-height: 8rem;
-    }
-
-    .partner__img {
-      width: 100%;
-      max-height: none;
+      padding: var(--space-5) var(--space-4);
     }
 
     .partner__caption {
       font-size: var(--fs-sm);
+    }
+  }
+
+  /* respiro lateral menor: em 1024px a legenda da LAES quebrava em 3 linhas e as outras em 2 */
+  @media (min-width: 64rem) {
+    .partner {
+      padding: var(--space-6) var(--space-4);
     }
   }
 

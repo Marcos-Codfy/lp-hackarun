@@ -150,6 +150,7 @@ export const toPrizeDTO = (p: Prize): PrizeDTO => ({
 export const toPartnerDTO = (p: Partner): PartnerDTO => ({
   id: p.id,
   name: p.name,
+  fullName: p.fullName,
   role: p.role,
   url: p.url,
   logo: p.logo,

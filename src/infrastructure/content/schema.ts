@@ -127,6 +127,8 @@ export interface RawPrize {
 export interface RawPartner {
   id: string;
   name: string;
+  // nome por extenso quando o name é sigla (ex.: LAES)
+  fullName?: string | null;
   role: PartnerRole;
   url?: string | null;
   logo?: string | null;
