@@ -102,9 +102,10 @@ import BrandLogo from '@presentation/components/ui/BrandLogo.astro';
     }
   }
 
+  /* 28.5rem = o resto do hero (selo de cursos, slogan, chips, contador e rodapé): tela baixa encolhe o logo */
   @media (min-width: 1024px) {
     .hero-logo {
-      --logo-w: min(62vw, 980px, max(30rem, (100svh - 26rem) * 2.6));
+      --logo-w: min(62vw, 980px, max(30rem, (100svh - 28.5rem) * 2.6));
     }
   }
 

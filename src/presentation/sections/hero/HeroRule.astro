@@ -1,0 +1,66 @@
+---
+// régua de HUD com um losango na ponta de dentro: ciano à esquerda (software), violeta à direita (IA).
+// Some abaixo de 480px, onde o selo ocupa a largura toda
+interface Props {
+  side: 'start' | 'end';
+}
+
+const { side } = Astro.props;
+---
+
+<span class:list={['hero-rule', `hero-rule--${side}`]} aria-hidden="true"></span>
+
+<style>
+  /* z-index: o véu do selo (que vem depois no DOM) não pinta por cima da régua da esquerda */
+  .hero-rule {
+    position: relative;
+    z-index: 1;
+    display: none;
+    flex: 1;
+    max-width: 9rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(0 229 255 / 0.7));
+    transform-origin: right;
+    animation: hero-rule-draw 1.1s 0.35s var(--ease-out) both;
+  }
+
+  .hero-rule::after {
+    content: '';
+    position: absolute;
+    inset: -2px -2px auto auto;
+    width: 5px;
+    height: 5px;
+    background: var(--c-cyan);
+    box-shadow: 0 0 10px var(--c-cyan);
+    transform: rotate(45deg);
+  }
+
+  .hero-rule--end {
+    background: linear-gradient(270deg, transparent, rgb(148 27 255 / 0.75));
+    transform-origin: left;
+  }
+
+  .hero-rule--end::after {
+    inset: -2px auto auto -2px;
+    background: var(--ink-violet);
+    box-shadow: 0 0 10px var(--c-violet);
+  }
+
+  @keyframes hero-rule-draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @media (min-width: 480px) {
+    .hero-rule {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-rule {
+      animation: none;
+    }
+  }
+</style>

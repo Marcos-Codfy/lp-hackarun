@@ -4,7 +4,7 @@ import Button from '@presentation/components/ui/Button.astro';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
-import HeroHud from './hero/HeroHud.astro';
+import HeroCourses from './hero/HeroCourses.astro';
 import HeroLogo from './hero/HeroLogo.astro';
 import HeroSlogan from './hero/HeroSlogan.astro';
 import HeroMeta from './hero/HeroMeta.astro';
@@ -41,7 +41,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
 
   <div class="container hero__frame">
     <div class="hero__content" data-hero-fade>
-      <HeroHud label={`1ª edição · ${event.tagline}`} />
+      <HeroCourses institution={organizer} />
       <HeroLogo />
       <HeroSlogan />
       <div class="hero-in" style="--d: 1.05s">
@@ -72,7 +72,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
     {/* a entrada (CSS) e a saída no scroll (GSAP) ficam em elementos diferentes: opacidade não briga */}
     <div class="hero-in" style="--d: 1.4s">
       <div data-hero-fade>
-        <HeroFooter organizer={organizer} partner={partner} />
+        <HeroFooter partner={partner} />
       </div>
     </div>
   </div>
@@ -110,8 +110,11 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
     gap: var(--space-6);
   }
 
+  /* coluna presa na largura do container: a trilha auto crescia até o min-content do logo (94vw) e o
+     bloco inteiro pendia pra direita no celular */
   .hero__content {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-content: center;
     justify-items: center;
     gap: var(--space-5);
@@ -188,6 +191,13 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
     .hero__ctas {
       display: grid;
       gap: var(--space-3);
+    }
+  }
+
+  /* notebook baixo (1366×768, 1280×720): ritmo mais justo pra o hero inteiro caber na primeira tela */
+  @media (min-width: 1024px) and (max-height: 800px) {
+    .hero__content {
+      gap: var(--space-4);
     }
   }
 

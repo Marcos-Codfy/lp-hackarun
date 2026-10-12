@@ -109,8 +109,10 @@ const readout = [
     padding-top: clamp(4rem, 2rem + 6vw, 8rem);
   }
 
+  /* minmax(0, 1fr): a trilha auto crescia até o min-content do card e cortava a borda direita em 320px */
   .about__tracks {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-5);
   }
 

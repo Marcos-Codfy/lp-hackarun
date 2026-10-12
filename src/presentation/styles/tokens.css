@@ -60,6 +60,8 @@
 
   /* tinta clara pra texto miúdo sobre o escuro: o neon puro vibra em letra pequena */
   --ink-cyan: #8ff3ff;
+  --ink-violet: #d2a8ff;
+  --ink-gold: #ffd88a;
   --ink-orange: #ffb27a;
   --ink-danger: #ff8ab3;
   --ink-danger-soft: #ffc2d7;

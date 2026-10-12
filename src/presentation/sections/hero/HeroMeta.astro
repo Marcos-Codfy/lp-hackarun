@@ -46,11 +46,17 @@ const { dates, datesLong, host, finalVenue } = Astro.props;
     color: var(--c-cyan);
   }
 
-  /* celular estreito: o chip do local precisa caber numa linha só */
+  /* celular estreito: o chip do local precisa caber numa linha só (em 320px, só com o tracking mais curto) */
   .hero-meta :global(li.chip) {
     font-size: 0.625rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     padding-inline: 0.75rem;
+  }
+
+  @media (min-width: 360px) {
+    .hero-meta :global(li.chip) {
+      letter-spacing: 0.08em;
+    }
   }
 
   /* daqui pra cima volta ao tamanho padrão do Chip.astro (mantenha os dois iguais) */

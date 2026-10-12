@@ -2,18 +2,17 @@
 import HeroPartners from './HeroPartners.astro';
 import ScrollCue from './ScrollCue.astro';
 
-// faixa de baixo do hero: parceiros à esquerda, dica de scroll no meio, coordenadas à direita
+// faixa de baixo do hero: parceiro à esquerda, dica de scroll no meio, coordenadas à direita
 interface Props {
-  organizer: string;
   partner: string;
 }
 
-const { organizer, partner } = Astro.props;
+const { partner } = Astro.props;
 ---
 
 <div class="hero-footer">
   <div class="hero-footer__partners">
-    <HeroPartners organizer={organizer} partner={partner} />
+    <HeroPartners partner={partner} />
   </div>
   <div class="hero-footer__cue">
     <ScrollCue />

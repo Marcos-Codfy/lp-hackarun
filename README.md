@@ -4,7 +4,7 @@
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/Marcos-Codfy/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
-  <img src="docs/media/scroll-preview.webp" width="960" alt="Animação da rolagem cinematográfica do HackaRun: o hero abre com o logo oficial e raios sobre o globo de partículas; a cada seção as partículas 3D viram uma forma nova (cronômetro, ponto de interrogação neon, mapa das missões, terreno synthwave, palco com telão, troféu dourado e galáxia) e no fim voltam a formar o globo, agora calmo, que gira devagar atrás da chamada &quot;Sua vaga na corrida&quot;, carrega, acende o botão &quot;Quero participar&quot; e solta um pulso suave de luz na borda." />
+  <img src="docs/media/scroll-preview.webp" width="960" alt="Animação da rolagem cinematográfica do HackaRun: o hero abre com o selo da UniCatólica e dos cursos de Engenharia de Software e Inteligência Artificial acima do logo oficial, com raios sobre o globo de partículas; a cada seção as partículas 3D viram uma forma nova (cronômetro, ponto de interrogação neon, mapa das missões, terreno synthwave, palco com telão, troféu dourado e galáxia) e no fim voltam a formar o globo, agora calmo, que gira devagar atrás da chamada &quot;Sua vaga na corrida&quot;, carrega, acende o botão &quot;Quero participar&quot; e solta um pulso suave de luz na borda." />
 </picture>
 
 # HackaRun · Overdrive
@@ -45,13 +45,14 @@ de cena em cena e, na chegada, o globo carrega e solta um pulso de energia.</sub
 - **Meu papel:** desenvolvimento solo. Criei a identidade visual do evento com a Eduarda, colega da Liga Acadêmica, e,
   em cima dela, fiz o design da página, o 3D e os shaders, o front-end, a API de inscrições no Apps Script, os testes,
   a CI e a documentação.
-- **O que é:** o site oficial do HackaRun 2026, a 1ª edição do evento da UniCatólica, com o Capim Dourado Shopping
-  como parceiro exclusivo da premiação. São 4 dias, de 11 a 14 de novembro de 2026, em Palmas-TO, em duas frentes:
-  uma programação aberta ao público (7 oficinas, palestras e até 10 estandes) e um hackathon só para alunos da
-  UniCatólica, uma corrida por objetivos em equipes que termina na HackaRun Experience, no shopping. A página traz a
-  programação em abas, 8 missões, mentores, prêmios, uma caça a 3 tokens escondidos, uma página de inscrição das
-  equipes (com rascunho na aba e volta ao mesmo ponto da página) e outra só para as equipes confirmadas, com a foto ou
-  a logo de cada time, ao vivo.
+- **O que é:** o site oficial do HackaRun 2026, a 1ª edição do evento da UniCatólica, organizado pela LAES (Liga
+  Acadêmica de Engenharia de Software e Inteligência Artificial) e com o Capim Dourado Shopping como parceiro
+  exclusivo da premiação. São 4 dias, de 11 a 14 de novembro de 2026, em Palmas-TO, em duas frentes: uma programação
+  aberta ao público (7 oficinas, palestras e até 10 estandes) e um hackathon só para alunos da UniCatólica, uma
+  corrida por objetivos em equipes que termina na HackaRun Experience, no shopping. A página traz a programação em
+  abas, 8 missões, mentores, prêmios, uma caça a 3 tokens escondidos, uma página de inscrição das equipes (com
+  rascunho na aba e volta ao mesmo ponto da página) e outra só para as equipes confirmadas, com a foto ou a logo de
+  cada time, ao vivo.
 - **O diferencial:** 8 objetos 3D procedurais (globo, cronômetro, "?", mapa holográfico, terreno synthwave, palco,
   troféu e galáxia) feitos de 9 mil a 42 mil partículas, sem nenhum modelo 3D nem vídeo
   ([ADR 0005](docs/adr/0005-procedural-particles-over-video.md)), com pós-processamento de cinema e uma câmera
@@ -63,18 +64,18 @@ de cena em cena e, na chegada, o globo carrega e solta um pulso de energia.</sub
 - **Backend de custo zero:** formulário → Google Apps Script → Google Sheets em três abas (equipes com a miniatura da
   foto na célula, integrantes com uma linha por pessoa e um resumo ao vivo), com a foto no Google Drive, uma equipe
   por pessoa, reenvio sem duplicar, limites de envio, trava de concorrência e consentimento LGPD versionado.
-- **Engenharia:** Clean Architecture + DDD + MVVM com a regra de dependência travada no ESLint, 765 testes, CI no
+- **Engenharia:** Clean Architecture + DDD + MVVM com a regra de dependência travada no ESLint, 786 testes, CI no
   GitHub Actions, Conventional Commits, 9 ADRs e um `npm run setup` para quem faz fork.
 
 ## Visual
 
 <p align="center">
-  <img src="docs/media/sections-desktop.jpg" width="960" alt="Mosaico com nove seções da página no desktop: o hero com o logo oficial, raios e a contagem regressiva; Da sala de aula ao palco, com o cronômetro; os NPCs, com o ponto de interrogação neon; 8 missões, com o mapa 3D; 4 dias de programação, com as abas por dia e o terreno synthwave; a final no Capim Dourado Shopping, com o telão; os prêmios, com o troféu dourado; as equipes, com a galáxia e o contador de confirmadas; e o fim da página, com o globo calmo atrás de Sua vaga na corrida, o contador, a lista do que ter em mãos e os botões Quero participar e Ver as equipes." />
-  <br /><sub>Nove seções, nove momentos do mesmo campo de partículas. No hero, o logo oficial é o H1 e o LCP.</sub>
+  <img src="docs/media/sections-desktop.jpg" width="960" alt="Mosaico com nove seções da página no desktop: o hero com o selo da UniCatólica e dos cursos de Engenharia de Software e Inteligência Artificial acima do logo oficial, raios e a contagem regressiva; Da sala de aula ao palco, com o cronômetro; os NPCs, com o ponto de interrogação neon; 8 missões, com o mapa 3D; 4 dias de programação, com as abas por dia e o terreno synthwave; a final no Capim Dourado Shopping, com o telão; os prêmios, com o troféu dourado; as equipes, com a galáxia e o contador de confirmadas; e o fim da página, com o globo calmo atrás de Sua vaga na corrida, o contador, a lista do que ter em mãos e os botões Quero participar e Ver as equipes." />
+  <br /><sub>Nove seções, nove momentos do mesmo campo de partículas. No hero, o selo da UniCatólica com os dois cursos abre a tela, e o logo oficial logo abaixo é o H1 e o LCP.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/mobile.jpg" width="960" alt="Cinco telas da versão para celular lado a lado: o hero com a contagem regressiva, os NPCs com o ponto de interrogação 3D e o terminal do NPC, as missões com o mapa de partículas, os prêmios com o troféu dourado e o card da equipe campeã, e o fim da página com o globo, a contagem, a lista do que ter em mãos e os botões Quero participar e Ver as equipes." />
+  <img src="docs/media/mobile.jpg" width="960" alt="Cinco telas da versão para celular lado a lado: o hero com o selo da UniCatólica e dos dois cursos, o logo e a contagem regressiva, os NPCs com o ponto de interrogação 3D e o terminal do NPC, as missões com o mapa de partículas, os prêmios com o troféu dourado e o card da equipe campeã, e o fim da página com o globo, a contagem, a lista do que ter em mãos e os botões Quero participar e Ver as equipes." />
   <br /><sub>No celular (390 px), no mesmo tier de qualidade que um aparelho recente recebe.</sub>
 </p>
 
@@ -344,7 +345,7 @@ A meta é **WCAG 2.2 AA**, e o Lighthouse dá 100 em acessibilidade:
 
 | Item            | Situação                                                                                                    |
 | --------------- | ----------------------------------------------------------------------------------------------------------- |
-| Testes          | **765 testes em 98 arquivos** (Vitest + happy-dom), por camada, incluindo 9 suítes do Apps Script real      |
+| Testes          | **786 testes em 102 arquivos** (Vitest + happy-dom), por camada, incluindo 9 suítes do Apps Script real     |
 | Lint            | ESLint sem erros e sem avisos: regra de camadas, teto de 250 linhas de código por arquivo, `import type`    |
 | Tipos           | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check     |
 | Formatação      | Prettier em todo o repositório                                                                              |
@@ -352,8 +353,8 @@ A meta é **WCAG 2.2 AA**, e o Lighthouse dá 100 em acessibilidade:
 | Commits         | Husky + lint-staged no pre-commit e commitlint no commit-msg (escopo fora da lista gera aviso)              |
 | QA no navegador | [`scripts/qa/`](scripts/qa/README.md): capturas, âncoras, overflow, Web Vitals, tarefas longas e Lighthouse |
 
-**Em números:** 435 arquivos e 33.019 linhas em `src` (TypeScript, Astro, GLSL e CSS), dos quais 90 arquivos e 5.852
-linhas são do módulo 3D; 98 arquivos de teste e 10 helpers, com 9.653 linhas; 999 linhas de Apps Script em 8 arquivos;
+**Em números:** 439 arquivos e 33.361 linhas em `src` (TypeScript, Astro, GLSL e CSS), dos quais 90 arquivos e 5.852
+linhas são do módulo 3D; 102 arquivos de teste e 10 helpers, com 9.910 linhas; 999 linhas de Apps Script em 8 arquivos;
 9 ADRs.
 
 ---
@@ -649,6 +650,7 @@ opções está na [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - [x] Apps Script publicado na planilha de inscrições e testado de ponta a ponta (foto na célula, duplicados barrados)
 - [x] Inscrição numa página própria, com rascunho na aba e volta ao mesmo ponto da landing page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md))
 - [x] Globo do fim da página mais calmo: gira devagar, respira e solta um pulso suave
+- [x] Selo da UniCatólica com os cursos de Engenharia de Software e Inteligência Artificial no topo do hero, e a LAES como organização na faixa de parceiros
 - [ ] Inscrições ligadas no site oficial, junto com a publicação na Cloudflare
 - [ ] Publicação oficial na Cloudflare Pages: em espera, por decisão minha
 - [ ] Regulamento e pontuação das missões: a organização apresenta na abertura, em 12/11, às 19h35
@@ -659,11 +661,12 @@ opções está na [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - **Design e desenvolvimento:** [Marcos Vinicius Muniz Arruda](https://github.com/Marcos-Codfy)
 - **Identidade visual:** Marcos Vinicius Muniz Arruda e Eduarda, colega da Liga Acadêmica
 - **Realização:** UniCatólica
+- **Organização:** LAES · Liga Acadêmica de Engenharia de Software e Inteligência Artificial
 - **Parceria:** Capim Dourado Shopping, parceiro exclusivo da premiação
 - **Fontes:** Orbitron, Montserrat e JetBrains Mono (SIL Open Font License)
 
-<sub>HackaRun, UniCatólica, Capim Dourado Shopping e os respectivos logos são marcas de seus titulares e aparecem aqui
-apenas para identificar o evento.</sub>
+<sub>HackaRun, UniCatólica, LAES, Capim Dourado Shopping e os respectivos logos são marcas de seus titulares e aparecem
+aqui apenas para identificar o evento.</sub>
 
 ---
 

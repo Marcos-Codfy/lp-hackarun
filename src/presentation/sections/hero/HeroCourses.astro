@@ -1,0 +1,191 @@
+---
+import { Image } from 'astro:assets';
+import institutionLogo from '../../../assets/brand/unicatolica-white.png';
+import { COURSES } from './courseLockup';
+import HeroRule from './HeroRule.astro';
+
+// selo acima do logo: a instituição, um fio e os dois cursos empilhados, entre as réguas de HUD.
+// É o único logo da UniCatólica na primeira tela (o crédito do rodapé do hero ficou só com o parceiro).
+// O leitor de tela ouve uma vez só, na ordem: "UniCatólica, cursos: Engenharia de Software, ..."
+interface Props {
+  institution: string;
+}
+
+const { institution } = Astro.props;
+---
+
+<div class="hero-courses">
+  <HeroRule side="start" />
+  <div class="hero-courses__lockup">
+    <Image
+      src={institutionLogo}
+      alt={institution}
+      width={60}
+      densities={[1, 2, 3]}
+      loading="eager"
+      class="hero-courses__logo"
+    />
+    <span class="sr-only">, cursos:</span>
+    <span class="hero-courses__divider" aria-hidden="true"></span>
+    <ul class="hero-courses__list" role="list">
+      {COURSES.map((course, index) => (
+        <li class:list={['hero-courses__name', `hero-courses__name--${course.tone}`]} style={`--i: ${index}`}>
+          {course.name}
+        </li>
+      ))}
+    </ul>
+  </div>
+  <HeroRule side="end" />
+</div>
+
+<style>
+  /* tamanhos por variável: cada faixa de tela troca só as variáveis */
+  .hero-courses {
+    --track: 0.18em;
+    --gap: var(--space-3);
+    --logo-h: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap);
+    width: 100%;
+    max-width: 62rem;
+    font-size: 0.6875rem;
+  }
+
+  .hero-courses__lockup {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--gap);
+  }
+
+  /* véu escuro sem borda atrás do selo: separa as letras finas do aro do globo (como o halo do logo) */
+  .hero-courses__lockup::before {
+    content: '';
+    position: absolute;
+    inset: -60% -14%;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(2 3 11 / 0.72), rgb(2 3 11 / 0.4) 55%, transparent);
+    pointer-events: none;
+    animation: courses-logo-in 0.9s 0.15s var(--ease-out) both;
+  }
+
+  /* branco oficial, sem filtro de desfoque: o brilho fica só no texto e no fio */
+  .hero-courses :global(.hero-courses__logo) {
+    width: auto;
+    height: var(--logo-h);
+    opacity: 0.95;
+    animation: courses-logo-in 0.9s 0.15s var(--ease-out) both;
+  }
+
+  /* fio vertical que vai do azul (software) ao violeta (IA), como as duas linhas ao lado */
+  .hero-courses__divider {
+    align-self: stretch;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--c-cyan) 28%, var(--c-violet) 72%, transparent);
+    opacity: 0.8;
+    animation: courses-divider-in 0.8s 0.3s var(--ease-out) both;
+  }
+
+  .hero-courses__list {
+    display: grid;
+    gap: 0.35em;
+    /* o espaçamento entra depois da última letra: devolve pra o bloco não pender pra esquerda */
+    margin: 0 calc(var(--track) * -1) 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: var(--track);
+    line-height: 1.3;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hero-courses__name {
+    animation: courses-name-in 0.9s var(--ease-out) backwards;
+    animation-delay: calc(0.42s + var(--i) * 0.14s);
+  }
+
+  .hero-courses__name--software {
+    color: var(--ink-cyan);
+    text-shadow: 0 0 12px rgb(0 229 255 / 0.5);
+  }
+
+  /* tinta clara (e não o --c-violet puro): letra pequena no escuro, com o mesmo brilho da linha de cima */
+  .hero-courses__name--ai {
+    color: var(--ink-violet);
+    text-shadow: 0 0 12px rgb(148 27 255 / 0.75);
+  }
+
+  @keyframes courses-logo-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 6px, 0) scale(0.94);
+    }
+  }
+
+  @keyframes courses-divider-in {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  /* varredura da esquerda pra direita, como um HUD escrevendo; a folga negativa deixa o brilho passar */
+  @keyframes courses-name-in {
+    from {
+      opacity: 0;
+      clip-path: inset(-100% 100% -100% -10%);
+    }
+    to {
+      opacity: 1;
+      clip-path: inset(-100% -10% -100% -10%);
+    }
+  }
+
+  @media (min-width: 480px) {
+    .hero-courses {
+      --track: 0.22em;
+      --gap: var(--space-4);
+      --logo-h: 2.75rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* do tablet pra cima o aro do globo passa atrás do selo: véu mais largo e mais denso nas pontas do texto.
+     No celular o globo fica mais baixo e esse véu viraria uma mancha oval */
+  @media (min-width: 768px) {
+    .hero-courses {
+      font-size: 0.8125rem;
+    }
+
+    .hero-courses__lockup::before {
+      inset: -70% -24%;
+      background: radial-gradient(closest-side, rgb(2 3 11 / 0.8), rgb(2 3 11 / 0.6) 62%, transparent);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-courses {
+      --track: 0.28em;
+      --gap: var(--space-5);
+      --logo-h: 3.25rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* movimento reduzido: nada no selo anima, tudo nasce no lugar */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-courses :global(.hero-courses__logo),
+    .hero-courses__lockup::before,
+    .hero-courses__divider,
+    .hero-courses__name {
+      animation: none;
+    }
+  }
+</style>
