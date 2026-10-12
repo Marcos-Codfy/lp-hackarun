@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+# o job só lê o código; nada de escrita no repositório
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,17 +16,21 @@ concurrency:
 
 jobs:
   validate:
+    name: Lint, format, test e build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node (.nvmrc)
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
 
-      - run: npm ci
+      - name: Install
+        run: npm ci
 
       - name: Lint
         run: npm run lint
@@ -32,11 +41,14 @@ jobs:
       - name: Test
         run: npm test
 
+      # astro check (tipos) + astro build
       - name: Build
         run: npm run build
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload dist
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
+          if-no-files-found: error
           retention-days: 7
