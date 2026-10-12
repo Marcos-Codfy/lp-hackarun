@@ -3,6 +3,8 @@
 interface Stat {
   value: number;
   label: string;
+  // "até" (teto, como nos estandes)
+  prefix?: string;
 }
 
 interface Props {
@@ -17,11 +19,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
   {stats.map((stat) => (
     <li class="readout__item">
       <p class="readout__value">
+        {stat.prefix && (
+          <span class="readout__prefix" aria-hidden="true">
+            {stat.prefix}
+          </span>
+        )}
         <span class="sx-grad-text" aria-hidden="true" data-count-to={stat.value} data-count-pad="2">
           {pad(stat.value)}
         </span>
         <span class="sr-only">
-          {stat.value} {stat.label}
+          {stat.prefix} {stat.value} {stat.label}
         </span>
       </p>
       <p class="readout__label" aria-hidden="true">
@@ -56,6 +63,17 @@ const pad = (n: number) => String(n).padStart(2, '0');
     line-height: 0.9;
     font-variant-numeric: tabular-nums;
     filter: drop-shadow(0 0 18px color-mix(in srgb, var(--sx-accent) 40%, transparent));
+  }
+
+  .readout__prefix {
+    margin-right: 0.3em;
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    vertical-align: 0.9em;
   }
 
   .readout__label {

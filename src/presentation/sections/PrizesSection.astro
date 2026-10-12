@@ -1,6 +1,7 @@
 ---
 import type { LandingPageDTO } from '@application/index';
 import Icon from '@presentation/components/ui/Icon.astro';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import SectionHeader from './shared/SectionHeader.astro';
 import PrizeCard from './prizes/PrizeCard.astro';
 import './sections.css';
@@ -9,7 +10,9 @@ interface Props {
   data: LandingPageDTO;
 }
 
-const { prizes } = Astro.props.data;
+const { prizes, schedule } = Astro.props.data;
+const lookup = new ScheduleLookup(schedule);
+const awards = lookup.activity('awards');
 ---
 
 <section
@@ -38,7 +41,16 @@ const { prizes } = Astro.props.data;
 
       <p class="section-note" data-reveal="up">
         <Icon name="lock" />
-        <span>Prêmios e valores anunciados em breve pela organização.</span>
+        <span>
+          Prêmios revelados em breve pela organização.
+          {awards && (
+            <>
+              {' '}
+              A premiação oficial é em {lookup.shortDate(awards.day)}, às {lookup.startOf(awards)}, no{' '}
+              {awards.session.venue.name}.
+            </>
+          )}
+        </span>
       </p>
     </div>
   </div>

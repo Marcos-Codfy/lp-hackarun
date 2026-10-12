@@ -1,0 +1,179 @@
+---
+import type { EventDayDTO } from '@application/index';
+import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
+import SessionBlock from './SessionBlock.astro';
+
+// um dia da programação; com JS vira o painel da aba (section aceita role=tabpanel, article não),
+// sem JS fica empilhado com a data grande, como região nomeada pelo título do dia
+interface Props {
+  day: EventDayDTO;
+  id: string;
+}
+
+const { day, id } = Astro.props;
+const label = new DayLabelFormatter().format(day.date);
+const isFinal = day.stage === 'final';
+const titled = day.sessions.length > 1;
+---
+
+<section class:list={['day', isFinal && 'day--final']} id={id} data-day-panel aria-labelledby={`${id}-title`}>
+  <header class="day__head">
+    <p class="day__date">
+      <time datetime={day.date}>
+        <span class="day__stamp" aria-hidden="true">
+          <span class="day__num">{label.day}</span>
+          <span class="day__month">
+            {label.month}
+            <span class="day__weekday">{label.weekday}</span>
+          </span>
+        </span>
+        <span class="day__long">{label.long}</span>
+      </time>
+    </p>
+    <h3 class="day__title" id={`${id}-title`}>
+      {day.title}
+    </h3>
+    <p class="day__summary">{day.summary}</p>
+  </header>
+
+  <div class="day__blocks">
+    {day.sessions.map((session) => (
+      <SessionBlock session={session} titled={titled} />
+    ))}
+  </div>
+</section>
+
+<style>
+  .day {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .day--final {
+    --sx-ink: var(--ink-orange);
+    --sx-grad: linear-gradient(100deg, #ffd27a, var(--c-orange));
+  }
+
+  .day__head {
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: var(--space-3);
+  }
+
+  .day__stamp {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .day__num {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 2.2rem + 2.8vw, 4.5rem);
+    font-weight: 900;
+    line-height: 0.85;
+    font-variant-numeric: tabular-nums;
+    background: var(--sx-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 22px color-mix(in srgb, var(--sx-accent) 50%, transparent));
+  }
+
+  .day__month {
+    display: grid;
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: 0.08em;
+  }
+
+  .day__weekday {
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+  }
+
+  /* data por extenso: só pro leitor de tela empilhado; nas abas vira a linha de HUD (a data grande sai) */
+  .day__long {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  :global(.is-tabbed) .day__stamp {
+    display: none;
+  }
+
+  :global(.is-tabbed) .day__long {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .day__title {
+    font-size: var(--fs-2xl);
+    text-shadow: 0 2px 22px rgb(2 3 11 / 0.9);
+  }
+
+  .day__summary {
+    max-width: 34rem;
+    color: var(--text-muted);
+    text-shadow: 0 1px 14px rgb(2 3 11 / 0.95);
+  }
+
+  .day__blocks {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  /* troca de aba: o painel novo sobe de leve (só quando a seção já virou abas) */
+  :global(.is-tabbed) .day:not([hidden]) {
+    animation: day-in 0.5s var(--ease-out) both;
+  }
+
+  :global(.is-tabbed) .day:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 8px;
+  }
+
+  @keyframes day-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+    }
+  }
+
+  /* desktop sem abas (sem JS): data e título à esquerda, blocos à direita, como uma linha do tempo */
+  @media (min-width: 1024px) {
+    .day {
+      grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+      column-gap: var(--space-8);
+    }
+
+    :global(.is-tabbed) .day {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.is-tabbed) .day:not([hidden]) {
+      animation: none;
+    }
+  }
+</style>

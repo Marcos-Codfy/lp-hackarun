@@ -1,13 +1,5 @@
 {
-  "scoring": {
-    "maxPoints": 100,
-    "criteria": [
-      { "key": "correctness", "label": "Solução correta", "points": 60 },
-      { "key": "teamwork", "label": "Trabalho em equipe", "points": 20 },
-      { "key": "creativity", "label": "Criatividade e estratégia", "points": 10 },
-      { "key": "time", "label": "Bônus de tempo", "points": 10 }
-    ]
-  },
+  "scoring": null,
   "stations": [
     {
       "id": "secret-code",

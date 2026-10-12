@@ -1,8 +1,8 @@
-import type { SessionDTO } from '@application/index';
+import type { TimeRangeDTO } from '@application/index';
 
-type SlotLike = Pick<SessionDTO, 'start' | 'end' | 'startHint'>;
+type SlotLike = Pick<TimeRangeDTO, 'start' | 'end' | 'startHint'>;
 
-// horário de sessão do jeito que a gente fala: "19h às 22h", "Manhã até 15h", "A partir das 18h"
+// horário do jeito que a gente fala: "19h às 22h", "Manhã até 15h", "A partir das 17h"
 export class SessionTimeFormatter {
   format(slot: SlotLike): string {
     const { start, end, startHint } = slot;
@@ -12,7 +12,15 @@ export class SessionTimeFormatter {
     return startHint ?? '';
   }
 
-  // "19:00" -> "19h" · "19:30" -> "19h30"
+  // versão curta pra etiqueta: "19h–19h50", "17h+" (sem fim)
+  compact(slot: SlotLike): string {
+    const { start, end } = slot;
+    if (start && end) return `${this.hour(start)}–${this.hour(end)}`;
+    if (start) return `${this.hour(start)}+`;
+    return end ? `até ${this.hour(end)}` : '';
+  }
+
+  // "19:00" -> "19h" · "19:30" -> "19h30" · "08:00" -> "8h"
   hour(hhmm: string): string {
     const [h = '0', m = '00'] = hhmm.split(':');
     const hours = String(Number(h));

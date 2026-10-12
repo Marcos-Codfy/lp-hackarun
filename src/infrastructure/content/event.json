@@ -2,14 +2,14 @@
   "id": "hackarun-2026",
   "name": "HackaRun",
   "edition": "2026",
-  "tagline": "Hackathon de Engenharia de Software e IA",
+  "tagline": "Tecnologia, inovação e empreendedorismo",
   "city": "Palmas – TO",
   "timezone": "America/Araguaina",
   "venues": [
     {
       "id": "unicatolica",
       "name": "Centro Universitário Católica do Tocantins",
-      "shortName": "Unicatólica",
+      "shortName": "UniCatólica",
       "city": "Palmas – TO",
       "role": "host",
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Unicat%C3%B3lica+Palmas+TO"
@@ -25,8 +25,8 @@
   ],
   "milestones": [
     { "key": "kickoff", "label": "O HackaRun começa em", "at": "2026-11-11T19:00:00-03:00" },
-    { "key": "submission", "label": "Entrega final em", "at": "2026-11-14T15:00:00-03:00" },
-    { "key": "ceremony", "label": "A premiação começa em", "at": "2026-11-14T18:00:00-03:00" }
+    { "key": "submission", "label": "Fim do desenvolvimento em", "at": "2026-11-14T13:00:00-03:00" },
+    { "key": "ceremony", "label": "A grande final começa em", "at": "2026-11-14T17:00:00-03:00" }
   ],
   "registration": {
     "endpoint": "",
@@ -34,29 +34,55 @@
     "capacity": null,
     "teamSize": { "min": 2, "max": 5 }
   },
+  "maxStands": 10,
   "days": [
     {
       "id": "day-1",
       "date": "2026-11-11",
-      "stage": "training",
-      "title": "Capacitação",
-      "summary": "Minicursos com prática orientada pra todo mundo chegar afiado na largada.",
+      "stage": "workshops",
+      "label": "Oficinas",
+      "title": "Oficinas práticas",
+      "summary": "Três oficinas em sequência: da validação da ideia ao protótipo com IA.",
       "sessions": [
         {
-          "id": "workshops",
-          "title": "Minicursos de capacitação",
+          "id": "workshops-day-1",
+          "title": "Oficinas práticas",
           "kind": "workshop",
           "start": "19:00",
-          "end": "22:00",
+          "end": "21:50",
           "venueId": "unicatolica",
-          "description": "Práticas orientadas em laboratório com professores, instrutores e egressos convidados.",
-          "topics": [
-            "Algoritmos e programação",
-            "Testes de software",
-            "Git e colaboração",
-            "Análise de dados",
-            "Fundamentos de IA",
-            "Uso responsável de assistentes de código"
+          "place": "Auditório do Bloco II",
+          "audience": "open",
+          "audienceNote": "Comunidade de tecnologia e estudantes do 3º ano do ensino médio.",
+          "description": "Três oficinas práticas abertas ao público: Ideia boa ou furada?, Do zero ao código e Hackeando ideias com IA.",
+          "activities": [
+            {
+              "id": "idea-check",
+              "title": "Ideia boa ou furada?",
+              "kind": "workshop",
+              "start": "19:00",
+              "end": "19:50",
+              "summary": "Validar o problema, o público e a proposta de valor antes do código.",
+              "details": "Identificação e validação de problemas reais, definição do público-alvo, proposta de valor e análise inicial de viabilidade técnica e comercial. Utilização de Canvas simplificado para estruturar ideias, avaliar hipóteses e identificar soluções inviáveis ou sem potencial de adoção."
+            },
+            {
+              "id": "zero-to-code",
+              "title": "Do zero ao código",
+              "kind": "workshop",
+              "start": "20:00",
+              "end": "20:50",
+              "summary": "Lógica de programação aplicada à resolução de problemas.",
+              "details": "Fundamentos de lógica de programação aplicados à resolução de problemas, decomposição de requisitos, algoritmos, estruturas condicionais e implementação de funcionalidades simples. Execução e teste de código."
+            },
+            {
+              "id": "hacking-ideas-ai",
+              "title": "Hackeando ideias com IA",
+              "kind": "workshop",
+              "start": "21:00",
+              "end": "21:50",
+              "summary": "Do prompt técnico ao protótipo funcional com IA generativa.",
+              "details": "Aplicação de inteligência artificial generativa no desenvolvimento de software, elaboração de prompts técnicos, geração e refinamento de código, prototipação de interfaces e validação de funcionalidades. Demonstração prática da construção de um protótipo funcional com apoio de ferramentas de IA, considerando testes, limitações e cuidados básicos de segurança."
+            }
           ]
         }
       ]
@@ -65,22 +91,81 @@
       "id": "day-2",
       "date": "2026-11-12",
       "stage": "launch",
-      "title": "Lançamento",
-      "summary": "O problema é revelado, as equipes são oficializadas e o relógio começa a correr.",
+      "label": "Abertura",
+      "title": "Abertura oficial e lançamento do HackaRun",
+      "summary": "A noite em que o evento abre, o regulamento é apresentado e o desafio é lançado.",
       "sessions": [
         {
-          "id": "launch",
-          "title": "Lançamento do desafio",
+          "id": "opening",
+          "title": "Abertura oficial e lançamento do HackaRun",
           "kind": "launch",
           "start": "19:00",
           "end": "22:00",
           "venueId": "unicatolica",
-          "description": "Apresentação de instrutores e mentores, regulamento, critérios de pontuação e credenciamento das equipes.",
-          "topics": [
-            "Problema central revelado",
-            "Credenciamento e QR Codes",
-            "Regras de uso de IA",
-            "Critérios de desempate"
+          "place": "Bloco II",
+          "audience": "open",
+          "audienceNote": "Comunidade de tecnologia, estudantes da UniCatólica e alunos do 3º ano do ensino médio interessados em conhecer os cursos da instituição.",
+          "description": "Abertura oficial, apresentação das equipes e mentores, regulamento, lançamento do desafio, oficina de tecnologia e exposição de produtos e soluções tecnológicas.",
+          "activities": [
+            {
+              "id": "official-opening",
+              "title": "Abertura oficial",
+              "kind": "talk",
+              "start": "19:00",
+              "end": "19:15",
+              "summary": "O evento, seus objetivos, a programação e os parceiros.",
+              "details": "Apresentação do evento, seus objetivos, programação e parceiros, destacando a integração entre tecnologia, inovação, empreendedorismo e formação acadêmica."
+            },
+            {
+              "id": "teams-and-mentors",
+              "title": "Apresentação das equipes e mentores",
+              "kind": "hackathon",
+              "track": "hackathon",
+              "start": "19:15",
+              "end": "19:35",
+              "summary": "As equipes do HackaRun e os mentores que vão orientá-las.",
+              "details": "Identificação das equipes participantes do HackaRun e apresentação dos respectivos mentores, responsáveis por orientar os estudantes durante a competição."
+            },
+            {
+              "id": "rulebook",
+              "title": "Regulamento do HackaRun",
+              "kind": "hackathon",
+              "track": "hackathon",
+              "start": "19:35",
+              "end": "19:55",
+              "summary": "Regras, pontuação, prazos, uso de IA e critérios de desempate.",
+              "details": "Apresentação das regras da competição, critérios de pontuação, prazos, utilização de inteligência artificial, critérios de desempate e orientações gerais para participação."
+            },
+            {
+              "id": "challenge-launch",
+              "title": "Lançamento do desafio",
+              "kind": "hackathon",
+              "track": "hackathon",
+              "start": "19:55",
+              "end": "20:15",
+              "summary": "A dinâmica da corrida por objetivos é revelada.",
+              "details": "Apresentação da dinâmica da competição no formato de corrida por objetivos, com explicação sobre missões, pistas, estações tecnológicas, entregas e funcionamento do sistema de pontuação."
+            },
+            {
+              "id": "tech-workshop",
+              "title": "Oficina de Tecnologia: Tendências e Aplicações Práticas",
+              "kind": "workshop",
+              "flags": ["tbd"],
+              "start": "20:15",
+              "end": "21:00",
+              "summary": "Tecnologias atuais e suas aplicações no mercado de trabalho.",
+              "details": "Oficina aberta ao público, com abordagem prática de tecnologias atuais e suas aplicações no mercado de trabalho. O tema e o formato serão definidos pelo palestrante conforme sua especialidade."
+            },
+            {
+              "id": "expo",
+              "title": "Exposição de Produtos e Soluções Tecnológicas",
+              "kind": "expo",
+              "flags": ["parallel"],
+              "start": "19:00",
+              "end": "21:30",
+              "summary": "Até 10 estandes de empresas, startups, parceiros e projetos acadêmicos.",
+              "details": "Exposição aberta ao público, com previsão de até 10 estandes, destinados a empresas, startups, parceiros e projetos acadêmicos para apresentação de produtos, serviços e soluções tecnológicas. A atividade ocorre paralelamente à programação principal, permitindo a circulação dos visitantes e a interação com os expositores."
+            }
           ]
         }
       ]
@@ -88,19 +173,50 @@
     {
       "id": "day-3",
       "date": "2026-11-13",
-      "stage": "race",
-      "title": "Corrida de missões",
-      "summary": "Estações técnicas espalhadas por salas e laboratórios. Cada pista vale pontos.",
+      "stage": "showcase",
+      "label": "Mercado",
+      "title": "Oficinas e interação com projetos acadêmicos",
+      "summary": "Oficinas de tecnologia aplicada ao mercado e os projetos dos alunos em exposição.",
       "sessions": [
         {
-          "id": "race",
-          "title": "Corrida de missões técnicas",
-          "kind": "challenge",
+          "id": "market",
+          "title": "Oficinas e interação com projetos acadêmicos",
+          "kind": "workshop",
           "start": "19:00",
           "end": "22:00",
           "venueId": "unicatolica",
-          "description": "Rotas rotativas entre salas e laboratórios, com monitores acompanhando cada estação.",
-          "topics": ["7 estações classificatórias", "NPCs com pistas", "Mentoria por equipe"]
+          "place": "Bloco II",
+          "audience": "open",
+          "audienceNote": "Comunidade de tecnologia, profissionais da área, estudantes universitários e alunos do 3º ano do ensino médio.",
+          "description": "Oficinas de tecnologia aplicada ao mercado e o Espaço de Desenvolvimento dos Alunos.",
+          "note": "A programação aberta ao público se encerra às 22h.",
+          "activities": [
+            {
+              "id": "market-workshops",
+              "title": "Oficinas de tecnologia aplicada ao mercado",
+              "kind": "workshop",
+              "flags": ["tbd"],
+              "start": "19:00",
+              "end": "21:50",
+              "parts": [
+                { "label": "Oficina 1", "start": "19:00", "end": "19:50" },
+                { "label": "Oficina 2", "start": "20:00", "end": "20:50" },
+                { "label": "Oficina 3", "start": "21:00", "end": "21:50" }
+              ],
+              "summary": "Tecnologias atuais e processos usados no mercado de trabalho.",
+              "details": "Realização de oficinas práticas sobre tecnologias atuais e processos utilizados no mercado de trabalho. Os temas e formatos serão definidos conforme a disponibilidade e a especialidade dos palestrantes convidados."
+            },
+            {
+              "id": "students-space",
+              "title": "Espaço de Desenvolvimento dos Alunos",
+              "kind": "expo",
+              "flags": ["parallel"],
+              "start": "19:00",
+              "end": "22:00",
+              "summary": "Conexão com o mercado: projetos dos alunos da UniCatólica com demonstrações práticas.",
+              "details": "Exposição de projetos desenvolvidos pelos alunos da UniCatólica, com demonstrações práticas e interação entre estudantes, profissionais de tecnologia, empresas e visitantes. A atividade busca promover a troca de experiências, o compartilhamento de conhecimentos e o recebimento de sugestões técnicas para aprimoramento dos projetos."
+            }
+          ]
         }
       ]
     },
@@ -108,29 +224,103 @@
       "id": "day-4",
       "date": "2026-11-14",
       "stage": "final",
-      "title": "Grande final",
-      "summary": "Últimas horas de código, entrega até as 15h e a premiação no Capim Dourado Shopping.",
+      "label": "Final",
+      "title": "Desenvolvimento final e HackaRun Experience",
+      "summary": "Manhã de desenvolvimento na UniCatólica e, a partir das 17h, a grande final no Capim Dourado Shopping.",
       "sessions": [
         {
-          "id": "submission",
-          "title": "Desenvolvimento e entrega final",
-          "kind": "deadline",
-          "start": null,
-          "startHint": "Manhã",
-          "end": "15:00",
+          "id": "final-development",
+          "title": "Desenvolvimento final",
+          "kind": "challenge",
+          "start": "08:00",
+          "end": "13:00",
           "venueId": "unicatolica",
-          "description": "Continuação dos desafios e submissão da solução final (repositório, documentação e demo), impreterivelmente até as 15h.",
-          "topics": ["Submissão com carimbo de horário", "Homologação pela banca"]
+          "audience": "teams",
+          "audienceNote": "Exclusivamente equipes participantes do HackaRun e seus respectivos mentores.",
+          "description": "Continuidade do desenvolvimento das soluções, conclusão das missões, testes e preparação da entrega final, com acompanhamento dos mentores.",
+          "note": "O prazo oficial para submissão da solução final é definido no regulamento.",
+          "activities": [
+            {
+              "id": "final-sprint",
+              "title": "Desenvolvimento das soluções",
+              "kind": "hackathon",
+              "start": "08:00",
+              "end": "13:00",
+              "summary": "Concluir missões, integrar, testar e preparar a entrega final, com mentoria.",
+              "details": "Período destinado à continuidade do desenvolvimento das soluções, conclusão das missões, integração das funcionalidades, realização de testes e preparação da entrega final. As equipes contam com acompanhamento e orientação dos mentores, respeitando as regras da competição. As atividades presenciais de desenvolvimento terminam às 13h.",
+              "checklist": [
+                "Desenvolvimento e aprimoramento das soluções",
+                "Conclusão dos objetivos e desafios pendentes",
+                "Mentorias técnicas e orientações às equipes",
+                "Testes, correções e validação das funcionalidades",
+                "Preparação da documentação e da apresentação final"
+              ]
+            }
+          ]
         },
         {
-          "id": "ceremony",
-          "title": "Show ao vivo + premiação",
+          "id": "experience",
+          "title": "HackaRun Experience",
           "kind": "ceremony",
-          "start": "18:00",
+          "start": "17:00",
           "end": null,
           "venueId": "capim-dourado",
-          "description": "Palco iluminado, telão gigante, banda ao vivo e o anúncio dos campeões.",
-          "topics": ["Banda ao vivo", "Telão com o ranking", "Troféus e prêmios"]
+          "audience": "final",
+          "description": "Etapa final do HackaRun: apresentação das soluções desenvolvidas pelas equipes, atividades de entretenimento e cerimônia de premiação.",
+          "activities": [
+            {
+              "id": "retrospective",
+              "title": "Abertura e retrospectiva do evento",
+              "kind": "ceremony",
+              "start": "17:00",
+              "end": "17:15",
+              "summary": "Vídeo com os principais momentos do HackaRun.",
+              "details": "Abertura da cerimônia e exibição de vídeo com os principais momentos do HackaRun, incluindo oficinas, atividades, bastidores e desenvolvimento dos desafios."
+            },
+            {
+              "id": "pitch",
+              "title": "Pitch das equipes finalistas",
+              "kind": "hackathon",
+              "start": "17:15",
+              "end": "18:15",
+              "summary": "As finalistas apresentam suas soluções à banca avaliadora.",
+              "details": "Apresentação das soluções desenvolvidas pelas equipes finalistas à banca avaliadora, conforme os critérios estabelecidos no regulamento da competição."
+            },
+            {
+              "id": "band",
+              "title": "Apresentação musical",
+              "kind": "show",
+              "start": "18:15",
+              "end": "18:45",
+              "summary": "Banda convidada, com entretenimento e interação com o público presente."
+            },
+            {
+              "id": "cosplay",
+              "title": "Desfile e concurso de cosplay",
+              "kind": "show",
+              "flags": ["optional"],
+              "start": "18:45",
+              "end": "19:15",
+              "summary": "Cultura geek com desfile, julgamento e premiação própria.",
+              "details": "Atividade complementar voltada à cultura geek, com desfile, julgamento e premiação própria, condicionada à definição da organização."
+            },
+            {
+              "id": "awards",
+              "title": "Premiação oficial do HackaRun",
+              "kind": "ceremony",
+              "start": "19:15",
+              "end": "19:45",
+              "summary": "Resultados, prêmios às equipes vencedoras e reconhecimento dos mentores e parceiros."
+            },
+            {
+              "id": "closing-music",
+              "title": "Encerramento musical e interação com o público",
+              "kind": "show",
+              "start": "19:45",
+              "end": null,
+              "summary": "Música e confraternização entre participantes, organização, parceiros e visitantes."
+            }
+          ]
         }
       ]
     }

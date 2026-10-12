@@ -16,6 +16,8 @@ export interface HackathonEventProps {
   days: EventDay[];
   milestones: Milestone[];
   registration: RegistrationWindow;
+  // teto de estandes na exposição ("até 10"); null = sem exposição anunciada
+  maxStands?: number | null;
 }
 
 export type EventPhase = 'upcoming' | 'running' | 'awaiting-ceremony' | 'finished';
@@ -31,6 +33,7 @@ export class HackathonEvent extends Entity {
   readonly days: readonly EventDay[];
   readonly milestones: readonly Milestone[];
   readonly registration: RegistrationWindow;
+  readonly maxStands: number | null;
 
   private constructor(props: HackathonEventProps) {
     super(props.id);
@@ -45,6 +48,7 @@ export class HackathonEvent extends Entity {
     this.days = [...props.days].sort((a, b) => a.date.localeCompare(b.date));
     this.milestones = [...props.milestones].sort((a, b) => a.at.getTime() - b.at.getTime());
     this.registration = props.registration;
+    this.maxStands = HackathonEvent.checkStands(props.maxStands ?? null);
   }
 
   static create(props: HackathonEventProps): HackathonEvent {
@@ -81,6 +85,13 @@ export class HackathonEvent extends Entity {
     if (next.key === 'kickoff') return 'upcoming';
     if (next.key === 'submission') return 'running';
     return 'awaiting-ceremony';
+  }
+
+  private static checkStands(value: number | null): number | null {
+    if (value !== null && (!Number.isInteger(value) || value < 1)) {
+      throw new DomainError(`Invalid maxStands "${value}"`);
+    }
+    return value;
   }
 
   private ensureVenuesExist(props: HackathonEventProps): void {

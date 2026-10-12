@@ -1,6 +1,7 @@
 ---
 import type { LandingPageDTO } from '@application/index';
 import Icon from '@presentation/components/ui/Icon.astro';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
 import SectionHeader from './shared/SectionHeader.astro';
 import CrewCard from './crew/CrewCard.astro';
@@ -11,8 +12,14 @@ interface Props {
   data: LandingPageDTO;
 }
 
-const { speakers } = Astro.props.data;
+const { speakers, schedule } = Astro.props.data;
 const roles = new SpeakerRoleLabel();
+// quando equipes e mentores são apresentados (lido da programação)
+const lookup = new ScheduleLookup(schedule);
+const reveal = lookup.activity('teams-and-mentors');
+const revealAt = reveal
+  ? ` Equipes e mentores são apresentados na abertura, em ${lookup.shortDate(reveal.day)}, às ${lookup.startOf(reveal)}.`
+  : '';
 ---
 
 <section
@@ -28,7 +35,7 @@ const roles = new SpeakerRoleLabel();
       code="05"
       eyebrow="Mentores"
       title="Quem vai estar <em>do seu lado</em>"
-      lead="Instrutores nos minicursos, egressos na mentoria das equipes e uma banca de olho em cada entrega. Os nomes saem aos poucos."
+      lead={`Instrutores nas oficinas, mentores ao lado das equipes e uma banca avaliadora no pitch da final.${revealAt}`}
     />
 
     <ul class="crew__grid" role="list" data-reveal-group>
@@ -49,10 +56,9 @@ const roles = new SpeakerRoleLabel();
             <Icon name="chat" size={20} />
           </span>
           <p>
-            <strong>
-              O mentor orienta arquitetura, planejamento e boas práticas, mas não escreve a solução.
-            </strong>
-            Presencial ou por vídeo, sem gabarito.
+            <strong>O mentor orienta, mas não escreve a solução.</strong>
+            Arquitetura, planejamento e boas práticas. No desenvolvimento final, em 14/11, as equipes contam
+            com mentorias técnicas.
           </p>
         </li>
         <li>
@@ -60,8 +66,8 @@ const roles = new SpeakerRoleLabel();
             <Icon name="trophy" size={20} />
           </span>
           <p>
-            <strong>O mentor da equipe campeã também é premiado.</strong>
-            Escolha bem quem vai correr com vocês.
+            <strong>O mentor da equipe campeã também é premiado.</strong>E os mentores são reconhecidos na
+            premiação oficial, no Capim Dourado Shopping.
           </p>
         </li>
       </ul>

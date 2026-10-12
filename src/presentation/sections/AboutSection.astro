@@ -1,9 +1,10 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import type { IconName } from '@presentation/components/ui/icons';
+import Button from '@presentation/components/ui/Button.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import SectionHeader from './shared/SectionHeader.astro';
-import PillarCard from './about/PillarCard.astro';
+import TrackCard from './about/TrackCard.astro';
 import AboutTicker from './about/AboutTicker.astro';
 import AboutStats from './about/AboutStats.astro';
 import './sections.css';
@@ -14,33 +15,15 @@ interface Props {
 
 const { event } = Astro.props.data;
 const { stats } = event;
-
-const pillars: { icon: IconName; title: string; text: string }[] = [
-  {
-    icon: 'book',
-    title: 'Minicursos',
-    text: 'Algoritmos, testes, Git, dados e IA com prática orientada em laboratório. Todo mundo chega afiado na largada.',
-  },
-  {
-    icon: 'cap',
-    title: 'Mentoria de egressos',
-    text: 'Quem já passou pelo curso orienta sua equipe em arquitetura, planejamento e boas práticas.',
-  },
-  {
-    icon: 'route',
-    title: 'Corrida de missões',
-    text: 'Estações técnicas espalhadas por salas e laboratórios. Cada pista decifrada vale pontos.',
-  },
-  {
-    icon: 'spotlight',
-    title: 'Final no shopping',
-    text: 'Entrega até as 15h e premiação no palco do Capim Dourado, com telão e banda ao vivo.',
-  },
-];
+const stands = stats.stands;
+const cta = new RegistrationCopy().cta(event.registration.status);
+const ctaAttrs = cta.isRegistration ? { registrationCta: 'about' } : { 'data-nav-link': true };
 
 const ticker = [
-  'Minicursos',
-  'Mentoria',
+  'Oficinas',
+  'Palestras',
+  'Exposição',
+  'Hackathon',
   `${stats.stations} missões`,
   'NPCs à solta',
   new DayLabelFormatter().range(event.firstDate, event.lastDate),
@@ -50,8 +33,8 @@ const ticker = [
 
 const readout = [
   { value: stats.days, label: 'dias de evento' },
-  { value: stats.stations, label: 'missões' },
-  { value: stats.workshops, label: 'minicursos' },
+  { value: stats.workshops, label: 'oficinas' },
+  ...(stands ? [{ value: stands, prefix: 'até', label: 'estandes na exposição' }] : []),
   { value: 1, label: 'final no Capim Dourado Shopping' },
 ];
 ---
@@ -72,13 +55,44 @@ const readout = [
         code="01"
         eyebrow="O evento"
         title="Da sala de aula ao <em>palco</em>."
-        lead="Aprendizado na prática: minicursos, mentoria de egressos e uma corrida de missões técnicas por salas e laboratórios, até entregar uma solução final no prazo. Estudantes, professores, egressos e empresas no mesmo lugar."
+        lead="O 1º HackaRun é tecnologia, inovação e empreendedorismo na UniCatólica, em duas frentes: uma programação aberta ao público e um hackathon dos alunos, com final no palco do Capim Dourado Shopping."
       />
 
-      <ul class="about__pillars" role="list" data-reveal-group>
-        {pillars.map((pillar, index) => (
-          <PillarCard index={index} {...pillar} />
-        ))}
+      <ul class="about__tracks" role="list" data-reveal-group>
+        <TrackCard
+          index={0}
+          tone="open"
+          badge="Aberto ao público"
+          title="Programação aberta"
+          text={`Oficinas práticas, palestras e exposição de produtos e soluções tecnológicas${stands ? ` em até ${stands} estandes` : ''}.`}
+          facts={[
+            { label: 'Para', value: 'Comunidade de tecnologia e estudantes do 3º ano do ensino médio' },
+            { label: 'Quando', value: '11 a 13/11, a partir das 19h · UniCatólica, Bloco II' },
+          ]}
+        >
+          <Button variant="ghost" href="#programacao" data-nav-link>
+            Ver programação
+          </Button>
+        </TrackCard>
+        <TrackCard
+          index={1}
+          tone="hackathon"
+          badge="Só alunos da UniCatólica"
+          title="Hackathon"
+          text="Corrida por objetivos em equipes: encontrar pistas, cumprir missões e desenvolver soluções com programação, engenharia de software e IA."
+          facts={[
+            { label: 'Para', value: 'Alunos da UniCatólica, em equipes' },
+            {
+              label: 'Quando',
+              value:
+                'Lançamento em 12/11 · desenvolvimento final em 14/11, das 8h às 13h · final às 17h, no Capim Dourado Shopping',
+            },
+          ]}
+        >
+          <Button href={cta.href} {...ctaAttrs}>
+            {cta.label}
+          </Button>
+        </TrackCard>
       </ul>
 
       <AboutStats stats={readout} />
@@ -95,14 +109,21 @@ const readout = [
     padding-top: clamp(4rem, 2rem + 6vw, 8rem);
   }
 
-  .about__pillars {
+  .about__tracks {
     display: grid;
     gap: var(--space-5);
   }
 
+  /* lado a lado no tablet; no desktop a coluna do texto é estreita (o 3D fica à direita) e eles empilham */
   @media (min-width: 640px) {
-    .about__pillars {
+    .about__tracks {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .about__tracks {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

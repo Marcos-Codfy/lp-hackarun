@@ -22,7 +22,7 @@ const seo = {
 <BaseLayout seo={seo} appConfig={appConfig}>
   <header class="lost__header">
     <a class="lost__brand" href="/" aria-label="HackaRun 2026, página inicial">
-      <Wordmark size="sm" />
+      <Wordmark size="sm" priority />
     </a>
   </header>
   <main id="conteudo">
@@ -93,13 +93,35 @@ const seo = {
     );
   }
 
+  /* minmax(0): o botão nowrap não alarga a trilha (no celular o texto vazava pela direita) */
   .lost__frame {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     gap: var(--space-5);
-    padding: var(--space-7) var(--space-5);
+    padding: var(--space-7) var(--space-3);
     text-align: center;
+  }
+
+  /* celular: o CTA cabe dentro da moldura de HUD; o respiro cheio volta quando sobra largura */
+  .lost__frame :global(.btn) {
+    --btn-px: 1.1rem;
+    --btn-fs: 0.8125rem;
+    max-width: 100%;
+  }
+
+  @media (min-width: 25rem) {
+    .lost__frame {
+      padding-inline: var(--space-5);
+    }
+  }
+
+  @media (min-width: 30rem) {
+    .lost__frame :global(.btn) {
+      --btn-px: 2.1rem;
+      --btn-fs: clamp(0.875rem, 0.82rem + 0.22vw, 1.0625rem);
+    }
   }
 
   .lost__code {

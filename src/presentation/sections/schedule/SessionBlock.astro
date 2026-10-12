@@ -1,0 +1,201 @@
+---
+import type { SessionDTO } from '@application/index';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { AudienceLabel } from '@presentation/formatters/AudienceLabel';
+import { SessionTimeFormatter } from '@presentation/formatters/SessionTimeFormatter';
+import AudienceBadge from '../shared/AudienceBadge.astro';
+import ActivityItem from './ActivityItem.astro';
+
+// bloco do dia: horário, local e público no topo; atividades no trilho e o que corre em paralelo à parte
+interface Props {
+  session: SessionDTO;
+  // dia com mais de um bloco mostra o título de cada um
+  titled: boolean;
+}
+
+const { session, titled } = Astro.props;
+const time = new SessionTimeFormatter();
+const labels = new AudienceLabel();
+const venueName = session.venue.role === 'final' ? session.venue.name : session.venue.shortName;
+const where = [venueName, session.place].filter(Boolean).join(' · ');
+const main = session.activities.filter((a) => !a.flags.includes('parallel'));
+const parallel = session.activities.filter((a) => a.flags.includes('parallel'));
+const heading = titled ? 'h5' : 'h4';
+---
+
+<div class:list={['block', `block--${session.audience}`]}>
+  {titled && <h4 class="block__title">{session.title}</h4>}
+  <div class="block__meta">
+    <p class="block__fact block__fact--time">
+      <Icon name="clock" size={16} />
+      {time.format(session)}
+    </p>
+    <p class="block__fact">
+      <Icon name="map-pin" size={16} />
+      <span class="sr-only">Local: </span>
+      {where}
+    </p>
+    <AudienceBadge as="p" tone={session.audience} label={labels.of(session.audience)} />
+  </div>
+  {session.audienceNote && (
+    <p class="block__who">
+      <span class="block__who-tag">Público</span> {session.audienceNote}
+    </p>
+  )}
+
+  <ol class="block__acts" role="list">
+    {main.map((activity) => (
+      <ActivityItem activity={activity} blockAudience={session.audience} heading={heading} />
+    ))}
+  </ol>
+
+  {parallel.length > 0 && (
+    <div class="block__parallel">
+      <p class="block__parallel-tag">
+        <span aria-hidden="true">//</span> Em paralelo
+      </p>
+      <ul class="block__acts" role="list">
+        {parallel.map((activity) => (
+          <ActivityItem activity={activity} blockAudience={session.audience} heading={heading} />
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {session.note && (
+    <p class="block__note">
+      <Icon name="clock" size={16} />
+      <span>{session.note}</span>
+    </p>
+  )}
+</div>
+
+<style>
+  .block {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  /* bloco só de equipes (laranja) e a final (ouro) trocam o tom de tudo dentro */
+  .block--teams {
+    --sx-accent: var(--c-orange);
+    --sx-accent-2: var(--c-gold);
+    --sx-ink: var(--ink-orange);
+    --sx-line: rgb(255 133 47 / 0.3);
+    --sx-soft: rgb(255 133 47 / 0.1);
+  }
+
+  .block--final {
+    --sx-accent: var(--c-gold);
+    --sx-accent-2: var(--c-orange);
+    --sx-ink: #ffd88a;
+    --sx-line: rgb(255 194 74 / 0.3);
+    --sx-soft: rgb(255 194 74 / 0.1);
+  }
+
+  .block__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--fs-lg);
+    letter-spacing: 0.06em;
+    color: var(--text);
+  }
+
+  .block__title::before {
+    content: '';
+    flex: none;
+    width: 1.5rem;
+    height: 2px;
+    background: var(--sx-accent);
+    box-shadow: 0 0 10px var(--sx-accent);
+  }
+
+  .block__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .block__fact {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.04em;
+  }
+
+  .block__fact :global(.icon) {
+    color: var(--sx-ink);
+  }
+
+  .block__fact--time {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .block__who {
+    max-width: 40rem;
+    margin-top: calc(var(--space-2) * -1);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+  }
+
+  .block__who-tag {
+    margin-right: var(--space-2);
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .block__acts {
+    display: grid;
+  }
+
+  /* o que acontece ao mesmo tempo: cartão à parte, sem brigar com a sequência principal */
+  .block__parallel {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-4) 0;
+    border: 1px dashed var(--sx-line);
+    border-radius: 3px;
+    background: linear-gradient(160deg, var(--sx-soft), transparent 70%);
+  }
+
+  .block__parallel-tag {
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .block__parallel-tag span {
+    color: var(--c-magenta);
+  }
+
+  .block__note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    max-width: 40rem;
+    padding: var(--space-3) var(--space-4);
+    border-left: 2px solid var(--sx-accent);
+    background: linear-gradient(90deg, var(--sx-soft), transparent 85%);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .block__note :global(.icon) {
+    flex: none;
+    margin-top: 0.15em;
+    color: var(--sx-ink);
+  }
+</style>

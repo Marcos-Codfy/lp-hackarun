@@ -19,7 +19,8 @@ const day = (id: string, date: string, venueId: string) =>
   EventDay.create({
     id,
     date,
-    stage: 'race',
+    stage: 'workshops',
+    label: id,
     title: id,
     summary: '',
     sessions: [
@@ -29,8 +30,12 @@ const day = (id: string, date: string, venueId: string) =>
         kind: 'challenge',
         slot: TimeSlot.create('19:00', '22:00'),
         venueId,
+        place: null,
+        audience: 'open',
+        audienceNote: null,
         description: '',
-        topics: [],
+        note: null,
+        activities: [],
       }),
     ],
   });
@@ -95,5 +100,13 @@ describe('HackathonEvent', () => {
 
   it('precisa de pelo menos um dia', () => {
     expect(() => HackathonEvent.create(props({ days: [] }))).toThrow(DomainError);
+  });
+
+  it('teto de estandes é opcional, mas quando vem é inteiro positivo', () => {
+    expect(event.maxStands).toBeNull();
+    expect(HackathonEvent.create(props({ maxStands: 10 })).maxStands).toBe(10);
+    for (const bad of [0, -1, 2.5]) {
+      expect(() => HackathonEvent.create(props({ maxStands: bad }))).toThrow(DomainError);
+    }
   });
 });

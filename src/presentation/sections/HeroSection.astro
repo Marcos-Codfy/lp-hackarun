@@ -21,7 +21,7 @@ const first = days.format(event.firstDate);
 const last = days.format(event.lastDate);
 const dates = `${days.range(event.firstDate, event.lastDate)} ${event.edition}`;
 const datesLong = `De ${Number(first.day)} a ${last.long.split(', ')[1] ?? ''} de ${event.edition}`;
-const host = event.venues.find((v) => v.role === 'host')?.shortName ?? 'Unicatólica';
+const host = event.venues.find((v) => v.role === 'host')?.shortName ?? 'UniCatólica';
 const finalVenue = event.venues.find((v) => v.role === 'final');
 const organizer = partners.find((p) => p.role === 'organizer')?.name ?? host;
 const partner = partners.find((p) => p.role === 'partner')?.name ?? finalVenue?.name ?? '';
@@ -41,7 +41,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : { 'data-nav-
 
   <div class="container hero__frame">
     <div class="hero__content" data-hero-fade>
-      <HeroHud label={event.tagline} />
+      <HeroHud label={`1ª edição · ${event.tagline}`} />
       <HeroLogo />
       <HeroSlogan />
       <div class="hero-in" style="--d: 1.05s">
@@ -100,7 +100,8 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : { 'data-nav-
         rgb(2 3 11 / 0.2) 60%,
         transparent 100%
       ),
-      linear-gradient(180deg, transparent 70%, rgb(2 3 11 / 0.55) 100%);
+      /* escurece a base pro contador e volta a zero na borda: sem faixa em cima do letreiro */
+      linear-gradient(180deg, transparent 62%, rgb(2 3 11 / 0.5) 88%, rgb(2 3 11 / 0) 100%);
   }
 
   .hero__frame {

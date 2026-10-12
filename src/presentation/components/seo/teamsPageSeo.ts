@@ -2,7 +2,7 @@
 export const TEAMS_PAGE = {
   title: 'Equipes inscritas · HackaRun 2026',
   description:
-    'Veja as equipes confirmadas no HackaRun 2026, o hackathon da Unicatólica em Palmas, com a foto ou a logo de cada time. Inscreva a sua.',
+    'Veja as equipes confirmadas no HackaRun 2026, o hackathon exclusivo para alunos da UniCatólica, em Palmas, com a foto ou a logo de cada time. Inscreva a sua.',
   path: '/equipes',
 } as const;
 

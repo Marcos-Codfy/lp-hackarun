@@ -23,11 +23,12 @@ const { event } = data;
 
 const appConfig = buildAppConfig(event);
 
+const description =
+  'De 11 a 14 de novembro, em Palmas: oficinas, palestras e estandes abertos ao público e o hackathon dos alunos da UniCatólica, com final no Capim Dourado Shopping.';
 const seo = {
-  title: 'HackaRun 2026 · Hackathon de Engenharia de Software e IA · Unicatólica',
-  description:
-    'Encontre os NPCs, decifre as pistas e codifique contra o relógio. De 11 a 14 de novembro em Palmas, com final no Capim Dourado Shopping. Inscreva sua equipe.',
-  jsonLd: buildEventJsonLd(data, Astro.site?.href ?? ''),
+  title: 'HackaRun 2026 · Oficinas, palestras e hackathon · UniCatólica',
+  description,
+  jsonLd: buildEventJsonLd(data, Astro.site?.href ?? '', description),
 };
 ---
 

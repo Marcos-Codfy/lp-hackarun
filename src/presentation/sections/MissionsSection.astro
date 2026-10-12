@@ -1,16 +1,24 @@
 ---
 import type { LandingPageDTO } from '@application/index';
 import SectionHeader from './shared/SectionHeader.astro';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import StationCard from './missions/StationCard.astro';
 import ScoringPanel from './missions/ScoringPanel.astro';
+import RulebookPanel from './missions/RulebookPanel.astro';
 import './sections.css';
+// trilho de deslizar do celular e a grade a partir de 640px
+import './missions/missions-rail.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { missions } = Astro.props.data;
+const { missions, schedule } = Astro.props.data;
 const { stations, scoring } = missions;
+// sem pontuação publicada, o painel mostra quando sai o regulamento (horário lido da programação)
+const lookup = new ScheduleLookup(schedule);
+const rulebook = lookup.activity('rulebook');
+const launch = lookup.activity('challenge-launch');
 const total = stations.length;
 const pad = (n: number) => String(n).padStart(2, '0');
 // token npc-2 fica na 5ª estação (Detetives de Dados); se a lista encolher, vai pra última
@@ -33,7 +41,7 @@ const tokenIndex = Math.min(4, total - 1);
         code="03"
         eyebrow="Missões"
         title={`${total} missões. <em>1 relógio.</em>`}
-        lead={`Rotas rotativas entre salas e laboratórios: cada equipe percorre as estações numa ordem diferente. Cada estação classificatória vale até ${scoring.maxPoints} pontos.`}
+        lead="Uma corrida por objetivos: encontre pistas, cumpra missões e desenvolva soluções com programação, engenharia de software e IA. Pontuação, prazos e desempate saem no regulamento."
       />
     </div>
 
@@ -46,7 +54,11 @@ const tokenIndex = Math.min(4, total - 1);
         data-reveal-group
       >
         {stations.map((station, index) => (
-          <StationCard station={station} maxPoints={scoring.maxPoints} withToken={index === tokenIndex} />
+          <StationCard
+            station={station}
+            maxPoints={scoring?.maxPoints ?? null}
+            withToken={index === tokenIndex}
+          />
         ))}
       </ol>
 
@@ -58,33 +70,31 @@ const tokenIndex = Math.min(4, total - 1);
         <span class="missions__bar">
           <span class="missions__bar-fill" data-missions-bar></span>
         </span>
-        <span class="sx-hud missions__hint">Role para avançar &raquo;</span>
+        <span class="sx-hud missions__hint">
+          <span class="missions__hint-pin">Role para avançar</span>
+          <span class="missions__hint-rail">Deslize</span> &raquo;
+        </span>
       </div>
     </div>
 
-    <ScoringPanel scoring={scoring} />
+    {scoring ? (
+      <ScoringPanel scoring={scoring} />
+    ) : (
+      rulebook && (
+        <RulebookPanel
+          date={lookup.shortDate(rulebook.day).replace('/', '.')}
+          hour={lookup.startOf(rulebook)}
+          dateLong={lookup.longDate(rulebook.day)}
+          launchAt={launch ? lookup.startOf(launch) : null}
+        />
+      )
+    )}
   </div>
 </section>
 
 <style>
   .missions__head {
     max-width: 44rem;
-  }
-
-  .missions__track {
-    display: grid;
-    gap: var(--space-4);
-  }
-
-  /* o indicador 01/08 só faz sentido no trilho horizontal */
-  .missions__progress {
-    display: none;
-  }
-
-  @media (min-width: 640px) {
-    .missions__track {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 
   @media (min-width: 1024px) {

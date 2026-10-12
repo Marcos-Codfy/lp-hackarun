@@ -11,12 +11,15 @@
 </div>
 
 <style>
+  /* os cones nascem acima da seção: a máscara esmaece o topo pra borda da seção não virar uma linha */
   .beams {
     position: absolute;
     inset: 0;
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12rem);
+    mask-image: linear-gradient(180deg, transparent 0, #000 12rem);
   }
 
   /* cone que nasce no teto e abre pra baixo: miolo quente e borda que some */

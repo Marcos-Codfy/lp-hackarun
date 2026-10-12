@@ -1,0 +1,129 @@
+---
+import type { ActivityDTO } from '@application/index';
+import Icon from '@presentation/components/ui/Icon.astro';
+import type { IconName } from '@presentation/components/ui/icons';
+import { SessionTimeFormatter } from '@presentation/formatters/SessionTimeFormatter';
+
+// roteiro da HackaRun Experience em chips de vidro: horário + momento (lido da programação, nada repetido à mão)
+interface Props {
+  activities: ActivityDTO[];
+}
+
+const { activities } = Astro.props;
+const time = new SessionTimeFormatter();
+// rótulo curto e ícone de cada momento; atividade nova cai no título dela com um raio
+const CUES: Record<string, { icon: IconName; label: string }> = {
+  retrospective: { icon: 'monitor', label: 'Retrospectiva em vídeo' },
+  pitch: { icon: 'mic', label: 'Pitch das finalistas para a banca' },
+  band: { icon: 'music', label: 'Banda convidada' },
+  cosplay: { icon: 'spotlight', label: 'Desfile e concurso de cosplay' },
+  awards: { icon: 'crown', label: 'Premiação oficial' },
+  'closing-music': { icon: 'users', label: 'Encerramento musical' },
+};
+---
+
+<ol class="show" role="list" aria-label="Roteiro da final" data-reveal-group>
+  {activities.map((activity) => {
+    const cue = CUES[activity.id] ?? { icon: 'zap', label: activity.title };
+    const optional = activity.flags.includes('optional');
+    return (
+      <li
+        class:list={[
+          'show__item sx-glass sx-glass--solid sx-hover',
+          activity.id === 'awards' && 'show__item--prize',
+        ]}
+      >
+        <span class="sx-icon">
+          <Icon name={cue.icon} size={18} />
+        </span>
+        <span class="show__text">
+          <span class="show__time">
+            {activity.start ? time.hour(activity.start) : ''}
+            {optional && (
+              <span class="show__opt">
+                <span class="sr-only">, </span>opcional
+              </span>
+            )}
+          </span>{' '}
+          <span class="show__label">{cue.label}</span>
+        </span>
+      </li>
+    );
+  })}
+</ol>
+
+<style>
+  .show {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  /* celular estreito: ícone em cima do texto pra caber em 2 colunas */
+  .show__item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-height: 4.5rem;
+    padding: var(--space-4);
+  }
+
+  .show__item .sx-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .show__text {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .show__time {
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* selo "opcional" quebra inteiro pra linha de baixo quando não cabe */
+  .show__opt {
+    display: inline-block;
+    margin-left: var(--space-2);
+    padding: 0 0.4em;
+    border: 1px solid rgb(150 175 255 / 0.3);
+    border-radius: 2px;
+    color: var(--text-muted);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    vertical-align: 0.1em;
+  }
+
+  .show__label {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* o momento da premiação ganha o brilho do troféu */
+  .show__item--prize {
+    --sx-border: var(--grad-prize);
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgb(255 194 74 / 0.22), transparent 60%),
+      linear-gradient(170deg, rgb(28 18 24 / 0.9), rgb(8 5 14 / 0.94));
+    box-shadow: 0 0 50px -16px rgb(255 133 47 / 0.6);
+  }
+
+  @media (min-width: 480px) {
+    .show__item {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+    }
+  }
+</style>

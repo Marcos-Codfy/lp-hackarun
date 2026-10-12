@@ -3,48 +3,90 @@
     "id": "what",
     "category": "Evento",
     "question": "O que é o HackaRun?",
-    "answer": "Um hackathon em formato de corrida: minicursos, mentoria de egressos e uma sequência de missões técnicas espalhadas por salas e laboratórios da Unicatólica. A grande final e a premiação acontecem no Capim Dourado Shopping."
+    "answer": "É um evento de tecnologia, inovação e empreendedorismo promovido pela UniCatólica, na 1ª edição. Tem duas frentes: uma programação aberta, com oficinas práticas, palestras e exposição de produtos e soluções em estandes, e um hackathon exclusivo para alunos da UniCatólica, no formato de corrida por objetivos. O encerramento é a premiação no Capim Dourado Shopping, parceiro exclusivo da premiação."
   },
   {
     "id": "when-where",
     "category": "Evento",
     "question": "Quando e onde acontece?",
-    "answer": "De 11 a 14 de novembro de 2026. Nos dias 11, 12 e 13 é das 19h às 22h, na Unicatólica. No dia 14 os desafios seguem pela manhã até a entrega das 15h, e a premiação começa às 18h no Capim Dourado Shopping."
+    "answer": "De 11 a 14 de novembro de 2026, em Palmas. De 11 a 13/11 a programação começa às 19h, no Bloco II da UniCatólica (no dia 11, no Auditório do Bloco II). No dia 14 o desenvolvimento final do hackathon vai das 8h às 13h, na UniCatólica, e a HackaRun Experience começa às 17h, no Capim Dourado Shopping."
+  },
+  {
+    "id": "who",
+    "category": "Evento",
+    "question": "Quem pode participar?",
+    "answer": "A programação aberta recebe a comunidade de tecnologia, profissionais da área, estudantes universitários e alunos do 3º ano do ensino médio interessados em conhecer os cursos de graduação e a área de tecnologia. O hackathon é exclusivo para alunos da UniCatólica, em equipes."
+  },
+  {
+    "id": "experience",
+    "category": "Evento",
+    "question": "O que é a HackaRun Experience?",
+    "answer": "É a etapa final, em 14/11, a partir das 17h, no Capim Dourado Shopping: vídeo com os melhores momentos do evento, pitch das equipes finalistas para a banca avaliadora, banda convidada, desfile e concurso de cosplay (opcional, depende da definição da organização), premiação oficial às 19h15 e encerramento musical com o público."
+  },
+  {
+    "id": "workshops",
+    "category": "Programação aberta",
+    "question": "Quais oficinas vão acontecer?",
+    "answer": "São 7 oficinas. Em 11/11, no Auditório do Bloco II: Ideia boa ou furada? (19h), Do zero ao código (20h) e Hackeando ideias com IA (21h). Em 12/11, uma oficina de tendências e aplicações práticas de tecnologia (20h15). Em 13/11, três oficinas de tecnologia aplicada ao mercado (19h, 20h e 21h), com temas definidos pelos palestrantes convidados. As miniementas estão na programação."
+  },
+  {
+    "id": "expo",
+    "category": "Programação aberta",
+    "question": "Como funciona a exposição de produtos e soluções?",
+    "answer": "Em 12/11, das 19h às 21h30, em paralelo à abertura, até 10 estandes de empresas, startups, parceiros e projetos acadêmicos apresentam produtos, serviços e soluções tecnológicas. A exposição é aberta ao público: dá para circular e conversar com os expositores."
+  },
+  {
+    "id": "students-space",
+    "category": "Programação aberta",
+    "question": "O que é o Espaço de Desenvolvimento dos Alunos?",
+    "answer": "Em 13/11, das 19h às 22h, alunos da UniCatólica mostram os projetos que desenvolveram, com demonstrações práticas. Estudantes, profissionais de tecnologia, empresas e visitantes trocam experiências e deixam sugestões técnicas para aprimorar os projetos."
+  },
+  {
+    "id": "race",
+    "category": "Hackathon",
+    "question": "Como funciona a corrida?",
+    "answer": "É uma corrida por objetivos, em equipes: encontrar pistas, cumprir missões e desenvolver soluções com programação, engenharia de software e inteligência artificial. A dinâmica completa (missões, pistas, estações tecnológicas, entregas e pontuação) é apresentada no lançamento do desafio, em 12/11, às 19h55."
   },
   {
     "id": "npcs",
-    "category": "Corrida",
+    "category": "Hackathon",
     "question": "Quem são os NPCs?",
     "answer": "Personagens espalhados pela corrida que guardam pistas sobre o desafio. Encontrar, conversar e decifrar o que eles dizem faz parte da missão. Onde eles estão? Isso também é uma pista."
   },
   {
-    "id": "scoring",
-    "category": "Corrida",
-    "question": "Como funciona a pontuação?",
-    "answer": "Cada uma das sete estações classificatórias vale até 100 pontos: solução correta (60), trabalho em equipe (20), criatividade e estratégia (10) e bônus de tempo (10). A missão final tem avaliação própria pela banca. O tempo nunca vale mais que a correção técnica."
+    "id": "rulebook",
+    "category": "Hackathon",
+    "question": "Quando sai o regulamento?",
+    "answer": "Na abertura oficial, em 12/11, às 19h35: regras da competição, critérios de pontuação, prazos, uso de inteligência artificial, critérios de desempate e orientações gerais. Logo antes, às 19h15, as equipes e os mentores são apresentados."
   },
   {
     "id": "ai",
-    "category": "Regras",
+    "category": "Hackathon",
     "question": "Posso usar IA durante a competição?",
-    "answer": "Pode, seguindo as regras de uso apresentadas no lançamento, iguais para todas as equipes. A organização prevê acesso a ferramentas como Claude e Codex, conforme disponibilidade e licenciamento."
+    "answer": "A inteligência artificial faz parte do desafio: as soluções são desenvolvidas com programação, engenharia de software e IA. As regras de uso valem para todas as equipes e são apresentadas no regulamento, em 12/11, às 19h35."
   },
   {
     "id": "mentoring",
-    "category": "Regras",
+    "category": "Hackathon",
     "question": "Como funciona a mentoria?",
-    "answer": "Cada equipe pode ter um mentor egresso de referência, que orienta arquitetura, planejamento, boas práticas e comunicação, presencialmente ou por vídeo. O mentor não escreve a solução nem entrega gabarito. E o mentor da equipe campeã também é premiado."
+    "answer": "Cada equipe tem mentores que orientam os estudantes durante a competição, apresentados junto com as equipes em 12/11, às 19h15. No desenvolvimento final, em 14/11, as equipes contam com mentorias técnicas e orientações, respeitando as regras da competição. O mentor orienta, mas não escreve a solução."
   },
   {
     "id": "delivery",
-    "category": "Regras",
-    "question": "O que precisa ser entregue no final?",
-    "answer": "A solução final é submetida até as 15h do dia 14/11, com link do repositório, documentação e, se quiser, uma demo em vídeo. Depois do prazo, a banca confere as entregas e homologa os resultados antes da premiação."
+    "category": "Hackathon",
+    "question": "Qual é o prazo da entrega final?",
+    "answer": "O desenvolvimento final é presencial, das 8h às 13h de 14/11, na UniCatólica, só para equipes e mentores: concluir objetivos, testar, preparar a documentação e a apresentação final. O prazo oficial de submissão da solução final é definido no regulamento, com tempo para a organização conferir as entregas e homologar os resultados antes da premiação."
   },
   {
     "id": "signup",
     "category": "Inscrição",
-    "question": "Como faço minha inscrição?",
-    "answer": "Pelo botão de inscrição aqui da página. Regulamento, elegibilidade e formação das equipes são publicados pela organização junto com o link oficial."
+    "question": "Como faço a inscrição no hackathon?",
+    "answer": "Pelo formulário aqui da página. O hackathon é exclusivo para alunos da UniCatólica e a corrida é disputada em equipes."
+  },
+  {
+    "id": "contact",
+    "category": "Inscrição",
+    "question": "Como recebo os avisos oficiais?",
+    "answer": "Por e-mail: a comunicação oficial do hackathon é feita pelo e-mail informado na inscrição. Use um endereço que você acompanha."
   }
 ]

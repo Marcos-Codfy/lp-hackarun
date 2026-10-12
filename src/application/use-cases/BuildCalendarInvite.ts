@@ -1,7 +1,9 @@
 import type { EventRepository, Session } from '@domain/index';
 import type { CalendarEntry, CalendarExporter } from '../ports/CalendarExporter';
 
-// gera o .ics com todas as atividades; sessão sem início usa 3h antes do fim
+export const UNCONFIRMED_END = 'Horário de término a confirmar pela organização.';
+
+// gera o .ics com um evento por bloco da programação; sessão sem início usa 3h antes do fim (sem fim, 3h depois)
 export class BuildCalendarInvite {
   private readonly events: EventRepository;
   private readonly exporter: CalendarExporter;
@@ -22,8 +24,8 @@ export class BuildCalendarInvite {
         return {
           uid: `${s.id}@hackarun`,
           title: `${event.name} · ${s.title}`,
-          description: s.description,
-          location: venue ? `${venue.name}, ${venue.city}` : event.city,
+          description: this.describe(s),
+          location: venue ? [venue.name, s.place, venue.city].filter(Boolean).join(', ') : event.city,
           start,
           end,
         };
@@ -31,6 +33,17 @@ export class BuildCalendarInvite {
     );
 
     return this.exporter.export(`${event.name} ${event.edition}`, entries);
+  }
+
+  // resumo do bloco + roteiro ("19:00 · Ideia boa ou furada?"), um item por linha. Bloco sem hora de fim
+  // no documento: o fim do convite é estimado e a descrição avisa
+  private describe(s: Session): string {
+    const lines = s.activities.map((a) => {
+      const marks = `${a.has('parallel') ? ' (em paralelo)' : ''}${a.has('optional') ? ' (opcional)' : ''}`;
+      return `${a.slot.start ?? a.slot.end ?? ''} · ${a.title}${marks}`;
+    });
+    const pending = s.slot.end ? null : UNCONFIRMED_END;
+    return [s.description, ...lines, pending].filter(Boolean).join('\n');
   }
 
   private resolveTimes(date: string, s: Session, offset: string): { start: Date; end: Date } {

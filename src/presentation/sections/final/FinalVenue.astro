@@ -28,6 +28,7 @@ const { venue } = Astro.props;
       Local da final
     </p>
     <p class="venue__name">{venue.name}</p>
+    <p class="venue__role">Parceiro exclusivo da premiação</p>
     {venue.mapUrl && (
       <a class="venue__map" href={venue.mapUrl} target="_blank" rel="noopener noreferrer">
         Ver no mapa
@@ -76,6 +77,11 @@ const { venue } = Astro.props;
     font-weight: 800;
     line-height: 1.05;
     text-transform: uppercase;
+  }
+
+  .venue__role {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
   }
 
   .venue__map {

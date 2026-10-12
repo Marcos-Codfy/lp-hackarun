@@ -6,7 +6,8 @@ import { stationIcon } from './stationIcon';
 
 interface Props {
   station: StationDTO;
-  maxPoints: number;
+  // null = pontuação ainda não publicada: o chip vira "?? pts" decorativo (o painel do regulamento explica)
+  maxPoints: number | null;
   withToken?: boolean;
 }
 
@@ -29,8 +30,8 @@ const titleId = `station-${station.id}`;
     {isFinal ? (
       <span class="station__badge">Final</span>
     ) : (
-      <span class="station__pts">
-        <b>{maxPoints}</b> pts
+      <span class="station__pts" aria-hidden={maxPoints === null ? 'true' : undefined}>
+        <b>{maxPoints ?? '??'}</b> pts
       </span>
     )}
   </div>

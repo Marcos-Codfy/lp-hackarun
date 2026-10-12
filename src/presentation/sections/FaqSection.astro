@@ -1,5 +1,6 @@
 ---
 import type { FaqItemDTO, LandingPageDTO } from '@application/index';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import SectionHeader from './shared/SectionHeader.astro';
 import FaqEntry from './faq/FaqEntry.astro';
 import './sections.css';
@@ -8,9 +9,14 @@ interface Props {
   data: LandingPageDTO;
 }
 
-const { faq } = Astro.props.data;
+const { faq, schedule } = Astro.props.data;
+const lookup = new ScheduleLookup(schedule);
+const rulebook = lookup.activity('rulebook');
+const rulebookAt = rulebook
+  ? ` O regulamento do hackathon é apresentado em ${lookup.shortDate(rulebook.day)}, às ${lookup.startOf(rulebook)}.`
+  : '';
 
-// agrupa por categoria mantendo a ordem do conteúdo
+// agrupa por categoria mantendo a ordem do conteúdo (Evento, Programação aberta, Hackathon, Inscrição)
 const groups = new Map<string, FaqItemDTO[]>();
 for (const item of faq) groups.set(item.category, [...(groups.get(item.category) ?? []), item]);
 
@@ -34,7 +40,7 @@ const numberOf = (item: FaqItemDTO) => faq.indexOf(item) + 1;
         eyebrow="FAQ"
         size="sm"
         title="Perguntas <em>frequentes</em>"
-        lead="O que todo mundo pergunta antes de entrar na corrida. Regulamento completo sai junto com o link oficial."
+        lead={`Evento, programação aberta, hackathon e inscrição: o essencial, separado por assunto.${rulebookAt}`}
       />
     </div>
 

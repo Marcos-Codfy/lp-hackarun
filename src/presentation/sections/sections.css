@@ -60,8 +60,11 @@
   gap: clamp(3rem, 2rem + 3vw, 5rem);
 }
 
-/* objeto 3D à direita no desktop: conteúdo à esquerda com um véu escuro só atrás do texto */
+/* objeto 3D à direita no desktop: conteúdo à esquerda com um véu escuro só atrás do texto.
+   A máscara zera o véu nas bordas de cima e de baixo (--veil-fade): sem ela o véu terminava seco na borda da
+   seção e desenhava uma linha no fundo contínuo */
 .section--split::before {
+  --veil-fade: 6rem;
   content: '';
   position: absolute;
   inset: 0;
@@ -74,10 +77,26 @@
     rgb(2 3 11 / 0.52) 75%,
     rgb(2 3 11 / 0.15) 100%
   );
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    #000 var(--veil-fade),
+    #000 calc(100% - var(--veil-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    #000 var(--veil-fade),
+    #000 calc(100% - var(--veil-fade)),
+    transparent 100%
+  );
 }
 
 @media (min-width: 1024px) {
+  /* véu lateral: escurece a coluna do texto e esmaece mais devagar em cima e embaixo */
   .section--split::before {
+    --veil-fade: 14rem;
     background: linear-gradient(90deg, rgb(2 3 11 / 0.72) 0%, rgb(2 3 11 / 0.46) 34%, rgb(2 3 11 / 0) 58%);
   }
 

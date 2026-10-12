@@ -1,0 +1,207 @@
+---
+import type { ActivityDTO, SessionDTO } from '@application/index';
+import { AudienceLabel } from '@presentation/formatters/AudienceLabel';
+import { SessionTimeFormatter } from '@presentation/formatters/SessionTimeFormatter';
+import AudienceBadge from '../shared/AudienceBadge.astro';
+import ActivityMore from './ActivityMore.astro';
+
+// uma linha da programação: horário, título, uma frase e, se houver, o texto longo num "ver mais".
+// Celular: o horário vira a 1ª linha do texto (sobra largura pro título); do tablet pra cima, coluna à esquerda do trilho
+interface Props {
+  activity: ActivityDTO;
+  // público do bloco: a trilha da atividade só ganha selo quando é diferente
+  blockAudience: SessionDTO['audience'];
+  heading: 'h4' | 'h5';
+}
+
+const { activity, blockAudience, heading: Heading } = Astro.props;
+const time = new SessionTimeFormatter();
+const labels = new AudienceLabel();
+const track = activity.track && activity.track !== blockAudience ? activity.track : null;
+// "em paralelo" já é o título do grupo onde a atividade aparece
+const flags = activity.flags.filter((f) => f !== 'parallel');
+const hasTags = Boolean(track) || flags.length > 0;
+---
+
+<li class:list={['act', track && `act--${track}`]}>
+  <p class="act__time" aria-hidden="true">
+    {activity.start && <span class="act__start">{time.hour(activity.start)}</span>}
+    {activity.end && <span class="act__end">{time.hour(activity.end)}</span>}
+  </p>
+  <span class="act__node" aria-hidden="true"></span>
+  <div class="act__body">
+    <p class="act__when">
+      <span aria-hidden="true">{time.compact(activity)}</span>
+      <span class="sr-only">{time.format(activity)}</span>
+    </p>
+    <Heading class="act__title">{activity.title}</Heading>
+    <p class="act__summary">{activity.summary}</p>
+    {hasTags && (
+      <ul class="act__tags" role="list">
+        {track && <AudienceBadge as="li" tone={track} label={labels.of(track)} />}
+        {flags.map((flag) => (
+          <AudienceBadge as="li" tone="muted" label={labels.flag(flag)} />
+        ))}
+      </ul>
+    )}
+    {activity.parts.length > 0 && (
+      <ul class="act__parts" role="list">
+        {activity.parts.map((part) => (
+          <li>
+            <b>{part.label}</b> <span>{time.compact(part)}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+    <ActivityMore activity={activity} />
+  </div>
+</li>
+
+<style>
+  .act {
+    --act-accent: var(--sx-accent);
+    position: relative;
+    display: grid;
+    grid-template-columns: 1px minmax(0, 1fr);
+    column-gap: var(--space-4);
+  }
+
+  .act--hackathon {
+    --act-accent: var(--c-violet);
+  }
+
+  .act__time {
+    display: none;
+    padding-top: 0.15rem;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .act__when {
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .act__start {
+    color: var(--sx-ink);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .act__end {
+    color: var(--text-dim);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.06em;
+  }
+
+  /* o trilho é a coluna do meio; cada item acende o próprio losango */
+  .act__node {
+    position: relative;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sx-accent) 45%, transparent), transparent);
+  }
+
+  .act:last-child .act__node {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--sx-accent) 45%, transparent),
+      transparent 70%
+    );
+  }
+
+  .act__node::before {
+    content: '';
+    position: absolute;
+    top: 0.45rem;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    background: var(--c-void);
+    border: 1px solid var(--act-accent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--act-accent) 70%, transparent);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .act--hackathon .act__node::before {
+    background: var(--c-violet);
+  }
+
+  .act__body {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    min-width: 0;
+    padding-bottom: var(--space-5);
+  }
+
+  .act__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .act__summary {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+  }
+
+  .act__tags,
+  .act__parts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+  }
+
+  .act__parts li {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--sx-line);
+    border-radius: 2px;
+    background: var(--surface-well);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.08em;
+  }
+
+  .act__parts b {
+    color: var(--text);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  @media (min-width: 640px) {
+    .act {
+      grid-template-columns: 4rem 1px minmax(0, 1fr);
+      column-gap: var(--space-5);
+    }
+
+    .act__time {
+      display: grid;
+      align-content: start;
+      gap: 0.15rem;
+    }
+
+    /* a linha de horário some da vista (sem deixar vão no grid), mas segue no leitor de tela antes do título */
+    .act__when {
+      display: contents;
+    }
+
+    .act__when > [aria-hidden] {
+      display: none;
+    }
+  }
+</style>

@@ -35,4 +35,14 @@ export class TimeSlot extends ValueObject<TimeSlotProps> {
   get hasOpenStart(): boolean {
     return this.props.start === null;
   }
+
+  // a faixa de dentro cabe nesta? (ponta em aberto não limita; "HH:MM" compara como texto)
+  contains(inner: TimeSlot): boolean {
+    const { start, end } = this.props;
+    if (start && inner.start && inner.start < start) return false;
+    if (start && inner.end && inner.end <= start) return false;
+    if (end && inner.end && inner.end > end) return false;
+    if (end && inner.start && inner.start >= end) return false;
+    return true;
+  }
 }

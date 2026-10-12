@@ -1,0 +1,202 @@
+---
+import type { EventDayDTO } from '@application/index';
+import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
+
+// seletor de dias. Nasce escondido: o DayTabsController liga o padrão de abas (role, aria, teclado);
+// sem JS os dias aparecem empilhados e este bloco nem existe pra quem lê
+interface Props {
+  days: EventDayDTO[];
+  panelId: (date: string) => string;
+}
+
+const { days, panelId } = Astro.props;
+const format = new DayLabelFormatter();
+const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+---
+
+<div class="day-tabs" data-day-tablist hidden>
+  {days.map((day) => {
+    const label = format.format(day.date);
+    const id = panelId(day.date);
+    return (
+      <button
+        type="button"
+        class:list={['day-tab', day.stage === 'final' && 'day-tab--final']}
+        id={`${id}-tab`}
+        data-day-tab={id}
+        data-date={day.date}
+      >
+        <span class="sr-only">{capitalize(label.long.split(',')[0] ?? '')}, </span>
+        <span class="day-tab__weekday" aria-hidden="true">
+          {label.weekday}
+        </span>
+        <span class="day-tab__date">
+          {label.day}/{day.date.slice(5, 7)}
+        </span>
+        <span class="sr-only">: </span>
+        <span class="day-tab__label">{day.label}</span>
+      </button>
+    );
+  })}
+</div>
+
+<style>
+  .day-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  /* degradê claro o bastante pro texto escuro passar no AA em letra pequena */
+  .day-tab {
+    --tab-grad: linear-gradient(110deg, #9ff6ff 0%, var(--c-cyan) 45%, #5c8dff 100%);
+    --tab-glow: rgb(0 229 255 / 0.45);
+    --tab-ink: var(--ink-cyan);
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    min-height: 44px;
+    padding: var(--space-3) var(--space-1);
+    /* borda transparente: em cores forçadas vira o contorno da aba */
+    border: 1px solid transparent;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .day-tab--final {
+    --tab-grad: var(--grad-time);
+    --tab-glow: rgb(255 133 47 / 0.5);
+    --tab-ink: var(--ink-orange);
+  }
+
+  /* casca inclinada (linguagem dos botões): vidro escuro, vira degradê cheio quando selecionada */
+  .day-tab::before,
+  .day-tab::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 3px;
+    transform: skewX(var(--skew));
+    transition:
+      opacity var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .day-tab::before {
+    background: linear-gradient(170deg, rgb(12 16 48 / 0.82), rgb(4 5 20 / 0.9));
+    box-shadow: inset 0 0 0 1px rgb(150 175 255 / 0.2);
+  }
+
+  .day-tab::after {
+    background: var(--tab-grad);
+    box-shadow:
+      0 0 28px var(--tab-glow),
+      0 0 70px -10px var(--tab-glow);
+    opacity: 0;
+  }
+
+  .day-tab:hover::before {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tab-ink) 70%, transparent);
+  }
+
+  .day-tab:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+  }
+
+  .day-tab[aria-selected='true'] {
+    color: var(--c-void);
+  }
+
+  .day-tab[aria-selected='true']::after {
+    opacity: 1;
+  }
+
+  .day-tab__weekday,
+  .day-tab__label {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .day-tab__weekday {
+    color: var(--tab-ink);
+  }
+
+  .day-tab__date {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.15rem);
+    font-weight: 900;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .day-tab[aria-selected='true'] :is(.day-tab__weekday, .day-tab__date) {
+    color: var(--c-void);
+  }
+
+  /* desktop: coluna de "fases" do lado da programação, presa no topo enquanto o dia rola */
+  @media (min-width: 1024px) {
+    .day-tabs {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+    }
+
+    .day-tab {
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        'weekday weekday'
+        'date label';
+      justify-items: start;
+      align-items: baseline;
+      column-gap: var(--space-4);
+      row-gap: var(--space-1);
+      padding: var(--space-4) var(--space-5) var(--space-4) var(--space-6);
+      text-align: left;
+    }
+
+    .day-tab__weekday {
+      grid-area: weekday;
+      font-size: var(--fs-hud);
+      letter-spacing: var(--tracking-hud);
+    }
+
+    .day-tab__date {
+      grid-area: date;
+      font-size: 1.75rem;
+    }
+
+    .day-tab__label {
+      grid-area: label;
+      font-size: var(--fs-hud);
+      letter-spacing: 0.16em;
+    }
+
+    .day-tab:hover:not([aria-selected='true']) {
+      color: var(--text);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .day-tab[aria-selected='true'] {
+      outline: 3px solid Highlight;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .day-tab::before,
+    .day-tab::after {
+      transition: none;
+    }
+  }
+</style>

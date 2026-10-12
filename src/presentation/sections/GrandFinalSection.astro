@@ -1,28 +1,25 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import type { IconName } from '@presentation/components/ui/icons';
-import Icon from '@presentation/components/ui/Icon.astro';
 import { EventStampFormatter } from '@presentation/formatters/EventStampFormatter';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import SectionHeader from './shared/SectionHeader.astro';
 import SpotlightBeams from './final/SpotlightBeams.astro';
 import FinalVenue from './final/FinalVenue.astro';
+import RunOfShow from './final/RunOfShow.astro';
 import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { event } = Astro.props.data;
+const { event, schedule } = Astro.props.data;
 const venue = event.venues.find((v) => v.role === 'final');
 const ceremonyAt = event.milestones.find((m) => m.key === 'ceremony')?.at ?? null;
 const stamp = ceremonyAt ? new EventStampFormatter(event.timezone).format(ceremonyAt) : null;
-
-const highlights: { icon: IconName; label: string }[] = [
-  { icon: 'spotlight', label: 'Palco iluminado' },
-  { icon: 'monitor', label: 'Telão gigante com o ranking' },
-  { icon: 'music', label: 'Banda ao vivo' },
-  { icon: 'crown', label: 'Anúncio dos campeões' },
-];
+// roteiro e horário da premiação saem do bloco da final na programação
+const lookup = new ScheduleLookup(schedule);
+const experience = lookup.finalSession();
+const awards = lookup.activity('awards');
 ---
 
 <section
@@ -46,29 +43,27 @@ const highlights: { icon: IconName; label: string }[] = [
       />
 
       {stamp && ceremonyAt && (
-        <p class="final__stamp" data-reveal="up">
-          <time datetime={ceremonyAt}>
-            <span aria-hidden="true">
-              <span class="final__date">{stamp.date}</span>
-              <span class="final__hour">{stamp.hour}</span>
-            </span>
-            <span class="sr-only">{stamp.long}</span>
-          </time>
-        </p>
+        <div class="final__when" data-reveal="up">
+          {experience && <p class="final__kicker sx-hud">// {experience.title}</p>}
+          <p class="final__stamp">
+            <time datetime={ceremonyAt}>
+              <span aria-hidden="true">
+                <span class="final__date">{stamp.date}</span>
+                <span class="final__hour">{stamp.hour}</span>
+              </span>
+              <span class="sr-only">{stamp.long}</span>
+            </time>
+          </p>
+          <p class="final__line">
+            A partir das {stamp.hour.toLowerCase()}
+            {awards && <> · premiação oficial às {lookup.startOf(awards)}</>}
+          </p>
+        </div>
       )}
 
       {venue && <FinalVenue venue={venue} />}
 
-      <ul class="final__highlights" role="list" data-reveal-group>
-        {highlights.map((item) => (
-          <li class="sx-glass sx-glass--solid sx-hover">
-            <span class="sx-icon">
-              <Icon name={item.icon} size={18} />
-            </span>
-            <span>{item.label}</span>
-          </li>
-        ))}
-      </ul>
+      {experience && <RunOfShow activities={experience.activities} />}
 
       <p class="final__cheer sx-grad-text" data-reveal="up">
         Chame sua torcida.
@@ -101,6 +96,8 @@ const highlights: { icon: IconName; label: string }[] = [
     font-size: clamp(3.4rem, 1.8rem + 5.6vw, 6.4rem);
     font-weight: 900;
     line-height: 0.88;
+    /* sem o respiro, a bandeira do 1 encosta na barra do 7 e "17H" vira "ПH" */
+    letter-spacing: 0.04em;
     font-variant-numeric: tabular-nums;
   }
 
@@ -119,28 +116,17 @@ const highlights: { icon: IconName; label: string }[] = [
     filter: drop-shadow(0 0 26px rgb(255 133 47 / 0.6));
   }
 
-  .final__highlights {
+  .final__when {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
   }
 
-  /* celular estreito: ícone em cima do texto pra caber em 2 colunas */
-  .final__highlights li {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-3);
-    min-height: 4.5rem;
-    padding: var(--space-4);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    line-height: 1.3;
-  }
-
-  .final__highlights .sx-icon {
-    width: 2.25rem;
-    height: 2.25rem;
+  .final__line {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .final__cheer {
@@ -151,14 +137,5 @@ const highlights: { icon: IconName; label: string }[] = [
     line-height: 1;
     text-transform: uppercase;
     filter: drop-shadow(0 0 24px rgb(255 133 47 / 0.45));
-  }
-
-  @media (min-width: 480px) {
-    .final__highlights li {
-      flex-direction: row;
-      align-items: center;
-      gap: var(--space-4);
-      padding: var(--space-3) var(--space-4);
-    }
   }
 </style>
