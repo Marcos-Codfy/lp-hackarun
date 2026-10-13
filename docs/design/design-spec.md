@@ -17,6 +17,8 @@
 > - **Rodada 5:** o topo do hero ganhou o selo da UniCatólica com os cursos de Engenharia de Software e Inteligência
 >   Artificial (seção 6), e a LAES entrou como Organização na faixa "Quem faz acontecer", entre a Realização e a
 >   Parceria.
+> - **Antes da produção:** saíram todos os botões "Adicionar à agenda" de `/inscricao`, e o arquivo `.ics` junto
+>   (seções 11 e 16).
 
 ## 1. Conceito: "a página é a corrida"
 
@@ -69,8 +71,9 @@ Regras:
 
 ## 4. Paleta oficial
 
-Do manual HackaRun 2026, em `src/presentation/styles/tokens.css`. O azul domina; violeta/magenta = mistério e
-gamificação (NPCs); laranja/ouro = tempo, prazos e prêmios.
+Do manual da identidade visual do HackaRun 2026, criada pela Eduarda Victória (Liga Acadêmica), em
+`src/presentation/styles/tokens.css`. O azul domina; violeta/magenta = mistério e gamificação (NPCs); laranja/ouro =
+tempo, prazos e prêmios.
 
 | Cor               | Hex       | Token          | Uso                                                            |
 | ----------------- | --------- | -------------- | -------------------------------------------------------------- |
@@ -216,9 +219,8 @@ bordas de vidro: `--grad-hairline`. Brilhos prontos: `--glow-cyan`, `--glow-viol
 - **Autoridade:** UniCatólica, LAES e Capim Dourado com logos oficiais, o selo dos cursos no topo do hero, mentores
   egressos e banca.
 - **Gamificação:** 3 tokens NPC escondidos na página; achar os 3 revela uma mensagem secreta no HUD.
-- **Microcompromisso:** "Adicionar à agenda" (.ics) em `/inscricao`: no rodapé do formulário, no aviso de inscrições
-  em breve e na tela de sucesso. Na programação o botão saiu, a pedido da organização. No fim da LP, a lista curta
-  "Tenha em mãos" diz o que a equipe precisa antes de clicar.
+- **Microcompromisso:** no fim da LP, a lista curta "Tenha em mãos" diz o que a equipe precisa antes de clicar. (Os
+  botões "Adicionar à agenda" e o `.ics` saíram do site em 12/10/2026, antes da produção.)
 - **Pico-fim:** o globo carregando e o CTA acendendo junto com o pulso é o momento mais forte da página; o clique leva
   direto para a página de inscrição.
 
@@ -330,9 +332,10 @@ site leva para ela; no fim da LP fica só o clímax (seção 9) com a lista curt
 - **Erros no campo certo:** e-mail ou matrícula repetidos na equipe apontam o integrante ("já está no integrante N"), e
   nome de equipe, e-mail ou matrícula que já estão em outra equipe aparecem no campo que o servidor apontou. O resumo
   agrupa por bloco ("Integrante 2: nome, matrícula e e-mail").
-- **Sucesso:** o protocolo, o aviso do e-mail, "Sua equipe aparece em Equipes depois da confirmação", "Adicionar à
-  agenda" e "Voltar ao evento". O painel lateral some.
-- **Em breve:** o aviso com "Adicionar à agenda" e uma amostra curta e apagada do formulário, que some num degradê.
+- **Sucesso:** o protocolo, o aviso do e-mail, "Sua equipe aparece em Equipes depois da confirmação", os próximos
+  passos, "Ver equipes" e "Voltar ao evento". O painel lateral some.
+- **Em breve:** o aviso (título e uma linha, sem botão) e uma amostra curta e apagada do formulário, que some num
+  degradê.
 - **Celular:** o aviso do e-mail empilha, e o botão da foto encurta para "Trocar" abaixo de 400 px (o leitor de tela
   continua ouvindo "Trocar imagem").
 

@@ -3,7 +3,7 @@
 <sub>**Português** · [English](README.en.md)</sub>
 
 <picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/Marcos-Codfy/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
+  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/hackarun-unicatolica/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
   <img src="docs/media/scroll-preview.webp" width="960" alt="Animação da rolagem cinematográfica do HackaRun: o hero abre com o selo da UniCatólica e dos cursos de Engenharia de Software e Inteligência Artificial acima do logo oficial, com raios sobre o globo de partículas; a cada seção as partículas 3D viram uma forma nova (cronômetro, ponto de interrogação neon, mapa das missões, terreno synthwave, palco com telão, troféu dourado e galáxia) e no fim voltam a formar o globo, agora calmo, que gira devagar atrás da chamada &quot;Sua vaga na corrida&quot;, carrega, acende o botão &quot;Quero participar&quot; e solta um pulso suave de luz na borda." />
 </picture>
 
@@ -18,14 +18,16 @@ cai direto numa planilha do Google.
 <sub>**Overdrive** é o codinome da v2 cinematográfica desta página: como o modo turbo dos jogos de corrida, ela acelera
 de cena em cena e, na chegada, o globo carrega e solta um pulso de energia.</sub>
 
-[![CI](https://github.com/Marcos-Codfy/lp-hackarun/actions/workflows/ci.yml/badge.svg)](https://github.com/Marcos-Codfy/lp-hackarun/actions/workflows/ci.yml)
+[![CI](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml/badge.svg)](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml)
 ![Astro](https://img.shields.io/badge/Astro-7-FF5D01?logo=astro&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strictest-3178C6?logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-049EF4?logo=threedotjs&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
 [![Lighthouse mobile: performance 98, acessibilidade 100, boas práticas 100 e SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%20100%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
-<!-- DEMO: badge e link da versão oficial (Cloudflare Pages) entram aqui quando o site estiver no ar. -->
+[![Ver ao vivo: hackarun.pages.dev](https://img.shields.io/badge/ver%20ao%20vivo-hackarun.pages.dev-00E5FF?logo=cloudflare&logoColor=white)](https://hackarun.pages.dev)
+
+**[Ver ao vivo → hackarun.pages.dev](https://hackarun.pages.dev)**
 
 [Guia do projeto](docs/GUIA_DO_PROJETO.md) · [Decisões (ADRs)](docs/adr) · [Changelog](CHANGELOG.md) ·
 [Design spec](docs/design/design-spec.md) · [Como contribuir](CONTRIBUTING.md)
@@ -42,9 +44,9 @@ de cena em cena e, na chegada, o globo carrega e solta um pulso de energia.</sub
 
 ## Em 30 segundos
 
-- **Meu papel:** desenvolvimento solo. Criei a identidade visual do evento com a Eduarda, colega da Liga Acadêmica, e,
-  em cima dela, fiz o design da página, o 3D e os shaders, o front-end, a API de inscrições no Apps Script, os testes,
-  a CI e a documentação.
+- **Meu papel:** desenvolvimento solo. Em cima da identidade visual do evento, criada pela Eduarda Victória (Liga
+  Acadêmica), fiz o design da página, o 3D e os shaders, o front-end, a API de inscrições no Apps Script, os testes, a
+  CI e a documentação.
 - **O que é:** o site oficial do HackaRun 2026, a 1ª edição do evento da UniCatólica, organizado pela LAES (Liga
   Acadêmica de Engenharia de Software e Inteligência Artificial) e com o Capim Dourado Shopping como parceiro
   exclusivo da premiação. São 4 dias, de 11 a 14 de novembro de 2026, em Palmas-TO, em duas frentes: uma programação
@@ -64,7 +66,7 @@ de cena em cena e, na chegada, o globo carrega e solta um pulso de energia.</sub
 - **Backend de custo zero:** formulário → Google Apps Script → Google Sheets em três abas (equipes com a miniatura da
   foto na célula, integrantes com uma linha por pessoa e um resumo ao vivo), com a foto no Google Drive, uma equipe
   por pessoa, reenvio sem duplicar, limites de envio, trava de concorrência e consentimento LGPD versionado.
-- **Engenharia:** Clean Architecture + DDD + MVVM com a regra de dependência travada no ESLint, 786 testes, CI no
+- **Engenharia:** Clean Architecture + DDD + MVVM com a regra de dependência travada no ESLint, 828 testes, CI no
   GitHub Actions, Conventional Commits, 9 ADRs e um `npm run setup` para quem faz fork.
 
 ## Visual
@@ -154,7 +156,7 @@ flowchart TB
   subgraph INFRA["Infrastructure"]
     JSON["Repositórios JSON"]
     GAS["Gateway Apps Script"]
-    ADP["Imagem, storage e ICS"]
+    ADP["Imagem, storage e relógio"]
   end
   COMP(["Composition roots"])
 
@@ -174,7 +176,7 @@ flowchart TB
 **Blocos de DDD:** `Entity` e `ValueObject` como base, `Result<T, E>` com `ok` e `fail`, dois aggregate roots
 (`HackathonEvent` e `TeamRegistration`), entidades como `EventDay`, `Session` e `Activity`, value objects como
 `TeamName`, `TeamMember`, `FullName`, `StudentId`, `Email`, `TeamImage`, `TimeSlot`, `Audience`, `Countdown` e
-`ScoringRule`, o serviço de domínio `RegistrationPolicy` (em breve, aberta, encerrando, encerrada) e 13 casos de uso.
+`ScoringRule`, o serviço de domínio `RegistrationPolicy` (em breve, aberta, encerrando, encerrada) e 12 casos de uso.
 Conteúdo inválido no JSON quebra o build, e um teste confere a programação contra o documento oficial do evento.
 
 **MVVM:** 6 ViewModels sem DOM, com estado em `Observable` (contador, HUD, pausa, caça aos NPCs, formulário e
@@ -345,17 +347,17 @@ A meta é **WCAG 2.2 AA**, e o Lighthouse dá 100 em acessibilidade:
 
 | Item            | Situação                                                                                                    |
 | --------------- | ----------------------------------------------------------------------------------------------------------- |
-| Testes          | **786 testes em 102 arquivos** (Vitest + happy-dom), por camada, incluindo 9 suítes do Apps Script real     |
+| Testes          | **828 testes em 108 arquivos** (Vitest + happy-dom), por camada, incluindo 12 suítes do Apps Script real    |
 | Lint            | ESLint sem erros e sem avisos: regra de camadas, teto de 250 linhas de código por arquivo, `import type`    |
 | Tipos           | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check     |
 | Formatação      | Prettier em todo o repositório                                                                              |
-| CI              | GitHub Actions em push na `main` e em PR: `npm ci` → lint → formatação → testes → build → artefato `dist`   |
+| CI              | GitHub Actions (push na `main` e PR): `npm ci` → lint → formatação → testes → build sem simulação → `dist`  |
 | Commits         | Husky + lint-staged no pre-commit e commitlint no commit-msg (escopo fora da lista gera aviso)              |
 | QA no navegador | [`scripts/qa/`](scripts/qa/README.md): capturas, âncoras, overflow, Web Vitals, tarefas longas e Lighthouse |
 
-**Em números:** 439 arquivos e 33.361 linhas em `src` (TypeScript, Astro, GLSL e CSS), dos quais 90 arquivos e 5.852
-linhas são do módulo 3D; 102 arquivos de teste e 10 helpers, com 9.910 linhas; 999 linhas de Apps Script em 8 arquivos;
-9 ADRs.
+**Em números:** 439 arquivos e 33.322 linhas em `src` (TypeScript, Astro, GLSL e CSS), dos quais 90 arquivos e 5.852
+linhas são do módulo 3D; 108 arquivos de teste e 12 helpers, com 10.686 linhas; 1.117 linhas de Apps Script em 8
+arquivos; 9 ADRs.
 
 ---
 
@@ -386,10 +388,15 @@ No GitHub, clique em **Fork** e depois:
 ```bash
 git clone https://github.com/<seu-usuario>/lp-hackarun.git
 cd lp-hackarun
-git remote add upstream https://github.com/Marcos-Codfy/lp-hackarun.git
+git remote add upstream https://github.com/hackarun-unicatolica/lp-hackarun.git
 ```
 
 O `origin` é o seu fork (onde você dá push) e o `upstream` é o repositório original (de onde vêm as atualizações).
+
+**É da equipe?** O repositório fica na organização `hackarun-unicatolica` do GitHub. Peça para entrar como
+colaborador e pule o fork: clone o original (`git clone https://github.com/hackarun-unicatolica/lp-hackarun.git`),
+sem `upstream`. Assim os seus PRs ganham a prévia da Cloudflare. O passo a passo está no
+[CONTRIBUTING.md](CONTRIBUTING.md#fluxo-de-trabalho-da-equipe).
 
 **3. Prepare o projeto**
 
@@ -502,11 +509,12 @@ o Status para `confirmado`. O `.env` fica fora do Git. Não coloque a URL no `ev
 
 ### Variáveis de ambiente
 
-| Variável                       | Obrigatória | Descrição                                                                             |
-| ------------------------------ | ----------- | ------------------------------------------------------------------------------------- |
-| `PUBLIC_SITE_URL`              | não         | URL pública (canonical, sitemap, Open Graph). Padrão: `https://lp-hackarun.pages.dev` |
-| `PUBLIC_REGISTRATION_ENDPOINT` | não         | URL do Web App do Apps Script. Vazia = "inscrições em breve" (em dev, modo simulado)  |
-| `DOCS_OUT_DIR`                 | não         | Pasta extra para onde o `npm run docs:pdf` copia os PDFs e o guia                     |
+| Variável                        | Obrigatória | Descrição                                                                                                    |
+| ------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| `PUBLIC_SITE_URL`               | não         | URL pública (canonical, sitemap, robots.txt, Open Graph). Padrão: `https://hackarun.pages.dev`               |
+| `PUBLIC_REGISTRATION_ENDPOINT`  | não         | URL do Web App do Apps Script. Vazia = "inscrições em breve" (em dev, modo simulado)                         |
+| `PUBLIC_REGISTRATION_SIMULATED` | não         | `true` só nas prévias da Cloudflare: sem endpoint, a inscrição roda simulada e as páginas saem com `noindex` |
+| `DOCS_OUT_DIR`                  | não         | Pasta extra para onde o `npm run docs:pdf` copia os PDFs e o guia                                            |
 
 Os scripts de QA leem `BRAVE_PATH` ou `CHROME_PATH` para achar o navegador.
 
@@ -561,16 +569,16 @@ Também há `vitals.mjs` (LCP, CLS e tempo até o 3D), `longtasks.mjs` (tarefas 
 src/
 ├── domain/          # entidades, value objects, aggregates, serviço e interfaces de repositório
 ├── application/     # casos de uso, DTOs e portas
-├── infrastructure/  # conteúdo JSON, mappers, repositórios, Apps Script, imagem, storage, relógio e ICS
+├── infrastructure/  # conteúdo JSON, mappers, repositórios, Apps Script, imagem, storage e relógio
 ├── presentation/    # app, layouts, sections, components, controllers, formatters, view-models, views, motion,
 │                    # styles e experience/ (3D: camera, input, layers, particles, post, quality, scene, shaders, shapes)
-├── shared/          # EventBus, Observable, Ticker e utilitários
+├── shared/          # EventBus, Observable, Ticker, utilitários e config/ (modo da inscrição, produção ou prévia)
 ├── composition/     # composition roots (build e navegador)
 ├── assets/          # logos oficiais e a Orbitron com o til redesenhado
-└── pages/           # index, inscricao, equipes, privacidade (LGPD), 404 e calendário .ics
+└── pages/           # index, inscricao, equipes, privacidade (LGPD), 404 e robots.txt
 apps-script/         # API de inscrições, planilha em 3 abas e fotos no Drive (Google Apps Script) + passo a passo
 design/              # referências visuais do briefing e o vídeo teaser (não vão para o site)
-public/              # og-image, favicon, _headers e robots
+public/              # og-image, favicon e _headers (cache, CSP e segurança)
 scripts/             # setup.mjs, patch da fonte, gerador dos PDFs e qa/
 tests/               # testes por camada
 docs/                # guia, design spec, ADRs, manifesto da stack, PDFs e mídia do README
@@ -601,37 +609,58 @@ requirements.txt     # dependências dos scripts de assets em Python
   hora, sem novo deploy) e `FOTOS_PASTA_ID` (pasta das fotos). Mudou o texto do aviso de privacidade? Suba o
   `CONSENT_VERSION` em [`SubmitRegistration.ts`](src/application/use-cases/SubmitRegistration.ts) e no
   [`Validation.gs`](apps-script/Validation.gs), e publique o script junto com o site.
-- **Agenda:** o build gera `/hackarun-2026.ics` (RFC 5545) com um evento por bloco da programação, baixado pelo
-  "Adicionar à agenda" da página de inscrição.
 
 ### Contribuindo
 
-O fluxo completo está no [CONTRIBUTING.md](CONTRIBUTING.md). Em resumo:
+O fluxo completo está no [CONTRIBUTING.md](CONTRIBUTING.md). Quem é da equipe entra como colaborador e clona o
+repositório direto (sem fork, para o PR ganhar a prévia da Cloudflare); quem é de fora usa um fork. Em resumo:
 
-1. Atualize a sua `main` com a do original: `git switch main`, `git pull upstream main` e `git push origin main`.
-2. Crie uma branch a partir dela: `git switch -c feat/<assunto>` (ou `fix/`, `docs/`, `refactor/`, `test/`).
-3. Faça commits pequenos em **Conventional Commits**, em inglês: `tipo(escopo): descrição`, por exemplo
+1. Crie uma branch a partir da `main` atualizada: `git switch -c feat/<assunto>` (ou `fix/`, `docs/`, `refactor/`,
+   `test/`).
+2. Faça commits pequenos em **Conventional Commits**, em inglês: `tipo(escopo): descrição`, por exemplo
    `feat(sections): add day tabs to the schedule`. Os escopos aceitos estão no
    [`commitlint.config.js`](commitlint.config.js): `domain`, `application`, `infra`, `ui`, `sections`, `experience`,
    `motion`, `a11y`, `perf`, `seo`, `content`, `docs`, `ci`, `deps`, `config` e `tests`.
-4. Rode `npm run validate` e `npm run format:check`.
-5. `git push -u origin feat/<assunto>` e abra um Pull Request para a `main` de `Marcos-Codfy/lp-hackarun`, preenchendo
-   o template. A CI precisa ficar verde, e o merge é com squash depois de uma revisão.
+3. Rode `npm run validate` e `npm run format:check`.
+4. `git push -u origin feat/<assunto>` e abra um Pull Request para a `main`, preenchendo o template. A CI precisa
+   ficar verde, a prévia da Cloudflare aparece no PR e um dos donos do código ([CODEOWNERS](.github/CODEOWNERS))
+   aprova.
+5. O merge é com **Squash and merge**, com o título do PR em Conventional Commits, e a produção atualiza sozinha.
 
 As mudanças de cada versão ficam no [CHANGELOG.md](CHANGELOG.md).
 
 ### Deploy
 
-Hospedagem gratuita na **Cloudflare Pages**. A publicação oficial deste repositório está em espera, por decisão minha;
-quando sair, o link entra no topo deste README. Para publicar o seu fork na sua conta:
+O site oficial está na **Cloudflare Pages**, no plano gratuito e sem cartão cadastrado:
+**[hackarun.pages.dev](https://hackarun.pages.dev)**. Escolhi a integração com o Git da própria Cloudflare (nenhum
+token guardado no GitHub) e mantive o site 100% estático, sem nada que gere cobrança.
 
-1. Cloudflare → **Workers & Pages → Create → Pages → Connect to Git**.
+- **Produção automática:** cada merge na `main` publica sozinho, em 1 a 2 minutos.
+- **Prévia em todo PR:** o bot da Cloudflare comenta no PR um endereço próprio (`<hash>.hackarun.pages.dev`). Na
+  prévia a inscrição é simulada, com o aviso "Prévia de revisão: as inscrições são simuladas e nada é gravado na
+  planilha.", e as páginas saem com `noindex`.
+- **Variáveis por ambiente** (Settings → Variables and Secrets do projeto):
+
+| Variável                        | Production                                                                       | Preview                      |
+| ------------------------------- | -------------------------------------------------------------------------------- | ---------------------------- |
+| `NODE_VERSION`                  | `24`                                                                             | `24`                         |
+| `PUBLIC_SITE_URL`               | `https://hackarun.pages.dev`                                                     | `https://hackarun.pages.dev` |
+| `PUBLIC_REGISTRATION_ENDPOINT`  | vazia até a abertura ("inscrições em breve")                                     | não existe                   |
+| `PUBLIC_REGISTRATION_SIMULATED` | não existe (sem endpoint, o build quebra de propósito; com endpoint, é ignorada) | `true`                       |
+
+- **Custo zero:** plano Free sem cartão, sem `functions/`, `_worker.js` ou `wrangler.toml`. Se os 500 builds do mês
+  acabarem, os builds novos só esperam o mês virar; o site continua no ar.
+
+A configuração completa (projeto, proteção da `main`, donos do código, como abrir as inscrições e como voltar um
+deploy) está no [guia do projeto, seção 16](docs/GUIA_DO_PROJETO.md#16-deploy-na-cloudflare-pages-grátis). Para
+publicar o seu fork na sua conta:
+
+1. Cloudflare → **Workers & Pages → Create application → Pages → Connect to Git**.
 2. Preset **Astro** · Build `npm run build` · Output `dist`.
-3. Variáveis: `NODE_VERSION=24`, `PUBLIC_SITE_URL` e, se quiser o formulário ligado, `PUBLIC_REGISTRATION_ENDPOINT`
-   com a URL da sua planilha de teste.
+3. Variáveis: `NODE_VERSION=24`, `PUBLIC_SITE_URL` com o endereço do seu projeto e, se quiser o formulário ligado,
+   `PUBLIC_REGISTRATION_ENDPOINT` com a URL da sua planilha de teste.
 
-Depois de ligado, cada push na `main` publica em produção, e cada PR ganha uma URL de preview. O comparativo com outras
-opções está na [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
+O comparativo com outras opções está na [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 
 ## Roadmap
 
@@ -651,15 +680,15 @@ opções está na [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - [x] Inscrição numa página própria, com rascunho na aba e volta ao mesmo ponto da landing page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md))
 - [x] Globo do fim da página mais calmo: gira devagar, respira e solta um pulso suave
 - [x] Selo da UniCatólica com os cursos de Engenharia de Software e Inteligência Artificial no topo do hero, e a LAES como organização na faixa de parceiros
-- [ ] Inscrições ligadas no site oficial, junto com a publicação na Cloudflare
-- [ ] Publicação oficial na Cloudflare Pages: em espera, por decisão minha
+- [x] Publicação oficial na Cloudflare Pages ([hackarun.pages.dev](https://hackarun.pages.dev)), com deploy automático da `main` e prévia em todo PR
+- [ ] Inscrições ligadas no site oficial: quando a coordenação definir as vagas e o prazo
 - [ ] Regulamento e pontuação das missões: a organização apresenta na abertura, em 12/11, às 19h35
 - [ ] Prêmios, mentores e banca: a organização revela mais perto do evento
 
 ## Créditos
 
-- **Design e desenvolvimento:** [Marcos Vinicius Muniz Arruda](https://github.com/Marcos-Codfy)
-- **Identidade visual:** Marcos Vinicius Muniz Arruda e Eduarda, colega da Liga Acadêmica
+- **Design da página e desenvolvimento:** [Marcos Vinicius Muniz Arruda](https://github.com/Marcos-Codfy)
+- **Identidade visual:** Eduarda Victória (Liga Acadêmica)
 - **Realização:** UniCatólica
 - **Organização:** LAES · Liga Acadêmica de Engenharia de Software e Inteligência Artificial
 - **Parceria:** Capim Dourado Shopping, parceiro exclusivo da premiação
@@ -672,7 +701,7 @@ aqui apenas para identificar o evento.</sub>
 
 <div align="center">
 
-<sub>Design e desenvolvimento por <a href="https://github.com/Marcos-Codfy">Marcos Vinicius Muniz Arruda</a> ·
+<sub>Design da página e desenvolvimento por <a href="https://github.com/Marcos-Codfy">Marcos Vinicius Muniz Arruda</a> ·
 Palmas-TO · 2026</sub>
 
 <!-- LINKEDIN: troque pelo link do perfil quando quiser exibi-lo aqui. -->

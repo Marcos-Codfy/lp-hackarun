@@ -8,9 +8,12 @@
 
 | Item                    | Valor                                                                                     |
 | ----------------------- | ----------------------------------------------------------------------------------------- |
-| Repositório (público)   | https://github.com/Marcos-Codfy/lp-hackarun                                               |
+| Repositório (público)   | https://github.com/hackarun-unicatolica/lp-hackarun (organização `hackarun-unicatolica`)  |
+| Equipe no GitHub        | Marcos (dono) e Emilly (admin) fazem merge direto; colegas colaboradores abrem PRs (16.4) |
 | Branch de produção      | `main`                                                                                    |
-| Hospedagem              | Cloudflare Pages, plano gratuito (`https://lp-hackarun.pages.dev` depois de conectar)     |
+| Site oficial            | https://hackarun.pages.dev (Cloudflare Pages, plano Free sem cartão; seção 16)            |
+| Prévias dos PRs         | `<hash>.hackarun.pages.dev`, uma por PR, com a inscrição simulada (seção 16.3)            |
+| Donos do código         | Marcos, Emilly e Amanda (`.github/CODEOWNERS`): 1 aprovação libera o merge (16.5)         |
 | Inscrições              | Formulário do site (só equipe), Apps Script (Web App) e Google Sheets em 3 abas (seção 9) |
 | Página de inscrição     | `/inscricao` (`src/pages/inscricao.astro`): o formulário, com etapas e rascunho na aba    |
 | Aviso de privacidade    | `/privacidade` (`src/pages/privacidade.astro`), linkado no consentimento e no rodapé      |
@@ -20,7 +23,7 @@
 | Primeiros passos (fork) | `npm run setup` e o README, seção "Como rodar no seu PC" (seção 4)                        |
 | Scripts de QA           | `scripts/qa/` (Playwright + Lighthouse, instalados à parte; seção 13)                     |
 | Apresentação (README)   | `README.md` (pt-BR) e `README.en.md` (inglês): a vitrine do projeto e o guia de fork      |
-| Como contribuir         | `CONTRIBUTING.md`: fork, branch, Conventional Commits e checklist do PR (seção 15)        |
+| Como contribuir         | `CONTRIBUTING.md`: fluxo da equipe, fork, commits e checklist do PR (seção 15)            |
 | Changelog               | `CHANGELOG.md` (Keep a Changelog + SemVer; seção 18)                                      |
 | Especificação de design | `docs/design/design-spec.md` (v2, vigente)                                                |
 | Decisões de arquitetura | `docs/adr/` (0001 a 0009)                                                                 |
@@ -64,6 +67,10 @@ de Engenharia de Software e Inteligência Artificial, e a LAES entrou como Organ
 na seção 18.1. O Lighthouse foi medido de novo depois da rodada 4: Performance 98 na LP e 99 em `/inscricao` e
 `/equipes` (seção 12.1).
 
+Também em 12/10/2026 o site ganhou a hospedagem oficial: Cloudflare Pages em **https://hackarun.pages.dev**, com deploy
+automático da `main`, uma prévia simulada em cada PR e as inscrições "em breve" até a coordenação definir vagas e
+prazo (seção 16).
+
 ## 3. Decisões principais
 
 | Decisão     | Escolha                                                   | Motivo curto                                                     |
@@ -90,7 +97,7 @@ O passo a passo completo para quem faz fork (pré-requisitos, `upstream`, planil
 ```bash
 git clone https://github.com/<seu-usuario>/lp-hackarun.git
 cd lp-hackarun
-git remote add upstream https://github.com/Marcos-Codfy/lp-hackarun.git
+git remote add upstream https://github.com/hackarun-unicatolica/lp-hackarun.git
 npm run setup
 npm run dev
 ```
@@ -108,7 +115,8 @@ matrícula repetidos entre as equipes simuladas), e as equipes inscritas aparece
 `/equipes` e na LP enquanto a aba estiver aberta (`sessionStorage`, chave `hackarun:dev:simulated-teams`; apague a
 chave para ver os estados vazios). E-mail de contato começando com `falha` simula erro de rede, `servidor` o script
 caindo e `duplicado` inscrição repetida. O que é digitado em `/inscricao` fica no rascunho da aba (`sessionStorage`,
-chaves `hackarun:registration-draft:v2` e `…:v2:image`; seção 9.8).
+chaves `hackarun:registration-draft:v2` e `…:v2:image`; seção 9.8). O mesmo modo simulado roda nas prévias da
+Cloudflare, ligado pela variável `PUBLIC_REGISTRATION_SIMULATED=true` (seção 16.3).
 
 Para testar o envio de verdade, publique o Apps Script numa planilha **sua** (`apps-script/README.md`) e coloque a URL
 `/exec` só no `.env`, nunca no `event.json` (ele vai para o Git e levaria a URL junto no PR).
@@ -141,9 +149,8 @@ Os scripts de assets em Python (seção 10) pedem Python 3.11 ou mais novo: `pyt
 ```text
 src/
   domain/              regras de negócio puras (entities, value-objects, services, repositories)
-  application/         casos de uso, DTOs e portas (Clock, CalendarExporter, RegistrationGateway,
-                       PreferenceStore, ImageCodec)
-  infrastructure/      adaptadores: JSON, repositórios, Apps Script, imagem, storage, calendário
+  application/         casos de uso, DTOs e portas (Clock, RegistrationGateway, PreferenceStore, ImageCodec)
+  infrastructure/      adaptadores: JSON, repositórios, Apps Script, imagem, storage, relógio
     content/           >>> conteúdo editável do site (event.json, stations.json, faq.json...)
     image/             CanvasImageCodec: abre, redimensiona e comprime a foto da equipe no navegador
   assets/
@@ -177,12 +184,13 @@ src/
       input/           ponteiro (parallax e repulsão)
     styles/            tokens.css (design tokens), base.css, deferred-sections.css (render adiado)
                        e motion-pause.css (o que para com "Pausar animações")
-  shared/              utilitários sem regra de negócio (Observable, EventBus, Ticker, math, dom)
+  shared/              utilitários sem regra de negócio (Observable, EventBus, Ticker, math, dom) e config/
+                       (modo da inscrição: planilha, simulada ou em breve; produção ou prévia da Cloudflare)
   composition/         composition roots: server.ts (build) e client.ts (browser)
-  pages/               rotas do Astro (index, inscricao, equipes, privacidade, 404, .ics)
+  pages/               rotas do Astro (index, inscricao, equipes, privacidade, 404, robots.txt)
 apps-script/           Google Apps Script: 8 .gs + appsscript.json (inscrições, planilha em 3 abas e fotos no
                        Drive) + passo a passo
-public/                servido como está: og-image.jpg, favicon, _headers, robots
+public/                servido como está: og-image.jpg, favicon e _headers (cache, CSP e segurança)
 scripts/
   setup.mjs            npm run setup: prepara o projeto num PC novo (Node, npm ci, .env, --qa)
   fonts/               patch_orbitron_tilde.py: til da Orbitron
@@ -196,18 +204,17 @@ requirements.txt       dependências dos scripts de assets em Python (fonttools,
 
 Páginas geradas no build:
 
-| Rota                 | Arquivo                      | O que é                                                           |
-| -------------------- | ---------------------------- | ----------------------------------------------------------------- |
-| `/`                  | `pages/index.astro`          | A landing page                                                    |
-| `/inscricao`         | `pages/inscricao.astro`      | Formulário de inscrição da equipe; página leve, sem 3D (ADR 0009) |
-| `/equipes`           | `pages/equipes.astro`        | Equipes confirmadas com foto ou logo; página leve, sem 3D         |
-| `/privacidade`       | `pages/privacidade.astro`    | Aviso de privacidade (LGPD) com a versão vigente do aviso         |
-| `/404`               | `pages/404.astro`            | Página de erro, no mesmo visual                                   |
-| `/hackarun-2026.ics` | `pages/hackarun-2026.ics.ts` | Agenda com um evento por bloco da programação (área de inscrição) |
+| Rota           | Arquivo                   | O que é                                                           |
+| -------------- | ------------------------- | ----------------------------------------------------------------- |
+| `/`            | `pages/index.astro`       | A landing page                                                    |
+| `/inscricao`   | `pages/inscricao.astro`   | Formulário de inscrição da equipe; página leve, sem 3D (ADR 0009) |
+| `/equipes`     | `pages/equipes.astro`     | Equipes confirmadas com foto ou logo; página leve, sem 3D         |
+| `/privacidade` | `pages/privacidade.astro` | Aviso de privacidade (LGPD) com a versão vigente do aviso         |
+| `/404`         | `pages/404.astro`         | Página de erro, no mesmo visual                                   |
+| `/robots.txt`  | `pages/robots.txt.ts`     | Libera o rastreio e aponta o sitemap do endereço do site          |
 
-O "Adicionar à agenda" aparece em `/inscricao`: no rodapé do formulário, no aviso de inscrições em breve e na tela
-de sucesso. O botão que ficava na programação saiu a pedido da organização. Todas as páginas entram no sitemap (a
-integração só exclui 404 e 500).
+Todas as páginas entram no sitemap (a integração só exclui 404 e 500). O site não oferece mais o arquivo de agenda
+(`.ics`) nem o "Adicionar à agenda": os botões saíram antes da produção (12/10/2026, seção 18.1).
 
 Os endereços não têm barra no fim (`trailingSlash: 'never'` no `astro.config.mjs`), e o build gera um arquivo por
 página (`build.format: 'file'`: `inscricao.html`, `equipes.html`, `privacidade.html`). Assim a Cloudflare Pages
@@ -533,7 +540,7 @@ dos cursos do selo do hero ficam em `presentation/sections/hero/courseLockup.ts`
 
 - **`days[]`:** um dia por aba, com `date`, `label` (o rótulo curto da aba: Oficinas, Abertura, Mercado, Final),
   `stage` (`workshops`, `launch`, `showcase` ou `final`), `title`, `summary` e `sessions`.
-- **`sessions[]`:** os blocos do dia, com `start` e `end` (`end: null` quando o documento não diz; o `.ics` usa 3 h),
+- **`sessions[]`:** os blocos do dia, com `start` e `end` (`end: null` quando o documento não diz),
   `place`, `audience` (`open`, `hackathon`, `teams` ou `final`, que viram os selos "Aberto ao público", "Hackathon",
   "Só equipes e mentores" e "Final com público"), `audienceNote` (a linha "Público" do documento), `note` e
   `activities`.
@@ -547,8 +554,8 @@ dos cursos do selo do hero ficam em `presentation/sections/hero/courseLockup.ts`
   presencial; o prazo oficial de entrega é o do regulamento) e `ceremony` (14/11, 17h, a HackaRun Experience).
 - **Números de "O evento":** saem do conteúdo. Dias, oficinas contadas por horário (3 + 1 + 3 = 7), estandes
   (`maxStands`) e a final.
-- **Saem daqui também:** o JSON-LD (um `subEvent` por bloco, com local e público), o `.ics` (um evento por bloco) e o
-  roteiro da HackaRun Experience na grande final (6 chips, com a premiação das 19h15 em destaque).
+- **Saem daqui também:** o JSON-LD (um `subEvent` por bloco, com local e público) e o roteiro da HackaRun Experience
+  na grande final (6 chips, com a premiação das 19h15 em destaque).
 
 ## 9. Inscrições (Google Sheets)
 
@@ -562,8 +569,9 @@ e-mail (o formulário e a tela de sucesso avisam), e a aba **Resumo** junta os e
 9.7).
 
 Passo a passo completo em `apps-script/README.md`. Depois de publicar o Web App, coloque a URL em
-`PUBLIC_REGISTRATION_ENDPOINT` (variável de ambiente na Cloudflare ou o `.env` local). O `registration.endpoint` do
-`event.json` também funciona, mas vai para o Git: prefira a variável, para nenhum fork gravar na planilha oficial.
+`PUBLIC_REGISTRATION_ENDPOINT` (no ambiente Production da Cloudflare, seção 16.7, ou no `.env` local). O
+`registration.endpoint` do `event.json` também funciona, mas vai para o Git: no repositório oficial (público), nunca;
+só num fork, com uma planilha de teste.
 
 | Arquivo           | O que faz                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------- |
@@ -711,7 +719,8 @@ Decisão registrada na ADR 0007. O campo **Foto ou logo da equipe** é obrigató
   hora). Pedido de remoção (LGPD) ou imagem imprópria: antes, mandar o arquivo para a lixeira do Drive pelo **Link da
   foto** e esvaziar a lixeira, porque o arquivo continua compartilhado por link e o endereço já passou pelo site. O
   passo a passo também está na aba Resumo. Detalhes em `apps-script/README.md`, seção 8.
-- Em `npm run dev` sem endpoint, o `InMemoryRegistrationGateway` grava as equipes aceitas no `SimulatedTeamStore`
+- Em `npm run dev` (ou numa prévia com `PUBLIC_REGISTRATION_SIMULATED=true`) sem endpoint, o
+  `InMemoryRegistrationGateway` grava as equipes aceitas no `SimulatedTeamStore`
   (memória + `sessionStorage`), com a foto como data URL, e o `SimulatedTeamRepository` alimenta `/equipes` e a LP.
 
 ### 9.7 A planilha (abas, fórmulas e filtros)
@@ -747,7 +756,7 @@ só com o clímax e o CTA (seção 7.5). Todo CTA de inscrição do site leva pa
 
 - **Página:** header, sub-navegação (seção 6.3), título "Inscreva sua _equipe_", o cartão de status
   (`RegistrationStatus`: Em breve, Abertas, Encerrando ou Encerradas, com o contador e o tamanho da equipe) e o
-  formulário com o "Adicionar à agenda" no rodapé (`AgendaRow`). SEO próprio em `components/seo/registrationPageSeo.ts`
+  formulário. SEO próprio em `components/seo/registrationPageSeo.ts`
   (título, descrição, canonical, Open Graph e JSON-LD com `WebPage` e `BreadcrumbList` Início › Inscrição).
 - **Desktop (64rem ou mais):** formulário à esquerda e, à direita, o painel "O que você precisa ter em mãos"
   (`RegistrationBrief`: 4 itens e 3 avisos curtos) e o cartão "Etapas da inscrição" (`FormProgress`), que fica preso
@@ -795,11 +804,18 @@ só com o clímax e o CTA (seção 7.5). Todo CTA de inscrição do site leva pa
   da lista, ou nenhum, vira `direct`. Vai para a coluna Origem da planilha e fica no rascunho, para não se perder numa
   volta.
 - **Sucesso:** o protocolo, o aviso do e-mail com o endereço do contato, "Sua equipe aparece em Equipes depois da
-  confirmação" (com link), "Adicionar à agenda" e "Voltar ao evento". O painel lateral (`[data-reg-aside]`) some antes
-  de o título receber o foco, sem pulo de conteúdo.
-- **Inscrições em breve** (produção sem endpoint): o aviso com "Adicionar à agenda" e só uma amostra curta e apagada
-  do formulário (22rem, 11rem abaixo de 40rem; some num degradê), ainda `inert`. Nesse estado, e com as inscrições
+  confirmação" (com link), os próximos passos (`SuccessSteps`), "Ver equipes" e "Voltar ao evento". O painel lateral
+  (`[data-reg-aside]`) some antes de o título receber o foco, sem pulo de conteúdo.
+- **Inscrições em breve** (produção sem endpoint): o aviso (título e uma linha, sem botão) e só uma amostra curta e
+  apagada do formulário (22rem, 11rem abaixo de 40rem; some num degradê), ainda `inert`. Nesse estado, e com as inscrições
   encerradas, o chunk do formulário nem é baixado.
+- **Prévia de revisão** (`npm run dev` ou `PUBLIC_REGISTRATION_SIMULATED=true`, sempre sem endpoint): o
+  `formStatus` troca o "em breve" por inscrição aberta e simulada, com o gateway em memória. O `PreviewBanner` (uma
+  nota, `role="note"`) diz "Prévia de revisão: as inscrições são simuladas e nada é gravado na planilha." no topo do
+  formulário e logo abaixo do título da tela de sucesso (o do topo sai quando o sucesso aparece), e o anúncio do envio
+  avisa que nada foi gravado. Com endpoint, o endpoint ganha e a flag é ignorada. O modo vem de
+  `shared/config/registrationMode.ts`: no build sem a flag, `SIMULATION_ENABLED` vira `false` e o store, o
+  repositório e o gateway simulados nem entram no bundle.
 - **Regras** (domínio, `FullName`, `StudentId`, `Email`, `TeamMember` e `TeamRegistration`): nome completo com duas
   palavras ou mais, matrícula aparada e em maiúsculas, e-mail válido, e e-mail ou matrícula repetidos na equipe
   marcados no campo repetido ("já está no integrante N").
@@ -808,6 +824,9 @@ só com o clímax e o CTA (seção 7.5). Todo CTA de inscrição do site leva pa
   `mountRegistrationPage`. Honeypot, regra dos 3 s e chave de envio continuam como antes.
 
 ## 10. Identidade e assets
+
+A identidade visual do evento (logo, paleta e fontes do manual oficial) foi criada pela Eduarda Victória (Liga
+Acadêmica). O design da página e o desenvolvimento, em cima dela, são do Marcos.
 
 ### 10.1 Logos e imagens
 
@@ -1037,36 +1056,34 @@ Mudanças em `package.json`, `docs/stack-manifest.json` ou neste guia regeneram 
 
 ## 15. Branches e Pull Requests
 
-1. Faça o fork e configure o `upstream` (seção 4). Quem tem acesso de escrita ao repositório original pode criar a
-   branch direto nele.
-2. Atualize a `main` (`git switch main`, `git pull upstream main`) e crie a branch: `feat/<assunto>`,
-   `fix/<assunto>`, `docs/<assunto>`.
+O passo a passo para a equipe está no `CONTRIBUTING.md`, seção "Fluxo de trabalho da equipe". O resumo:
+
+1. Quem é da equipe entra como **colaborador** (o Marcos ou a Emilly adiciona pelo usuário do GitHub) e **clona o
+   original, sem fork**: PR de fork não ganha a prévia da Cloudflare. Quem é de fora faz fork e configura o `upstream` (seção 4).
+2. Atualize a `main` (`git switch main`, `git pull`) e crie a branch: `feat/<assunto>`, `fix/<assunto>`,
+   `docs/<assunto>` (também `refactor/`, `test/` e `chore/`).
 3. Commits pequenos, no padrão acima.
 4. `npm run validate` e `npm run format:check` antes de abrir o PR.
-5. Se a `main` andou, `git fetch upstream` e `git rebase upstream/main` na sua branch (depois,
-   `git push --force-with-lease`, só nela).
-6. Abra o PR pra `main` de `Marcos-Codfy/lp-hackarun` usando o template (checklist). A CI roda lint, formatação,
-   testes e build; com a Cloudflare ligada, o PR ganha uma URL de preview.
-7. Pelo menos 1 revisão. Merge com **squash**, com título no padrão Conventional Commits.
+5. Se a `main` andou, botão **Update branch** do PR ou `git fetch origin` e `git rebase origin/main` na sua branch
+   (depois, `git push --force-with-lease`, só nela).
+6. Abra o PR pra `main` usando o template (checklist). A CI roda lint, formatação, testes e build (e confere que a
+   inscrição simulada ficou fora do bundle), e o bot da Cloudflare comenta o link da prévia (seção 16.3), que se
+   confere no desktop e no celular.
+7. Um dos donos do código (Marcos, Emilly ou Amanda) aprova; quem abriu o PR não conta. Marcos e Emilly, como
+   administradores, podem fazer o merge direto (seção 16.5).
+8. Merge com **Squash and merge**, com o título do PR no padrão Conventional Commits: um commit por PR na `main`,
+   histórico limpo e revert simples. A produção publica sozinha em 1 a 2 minutos.
 
-Recomendado: proteger a `main` no GitHub (Settings → Branches), exigindo PR e CI verde. O passo a passo para quem
-contribui está no `CONTRIBUTING.md`.
+A proteção da `main` (PR obrigatório, CI verde, aprovação de dono do código, sem force push) está na seção 16.4.
 
 ## 16. Deploy na Cloudflare Pages (grátis)
 
-**Situação:** a publicação oficial está em espera, por decisão do responsável pelo projeto. Os passos abaixo valem
-para quando ela sair e também para quem quer publicar um fork na própria conta (com o endpoint de uma planilha de
-teste).
+**Situação:** a hospedagem oficial é a **Cloudflare Pages**, no plano Free e sem forma de pagamento cadastrada, no
+projeto `hackarun`: **https://hackarun.pages.dev**. O projeto usa a integração com o Git da Cloudflare (Connect to
+Git): cada merge na `main` publica a produção e cada PR ganha uma prévia. A produção abre com as inscrições "em breve"
+(sem `PUBLIC_REGISTRATION_ENDPOINT`) até a coordenação definir vagas e prazo (16.7). A decisão está na ADR 0003.
 
-1. Crie uma conta gratuita em `dash.cloudflare.com`.
-2. **Workers & Pages → Create → Pages → Connect to Git** e escolha `Marcos-Codfy/lp-hackarun`.
-3. Framework preset **Astro**. Build command `npm run build`. Output directory `dist`.
-4. Variáveis de ambiente: `NODE_VERSION=24`, `PUBLIC_SITE_URL=https://<seu-projeto>.pages.dev`,
-   `PUBLIC_REGISTRATION_ENDPOINT=<url do Web App>`.
-5. **Save and Deploy**. Cada push na `main` publica em produção; cada PR ganha uma URL de preview.
-6. (Opcional) Domínio próprio em **Custom domains**.
-
-Cache e headers de segurança ficam em `public/_headers`.
+Por que a Cloudflare (ADR 0003):
 
 | Opção                | Por que não foi a escolhida                                                                              |
 | -------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -1074,9 +1091,188 @@ Cache e headers de segurança ficam em `public/_headers`.
 | GitHub Pages         | Banda sugerida de 100 GB/mês, sem headers customizados e sem preview por PR                              |
 | **Cloudflare Pages** | **Escolhida**: banda e requisições ilimitadas pra estático, CDN com servidores no Brasil, preview por PR |
 
+### 16.1 Projeto
+
+Criado uma vez, por quem é dono da conta da Cloudflare:
+
+1. `dash.cloudflare.com` → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**.
+2. Autorize o app da Cloudflare no GitHub, na organização `hackarun-unicatolica`, só para o repositório
+   `hackarun-unicatolica/lp-hackarun` e clique em **Begin setup**.
+3. Preencha **Set up builds and deployments**:
+
+| Campo                  | Valor                                            |
+| ---------------------- | ------------------------------------------------ |
+| Project name           | `hackarun` (vira `https://hackarun.pages.dev`)   |
+| Production branch      | `main`                                           |
+| Framework preset       | Astro                                            |
+| Build command          | `npm run build` (`astro check` + `astro build`)  |
+| Build output directory | `dist`                                           |
+| Root directory         | `/` (a raiz do repositório)                      |
+| Node                   | o do `.nvmrc` (24), com `NODE_VERSION=24` (16.2) |
+
+4. Coloque as variáveis da 16.2 e clique em **Save and Deploy**. Sem o `.nvmrc` e sem o `NODE_VERSION`, a imagem de
+   build usaria o Node 22.16, abaixo do mínimo de 22.18 do `package.json`. A Cloudflare instala as dependências pelo
+   `package-lock.json`, roda o build e publica o `dist/`. O build do site não usa Python (o `requirements.txt` é só
+   dos scripts de assets).
+5. Em **Settings → Builds** (em telas antigas, **Builds & deployments**) → **Branch control**, confira: produção na
+   `main` e prévias automáticas em todas as outras branches.
+6. Confira o endereço que a Cloudflare deu: tem que ser exatamente `hackarun.pages.dev`. Se o nome já estiver
+   ocupado, ela acrescenta alguns caracteres aleatórios (`hackarun-xyz.pages.dev`); aí troque o endereço junto, num PR
+   só, no `DEFAULT_SITE_URL` (`shared/config/deploy.ts`), no `astro.config.mjs`, no `.env.example`, na documentação e
+   nos testes, e no `PUBLIC_SITE_URL` dos dois ambientes (16.2).
+
+Projeto com Git integration não vira Direct Upload depois; nem precisa: nada de token da Cloudflare no GitHub
+(ADR 0003).
+
+### 16.2 Variáveis de ambiente
+
+No projeto: **Settings → Variables and Secrets** (em telas antigas, **Environment variables**), escolhendo o ambiente
+(**Production** ou **Preview**). Todas são do tipo texto: nada aqui é segredo, porque o que começa com `PUBLIC_` vai
+para o HTML.
+
+| Variável                        | Production                                     | Preview                      |
+| ------------------------------- | ---------------------------------------------- | ---------------------------- |
+| `NODE_VERSION`                  | `24`                                           | `24`                         |
+| `PUBLIC_SITE_URL`               | `https://hackarun.pages.dev`                   | `https://hackarun.pages.dev` |
+| `PUBLIC_REGISTRATION_ENDPOINT`  | vazia (não crie) até a abertura das inscrições | não crie                     |
+| `PUBLIC_REGISTRATION_SIMULATED` | não crie                                       | `true`                       |
+
+- **As variáveis entram no build.** Mudou alguma? Em **Deployments**, no último deploy daquele ambiente, menu **⋯** →
+  **Retry deployment**.
+- **`PUBLIC_SITE_URL` igual nos dois ambientes:** o canonical, o sitemap e o robots.txt das prévias apontam para a
+  produção, e nada compete com ela nos buscadores. Vazio vale como não definido (cai no mesmo endereço).
+- **`PUBLIC_REGISTRATION_SIMULATED` só no Preview.** Se ela for parar no Production sem endpoint, o build da `main`
+  quebra com "PUBLIC_REGISTRATION_SIMULATED=true no build de produção..." e a Cloudflare mantém no ar o último deploy
+  bom (a trava está em `infrastructure/config/env.ts` e `shared/config/deploy.ts`). Com endpoint, o endpoint ganha e a
+  flag é ignorada. Só a palavra `true` liga.
+- **O endpoint nunca vai no Preview:** prévia não grava na planilha oficial.
+- A Cloudflare põe no build `CF_PAGES=1`, `CF_PAGES_BRANCH`, `CF_PAGES_COMMIT_SHA` e `CF_PAGES_URL`. O site usa os
+  dois primeiros para saber se o build é a produção (branch `main`) ou uma prévia.
+
+### 16.3 Prévias dos PRs
+
+- O bot da Cloudflare comenta no PR o link da prévia (`https://<hash>.hackarun.pages.dev`), em 1 a 2 minutos, e cada
+  branch tem também um endereço fixo (`https://<branch>.hackarun.pages.dev`, com `/` virando `-`: `feat/faq` fica em
+  `feat-faq.hackarun.pages.dev`).
+- **Inscrição simulada:** o aviso "Prévia de revisão: as inscrições são simuladas e nada é gravado na planilha."
+  aparece no topo do formulário e na tela de sucesso. As equipes enviadas aparecem em `/equipes` e na LP só naquela
+  aba (`sessionStorage`), como no `npm run dev`, e os e-mails de teste `falha…`, `servidor…` e `duplicado…` simulam os
+  erros (seção 4).
+- **Fora dos buscadores:** a Cloudflare manda `X-Robots-Tag: noindex` em toda prévia, e o build de uma prévia (branch
+  que não é a `main`, ou com a flag de simulação) põe `<meta name="robots" content="noindex">` em todas as páginas
+  (`shared/config/deploy.ts` e `components/seo/Seo.astro`). A produção não leva `noindex`.
+- **A CSP funciona igual nas prévias:** o `public/_headers` só usa `'self'` e os hosts do Google, sem o endereço do
+  site.
+- PR de fork não ganha prévia: a Cloudflare só faz build das branches do próprio repositório. Por isso a equipe clona
+  em vez de fazer fork.
+
+### 16.4 Proteção da `main` no GitHub
+
+**Settings → Branches → Add branch protection rule** (ou **Rules → Rulesets**), para a branch `main`:
+
+| Opção                                                            | Valor                                                            |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Require a pull request before merging                            | ligado                                                           |
+| Require approvals                                                | 1                                                                |
+| Require review from Code Owners                                  | ligado (a aprovação precisa ser de Marcos, Emilly ou Amanda)     |
+| Dismiss stale pull request approvals when new commits are pushed | ligado (commit novo depois da aprovação pede aprovação de novo)  |
+| Require status checks to pass before merging                     | ligado, com o check **Lint, format, test e build** (o job da CI) |
+| Do not allow bypassing the above settings                        | desligado: Marcos e Emilly (admins) fazem o merge direto         |
+| Allow force pushes                                               | desligado                                                        |
+| Allow deletions                                                  | desligado                                                        |
+
+- O check só aparece na busca depois de rodar uma vez (qualquer PR ou push na `main`).
+- Sem o **Dismiss stale pull request approvals**, quem tem acesso de escrita consegue uma aprovação, empurra commits
+  que ninguém revisou para a mesma branch e faz o merge. Ligado, o **Update branch** e um rebase também derrubam a
+  aprovação: o dono do código aprova de novo.
+- Em **Settings → General → Pull Requests**, deixe ligado só **Allow squash merging** (mensagem padrão: o título do
+  PR) e ligue **Automatically delete head branches**.
+- O repositório fica na organização **`hackarun-unicatolica`** (veio da conta pessoal do Marcos em 12/10/2026; o
+  GitHub redireciona o endereço antigo). O Marcos é o dono e a Emilly é administradora: os dois podem passar por cima
+  da regra e fazer o merge direto, sem esperar a aprovação. A Amanda é dona do código (16.5).
+- Em **Settings → Collaborators and teams → Add people**, os outros colegas entram como colaboradores com acesso de
+  escrita (papel **Write**): criam branches e abrem PRs, mas não dão push na `main`, porque o PR é obrigatório.
+
+### 16.5 Donos do código
+
+O `.github/CODEOWNERS` tem `* @Marcos-Codfy @Emyrreis @Manddyyysss`: todo PR pede a revisão dos três, e **uma
+aprovação de qualquer um deles** libera o merge (junto com a CI verde).
+
+- Quem abre o PR não aprova o próprio: PR da Amanda precisa do Marcos ou da Emilly, e PR de um colega, de qualquer um
+  dos três. Marcos e Emilly, administradores, podem fazer o merge direto (a passagem de administrador da 16.4).
+- A aprovação de outro colaborador vale como revisão, mas não cumpre a exigência de dono do código.
+- Dono do código precisa ter acesso de escrita ao repositório: a Emilly é administradora e a Amanda tem escrita.
+  Sem isso, o GitHub ignora o nome no CODEOWNERS.
+
+### 16.6 Custo zero: o que mantém o plano Free
+
+- **Plano Free, sem cartão.** Sem forma de pagamento cadastrada não existe cobrança. Nunca clique em **Upgrade**,
+  **Workers Paid** ou **Pages Pro**, nem adicione cartão em **Manage account → Billing**.
+- **Site só estático.** Nada de `functions/`, `_worker.js` ou adapter `@astrojs/cloudflare`: eles ligam código no
+  servidor da Cloudflare (Pages Functions), que conta na cota diária de Workers. Arquivo estático não tem limite de
+  requisições nem de banda.
+- **Nada de `wrangler.toml`.** Ele passa a mandar na configuração do projeto e o painel deixa de editar as variáveis
+  de Production e Preview, justamente onde fica a separação da 16.2 (flag só no Preview, endpoint só no Production e
+  nunca no repositório).
+- **500 builds por mês, um de cada vez.** Cada push numa branch e cada merge na `main` gastam um. Se acabar, os builds
+  novos ficam parados até o mês virar e o site no ar continua igual: nunca faça upgrade por causa disso. Agrupe os
+  commits antes do push.
+- **Nada de Web Analytics, Turnstile, Zaraz ou Rocket Loader por enquanto:** eles mexem na CSP (`public/_headers`).
+
+### 16.7 Abrir as inscrições depois
+
+Quando a coordenação definir as vagas e o prazo (e o contato do encarregado de dados estiver no aviso de privacidade,
+seção 19.1):
+
+1. No Apps Script, em **Configurações do projeto → Propriedades do script**, defina `CAPACITY` e `CLOSES_AT` (seção
+   9.1). Os mesmos valores vão para `registration.capacity` e `registration.closesAt` do `event.json`, num PR normal.
+2. Confira `URL/exec?action=health`: tem que responder `open: true`.
+3. Cloudflare → `hackarun` → **Settings → Variables and Secrets** → **Production** → crie `PUBLIC_REGISTRATION_ENDPOINT`
+   com a URL `/exec`. Só aqui: nunca no Preview nem no repositório.
+4. **Deployments** → último deploy de produção → **⋯** → **Retry deployment**. Em 1 a 2 minutos `/inscricao` abre o
+   formulário de verdade.
+5. Faça uma inscrição de teste e confira a linha na planilha (depois, marque como `recusado` para liberar a vaga).
+
+Para fechar na hora, sem deploy: `INSCRICOES_FECHADAS=sim` nas Propriedades do script (seção 9.1).
+
+### 16.8 Administradores da conta da Cloudflare
+
+Hoje a conta tem **um dono só** (o Marcos). Se ele perder o acesso, ninguém consegue voltar um deploy, mexer nas
+variáveis nem abrir as inscrições. Para tirar esse risco, convide pelo menos mais uma pessoa da organização:
+**Manage account → Members → Invite**, com o e-mail dela e o papel **Administrator**. Ative a verificação em duas
+etapas em todas as contas. Quem entra como administrador segue as mesmas regras de custo (16.6).
+
+### 16.9 Voltar um deploy (rollback)
+
+- **Na hora, pela Cloudflare:** **Workers & Pages** → `hackarun` → **Deployments** → no último deploy de produção bom,
+  menu **⋯** → **Rollback to this deployment**. Só deploys de produção que deram certo servem de alvo.
+- **Pelo GitHub:** botão **Revert** no PR que causou o problema; o PR de reversão passa pela CI e pela aprovação e,
+  no merge, publica a correção.
+- Voltou pela Cloudflare? Faça também o revert no GitHub, senão o próximo merge publica o problema de novo.
+
+### 16.10 Conferência depois do primeiro deploy
+
+- `curl -I https://hackarun.pages.dev/inscricao` (e `/equipes`, `/privacidade`): `200`, sem redirecionar. Já
+  `/inscricao.html` redireciona (308) para `/inscricao`, e um endereço que não existe responde `404` com o `404.html`.
+- Os headers do `_headers` (CSP, `X-Frame-Options`) aparecem na resposta; `/_astro/*` com cache de 1 ano.
+- `/robots.txt` e `/sitemap-index.xml` com os endereços `https://hackarun.pages.dev`; produção sem `noindex`.
+- Numa prévia: o aviso "Prévia de revisão" em `/inscricao`, o header `x-robots-tag: noindex` e o meta `noindex`.
+
+### 16.11 Deploy temporário de validação (Vercel)
+
+O projeto na Vercel serviu só para validar o design com a organização e é **temporário**: o plano Hobby proíbe uso
+comercial ou patrocinado (ADR 0003). Conferida a produção na Cloudflare, apague o projeto na Vercel (**Settings →
+Advanced → Delete Project**) e não divulgue aquele endereço.
+
+### 16.12 Publicar um fork na sua conta
+
+Os mesmos passos da 16.1, na sua conta e com o seu repositório: `PUBLIC_SITE_URL` com o endereço do seu projeto e, se
+quiser o formulário ligado, `PUBLIC_REGISTRATION_ENDPOINT` com a URL de uma planilha de teste sua.
+
 ## 17. Checklist antes do merge
 
 - [ ] `npm run validate` passou (e `npm run format:check`).
+- [ ] Conferi a prévia da Cloudflare do PR no desktop e no celular (seção 16.3).
 - [ ] Testei no celular (360 e 390 px) e no desktop (1440 px), com capturas das seções alteradas
       (`scripts/qa/shots.mjs`), sem scroll horizontal (`overflow.mjs`) e com as âncoras no alvo (`anchorcheck.mjs`).
 - [ ] Mexeu no 3D: conferi com `?quality=low` e `?quality=high`, sem erro no console.
@@ -1119,7 +1315,8 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 **11/10/2026, v2 aprovada e publicada:**
 
 - Design v2 cinematográfico **aprovado**: mudanças visuais grandes daqui pra frente passam por nova aprovação.
-- Código publicado no GitHub: https://github.com/Marcos-Codfy/lp-hackarun (branch `main`).
+- Código publicado no GitHub: https://github.com/hackarun-unicatolica/lp-hackarun (branch `main`; na época, na
+  conta pessoal do Marcos).
 - Um deploy temporário serviu pra validar o design com a organização. A hospedagem oficial continua a Cloudflare
   Pages (ADR 0003), ainda por conectar.
 - Lighthouse mobile: Performance 66 → **95**, TBT 1.600 → 18 ms, LCP 2,9 → 2,6 s; Acessibilidade, Boas práticas e
@@ -1141,8 +1338,9 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
   rodada 3 subiu para `2026-10-v3`).
 - **Textos:** "Final no Capim Dourado Shopping" (no lugar de "Final no telão"), "UNICATÓLICA" na faixa (no lugar de
   "Palmas–TO"), "Da sala de aula ao palco." no título de "O evento" e chamada nova dos prêmios.
-- **Saíram:** o "Adicionar à agenda" da programação (o `.ics` segue na área de inscrição), o aviso "Corra contra o
-  relógio, não pelos corredores" dos NPCs (a regra vai ser dita no dia) e o link do repositório no rodapé.
+- **Saíram:** o "Adicionar à agenda" da programação (o `.ics` ficou na área de inscrição até sair de vez, antes da
+  produção), o aviso "Corra contra o relógio, não pelos corredores" dos NPCs (a regra vai ser dita no dia) e o link
+  do repositório no rodapé.
 
 **12/10/2026, rodada 3 (em [Unreleased]):**
 
@@ -1199,6 +1397,28 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
 - **Mídias do README** refeitas no build de produção: a prévia animada e o pôster, `hero-desktop.webp` e os quadros
   do hero e do fim da página em `sections-desktop.jpg` e `mobile.jpg`.
 
+**12/10/2026, publicação oficial (em [Unreleased]):**
+
+- **Cloudflare Pages** no projeto `hackarun` (`https://hackarun.pages.dev`), plano Free sem cartão, com a integração
+  com o Git: produção a cada merge na `main` e prévia em cada PR (seção 16). `PUBLIC_SITE_URL` e o `robots.txt` (agora
+  gerado no build) apontam para o endereço novo.
+- **Prévia de revisão:** com `PUBLIC_REGISTRATION_SIMULATED=true` e sem endpoint, o build roda a inscrição simulada,
+  com o aviso "Prévia de revisão" e `noindex`. A flag no build de produção sem endpoint quebra o build de propósito.
+- **Equipe:** `.github/CODEOWNERS` (Marcos, Emilly e Amanda), o template de PR com a conferência da prévia e o "Fluxo
+  de trabalho da equipe" no `CONTRIBUTING.md` (clone, branch, PR, aprovação e Squash and merge).
+
+**12/10/2026, antes da produção (em [Unreleased]):**
+
+- **Sem "Adicionar à agenda":** saíram todos os botões de `/inscricao` (aviso de em breve, rodapé do formulário e
+  tela de sucesso) e, com eles, o arquivo `/hackarun-2026.ics` inteiro: a rota, o caso de uso `BuildCalendarInvite`, a
+  porta `CalendarExporter`, o `IcsCalendarExporter`, o `AgendaRow` e os testes. O aviso de em breve ficou só com o
+  título e uma linha.
+- **Crédito da identidade visual:** a identidade do evento é da Eduarda Victória (Liga Acadêmica); o Marcos fez o
+  design da página e o desenvolvimento em cima dela (seção 10).
+- **Repositório na organização `hackarun-unicatolica`:** https://github.com/hackarun-unicatolica/lp-hackarun (o
+  GitHub redireciona o endereço antigo). README, guia, CONTRIBUTING, changelog, `package.json` e o manifesto da stack
+  apontam para o endereço novo; os papéis da equipe estão na seção 16.4.
+
 ## 19. Pendências
 
 ### 19.1 Da organização
@@ -1218,8 +1438,7 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
       do `ScoringPanel` contra o regulamento.
 - [ ] Horário da premiação: o documento cita "prevista para as 18h" numa nota e 19h15 na programação da HackaRun
       Experience. O site usa 19h15; confirmar.
-- [ ] Horário de término da HackaRun Experience (o documento não informa; o `.ics` usa 17h às 20h e avisa na
-      descrição "Horário de término a confirmar pela organização.", e o JSON-LD termina só na data).
+- [ ] Horário de término da HackaRun Experience (o documento não informa; o JSON-LD termina só na data).
 - [ ] Local exato do desenvolvimento final de 14/11, das 8h às 13h (o documento diz só "UniCatólica").
 - [ ] Faixa de horário de 11/11 (o site usa 19h às 21h50, tirada das três oficinas) e o fim da miniementa de "Do zero
       ao código", que veio cortada no documento.
@@ -1267,9 +1486,12 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
       `v0.3.0` (commit que publica o changelog). Os links do `CHANGELOG.md` dependem delas.
 - [x] Inscrição só de equipe e planilha organizada em três abas (seção 9.7, ADR 0008).
 - [x] Guia de fork (`npm run setup`, `requirements.txt`, README "Como rodar no seu PC" e `CONTRIBUTING.md`).
-- [ ] Conectar a Cloudflare Pages (seção 16) e definir `PUBLIC_SITE_URL` com a URL final: **em espera**, por decisão
-      do responsável pelo projeto.
-- [ ] Excluir o deploy temporário de validação depois da aprovação final.
+- [x] Hospedagem oficial definida e documentada: Cloudflare Pages, projeto `hackarun` (`https://hackarun.pages.dev`),
+      plano Free sem cartão, com prévia simulada em cada PR (seção 16).
+- [ ] Excluir o projeto temporário de validação na Vercel quando a produção na Cloudflare estiver conferida (seção
+      16.11).
+- [ ] Convidar pelo menos mais um administrador para a conta da Cloudflare (seção 16.8).
+- [ ] Confirmar que as duas donas do código aceitaram o convite de colaboradora (seção 16.5).
 - [ ] Testar o Apps Script de verdade: o escopo `spreadsheets.currentonly` num Web App (se a lista de equipes der erro
       de permissão, trocar por `spreadsheets`, como está no `apps-script/README.md`), a autorização do Drive, o
       compartilhamento num domínio institucional e o `lh3.googleusercontent.com` servindo o link público. Hoje só os
@@ -1278,12 +1500,12 @@ O histórico fica no `CHANGELOG.md`, no formato Keep a Changelog 1.1, em portugu
       página de inscrição, o fim da LP com o globo calmo, a prévia animada e `/equipes` com a sub-navegação).
 - [ ] `/inscricao` no estado "em breve": o título do aviso (`RegistrationNotice`) é um `h3` logo depois do `h1`, e o
       Lighthouse tira 2 pontos de acessibilidade (`heading-order`, 98). Com as inscrições abertas fica em 100.
-- [ ] Depois do deploy, confirmar com `curl -I` que `/inscricao`, `/equipes` e `/privacidade` respondem 200 sem
-      redirecionar (seção 5).
+- [ ] Depois do deploy, fazer a conferência da seção 16.10 (`/inscricao`, `/equipes` e `/privacidade` com 200 sem
+      redirecionar, headers, sitemap e o `noindex` só nas prévias).
 - [ ] Reservar a altura do que aparece depois que monta no `#npcs` (a linha a mais da dica do terminal) e no
       `#missoes` (contador e dica do trilho): é o que sobra de pulo de layout e de erro na volta sem bfcache.
 - [ ] Levar `/privacidade` e `/404` para o `PageLayout` leve (seção 6.3), se fizer sentido.
-- [ ] Proteger a `main` no GitHub, exigindo PR e CI verde (seção 15).
+- [ ] Proteger a `main` no GitHub e deixar só o Squash and merge, com as opções da seção 16.4.
 - [ ] Cloudflare Turnstile no formulário, quando a organização gerar as chaves (`apps-script/README.md`).
 
 ## 20. Documentação gerada

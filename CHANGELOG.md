@@ -12,7 +12,75 @@ do Git.
 
 ## [Unreleased]
 
-Nada por enquanto.
+Publicação oficial na Cloudflare Pages, em `https://hackarun.pages.dev`, com as inscrições "em breve" e uma prévia de
+revisão em cada Pull Request.
+
+### Added
+
+- Prévia de revisão: com `PUBLIC_REGISTRATION_SIMULATED=true` e sem endpoint, o build de produção roda a inscrição
+  simulada (gateway em memória, nada é gravado na planilha) e `/equipes` mostra as equipes simuladas, como no
+  `npm run dev`. Ligada só no ambiente Preview da Cloudflare.
+- Aviso "Prévia de revisão: as inscrições são simuladas e nada é gravado na planilha." (`PreviewBanner`) no topo do
+  formulário de `/inscricao` e logo abaixo do título da tela de sucesso, e o anúncio do envio avisa que nada foi
+  gravado.
+- `noindex` nas prévias: o build de uma branch que não é a `main` na Cloudflare, ou com a flag de simulação, põe
+  `<meta name="robots" content="noindex">` em todas as páginas. A produção continua indexável.
+- `.github/CODEOWNERS` com Marcos, Emilly e Amanda: uma aprovação de um deles libera o merge na `main`.
+- "Fluxo de trabalho da equipe" no `CONTRIBUTING.md`: colaborador, clone, branch, PR, CI, prévia, aprovação, Squash
+  and merge, rollback e o que não fazer.
+- Guia, seção 16: o projeto `hackarun` na Cloudflare, as variáveis de Production e Preview, a proteção da `main`, os
+  donos do código, o custo zero, como abrir as inscrições, os administradores da conta e o rollback. Nota de
+  2026-10-12 na ADR 0003 (integração com o Git no lugar de uma GitHub Action com token).
+- Testes do modo da inscrição (o endpoint ganha da flag; flag ligada e desligada), da trava de produção, do `noindex`,
+  do aviso da prévia e do `robots.txt`.
+- Passo "Sem simulação no bundle de produção" na CI: o build sem a flag não pode levar para o `dist/` o gateway, o
+  store nem o anúncio da inscrição simulada.
+
+### Changed
+
+- Endereço oficial `https://hackarun.pages.dev` (era `https://lp-hackarun.pages.dev`) como padrão do `site` no
+  `astro.config.mjs`, no `.env.example`, nos documentos e nos testes. O `PUBLIC_SITE_URL` continua trocando, e vazio
+  vale como não definido.
+- `robots.txt` gerado no build (`pages/robots.txt.ts`), com o sitemap do endereço do site, no lugar do arquivo fixo em
+  `public/`.
+- README e README.en: link "Ver ao vivo" no topo, seção Deploy com produção automática, prévias, variáveis por
+  ambiente e o plano Free sem cartão, e a publicação oficial marcada como feita no roadmap.
+- Template de PR com o link da prévia ("o bot da Cloudflare comenta o link da prévia no PR") e a conferência no
+  desktop e no celular.
+- A tela de sucesso da inscrição tirou os próximos passos para o `SuccessSteps.astro` (o arquivo passava do limite de
+  linhas).
+- Crédito da identidade visual: ela é da Eduarda Victória (Liga Acadêmica), e o Marcos fica com o design da página e
+  o desenvolvimento. "Meu papel" e Créditos do README ("Identidade visual: Eduarda Victória (Liga Acadêmica)") e do
+  README.en ("Visual identity: Eduarda Victória (Academic League)"), guia (seções 10 e 18.1) e design spec. O rodapé
+  dos dois READMEs também ficou "Design da página e desenvolvimento" ("Page design and development").
+- Repositório na organização `hackarun-unicatolica`: https://github.com/hackarun-unicatolica/lp-hackarun (o GitHub
+  redireciona o endereço antigo). Links novos no `package.json` (`repository`, `homepage` e `bugs`), nos READMEs
+  (selo da CI, pôster da prévia, clone e `upstream`), no CONTRIBUTING, no guia, no manifesto da stack e nos links de
+  comparação deste changelog. Guia (seções 1, 15 e 16) e CONTRIBUTING com os papéis: Marcos (dono) e Emilly
+  (administradora) fazem o merge direto, Amanda é dona do código e os demais colegas são colaboradores que abrem PRs.
+- O aviso de inscrições em breve ficou só com o título e uma linha ("Enquanto isso, confere a programação e já chama a
+  sua equipe.", com link para `/#programacao`), e o último dos próximos passos da tela de sucesso virou "Confira a
+  programação no site pra não perder a largada.". Sem o botão de agenda, a página de inscrição não mostra mais as
+  datas no celular, então os dois textos apontam para a programação.
+- Números do README e do README.en contados de novo: 828 testes em 108 arquivos (12 suítes do Apps Script real), 12
+  casos de uso, 439 arquivos e 33.322 linhas em `src`, 108 arquivos de teste e 12 helpers com 10.686 linhas e 1.117
+  linhas de Apps Script.
+- PDFs de `docs/pdf` gerados de novo (`npm run docs:pdf`), com o endereço novo do repositório e sem a agenda `.ics`.
+
+### Removed
+
+- O selo "DEV · Sem planilha configurada" do `RegistrationNotice`, trocado pelo aviso da prévia.
+- Todos os botões "Adicionar à agenda", antes da produção: o do aviso de inscrições em breve, o do rodapé do
+  formulário (`AgendaRow`, com a linha "Não perca a largada") e o da tela de sucesso. Sem nenhum link para ele, saiu
+  também o arquivo de agenda inteiro: a rota `/hackarun-2026.ics`, o caso de uso `BuildCalendarInvite`, a porta
+  `CalendarExporter`, o adaptador `IcsCalendarExporter`, os testes deles e as menções no README, no README.en, no
+  guia, na design spec e no manifesto da stack.
+
+### Security
+
+- Trava contra simular no site oficial: `PUBLIC_REGISTRATION_SIMULATED=true` num build de produção da Cloudflare
+  (branch `main`) sem endpoint quebra o build, e a Cloudflare mantém no ar o último deploy bom. Com endpoint, o
+  endpoint sempre ganha e a flag é ignorada. Sem a flag, a simulação continua fora do bundle de produção.
 
 ## [0.4.0] - 2026-10-12
 
@@ -502,8 +570,8 @@ Fundação do projeto.
 - Bootstrap do cliente (`App`), contratos de eventos e o esqueleto das seções com a sequência de cenas do scroll.
 - Agenda `/hackarun-2026.ics` gerada no build.
 
-[Unreleased]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/Marcos-Codfy/lp-hackarun/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/Marcos-Codfy/lp-hackarun/releases/tag/v0.1.0
+[Unreleased]: https://github.com/hackarun-unicatolica/lp-hackarun/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/hackarun-unicatolica/lp-hackarun/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/hackarun-unicatolica/lp-hackarun/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/hackarun-unicatolica/lp-hackarun/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/hackarun-unicatolica/lp-hackarun/releases/tag/v0.1.0

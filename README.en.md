@@ -3,7 +3,7 @@
 <sub>[Português](README.md) · **English**</sub>
 
 <picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/Marcos-Codfy/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
+  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/hackarun-unicatolica/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
   <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun cinematic scroll: the hero opens with the UniCatólica logo and its two courses, Engenharia de Software and Inteligência Artificial (Software Engineering and Artificial Intelligence), above the official logo, with lightning over the particle globe; at each section the 3D particles become a new shape (stopwatch, neon question mark, mission map, synthwave terrain, stage with an LED wall, golden trophy and galaxy) and at the end they form the globe again, now calm: it turns slowly behind the &quot;Sua vaga na corrida&quot; call to action, charges up, lights the &quot;Quero participar&quot; button and releases a soft pulse of light at its edge." />
 </picture>
 
@@ -18,14 +18,16 @@ registrations land straight in a Google Sheet.
 <sub>**Overdrive** is the codename of this page's cinematic v2: like the turbo boost in racing games, it speeds up from
 scene to scene and, at the finish, the globe charges up and releases a pulse of energy.</sub>
 
-[![CI](https://github.com/Marcos-Codfy/lp-hackarun/actions/workflows/ci.yml/badge.svg)](https://github.com/Marcos-Codfy/lp-hackarun/actions/workflows/ci.yml)
+[![CI](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml/badge.svg)](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml)
 ![Astro](https://img.shields.io/badge/Astro-7-FF5D01?logo=astro&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strictest-3178C6?logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-049EF4?logo=threedotjs&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
 [![Lighthouse mobile: performance 98, accessibility 100, best practices 100 and SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%20100%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
-<!-- DEMO: the badge and link for the official site (Cloudflare Pages) go here once it is live. -->
+[![Live demo: hackarun.pages.dev](https://img.shields.io/badge/live%20demo-hackarun.pages.dev-00E5FF?logo=cloudflare&logoColor=white)](https://hackarun.pages.dev)
+
+**[See it live → hackarun.pages.dev](https://hackarun.pages.dev)**
 
 [Project guide (pt-BR)](docs/GUIA_DO_PROJETO.md) · [Decisions (ADRs)](docs/adr) · [Changelog](CHANGELOG.md) ·
 [Design spec](docs/design/design-spec.md) · [Contributing](CONTRIBUTING.md)
@@ -42,9 +44,9 @@ scene to scene and, at the finish, the globe charges up and releases a pulse of 
 
 ## In 30 seconds
 
-- **My role:** solo development. I created the event's visual identity with Eduarda, a fellow member of the Academic
-  League, and, on top of it, designed the page and built the 3D and shaders, the front end, the Apps Script
-  registration API, the tests, the CI and the docs.
+- **My role:** solo development. On top of the event's visual identity, created by Eduarda Victória (Academic
+  League), I designed the page and built the 3D and shaders, the front end, the Apps Script registration API, the
+  tests, the CI and the docs.
 - **What it is:** the official site of HackaRun 2026, the 1st edition of UniCatólica's event, organized by LAES (the
   Software Engineering and Artificial Intelligence Academic League), with Capim Dourado Shopping, a local mall, as the
   exclusive partner of the awards. It is a 4-day event, November 11 to 14, 2026, in Palmas, Tocantins, Brazil, with
@@ -66,7 +68,7 @@ scene to scene and, at the finish, the globe charges up and releases a pulse of 
   inside the cell, members with one row per person and a live summary), with the team photo in Google Drive, one team
   per person, idempotent retries, rate limits, a concurrency lock and versioned LGPD (Brazil's data protection law)
   consent.
-- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 786 tests, CI on
+- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 828 tests, CI on
   GitHub Actions, Conventional Commits, 9 ADRs and an `npm run setup` for anyone who forks it.
 
 ## Visuals
@@ -157,7 +159,7 @@ flowchart TB
   subgraph INFRA["Infrastructure"]
     JSON["JSON repositories"]
     GAS["Apps Script gateway"]
-    ADP["Image, storage and ICS"]
+    ADP["Image, storage and clock"]
   end
   COMP(["Composition roots"])
 
@@ -177,7 +179,7 @@ flowchart TB
 **DDD building blocks:** `Entity` and `ValueObject` base types, `Result<T, E>` with `ok` and `fail`, two aggregate
 roots (`HackathonEvent` and `TeamRegistration`), entities such as `EventDay`, `Session` and `Activity`, value objects
 such as `TeamName`, `TeamMember`, `FullName`, `StudentId`, `Email`, `TeamImage`, `TimeSlot`, `Audience`, `Countdown`
-and `ScoringRule`, the `RegistrationPolicy` domain service (soon, open, closing, closed) and 13 use cases. Invalid JSON
+and `ScoringRule`, the `RegistrationPolicy` domain service (soon, open, closing, closed) and 12 use cases. Invalid JSON
 content fails the build, and a test checks the schedule against the event's official document.
 
 **MVVM:** 6 DOM-free ViewModels holding state in `Observable` (countdown, HUD, pause, NPC hunt, form and teams), and
@@ -350,18 +352,19 @@ The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
 
 ## Quality
 
-| Item       | Status                                                                                                            |
-| ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| Tests      | **786 tests in 102 files** (Vitest + happy-dom), split by layer, including 9 suites that run the real Apps Script |
-| Lint       | ESLint with no errors or warnings: layer rules, a 250 code-line cap per file, `import type`                       |
-| Types      | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check           |
-| Formatting | Prettier across the repository                                                                                    |
-| CI         | GitHub Actions on push to `main` and on PRs: `npm ci` → lint → format check → tests → build → `dist` artifact     |
-| Commits    | Husky + lint-staged on pre-commit and commitlint on commit-msg (a scope outside the list triggers a warning)      |
-| Browser QA | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow, Web Vitals, long tasks and Lighthouse      |
+| Item       | Status                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| Tests      | **828 tests in 108 files** (Vitest + happy-dom), split by layer, including 12 suites that run the real Apps Script |
+| Lint       | ESLint with no errors or warnings: layer rules, a 250 code-line cap per file, `import type`                        |
+| Types      | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check            |
+| Formatting | Prettier across the repository                                                                                     |
+| CI         | GitHub Actions on push to `main` and on PRs: `npm ci` → lint → format → tests → simulation-free build → `dist`     |
+| Commits    | Husky + lint-staged on pre-commit and commitlint on commit-msg (a scope outside the list triggers a warning)       |
+| Browser QA | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow, Web Vitals, long tasks and Lighthouse       |
 
-**By the numbers:** 439 files and 33,361 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 90 files and 5,852
-lines are the 3D module; 102 test files and 10 helpers, with 9,910 lines; 999 lines of Apps Script in 8 files; 9 ADRs.
+**By the numbers:** 439 files and 33,322 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 90 files and 5,852
+lines are the 3D module; 108 test files and 12 helpers, with 10,686 lines; 1,117 lines of Apps Script in 8 files; 9
+ADRs.
 
 ---
 
@@ -392,10 +395,15 @@ On GitHub, click **Fork**, then:
 ```bash
 git clone https://github.com/<your-username>/lp-hackarun.git
 cd lp-hackarun
-git remote add upstream https://github.com/Marcos-Codfy/lp-hackarun.git
+git remote add upstream https://github.com/hackarun-unicatolica/lp-hackarun.git
 ```
 
 `origin` is your fork (where you push) and `upstream` is the original repository (where updates come from).
+
+**On the team?** The repository lives in the `hackarun-unicatolica` GitHub organization. Ask to be added as a
+collaborator and skip the fork: clone the original
+(`git clone https://github.com/hackarun-unicatolica/lp-hackarun.git`), with no `upstream`. That way your PRs get the
+Cloudflare preview. The step by step (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTING.md#fluxo-de-trabalho-da-equipe).
 
 **3. Set up the project**
 
@@ -509,11 +517,12 @@ your PR.
 
 ### Environment variables
 
-| Variable                       | Required | Description                                                                           |
-| ------------------------------ | -------- | ------------------------------------------------------------------------------------- |
-| `PUBLIC_SITE_URL`              | no       | Public URL (canonical, sitemap, Open Graph). Default: `https://lp-hackarun.pages.dev` |
-| `PUBLIC_REGISTRATION_ENDPOINT` | no       | Apps Script Web App URL. Empty means "inscrições em breve" (simulated mode in dev)    |
-| `DOCS_OUT_DIR`                 | no       | Extra folder where `npm run docs:pdf` copies the PDFs and the guide                   |
+| Variable                        | Required | Description                                                                                             |
+| ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL`               | no       | Public URL (canonical, sitemap, robots.txt, Open Graph). Default: `https://hackarun.pages.dev`          |
+| `PUBLIC_REGISTRATION_ENDPOINT`  | no       | Apps Script Web App URL. Empty means "inscrições em breve" (simulated mode in dev)                      |
+| `PUBLIC_REGISTRATION_SIMULATED` | no       | `true` on Cloudflare previews only: with no endpoint, registration is simulated and pages get `noindex` |
+| `DOCS_OUT_DIR`                  | no       | Extra folder where `npm run docs:pdf` copies the PDFs and the guide                                     |
 
 The QA scripts read `BRAVE_PATH` or `CHROME_PATH` to find the browser.
 
@@ -568,16 +577,16 @@ throttling and slow 4G) and `trace.mjs` (a trace up to first paint and the boot 
 src/
 ├── domain/          # entities, value objects, aggregates, a domain service and repository interfaces
 ├── application/     # use cases, DTOs and ports
-├── infrastructure/  # JSON content, mappers, repositories, Apps Script, image, storage, clock and ICS
+├── infrastructure/  # JSON content, mappers, repositories, Apps Script, image, storage and clock
 ├── presentation/    # app, layouts, sections, components, controllers, formatters, view-models, views, motion,
 │                    # styles and experience/ (3D: camera, input, layers, particles, post, quality, scene, shaders, shapes)
-├── shared/          # EventBus, Observable, Ticker and utilities
+├── shared/          # EventBus, Observable, Ticker, utilities and config/ (registration mode, production or preview)
 ├── composition/     # composition roots (build and browser)
 ├── assets/          # official logos and Orbitron with the redrawn tilde
-└── pages/           # index, inscricao (registration), equipes (teams), privacidade (LGPD), 404 and the .ics calendar
+└── pages/           # index, inscricao (registration), equipes (teams), privacidade (LGPD), 404 and robots.txt
 apps-script/         # registration API, the three-tab sheet and photos in Drive (Google Apps Script) + setup guide
 design/              # briefing references and the teaser video (not shipped)
-public/              # og-image, favicon, _headers and robots
+public/              # og-image, favicon and _headers (cache, CSP and security)
 scripts/             # setup.mjs, font patch, PDF generator and qa/
 tests/               # tests split by layer
 docs/                # guide, design spec, ADRs, stack manifest, PDFs and README media
@@ -608,37 +617,58 @@ requirements.txt     # dependencies of the Python asset scripts
   site redeploy) and `FOTOS_PASTA_ID` (the photo folder). Changed the privacy notice text? Bump `CONSENT_VERSION` in
   [`SubmitRegistration.ts`](src/application/use-cases/SubmitRegistration.ts) and in
   [`Validation.gs`](apps-script/Validation.gs), and publish the script together with the site.
-- **Calendar:** the build generates `/hackarun-2026.ics` (RFC 5545) with one event per schedule block, downloaded from
-  the "Adicionar à agenda" (add to calendar) buttons on the registration page.
 
 ### Contributing
 
-The full workflow (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTING.md). In short:
+The full workflow (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTING.md). Team members are added as collaborators and clone
+the repository directly (no fork, so the PR gets its Cloudflare preview); outside contributors use a fork. In short:
 
-1. Sync your `main` with the original: `git switch main`, `git pull upstream main` and `git push origin main`.
-2. Branch off it: `git switch -c feat/<topic>` (or `fix/`, `docs/`, `refactor/`, `test/`).
-3. Make small commits in **Conventional Commits**, in English: `type(scope): description`, for example
+1. Branch off an up-to-date `main`: `git switch -c feat/<topic>` (or `fix/`, `docs/`, `refactor/`, `test/`).
+2. Make small commits in **Conventional Commits**, in English: `type(scope): description`, for example
    `feat(sections): add day tabs to the schedule`. The allowed scopes are in
    [`commitlint.config.js`](commitlint.config.js): `domain`, `application`, `infra`, `ui`, `sections`, `experience`,
    `motion`, `a11y`, `perf`, `seo`, `content`, `docs`, `ci`, `deps`, `config` and `tests`.
-4. Run `npm run validate` and `npm run format:check`.
-5. `git push -u origin feat/<topic>` and open a Pull Request against `main` on `Marcos-Codfy/lp-hackarun`, filling in
-   the template. CI has to be green, and the merge is a squash after one review.
+3. Run `npm run validate` and `npm run format:check`.
+4. `git push -u origin feat/<topic>` and open a Pull Request against `main`, filling in the template. CI has to be
+   green, the Cloudflare preview shows up on the PR and one of the code owners ([CODEOWNERS](.github/CODEOWNERS))
+   approves it.
+5. The merge is a **Squash and merge**, with the PR title in Conventional Commits, and production updates on its own.
 
 Each release's changes are in [CHANGELOG.md](CHANGELOG.md).
 
 ### Deploy
 
-Free hosting on **Cloudflare Pages**. The official launch of this repository is on hold, by my decision; once it
-happens, the link goes at the top of this README. To publish your fork on your own account:
+The official site runs on **Cloudflare Pages**, on the free plan with no card on file:
+**[hackarun.pages.dev](https://hackarun.pages.dev)**. I went with Cloudflare's own Git integration (no token stored in
+GitHub) and kept the site 100% static, with nothing that could be billed.
 
-1. Cloudflare → **Workers & Pages → Create → Pages → Connect to Git**.
+- **Automatic production:** every merge into `main` deploys on its own, in 1 to 2 minutes.
+- **A preview on every PR:** the Cloudflare bot comments a dedicated address on the PR (`<hash>.hackarun.pages.dev`).
+  On the preview, registration is simulated and shows the notice "Prévia de revisão: as inscrições são simuladas e
+  nada é gravado na planilha." (review preview: registrations are simulated and nothing is written to the
+  spreadsheet), and the pages get `noindex`.
+- **Variables per environment** (Settings → Variables and Secrets on the project):
+
+| Variable                        | Production                                                                    | Preview                      |
+| ------------------------------- | ----------------------------------------------------------------------------- | ---------------------------- |
+| `NODE_VERSION`                  | `24`                                                                          | `24`                         |
+| `PUBLIC_SITE_URL`               | `https://hackarun.pages.dev`                                                  | `https://hackarun.pages.dev` |
+| `PUBLIC_REGISTRATION_ENDPOINT`  | empty until registration opens ("inscrições em breve")                        | not set                      |
+| `PUBLIC_REGISTRATION_SIMULATED` | not set (with no endpoint the build fails on purpose; with one it is ignored) | `true`                       |
+
+- **Zero cost:** Free plan with no card, no `functions/`, `_worker.js` or `wrangler.toml`. If the 500 builds of the
+  month run out, new builds just wait for the next month; the site stays up.
+
+The full setup (project, `main` protection, code owners, how to open registration and how to roll back a deploy) is
+in the [project guide, section 16 (pt-BR)](docs/GUIA_DO_PROJETO.md#16-deploy-na-cloudflare-pages-grátis). To publish
+your fork on your own account:
+
+1. Cloudflare → **Workers & Pages → Create application → Pages → Connect to Git**.
 2. Preset **Astro** · Build `npm run build` · Output `dist`.
-3. Variables: `NODE_VERSION=24`, `PUBLIC_SITE_URL` and, if you want the form live, `PUBLIC_REGISTRATION_ENDPOINT`
-   pointing at your test spreadsheet.
+3. Variables: `NODE_VERSION=24`, `PUBLIC_SITE_URL` with your project's address and, if you want the form live,
+   `PUBLIC_REGISTRATION_ENDPOINT` pointing at your test spreadsheet.
 
-Once connected, every push to `main` deploys to production, and every PR gets a preview URL. The comparison with other
-options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
+The comparison with other options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 
 ## Roadmap
 
@@ -658,15 +688,15 @@ options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
 - [x] Registration on a page of its own, with a draft kept in the tab and a way back to the same spot on the landing page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md))
 - [x] A calmer globe at the end of the page: it turns slowly, breathes and releases a soft pulse
 - [x] UniCatólica and course lockup (Software Engineering and Artificial Intelligence) at the top of the hero, and LAES as organizer in the partners band
-- [ ] Registrations switched on in the official site, together with the Cloudflare launch
-- [ ] Official launch on Cloudflare Pages: on hold, by my decision
+- [x] Official launch on Cloudflare Pages ([hackarun.pages.dev](https://hackarun.pages.dev)), with automatic deploys from `main` and a preview on every PR
+- [ ] Registrations switched on in the official site: once the organizers set the capacity and the deadline
 - [ ] Rules and mission scoring: the organizers present them at the opening, on November 12, at 7:35 p.m.
 - [ ] Prizes, mentors and judges: the organizers reveal them closer to the event
 
 ## Credits
 
-- **Design and development:** [Marcos Vinicius Muniz Arruda](https://github.com/Marcos-Codfy)
-- **Visual identity:** Marcos Vinicius Muniz Arruda and Eduarda, a fellow member of the Academic League
+- **Page design and development:** [Marcos Vinicius Muniz Arruda](https://github.com/Marcos-Codfy)
+- **Visual identity:** Eduarda Victória (Academic League)
 - **Hosted by:** UniCatólica
 - **Organized by:** LAES, the Software Engineering and Artificial Intelligence Academic League
 - **Partner:** Capim Dourado Shopping, exclusive partner of the awards
@@ -679,7 +709,7 @@ and appear here only to identify the event.</sub>
 
 <div align="center">
 
-<sub>Design and development by <a href="https://github.com/Marcos-Codfy">Marcos Vinicius Muniz Arruda</a> ·
+<sub>Page design and development by <a href="https://github.com/Marcos-Codfy">Marcos Vinicius Muniz Arruda</a> ·
 Palmas, Brazil · 2026</sub>
 
 <!-- LINKEDIN: replace with the profile link when you want it shown here. -->

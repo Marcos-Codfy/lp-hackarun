@@ -2,7 +2,7 @@
   "$comment": "Fonte única do PDF 'Stack e Padrões'. Só nomes, sem explicação. Bibliotecas e versões são lidas do package.json automaticamente.",
   "title": "HackaRun 2026 · Landing Page",
   "subtitle": "Stack, bibliotecas, recursos, padrões e conceitos aplicados",
-  "repository": "https://github.com/Marcos-Codfy/lp-hackarun",
+  "repository": "https://github.com/hackarun-unicatolica/lp-hackarun",
   "sections": [
     {
       "title": "Linguagens e formatos",
@@ -40,7 +40,6 @@
         "Back/forward cache (bfcache)",
         "Canvas 2D (raios procedurais e contorno do logo)",
         "<details>/<summary> nativos",
-        "iCalendar (.ics, RFC 5545)",
         "CSS mix-blend-mode (screen)",
         "backdrop-filter",
         "Web Workers (geração das formas 3D)",

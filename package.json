@@ -17,13 +17,13 @@
     "accessibility",
     "unicatolica"
   ],
-  "homepage": "https://github.com/Marcos-Codfy/lp-hackarun#readme",
+  "homepage": "https://github.com/hackarun-unicatolica/lp-hackarun#readme",
   "bugs": {
-    "url": "https://github.com/Marcos-Codfy/lp-hackarun/issues"
+    "url": "https://github.com/hackarun-unicatolica/lp-hackarun/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Marcos-Codfy/lp-hackarun.git"
+    "url": "git+https://github.com/hackarun-unicatolica/lp-hackarun.git"
   },
   "author": "Marcos Vinicius Muniz Arruda (https://github.com/Marcos-Codfy)",
   "type": "module",
