@@ -45,6 +45,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      # o build da CI não tem a flag: o gateway, o store e o anúncio da inscrição simulada não podem estar no dist
+      - name: Sem simulação no bundle de produção
+        run: |
+          test -d dist/_astro
+          if grep -rlE 'hackarun:dev:simulated-teams|Simulated failure|Inscrição simulada' dist; then
+            echo "::error::código da inscrição simulada no build sem PUBLIC_REGISTRATION_SIMULATED"
+            exit 1
+          fi
+
       - name: Upload dist
         uses: actions/upload-artifact@v7
         with:
