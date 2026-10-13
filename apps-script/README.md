@@ -6,7 +6,7 @@ através de um **Web App do Apps Script**, que é gratuito. A foto ou logo de ca
 quase em tempo real.
 
 ```
-site (formulário + foto) --POST--> Web App --> aba "Equipes"      (1 linha por equipe, com a foto na célula)
+site (formulário + foto) --POST--> Web App --> aba "Equipes"      (1 linha por equipe, com a foto e os integrantes)
                                            +-> aba "Integrantes"  (1 linha por pessoa: nome, matrícula, e-mail)
                                            +-> Drive: pasta das fotos (FOTOS_PASTA_ID)
 site (/equipes)          --GET ?action=teams--> só equipes com Status "confirmado": nome, nº de integrantes e foto
@@ -79,8 +79,10 @@ Em **Configurações do projeto > Propriedades do script > Adicionar propriedade
    **Google Drive** (para as fotos).
 3. No **Registro de execução** aparecem as abas criadas e o endereço da pasta das fotos. Na planilha agora existem:
    - **Equipes**: Protocolo, Data/hora, Equipe, Integrantes (qtd), **Foto** (miniatura dentro da célula, pela
-     fórmula `=IMAGE()`), **Status** (menu `pendente` / `confirmado` / `recusado`), E-mail de contato, E-mails da
-     equipe (separados por `; `), Link da foto (abre no Drive), ID da foto, Origem, Consentimento, Chave de envio.
+     fórmula `=IMAGE()`), **Status** (menu `pendente` / `confirmado` / `recusado`), **Integrantes** (a equipe
+     inteira numa célula, uma pessoa por linha: `1. Nome completo · Matrícula · E-mail (contato)`, na ordem da
+     inscrição), E-mail de contato, E-mails da equipe (separados por `; `), Link da foto (abre no Drive), ID da
+     foto, Origem, Consentimento, Chave de envio.
    - **Integrantes**: Protocolo, Equipe, Nº, Nome completo, Matrícula, E-mail, Contato (`sim`/`não`) e **Status da
      equipe** (fórmula que busca o Status na aba Equipes).
    - **Resumo**: equipes inscritas, confirmadas, pendentes, recusadas, total de integrantes, vagas restantes (com
@@ -118,15 +120,20 @@ Em **Configurações do projeto > Propriedades do script > Adicionar propriedade
 
 Escolha **uma** das opções:
 
-- **Cloudflare Pages (recomendado):** no projeto, abra **Settings > Environment variables** e crie
-  `PUBLIC_REGISTRATION_ENDPOINT` com a URL `/exec` do passo 5. Faça um novo deploy (as variáveis entram no build).
-- **No código:** coloque a URL em `registration.endpoint` no `src/infrastructure/content/event.json` e faça commit.
+- **Cloudflare Pages (o caminho do site oficial):** no projeto, abra **Settings > Variables and Secrets** (em telas
+  antigas, **Environment variables**), escolha o ambiente **Production** e crie `PUBLIC_REGISTRATION_ENDPOINT` com a
+  URL `/exec` do passo 5. Depois, **Deployments > Retry deployment** no último deploy de produção (as variáveis entram
+  no build). Nunca no ambiente Preview: as prévias dos PRs rodam simuladas e não gravam na planilha. Passo a passo no
+  guia do projeto, seção 16.7.
+- **No código, só num fork seu com planilha de teste:** coloque a URL em `registration.endpoint` no
+  `src/infrastructure/content/event.json`. No repositório oficial, nunca: ele é público e a URL iria junto.
 
 Sem URL, o site mostra "As inscrições abrem em breve" com o formulário desativado. Em `npm run dev` sem URL, o envio é
 simulado na memória para testar a tela: e-mail de contato começando com `falha` simula erro de rede, `servidor` o
 script caindo e `duplicado` inscrição repetida; nome de equipe, e-mail ou matrícula repetidos entre as equipes da
 simulação dão o mesmo erro no campo que o script de verdade. As equipes simuladas aparecem em `/equipes` já
-confirmadas, com a foto, enquanto a aba do navegador estiver aberta.
+confirmadas, com a foto, enquanto a aba do navegador estiver aberta. As prévias da Cloudflare rodam igual, ligadas
+pela variável `PUBLIC_REGISTRATION_SIMULATED=true` do ambiente Preview.
 
 ## 7. Mudou o código? Publique uma nova versão
 
@@ -140,13 +147,42 @@ confirmadas, com a foto, enquanto a aba do navegador estiver aberta.
 > **Vindo da versão com a aba `Inscricoes`** (modalidade individual, WhatsApp, curso): a aba antiga não é mais usada.
 > Cole os oito arquivos, rode `configurarPlanilha` e publique a nova versão. Depois apague a aba `Inscricoes`.
 
+### Atualizando para a coluna Integrantes (layout 6)
+
+A aba **Equipes** ganhou a coluna **Integrantes**, logo depois do **Status**. Mudaram só `Code.gs`, `Sheets.gs`,
+`Setup.gs` e `Summary.gs`.
+
+1. Cole os quatro arquivos por cima dos que estão no editor e salve.
+2. Publique a nova versão (passo 2 acima: **Gerenciar implantações > Editar > Nova versão**).
+3. Logo em seguida, rode `configurarPlanilha` uma vez. Se esquecer, a próxima inscrição faz a mesma coisa sozinha.
+
+Faça nessa ordem. A versão publicada antes não conhece a coluna nova: se ela receber uma inscrição depois da
+migração, grava os dados nas colunas erradas. Entre o passo 2 e o 3, a lista pública (`?action=teams`) sai sem as
+fotos (o site mostra as iniciais): confira ela só depois do passo 3. Para não correr risco nenhum, crie a propriedade
+`INSCRICOES_FECHADAS=sim` antes do passo 1 e apague depois do passo 3 (o site mostra inscrições fechadas por esses
+poucos minutos).
+
+O que o `configurarPlanilha` faz na planilha que já tem equipes:
+
+- **Insere** uma coluna de verdade depois do Status (igual a **Inserir 1 coluna à direita**): o que estava da coluna G
+  em diante anda uma coluna para a direita e nenhum dado é sobrescrito.
+- **Preenche** a célula Integrantes de cada equipe que já existe com as pessoas da aba **Integrantes** (pelo
+  Protocolo, na ordem do Nº).
+- Refaz as fórmulas (Foto, Link da foto, Status da equipe e o Resumo) com as letras novas. O filtro, as faixas, as
+  cores e o aviso dos títulos passam a cobrir a coluna nova. Se o filtro for refeito, os critérios que estavam
+  aplicados nele somem (os dados ficam).
+- Rodar de novo não insere outra coluna. Ele só preenche as células Integrantes que estiverem vazias.
+
+Depois de migrar, **não volte** para uma implantação antiga: ela grava no layout anterior.
+
 ## 8. Rotina da organização
 
 ### Confirmar uma equipe
 
 1. Na aba **Equipes**, confira os dados e a **Foto** (a miniatura aparece na própria célula; o **Link da foto** abre
    no Drive).
-2. Se quiser, confira as pessoas na aba **Integrantes** (filtre pelo Protocolo ou pela Equipe).
+2. Confira as pessoas na coluna **Integrantes** da própria linha (nome, matrícula e e-mail de cada uma; a primeira é o
+   contato). Para filtrar por pessoa, use a aba **Integrantes**.
 3. Na coluna **Status**, troque `pendente` por `confirmado`.
 4. Em até 1 minuto a equipe aparece em **/equipes** e no contador do site, só com **nome, foto e número de
    integrantes**. Nomes, matrículas e e-mails nunca saem da planilha.
@@ -160,6 +196,12 @@ de novo).
 - Na aba **Integrantes**: por pessoa, **Matrícula**, **E-mail**, Contato ou **Status da equipe** (a coluna acompanha a
   aba Equipes sozinha).
 - Para não atrapalhar quem está olhando junto, use uma visualização filtrada (**Dados > Visualizações filtradas**).
+
+### Corrigir um integrante
+
+A célula **Integrantes** da aba Equipes é texto e não acompanha a aba Integrantes sozinha. Corrigiu um nome, uma
+matrícula ou um e-mail na aba **Integrantes**? Apague a célula **Integrantes** da equipe e rode `configurarPlanilha`:
+ela é refeita com os dados da aba. Se o e-mail mudou, corrija também **E-mail de contato** e **E-mails da equipe**.
 
 ### Mandar e-mail para as equipes
 
@@ -260,4 +302,6 @@ em `script-src` e `frame-src`. Fica pendente até a organização gerar as chave
 - **Retenção:** até 6 meses depois do evento. Depois disso, apague a planilha e a pasta das fotos (ou anonimize o que
   precisar guardar para estatística).
 - Pedidos de acesso, correção, exclusão ou revogação chegam por e-mail: localize pelo protocolo, pelo nome da equipe
-  ou pelo e-mail (filtro da aba Integrantes) e atenda em até 15 dias.
+  ou pelo e-mail (filtro da aba Integrantes) e atenda em até 15 dias. Os dados de cada pessoa aparecem em dois
+  lugares: na aba **Integrantes** e, na aba **Equipes**, nas colunas **Integrantes**, **E-mail de contato** e
+  **E-mails da equipe**. Corrija ou apague nos dois.

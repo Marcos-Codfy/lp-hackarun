@@ -53,6 +53,12 @@ describe('Apps Script · foto/logo da equipe', () => {
     expect(heldWhileSharing).toEqual([false]);
   });
 
+  it('as linhas vão pra planilha (flush) antes de soltar o lock: a próxima da fila já vê a equipe', () => {
+    const script = new AppsScriptSandbox();
+    expect(script.post(withImage('image/png')).ok).toBe(true);
+    expect(script.flushes).toEqual([true]);
+  });
+
   it('cria a pasta das fotos uma vez só e guarda o id em FOTOS_PASTA_ID', () => {
     const script = new AppsScriptSandbox();
     script.post(withImage('image/png'));

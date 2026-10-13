@@ -1,10 +1,12 @@
 // dublês da planilha (SpreadsheetApp): abas, intervalos, fórmulas e o que a formatação pediu.
 // Formatação (cor, largura, alinhamento...) só fica registrada em `calls`: o teste confere o pedido, não o visual
 
-import { protection, recorder, type FakeProtection } from './recorders';
+import { FakeBanding, FakeFilter, insertColumn } from './layoutFakes';
+import { protection, type FakeProtection } from './recorders';
 
 export type Cell = string | number | Date;
 export { recorder, type FakeProtection } from './recorders';
+export { FakeBanding, FakeFilter } from './layoutFakes';
 
 export interface StyleCall {
   method: string;
@@ -76,18 +78,32 @@ export class FakeRange {
     return this;
   }
 
-  createFilter(): unknown {
-    this.sheet.filter = { a1: this.getA1Notation() };
+  clearDataValidations(): this {
+    const a1 = this.getA1Notation();
+    this.sheet.calls.push({ method: 'clearDataValidations', a1, args: [] });
+    this.sheet.validations.splice(0, Infinity, ...this.sheet.validations.filter((v) => v.a1 !== a1));
+    return this;
+  }
+
+  clearFormat(): this {
+    this.sheet.calls.push({ method: 'clearFormat', a1: this.getA1Notation(), args: [] });
+    return this;
+  }
+
+  createFilter(): FakeFilter {
+    if (this.sheet.filter) throw new Error('You can only have one filter per sheet');
+    this.sheet.filter = new FakeFilter(this.sheet, this);
     return this.sheet.filter;
   }
 
-  applyRowBanding(...args: unknown[]): unknown {
-    this.sheet.bandings.push({ a1: this.getA1Notation(), args });
-    return recorder();
+  applyRowBanding(...args: unknown[]): FakeBanding {
+    const banding = new FakeBanding(this, args);
+    this.sheet.bandings.push(banding);
+    return banding;
   }
 
   protect(): FakeProtection {
-    const p = protection('RANGE', this.getA1Notation());
+    const p = protection('RANGE', this.getA1Notation(), this);
     this.sheet.protections.push(p);
     return p;
   }
@@ -98,11 +114,14 @@ export class FakeSheet {
   readonly formulas = new Map<string, string>();
   readonly calls: StyleCall[] = [];
   readonly validations: { a1: string; rule: unknown }[] = [];
-  readonly bandings: unknown[] = [];
+  readonly bandings: FakeBanding[] = [];
   readonly protections: FakeProtection[] = [];
   readonly rowHeights = new Map<number, number>();
+  readonly columnWidths = new Map<number, number>();
+  // cada insertColumnAfter pedido (a posição depois da qual entrou a coluna)
+  readonly insertedAfter: number[] = [];
   conditionalRules: unknown[] = [];
-  filter: { a1: string } | null = null;
+  filter: FakeFilter | null = null;
   frozen = { rows: 0, columns: 0 };
   tabColor = '';
 
@@ -119,7 +138,8 @@ export class FakeSheet {
   setFrozenRows = (n: number) => ((this.frozen.rows = n), this);
   setFrozenColumns = (n: number) => ((this.frozen.columns = n), this);
   setTabColor = (color: string) => ((this.tabColor = color), this);
-  setColumnWidth = () => this;
+  setColumnWidth = (col: number, width: number) => (this.columnWidths.set(col, width), this);
+  insertColumnAfter = (after: number) => (insertColumn(this, after), this);
   setRowHeight = (row: number, height: number) => (this.rowHeights.set(row, height), this);
   setRowHeights = (start: number, count: number, height: number) => {
     for (let r = start; r < start + count; r++) this.rowHeights.set(r, height);

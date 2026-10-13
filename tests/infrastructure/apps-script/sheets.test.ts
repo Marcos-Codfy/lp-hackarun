@@ -41,7 +41,7 @@ describe('Apps Script · planilha organizada', () => {
     const { teams, members } = script;
     expect(teams.frozen).toEqual({ rows: 1, columns: 3 });
     expect(members.frozen).toEqual({ rows: 1, columns: 2 });
-    expect(teams.filter?.a1).toBe('A1:M1000');
+    expect(teams.filter?.a1).toBe('A1:N1000');
     expect(members.filter?.a1).toBe('A1:H1000');
     expect(teams.bandings).toHaveLength(1);
     expect(teams.validations).toEqual([{ a1: 'F2:F1000', rule: expect.anything() }]);
@@ -57,7 +57,7 @@ describe('Apps Script · planilha organizada', () => {
     ]);
     expect(members.conditionalRules).toHaveLength(4);
     expect(teams.protections).toEqual([
-      expect.objectContaining({ type: 'RANGE', a1: 'A1:M1', warningOnly: true }),
+      expect.objectContaining({ type: 'RANGE', a1: 'A1:N1', warningOnly: true }),
     ]);
     const formats = teams.calls.filter((c) => c.method === 'setNumberFormat').map((c) => [c.a1, c.args[0]]);
     expect(formats).toContainEqual(['B2:B1000', 'dd/MM/yyyy HH:mm']);
@@ -91,10 +91,10 @@ describe('Apps Script · planilha organizada', () => {
     const imageId = script.drive.allFiles[0]?.id;
     expect(script.row(script.teams, 0)['ID da foto']).toBe(imageId);
     expect(script.teams.formulaAt(2, 5)).toBe(
-      '=IF(J2="","",IMAGE("https://lh3.googleusercontent.com/d/"&J2&"=w240"))',
+      '=IF(K2="","",IMAGE("https://lh3.googleusercontent.com/d/"&K2&"=w240"))',
     );
-    expect(script.teams.formulaAt(2, 9)).toBe(
-      '=IF(J2="","",HYPERLINK("https://drive.google.com/file/d/"&J2&"/view","Abrir no Drive"))',
+    expect(script.teams.formulaAt(2, 10)).toBe(
+      '=IF(K2="","",HYPERLINK("https://drive.google.com/file/d/"&K2&"/view","Abrir no Drive"))',
     );
     expect(script.teams.rowHeights.get(2)).toBe(84);
     expect(script.members.data).toHaveLength(2);
@@ -127,7 +127,7 @@ describe('Apps Script · planilha organizada', () => {
     expect(summary.formulaAt(12, 2)).toBe('=IF(ISNUMBER(B11),MAX(0,B11-(B5-B8)),"sem limite")');
     expect(label(14)).toBe('E-mails das equipes confirmadas');
     expect(summary.formulaAt(14, 2)).toBe(
-      '=IFERROR(TEXTJOIN("; ",TRUE,FILTER(\'Equipes\'!H2:H,LOWER(TRIM(\'Equipes\'!F2:F))="confirmado")),"Nenhuma equipe confirmada ainda.")',
+      '=IFERROR(TEXTJOIN("; ",TRUE,FILTER(\'Equipes\'!I2:I,LOWER(TRIM(\'Equipes\'!F2:F))="confirmado")),"Nenhuma equipe confirmada ainda.")',
     );
     const howto = summary.rows.map((r) => String(r[1] ?? '')).join(' ');
     expect(howto).toContain('Copie a célula B14');
@@ -139,20 +139,20 @@ describe('Apps Script · planilha organizada', () => {
     script.book.locale = 'pt_BR';
     script.post(registrationBody());
     expect(script.teams.formulaAt(2, 5)).toBe(
-      '=IF(J2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&J2&"=w240"))',
+      '=IF(K2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&K2&"=w240"))',
     );
-    expect(script.teams.formulaAt(2, 9)).toBe(
-      '=IF(J2="";"";HYPERLINK("https://drive.google.com/file/d/"&J2&"/view";"Abrir no Drive"))',
+    expect(script.teams.formulaAt(2, 10)).toBe(
+      '=IF(K2="";"";HYPERLINK("https://drive.google.com/file/d/"&K2&"/view";"Abrir no Drive"))',
     );
     expect(script.members.formulaAt(3, 8)).toBe(
       "=IFERROR(INDEX('Equipes'!$F:$F;MATCH($A3;'Equipes'!$A:$A;0));\"\")",
     );
     const summary = script.tab('Resumo');
     expect(summary.formulaAt(14, 2)).toContain('TEXTJOIN("; ";TRUE;FILTER(');
-    script.teams.formulas.set('2,5', '=IF(J2="","",IMAGE("quebrada"))');
+    script.teams.formulas.set('2,5', '=IF(K2="","",IMAGE("quebrada"))');
     configure(script);
     expect(script.teams.formulaAt(2, 5)).toBe(
-      '=IF(J2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&J2&"=w240"))',
+      '=IF(K2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&K2&"=w240"))',
     );
   });
 

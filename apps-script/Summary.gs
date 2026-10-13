@@ -56,7 +56,7 @@ function summaryHowto_(listsRow) {
   return [
     [
       'Confirmar uma equipe',
-      'Na aba Equipes, confira os dados e a foto (coluna Foto) e troque o Status de pendente para confirmado. Em até 1 minuto a equipe aparece no site, só com nome, foto e número de integrantes.',
+      'Na aba Equipes, confira quem é da equipe (coluna Integrantes: nome, matrícula e e-mail de cada pessoa) e a foto (coluna Foto) e troque o Status de pendente para confirmado. Em até 1 minuto a equipe aparece no site, só com nome, foto e número de integrantes.',
     ],
     ['Recusar', 'Status recusado: a equipe sai do site e libera a vaga, o nome, os e-mails e as matrículas.'],
     [

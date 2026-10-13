@@ -27,6 +27,8 @@ function doPost(e) {
   let result;
   try {
     result = registerLocked_(data, body, config);
+    // grava as linhas antes de soltar o lock: a próxima da fila já enxerga esta equipe (duplicados e vagas)
+    SpreadsheetApp.flush();
   } catch (err) {
     console.error(err);
     result = { output: json_({ ok: false, error: 'server' }), photo: null, protocol: '' };

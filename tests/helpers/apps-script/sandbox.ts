@@ -44,6 +44,8 @@ export class AppsScriptSandbox {
   readonly properties: Record<string, string> = {};
   readonly errors: unknown[][] = [];
   readonly logs: unknown[][] = [];
+  // cada SpreadsheetApp.flush(): true = ainda com o lock na mão
+  readonly flushes: boolean[] = [];
   now = Date.parse('2026-10-20T12:00:00-03:00');
   private readonly context: vm.Context;
 
@@ -128,10 +130,11 @@ export class AppsScriptSandbox {
       const output = { getContent: () => text, setMimeType: () => output };
       return output;
     };
-    // regra montada: o que foi pedido + getRanges, que o Setup.gs usa pra achar as regras dele
+    // regra montada: o que foi pedido + getRanges e a fórmula, que o Setup.gs usa pra achar as regras dele
     const rule = (spec: Record<string, unknown[]>) => ({
       spec,
       getRanges: () => spec['setRanges']?.[0] ?? [],
+      getBooleanCondition: () => ({ getCriteriaValues: () => spec['whenFormulaSatisfied'] ?? [] }),
     });
     return {
       Date: ScriptDate,
@@ -159,6 +162,9 @@ export class AppsScriptSandbox {
         newDataValidation: () => recorder(),
         newConditionalFormatRule: () => recorder(rule),
         getActiveSpreadsheet: () => this.book,
+        flush: () => {
+          this.flushes.push(this.lock.held);
+        },
       },
       Utilities: {
         DigestAlgorithm: { SHA_256: 'SHA_256' },

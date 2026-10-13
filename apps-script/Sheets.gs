@@ -19,6 +19,9 @@ const TEAM_COLUMNS = [
   { key: 'size', title: 'Integrantes (qtd)', width: 100, format: '0', align: 'center' },
   { key: 'photo', title: 'Foto', width: 96, align: 'center' },
   { key: 'status', title: 'Status', width: 120, align: 'center' },
+  // uma pessoa por linha na célula; com fonte 9 e 520 px quase todo mundo cabe sem quebrar. Nome ou e-mail
+  // comprido quebra e a linha cresce além da altura da foto (o setRowHeight não trava): nada fica escondido
+  { key: 'roster', title: 'Integrantes', width: 520, format: '@', wrap: true, fontSize: 9 },
   { key: 'contact', title: 'E-mail de contato', width: 230, format: '@' },
   { key: 'emails', title: 'E-mails da equipe', width: 360, format: '@', wrap: true },
   { key: 'link', title: 'Link da foto', width: 120 },
@@ -83,6 +86,7 @@ function appendTeam_(sheet, protocol, data, imageId) {
   values[COL.team] = sheetSafe_(data.teamName);
   values[COL.size] = data.members.length;
   values[COL.status] = 'pendente';
+  values[COL.roster] = sheetSafe_(rosterText_(data.members));
   values[COL.contact] = sheetSafe_(data.members[0].email);
   // "; " cola direto no campo Para do e-mail
   values[COL.emails] = sheetSafe_(data.members.map((m) => m.email).join('; '));
@@ -110,6 +114,57 @@ function appendMembers_(sheet, protocol, data) {
     sheet.appendRow(values);
     setScriptFormula_(sheet.getRange(first + i, MCOL.status + 1), memberStatusFormula_(first + i));
   });
+}
+
+// "1. Nome · Matrícula · E-mail (contato)", um por linha e na ordem da inscrição. Começa com o número,
+// então nunca vira fórmula (o sheetSafe_ de quem chama fica de garantia); o clean_ já tirou as quebras de linha
+function rosterText_(people) {
+  return people
+    .map((p, i) => i + 1 + '. ' + [p.name, p.studentId, p.email].join(' · ') + (i === 0 ? ' (contato)' : ''))
+    .join('\n');
+}
+
+// célula Integrantes vazia (coluna recém-criada ou apagada à mão) é refeita a partir da aba Integrantes.
+// Só escreve nas vazias, em blocos seguidos: a primeira migração preenche a coluna toda numa chamada
+function fillRosters_(teams, members) {
+  const rows = readRows_(teams, TEAM_HEADERS.length);
+  const blank = (r) => String(r[COL.protocol]).trim() !== '' && String(r[COL.roster]).trim() === '';
+  if (!rows.some(blank)) return;
+  const people = peopleByProtocol_(members);
+  let start = -1;
+  let cells = [];
+  const flush = () => {
+    if (cells.length) teams.getRange(start + 2, COL.roster + 1, cells.length, 1).setValues(cells);
+    cells = [];
+  };
+  rows.forEach((r, i) => {
+    if (!blank(r)) return flush();
+    if (!cells.length) start = i;
+    const team = people[String(r[COL.protocol]).trim()] || [];
+    cells.push([team.length ? sheetSafe_(rosterText_(team)) : '']);
+  });
+  flush();
+}
+
+// protocolo -> integrantes em ordem de Nº, sem o apóstrofo do sheetSafe_
+function peopleByProtocol_(members) {
+  const groups = {};
+  readRows_(members, MEMBER_HEADERS.length).forEach((r) => {
+    const protocol = String(r[MCOL.protocol]).trim();
+    if (!protocol) return;
+    (groups[protocol] = groups[protocol] || []).push(r);
+  });
+  const text = (value) => cellText_(value).trim();
+  Object.keys(groups).forEach((protocol) => {
+    groups[protocol] = groups[protocol]
+      .sort((a, b) => (Number(a[MCOL.order]) || 0) - (Number(b[MCOL.order]) || 0))
+      .map((r) => ({
+        name: text(r[MCOL.name]),
+        studentId: text(r[MCOL.studentId]),
+        email: text(r[MCOL.email]),
+      }));
+  });
+  return groups;
 }
 
 // a foto sai do ID da foto da mesma linha: apagou o ID (moderação), a miniatura some junto
