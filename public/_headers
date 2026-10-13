@@ -3,6 +3,8 @@
 # Apps Script responde com 302 pro googleusercontent, por isso os dois hosts no connect-src.
 # Fotos das equipes (/equipes) vêm do CDN de imagens do Google: só lh3.googleusercontent.com, só no img-src.
 # Ligou Web Analytics ou Turnstile na Cloudflare? Libere o host deles aqui antes (Rocket Loader quebra com esta CSP).
+# Nenhum host do próprio site na CSP, só 'self': vale igual em hackarun.pages.dev e nas prévias dos PRs
+# (<hash>.hackarun.pages.dev e <branch>.hackarun.pages.dev). As prévias já saem com X-Robots-Tag: noindex da Cloudflare.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
@@ -15,5 +17,7 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
+# HTML sempre revalidado. /inscricao (sem .html) não casa com a regra, mas a Cloudflare já manda esse mesmo
+# Cache-Control por padrão; não repita em /*: regras que casam juntas somam o valor do header com vírgula
 /*.html
   Cache-Control: public, max-age=0, must-revalidate

@@ -20,8 +20,9 @@ const isRawTeam = (value: unknown): value is RawTeam =>
   typeof (value as RawTeam).id === 'string' &&
   typeof (value as RawTeam).name === 'string';
 
-// só no dev sem planilha: equipe inscrita na simulação já aparece como confirmada em /equipes, com a foto
-// em data URL. Fica na memória e numa cópia no sessionStorage, pra sobreviver à troca de página na mesma aba
+// dev ou prévia (PUBLIC_REGISTRATION_SIMULATED=true) sem planilha: equipe inscrita na simulação já aparece
+// como confirmada em /equipes, com a foto em data URL. Fica na memória e numa cópia no sessionStorage, pra
+// sobreviver à troca de página na mesma aba
 export class SimulatedTeamStore {
   private readonly storage: SessionLike | null;
   private teams: RawTeam[];

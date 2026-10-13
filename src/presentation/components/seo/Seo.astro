@@ -1,4 +1,6 @@
 ---
+import { DEFAULT_SITE_URL, isIndexable } from '@shared/config/deploy';
+import { SIMULATION_FLAG } from '@shared/config/registrationMode';
 import { safeJsonForScript } from '@shared/utils/json';
 
 export interface SeoProps {
@@ -10,15 +12,22 @@ export interface SeoProps {
 }
 
 const { title, description, path = '/', image = '/og-image.jpg', jsonLd } = Astro.props as SeoProps;
-const site = Astro.site ?? new URL('https://lp-hackarun.pages.dev');
+const site = Astro.site ?? new URL(DEFAULT_SITE_URL);
 const canonical = new URL(path, site).href;
 const imageUrl = new URL(image, site).href;
 // texto do conteúdo nunca fecha o <script> antes da hora
 const jsonLdText = jsonLd ? safeJsonForScript(jsonLd) : null;
+// prévia (PR na Cloudflare ou build com a inscrição simulada) fica fora dos buscadores; produção segue indexável
+const indexable = isIndexable({
+  cfPages: import.meta.env.CF_PAGES,
+  branch: import.meta.env.CF_PAGES_BRANCH,
+  simulationFlag: SIMULATION_FLAG,
+});
 ---
 
 <title>{title}</title>
 <meta name="description" content={description} />
+{!indexable && <meta name="robots" content="noindex" />}
 <link rel="canonical" href={canonical} />
 <link rel="sitemap" href="/sitemap-index.xml" />
 

@@ -2,7 +2,9 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-const site = process.env.PUBLIC_SITE_URL ?? 'https://lp-hackarun.pages.dev';
+// endereço oficial (Cloudflare Pages, projeto "hackarun"); o PUBLIC_SITE_URL troca (fork, domínio próprio). Vazio
+// conta como não definido. Igual ao DEFAULT_SITE_URL de src/shared/config/deploy.ts (um teste confere)
+const site = process.env.PUBLIC_SITE_URL || 'https://hackarun.pages.dev';
 
 export default defineConfig({
   site,

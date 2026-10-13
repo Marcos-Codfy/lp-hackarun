@@ -1,6 +1,7 @@
 import { EventBus } from '@shared/core/EventBus';
 import { qs, qsa } from '@shared/utils/dom';
 import { prefersReducedMotion } from '@shared/utils/env';
+import { SIMULATION_ENABLED } from '@shared/config/registrationMode';
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { HeaderScrollController } from '@presentation/controllers/HeaderScrollController';
 import { MobileMenuController } from '@presentation/controllers/MobileMenuController';
@@ -94,7 +95,7 @@ export class LightApp {
     boot.add('header', mountHeader);
     boot.add('navigation', () => mountNavigation(reducedMotion));
     boot.add('views container', () => {
-      container.current = createClientContainer(config, { dev: import.meta.env.DEV });
+      container.current = createClientContainer(config, { simulation: SIMULATION_ENABLED });
     });
     boot.add(
       'motion',

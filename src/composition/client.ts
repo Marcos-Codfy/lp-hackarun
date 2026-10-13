@@ -16,6 +16,7 @@ import { FallbackTeamRepository } from '@infrastructure/repositories/FallbackTea
 import { SimulatedTeamRepository } from '@infrastructure/repositories/SimulatedTeamRepository';
 import { StaticTeamRepository } from '@infrastructure/repositories/StaticContentRepositories';
 import { LocalPreferenceStore } from '@infrastructure/storage/LocalPreferenceStore';
+import { registrationMode, SIMULATION_ENABLED } from '@shared/config/registrationMode';
 import type { RegistrationServices } from './registration';
 
 export type { RegistrationServices } from './registration';
@@ -69,19 +70,22 @@ function registrationLoader(
 
 function createListTeams(endpoint: string | null, simulated: SimulatedTeamStore | null): ListTeams | null {
   if (!endpoint) {
-    return import.meta.env.DEV && simulated ? new ListTeams(new SimulatedTeamRepository(simulated)) : null;
+    return SIMULATION_ENABLED && simulated ? new ListTeams(new SimulatedTeamRepository(simulated)) : null;
   }
   const live = new AppsScriptTeamRepository(new AppsScriptClient(endpoint));
   const bundled = new StaticTeamRepository(teamsData as RawTeam[]);
   return new ListTeams(new FallbackTeamRepository(live, bundled));
 }
 
-export function createClientContainer(config: AppConfig, options: { dev: boolean }): ClientContainer {
+// simulation: o build liberou a simulação (SIMULATION_ENABLED); os testes passam false pra ficar sem ela
+export function createClientContainer(config: AppConfig, options: { simulation: boolean }): ClientContainer {
   const clock = createClock();
-  // dev sem planilha: inscrição e lista de equipes simuladas, ligadas entre si (dá pra ver a foto em /equipes)
-  // import.meta.env.DEV vira false no build: a simulação (store, repositório, gateway) nem entra no bundle
+  // dev ou prévia sem planilha: inscrição e lista de equipes simuladas, ligadas entre si (a foto aparece em
+  // /equipes). Build sem a flag: SIMULATION_ENABLED vira false e a simulação nem entra no bundle
   const simulated =
-    import.meta.env.DEV && options.dev && !config.registration.endpoint ? new SimulatedTeamStore() : null;
+    SIMULATION_ENABLED && registrationMode(config.registration.endpoint, options.simulation) === 'simulated'
+      ? new SimulatedTeamStore()
+      : null;
   return {
     clock,
     getCountdown: new GetCountdown(clock, config.milestones),

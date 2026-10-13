@@ -82,11 +82,11 @@ describe('SEO da página /equipes', () => {
   });
 
   it('JSON-LD com a trilha Início > Equipes e URLs absolutas', () => {
-    const graph = teamsPageJsonLd('https://lp-hackarun.pages.dev/')['@graph'] as Record<string, unknown>[];
+    const graph = teamsPageJsonLd('https://hackarun.pages.dev/')['@graph'] as Record<string, unknown>[];
     expect(graph[0]).toMatchObject({
       '@type': 'CollectionPage',
-      url: 'https://lp-hackarun.pages.dev/equipes',
+      url: 'https://hackarun.pages.dev/equipes',
     });
-    expect(JSON.stringify(graph[1])).toContain('"item":"https://lp-hackarun.pages.dev/"');
+    expect(JSON.stringify(graph[1])).toContain('"item":"https://hackarun.pages.dev/"');
   });
 });

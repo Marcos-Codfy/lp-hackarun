@@ -2,6 +2,7 @@
 // container. O formulário mora na página /inscricao (LightApp): aqui não baixa nada dele
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { qs, qsa } from '@shared/utils/dom';
+import { SIMULATION_ENABLED } from '@shared/config/registrationMode';
 import type { AppContext } from '@presentation/app/AppContext';
 import type { BootSteps } from '@presentation/app/BootQueue';
 import { LazyMount } from '@presentation/app/LazyMount';
@@ -24,7 +25,7 @@ class ViewMounter {
 
   container(): void {
     try {
-      this.c = createClientContainer(this.ctx.config, { dev: import.meta.env.DEV });
+      this.c = createClientContainer(this.ctx.config, { simulation: SIMULATION_ENABLED });
     } catch (error) {
       // config quebrada (data inválida...): a página continua legível só com o HTML
       console.error('[views] client container failed', error);

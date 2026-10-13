@@ -139,7 +139,7 @@ describe('LP sem formulário', () => {
 
 describe('createClientContainer: inscrição em chunk à parte', () => {
   it('loadRegistration entrega envio e foto, e reaproveita o mesmo carregamento', async () => {
-    const container = createClientContainer(CONFIG, { dev: false });
+    const container = createClientContainer(CONFIG, { simulation: false });
 
     const first = container.loadRegistration();
     const services = await first;

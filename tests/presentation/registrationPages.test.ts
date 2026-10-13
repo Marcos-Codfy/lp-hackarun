@@ -85,10 +85,10 @@ describe('página /inscricao', () => {
     expect(seo.title.length).toBeLessThanOrEqual(60);
     expect(seo.description.length).toBeGreaterThanOrEqual(70);
     expect(seo.description.length).toBeLessThanOrEqual(160);
-    const graph = registrationPageJsonLd('https://lp-hackarun.pages.dev/', seo.title, seo.description)[
+    const graph = registrationPageJsonLd('https://hackarun.pages.dev/', seo.title, seo.description)[
       '@graph'
     ] as Record<string, unknown>[];
-    expect(graph[0]).toMatchObject({ '@type': 'WebPage', url: 'https://lp-hackarun.pages.dev/inscricao' });
+    expect(graph[0]).toMatchObject({ '@type': 'WebPage', url: 'https://hackarun.pages.dev/inscricao' });
     expect(JSON.stringify(graph[1])).toContain('"name":"Inscrição"');
   });
 

@@ -1,0 +1,64 @@
+---
+// aviso da prévia de revisão (dev ou PUBLIC_REGISTRATION_SIMULATED=true sem planilha): no topo do formulário e na
+// tela de sucesso, pra ninguém achar que a inscrição de teste foi gravada. role="note": texto fixo, sem anúncio
+interface Props {
+  // na tela de sucesso: um pouco mais compacto, logo abaixo do título
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+---
+
+<div class:list={['preview-banner', { 'preview-banner--compact': compact }]} role="note" data-preview-banner>
+  <span class="preview-banner__tag" aria-hidden="true">
+    Prévia
+  </span>
+  <p class="preview-banner__text">
+    <strong>Prévia de revisão:</strong> as inscrições são simuladas e nada é gravado na planilha.
+  </p>
+</div>
+
+<style>
+  .preview-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--c-gold) 45%, transparent);
+    border-left: 3px solid var(--c-gold);
+    border-radius: 3px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--c-gold) 12%, transparent), transparent 85%);
+    color: var(--text);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-snug);
+  }
+
+  .preview-banner__tag {
+    flex: none;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    background: var(--c-gold);
+    color: var(--c-void);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 700;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .preview-banner__text {
+    flex: 1 1 14rem;
+    min-width: 0;
+  }
+
+  .preview-banner__text strong {
+    color: var(--ink-gold);
+  }
+
+  .preview-banner--compact {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--fs-xs);
+  }
+</style>

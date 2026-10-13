@@ -6,7 +6,7 @@ import { buildEventJsonLd } from '@presentation/components/seo/eventJsonLd';
 
 type Node = Record<string, unknown>;
 
-async function graph(siteUrl = 'https://lp-hackarun.pages.dev/'): Promise<Node[]> {
+async function graph(siteUrl = 'https://hackarun.pages.dev/'): Promise<Node[]> {
   const data = await serverContainer().getLandingPage.execute();
   const ld = buildEventJsonLd(data, siteUrl, 'Descrição da página');
   expect(ld['@context']).toBe('https://schema.org');
@@ -23,7 +23,7 @@ describe('buildEventJsonLd', () => {
       description: 'Descrição da página',
       startDate: '2026-11-11T19:00:00-03:00',
       endDate: '2026-11-14',
-      image: 'https://lp-hackarun.pages.dev/og-image.jpg',
+      image: 'https://hackarun.pages.dev/og-image.jpg',
       inLanguage: 'pt-BR',
     });
     expect(event?.['organizer']).toEqual([

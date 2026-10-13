@@ -1,3 +1,4 @@
+import { SIMULATION_ENABLED } from '@shared/config/registrationMode';
 import type { EventBus } from '@shared/core/EventBus';
 import { qs } from '@shared/utils/dom';
 import type { AppEvents } from '@presentation/app/AppEvents';
@@ -51,7 +52,14 @@ export class SubmitStatusPresenter {
     const typed = qs('[data-reg-protocol-typed]', success);
     form.hidden = true;
     success.hidden = false;
-    this.announce(`Inscrição recebida. Protocolo ${protocol}.`);
+    // prévia simulada (data-simulated no formulário): quem ouve a tela também fica sabendo que nada foi gravado.
+    // Build sem simulação: SIMULATION_ENABLED vira false e o texto simulado nem entra no bundle
+    const simulated = SIMULATION_ENABLED && this.root.dataset['simulated'] === 'true';
+    this.announce(
+      simulated
+        ? `Inscrição simulada recebida. Protocolo ${protocol}. Nada foi gravado na planilha.`
+        : `Inscrição recebida. Protocolo ${protocol}.`,
+    );
     qs('[data-reg-success-title]', success)?.focus();
     if (typed) new ProtocolReveal(typed).play(protocol);
     this.bus.emit('registration:submitted', { protocol });

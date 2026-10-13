@@ -15,10 +15,11 @@ const nameKey = (name: string) => normalizeSearch(name).replace(/\s+/g, ' ');
 const takenIndexes = (values: readonly string[], used: ReadonlySet<string>): number[] =>
   values.flatMap((value, i) => (used.has(value) ? [i] : []));
 
-// só pro dev sem planilha: simula a latência e devolve um protocolo falso, com as mesmas regras do Code.gs
-// (mesma chave + mesmo contato = mesmo protocolo; nome, e-mail ou matrícula já inscritos = conflito).
-// E-mail de contato começando com "falha" simula erro de rede, "servidor" o script caindo e "duplicado"
-// inscrição repetida. Com store, a equipe (e a foto) vai pra lista simulada de /equipes
+// dev ou prévia (PUBLIC_REGISTRATION_SIMULATED=true) sem planilha: simula a latência e devolve um protocolo
+// falso, com as mesmas regras do Code.gs (mesma chave + mesmo contato = mesmo protocolo; nome, e-mail ou
+// matrícula já inscritos = conflito). E-mail de contato começando com "falha" simula erro de rede, "servidor"
+// o script caindo e "duplicado" inscrição repetida. Com store, a equipe (e a foto) vai pra lista simulada de
+// /equipes
 export class InMemoryRegistrationGateway implements RegistrationGateway {
   readonly received: RegistrationPayload[] = [];
   private readonly protocols = new Map<string, string>();

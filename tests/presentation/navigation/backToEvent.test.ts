@@ -8,7 +8,7 @@ import {
 } from '@presentation/views/navigation/backToEvent';
 import { CurrentPageLinks, isSamePageLink } from '@presentation/views/navigation/currentPageLinks';
 
-const ORIGIN = 'https://lp-hackarun.pages.dev';
+const ORIGIN = 'https://hackarun.pages.dev';
 const entry = (index: number, path: string): HistoryEntryLike => ({
   key: `k${index}`,
   index,

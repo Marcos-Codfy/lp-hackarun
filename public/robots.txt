@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://lp-hackarun.pages.dev/sitemap-index.xml

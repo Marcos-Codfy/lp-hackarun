@@ -12,6 +12,7 @@ import TeamImageField from './TeamImageField.astro';
 import { formStatus } from './formStatus';
 import RegistrationNotice from './RegistrationNotice.astro';
 import RegistrationSuccess from './RegistrationSuccess.astro';
+import PreviewBanner from './PreviewBanner.astro';
 // css global com prefixo .regform (os cards de integrante são clonados em runtime)
 import './registration-form.css';
 import './registration-states.css';
@@ -22,15 +23,23 @@ interface Props {
 
 const { registration } = Astro.props;
 const { min, max } = registration.teamSize;
-// dev sem planilha: libera o formulário com o gateway em memória pra testar a UX
+// dev ou prévia sem planilha: libera o formulário com o gateway em memória (nada é gravado) e mostra o aviso
 const { status, simulated, isOpen } = formStatus(registration);
 ---
 
-<div class="regform" data-registration-form data-status={status} data-team-min={min} data-team-max={max}>
-  <RegistrationNotice status={status} simulated={simulated} />
+<div
+  class="regform"
+  data-registration-form
+  data-status={status}
+  data-simulated={simulated ? 'true' : undefined}
+  data-team-min={min}
+  data-team-max={max}
+>
+  {simulated && <PreviewBanner />}
+  <RegistrationNotice status={status} />
   {isOpen && (
     <div data-reg-closed hidden>
-      <RegistrationNotice status="closed" simulated={false} />
+      <RegistrationNotice status="closed" />
     </div>
   )}
   {status !== 'closed' && (
@@ -123,7 +132,7 @@ const { status, simulated, isOpen } = formStatus(registration);
           </FormStep>
         </fieldset>
       </form>
-      <RegistrationSuccess />
+      <RegistrationSuccess>{simulated && <PreviewBanner compact />}</RegistrationSuccess>
       <p class="sr-only" aria-live="polite" data-reg-live></p>
     </div>
   )}

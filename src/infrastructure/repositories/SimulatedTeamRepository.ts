@@ -2,7 +2,8 @@ import type { Team, TeamRepository } from '@domain/index';
 import { ContentMapper } from '../mappers/ContentMapper';
 import type { SimulatedTeamStore } from '../registration/SimulatedTeamStore';
 
-// dev sem planilha: as equipes da simulação fazem o papel da lista ao vivo
+// dev ou prévia (PUBLIC_REGISTRATION_SIMULATED=true) sem planilha: as equipes da simulação fazem o papel da
+// lista ao vivo
 export class SimulatedTeamRepository implements TeamRepository {
   private readonly store: SimulatedTeamStore;
 

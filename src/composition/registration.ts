@@ -12,6 +12,7 @@ import { InMemoryRegistrationGateway } from '@infrastructure/registration/InMemo
 import { RetryingRegistrationGateway } from '@infrastructure/registration/RetryingRegistrationGateway';
 import { UnavailableRegistrationGateway } from '@infrastructure/registration/UnavailableRegistrationGateway';
 import type { SimulatedTeamStore } from '@infrastructure/registration/SimulatedTeamStore';
+import { SIMULATION_ENABLED } from '@shared/config/registrationMode';
 
 export interface RegistrationServices {
   submitRegistration: SubmitRegistration;
@@ -23,8 +24,8 @@ function createGateway(endpoint: string | null, simulated: SimulatedTeamStore | 
   if (endpoint) {
     return new RetryingRegistrationGateway(new AppsScriptRegistrationGateway(new AppsScriptClient(endpoint)));
   }
-  // dev sem planilha: simula o envio pra dar pra testar a UX local
-  return import.meta.env.DEV && simulated
+  // dev ou prévia sem planilha: simula o envio (nada vai pra planilha); o endpoint sempre ganha, acima
+  return SIMULATION_ENABLED && simulated
     ? new InMemoryRegistrationGateway({ store: simulated })
     : new UnavailableRegistrationGateway();
 }
