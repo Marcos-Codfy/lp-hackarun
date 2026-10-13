@@ -1,0 +1,42 @@
+---
+// próximos passos da tela de sucesso (RegistrationSuccess), numerados em HUD
+const steps = [
+  'Guarde o protocolo: é ele que identifica a inscrição da equipe.',
+  'A organização confere os dados e a foto e confirma a equipe por e-mail.',
+  'Confirmada, a equipe aparece com a foto ou a logo na página de equipes do site.',
+  'Confira a programação no site pra não perder a largada.',
+];
+---
+
+<ol class="success__steps" role="list">
+  {steps.map((step, i) => (
+    <li>
+      <span class="success__step-num" aria-hidden="true">
+        {String(i + 1).padStart(2, '0')}
+      </span>
+      <span>{step}</span>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .success__steps {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .success__steps li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+    color: var(--text-muted);
+  }
+
+  .success__step-num {
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+  }
+</style>

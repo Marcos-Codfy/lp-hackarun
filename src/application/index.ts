@@ -1,7 +1,6 @@
 export type * from './dto';
 export type * from './ports/Clock';
 export type * from './ports/PreferenceStore';
-export type * from './ports/CalendarExporter';
 export * from './ports/RegistrationGateway';
 export type * from './ports/ImageCodec';
 export * from './use-cases/GetEventOverview';
@@ -13,7 +12,6 @@ export * from './use-cases/ListPrizes';
 export * from './use-cases/ListPartners';
 export * from './use-cases/ListFaq';
 export * from './use-cases/GetCountdown';
-export * from './use-cases/BuildCalendarInvite';
 export * from './use-cases/GetLandingPage';
 export * from './use-cases/SubmitRegistration';
 export * from './use-cases/PrepareTeamImage';

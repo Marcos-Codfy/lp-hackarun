@@ -1,16 +1,15 @@
 ---
-// avisos de estado da inscrição: em breve, últimas horas, encerrada e modo dev
+// avisos de estado da inscrição: em breve, últimas horas e encerrada (o da prévia simulada é o PreviewBanner)
 import type { RegistrationStatus } from '@domain/index';
 import Button from '@presentation/components/ui/Button.astro';
 
 interface Props {
   status: RegistrationStatus;
-  simulated: boolean;
   // nível do título no contexto: em /inscricao o aviso vem logo abaixo do h1 da página (h2)
   level?: 'h2' | 'h3';
 }
 
-const { status, simulated, level = 'h2' } = Astro.props;
+const { status, level = 'h2' } = Astro.props;
 const Heading = level;
 ---
 
@@ -30,12 +29,9 @@ const Heading = level;
       {status === 'soon' ? 'As inscrições abrem em breve' : 'Inscrições encerradas'}
     </Heading>
     {status === 'soon' ? (
-      <>
-        <p class="notice__text">Enquanto isso, salve as datas e já chama a sua equipe.</p>
-        <Button href="/hackarun-2026.ics" variant="time" download="hackarun-2026.ics">
-          Adicionar à agenda
-        </Button>
-      </>
+      <p class="notice__text">
+        Enquanto isso, confere a <a href="/#programacao">programação</a> e já chama a sua equipe.
+      </p>
     ) : (
       <>
         <p class="notice__text">Valeu pelo interesse! Acompanhe quem vai correr.</p>
@@ -45,13 +41,6 @@ const Heading = level;
       </>
     )}
   </div>
-)}
-
-{simulated && (
-  <p class="notice-dev">
-    <span aria-hidden="true">DEV</span>
-    Sem planilha configurada: os envios são simulados.
-  </p>
 )}
 
 <style>
@@ -117,25 +106,21 @@ const Heading = level;
     color: var(--text-muted);
   }
 
-  /* celular: o botão ocupa a largura do aviso e o rótulo fica numa linha só (abaixo de 24rem sem as setas
-     ">>" e com a fonte um pouco menor: "Adicionar à agenda" não cabe junto com elas em 360px) */
+  /* mesmo tom de link da tela de sucesso */
+  .notice__text a {
+    color: var(--ink-cyan);
+  }
+
+  /* celular: o botão (só no "encerradas") ocupa a largura do aviso, com a fonte um pouco menor abaixo de 24rem */
   .notice :global(.btn) {
     --btn-px: 1rem;
     --btn-fs: 0.8125rem;
     justify-self: stretch;
   }
 
-  .notice :global(.btn .chevrons) {
-    display: none;
-  }
-
   @media (min-width: 24rem) {
     .notice :global(.btn) {
       --btn-fs: 0.875rem;
-    }
-
-    .notice :global(.btn .chevrons) {
-      display: inline-flex;
     }
   }
 
@@ -148,23 +133,6 @@ const Heading = level;
       --btn-px: 1.6rem;
       justify-self: start;
     }
-  }
-
-  .notice-dev {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-  }
-
-  .notice-dev span {
-    padding: 0.1rem 0.45rem;
-    background: var(--c-orange);
-    color: var(--c-void);
-    font-weight: 700;
-    letter-spacing: 0.12em;
   }
 
   @keyframes notice-pulse {

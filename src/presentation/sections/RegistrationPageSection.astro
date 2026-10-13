@@ -9,7 +9,6 @@ import RegistrationForm from '@presentation/components/registration/Registration
 import RegistrationStatus from '@presentation/components/registration/RegistrationStatus.astro';
 import { formStatus } from '@presentation/components/registration/formStatus';
 import SectionHeader from './shared/SectionHeader.astro';
-import AgendaRow from './registration/AgendaRow.astro';
 import RegistrationBrief from './registration/RegistrationBrief.astro';
 import RegistrationBriefToggle from './registration/RegistrationBriefToggle.astro';
 import './sections.css';
@@ -50,7 +49,6 @@ const { status, isOpen } = formStatus(registration);
       <div class="signup__panel sx-glass sx-corners" id="formulario">
         <span class="signup__topline" aria-hidden="true"></span>
         <RegistrationForm registration={registration} />
-        <AgendaRow event={event} />
       </div>
     </div>
   </div>

@@ -17,7 +17,6 @@ import type {
 } from '@infrastructure/content/schema';
 import { RegistrationPolicy } from '@domain/index';
 import {
-  BuildCalendarInvite,
   GetEventOverview,
   GetLandingPage,
   GetSchedule,
@@ -38,7 +37,6 @@ import {
   StaticTeamRepository,
 } from '@infrastructure/repositories/StaticContentRepositories';
 import { SystemClock } from '@infrastructure/clock/SystemClock';
-import { IcsCalendarExporter } from '@infrastructure/calendar/IcsCalendarExporter';
 import { withEnvOverrides } from '@infrastructure/config/env';
 
 function createServerContainer() {
@@ -64,7 +62,6 @@ function createServerContainer() {
       partners: new ListPartners(partners),
       faq: new ListFaq(faq),
     }),
-    buildCalendarInvite: new BuildCalendarInvite(events, new IcsCalendarExporter()),
   };
 }
 

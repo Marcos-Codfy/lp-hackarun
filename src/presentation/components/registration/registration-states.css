@@ -1,4 +1,4 @@
-/* estados do formulário: erros, falha de envio, enviando e a prévia "em breve" */
+/* estados do formulário: erros, falha de envio, enviando, a prévia "em breve" e a prévia simulada */
 .regform__summary {
   display: grid;
   gap: var(--space-2);
@@ -76,9 +76,9 @@
   animation: regform-spin 0.8s linear infinite;
 }
 
-/* "em breve": só uma amostra curta e apagada do formulário, que some num degradê (o recado é o aviso e a
-   agenda). No celular, só o começo da etapa 01; mais que isso parece um formulário quebrado. O form segue
-   inert: nada do que fica cortado recebe foco nem vai pro leitor de tela */
+/* "em breve": só uma amostra curta e apagada do formulário, que some num degradê (o recado é o aviso). No
+   celular, só o começo da etapa 01; mais que isso parece um formulário quebrado. O form segue inert: nada do que
+   fica cortado recebe foco nem vai pro leitor de tela */
 .regform[data-status='soon'] .regform__form {
   max-height: 11rem;
   overflow: clip;
@@ -93,6 +93,11 @@
   .regform[data-status='soon'] .regform__form {
     max-height: 22rem;
   }
+}
+
+/* prévia simulada: enviada, o aviso do topo sai e fica só o da tela de sucesso, logo abaixo do título */
+.regform:has([data-reg-success]:not([hidden])) > [data-preview-banner] {
+  display: none;
 }
 
 @keyframes regform-spin {

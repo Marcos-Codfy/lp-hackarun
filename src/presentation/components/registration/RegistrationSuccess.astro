@@ -1,17 +1,12 @@
 ---
 // tela de sucesso: emblema + protocolo "decodificando" + onde a equipe aparece + canal oficial (e-mail) +
-// próximos passos. A View preenche o protocolo e o e-mail do contato e foca o título
+// próximos passos. A View preenche o protocolo e o e-mail do contato e foca o título. O slot fica logo abaixo
+// do título: é onde entra o aviso da prévia simulada (PreviewBanner)
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { EVENT_RETURN_HREF } from '@presentation/components/layout/navLinks';
 import MailNotice from './MailNotice.astro';
-
-const steps = [
-  'Guarde o protocolo: é ele que identifica a inscrição da equipe.',
-  'A organização confere os dados e a foto e confirma a equipe por e-mail.',
-  'Confirmada, a equipe aparece com a foto ou a logo na página de equipes do site.',
-  'Salve as datas na agenda pra não perder a largada.',
-];
+import SuccessSteps from './SuccessSteps.astro';
 ---
 
 <div class="success" data-reg-success hidden>
@@ -27,6 +22,7 @@ const steps = [
   <h2 class="success__title" tabindex="-1" data-reg-success-title>
     Tá dentro! Agora é com a organização.
   </h2>
+  <slot />
   <div class="success__ticket">
     <p class="success__label">Protocolo da equipe</p>
     <p class="success__protocol">
@@ -44,20 +40,8 @@ const steps = [
     </strong>
     {'. '}Não usamos WhatsApp: fique de olho na caixa de entrada (e no spam).
   </MailNotice>
-  <ol class="success__steps" role="list">
-    {steps.map((step, i) => (
-      <li>
-        <span class="success__step-num" aria-hidden="true">
-          {String(i + 1).padStart(2, '0')}
-        </span>
-        <span>{step}</span>
-      </li>
-    ))}
-  </ol>
+  <SuccessSteps />
   <div class="success__actions">
-    <Button href="/hackarun-2026.ics" variant="time" download="hackarun-2026.ics">
-      Adicionar à agenda
-    </Button>
     <Button href="/equipes" variant="ghost">
       Ver equipes
     </Button>
@@ -181,26 +165,6 @@ const steps = [
   .success__mail {
     color: var(--text);
     overflow-wrap: anywhere;
-  }
-
-  .success__steps {
-    display: grid;
-    gap: var(--space-3);
-  }
-
-  .success__steps li {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-4);
-    align-items: baseline;
-    color: var(--text-muted);
-  }
-
-  .success__step-num {
-    color: var(--ink-cyan);
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    font-weight: 700;
   }
 
   .success__actions {
