@@ -4,19 +4,16 @@
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/hackarun-unicatolica/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
-  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun cinematic scroll: the hero opens with the UniCatólica logo and its two courses, Engenharia de Software and Inteligência Artificial (Software Engineering and Artificial Intelligence), above the official logo, with lightning over the particle globe; at each section the 3D particles become a new shape (stopwatch, neon question mark, mission map, synthwave terrain, stage with an LED wall, golden trophy and galaxy) and at the end they form the globe again, now calm: it turns slowly behind the &quot;Sua vaga na corrida&quot; call to action, charges up, lights the &quot;Quero participar&quot; button and releases a soft pulse of light at its edge." />
+  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun page scroll: at each section the 3D particles form a different object (globe, stopwatch, question mark, mission map, terrain, stage, trophy and galaxy) and, at the end, they form the globe again behind the registration call to action." />
 </picture>
 
-# HackaRun · Overdrive
+# HackaRun
 
 **Desvende. Programe. Conquiste.** <sub>(Uncover. Code. Conquer.)</sub>
 
-The landing page for the 1st HackaRun, UniCatólica's technology, innovation and entrepreneurship event. It tells the
-story as you scroll: a single WebGL particle field turns into a different 3D object for each section, and team
-registrations land straight in a Google Sheet.
-
-<sub>**Overdrive** is the codename of this page's cinematic v2: like the turbo boost in racing games, it speeds up from
-scene to scene and, at the finish, the globe charges up and releases a pulse of energy.</sub>
+Landing page for the 1st HackaRun, UniCatólica's technology, innovation and entrepreneurship event. The site presents
+the schedule, the missions and the teams, and takes team registrations, which are saved to a Google Sheet. In the
+background, a WebGL 3D scene changes shape at each section as the page scrolls.
 
 [![CI](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml/badge.svg)](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml)
 ![Astro](https://img.shields.io/badge/Astro-7-FF5D01?logo=astro&logoColor=white)
@@ -25,128 +22,109 @@ scene to scene and, at the finish, the globe charges up and releases a pulse of 
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
 [![Lighthouse mobile: performance 98, accessibility 100, best practices 100 and SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%20100%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
-[![Live demo: hackarun.pages.dev](https://img.shields.io/badge/live%20demo-hackarun.pages.dev-00E5FF?logo=cloudflare&logoColor=white)](https://hackarun.pages.dev)
+**[See the site → hackarun.pages.dev](https://hackarun.pages.dev)**
 
-**[See it live → hackarun.pages.dev](https://hackarun.pages.dev)**
-
-[Project guide (pt-BR)](docs/GUIA_DO_PROJETO.md) · [Decisions (ADRs)](docs/adr) · [Changelog](CHANGELOG.md) ·
-[Design spec](docs/design/design-spec.md) · [Contributing](CONTRIBUTING.md)
+[Contributing (pt-BR)](CONTRIBUTING.md) · [Changelog (pt-BR)](CHANGELOG.md)
 
 </div>
 
 ---
 
-**For reviewers:** [In 30 seconds](#in-30-seconds) · [Visuals](#visuals) ·
-[Visual script](#visual-script-one-3d-scene-per-section) · [Stack](#stack) · [Architecture](#architecture) ·
-[Performance](#performance) · [Accessibility](#accessibility)<br />
-**For developers:** [Run it on your machine](#run-it-on-your-machine) · [Scripts](#scripts) ·
-[Registration](#content-and-registration) · [Contributing](#contributing) · [Deploy](#deploy) · [Roadmap](#roadmap)
+**Contents:** [Overview](#overview) · [Screens](#screens) · [3D scenes](#3d-scenes-by-section) ·
+[Stack](#stack) · [Architecture](#architecture) · [Performance](#performance) · [Accessibility](#accessibility) ·
+[Security and LGPD](#security-and-lgpd) · [Running locally](#running-it-locally) · [Contributing](#contributing) ·
+[Deploy](#deploy) · [Roadmap](#roadmap) · [Credits](#credits)
 
-## In 30 seconds
+## Overview
 
-- **My role:** solo development. On top of the event's visual identity, created by Eduarda Victória (Academic
-  League), I designed the page and built the 3D and shaders, the front end, the Apps Script registration API, the
-  tests, the CI and the docs.
-- **What it is:** the official site of HackaRun 2026, the 1st edition of UniCatólica's event, organized by LAES (the
-  Software Engineering and Artificial Intelligence Academic League), with Capim Dourado Shopping, a local mall, as the
-  exclusive partner of the awards. It is a 4-day event, November 11 to 14, 2026, in Palmas, Tocantins, Brazil, with
-  two tracks: a program open to the public (7 workshops, talks and up to 10 exhibitor stands) and a hackathon for
-  UniCatólica students only, an objective-based race in teams that ends at the HackaRun Experience, at the mall. The
-  page covers the schedule in tabs, 8 missions, mentors, prizes, a hunt for 3 hidden tokens, a team registration page
-  (with a draft kept in the tab and a way back to the same spot on the landing page) and another page for the
-  confirmed teams, with each team's photo or logo, live. All site content is in Brazilian Portuguese.
-- **What sets it apart:** 8 procedural 3D objects (globe, stopwatch, "?", holographic map, synthwave terrain, stage,
-  trophy and galaxy) made of 9,000 to 42,000 particles, with no 3D models and no video
-  ([ADR 0005](docs/adr/0005-procedural-particles-over-video.md)), plus cinematic post-processing and a choreographed
-  camera for every transition.
-- **Fast:** Lighthouse mobile Performance **98** (up from 66), 2.2 s LCP and 0.001 CLS. Accessibility, Best practices
-  and SEO at **100**. The registration and teams pages, with no 3D, score 99.
-- **Accessible:** all content shows up without JavaScript and without WebGL (only submitting the registration needs
-  JavaScript, and the page says so), `prefers-reduced-motion` is respected and there is a pause animations button
-  (WCAG 2.2.2).
-- **Zero-cost backend:** form → Google Apps Script → a Google Sheet with three tabs (teams with the photo thumbnail
-  inside the cell, members with one row per person and a live summary), with the team photo in Google Drive, one team
-  per person, idempotent retries, rate limits, a concurrency lock and versioned LGPD (Brazil's data protection law)
-  consent.
-- **Engineering:** Clean Architecture + DDD + MVVM with the dependency rule enforced by ESLint, 828 tests, CI on
-  GitHub Actions, Conventional Commits, 9 ADRs and an `npm run setup` for anyone who forks it.
+- **The event:** the 1st HackaRun, from November 11 to 14, 2026, in Palmas, Tocantins, Brazil. It is held by
+  UniCatólica, organized by LAES (the university's Software Engineering and Artificial Intelligence student league),
+  and Capim Dourado Shopping is the awards partner. The event has two parts: a schedule open to the public, with
+  workshops, talks and exhibitor booths, and a team hackathon for UniCatólica students, with the final at the mall.
+- **The site:** schedule in tabs by day, missions, mentors, prizes, FAQ, a registration page and a page with the
+  confirmed teams, each with its photo or logo.
+- **3D scene:** eight objects generated in code (globe, stopwatch, question mark, map, terrain, stage, trophy and
+  galaxy), with 9,000 to 42,000 particles and post-processing (bloom, vignette and chromatic aberration). There are no
+  3D models or videos.
+- **Performance:** Lighthouse mobile scores 98 for Performance and 100 for Accessibility, Best Practices and SEO.
+- **Accessibility:** the content works without JavaScript or WebGL, the page respects `prefers-reduced-motion`, and a
+  button pauses the animations.
+- **Registration without a server of its own:** the form sends the data to a Google Apps Script, which saves the
+  registration to Google Sheets and the team photo to Google Drive.
 
-## Visuals
+## Screens
+
+The site is in Portuguese.
 
 <p align="center">
-  <img src="docs/media/sections-desktop.jpg" width="960" alt="Mosaic of nine desktop sections: the hero with the UniCatólica logo and the two course names above the official logo, lightning and the countdown; From the classroom to the stage, with the stopwatch; the NPCs, with the neon question mark; 8 missions, with the 3D map; 4 days of schedule, with the day tabs and the synthwave terrain; the final at Capim Dourado Shopping, with the LED wall; the prizes, with the golden trophy; the teams, with the galaxy and the confirmed teams counter; and the end of the page, with the calm globe behind Sua vaga na corrida, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
-  <br /><sub>Nine sections, nine moments of the same particle field. In the hero, the UniCatólica and course lockup opens the screen, and the official logo right below it is the H1 and the LCP element.</sub>
+  <img src="docs/media/sections-desktop.jpg" width="960" alt="Nine sections of the page on desktop: the hero with the UniCatólica logo, the courses and the HackaRun logo; the event, with the stopwatch; the NPCs, with the question mark; the missions, with the map; the schedule, with the day tabs; the final at Capim Dourado Shopping; the prizes, with the trophy; the teams, with the galaxy; and the closing registration call to action, with the globe." />
+  <br /><sub>Nine sections of the page on desktop.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/mobile.jpg" width="960" alt="Five mobile screens side by side: the hero with the UniCatólica logo and the two course names, the official logo and the countdown, the NPCs with the 3D question mark and the NPC terminal, the missions with the particle map, the prizes with the golden trophy and the champion team card, and the end of the page with the globe, the countdown, the checklist of what to have ready and the Quero participar and Ver as equipes buttons." />
-  <br /><sub>On a phone (390 px), at the same quality tier a recent device gets.</sub>
+  <img src="docs/media/mobile.jpg" width="960" alt="Five screens of the mobile version: the hero with the countdown, the NPCs, the missions, the prizes and the closing registration call to action." />
+  <br /><sub>The same page on a phone (390 px).</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/teams-page.jpg" width="720" alt="The teams page on desktop: the sub-navigation with Voltar ao evento (back to the event) and the Inscrição and Equipes inscritas switch, the Equipes inscritas title, a counter with 6 confirmed teams, a search by name and six cards with the logo or photo of each team (Byte do Cerrado, Café com Código, Capivara Stack, Jalapão Hackers, Null Pointers and Os Commitados), each with a confirmed badge and its number of members." />
-  <br /><sub>The <code>/equipes</code> page reads the confirmed teams from the Google Sheet and shares its sub-navigation with the registration page. The teams and images in this capture are made up, for illustration only.</sub>
+  <img src="docs/media/teams-page.jpg" width="720" alt="The teams page on desktop: the menu with Back to the event, Registration and Registered teams, the confirmed-team counter, the search by name and six cards with each team's logo or photo." />
+  <br /><sub>The <code>/equipes</code> page. The teams and images in this screenshot are fictional.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/registration.jpg" width="960" alt="The registration page with registration open, on one desktop screen and two phone screens. On desktop, the form with the team name Byte do Cerrado, the preview of the team logo already converted to WebP (600 × 600 px, 15 KB), the Members step at 3 of 5 and member 1, the team contact; beside it, the What you need to have ready panel and the Registration steps card with all 3 steps done and Draft saved in this tab. On the first phone, the top of the page: Back, the Inscrição and Equipes switch, the Inscreva sua equipe title, the Abertas (open) status, the collapsed checklist and the steps with check marks. On the second, members 2 and 3 with full name, student ID and email." />
-  <br /><sub>Registration has a page of its own, light and with no 3D: the photo is resized right in the browser, the steps show what is already done and the draft stays in the tab if someone leaves and comes back. Made-up data, on a test build with a simulated submission.</sub>
+  <img src="docs/media/registration.jpg" width="960" alt="The registration page on desktop and on a phone: the form with the team name, the logo preview and the members, each with full name, student ID and e-mail, and beside it the list of what to have at hand and the registration steps." />
+  <br /><sub>The <code>/inscricao</code> page, with fictional data and simulated submission.</sub>
 </p>
 
-## Visual script: one 3D scene per section
+## 3D scenes by section
 
-Each section declares `data-scene`. Scrolling blends the shapes on the GPU continuously and reversibly, and
-[`FlightPath`](src/presentation/experience/camera/FlightPath.ts) has camera choreography for every transition, from
-flying through the globe shell to the final pull-back. The shapes are built in a Web Worker with the same spatial order
-(a Morton curve) in all of them, so particle k sits in the "same place" in every object and the morph flows instead of
-scrambling.
+Each section of the page has a scene (`data-scene`). While scrolling, the particles move from one shape to the next,
+and the camera follows the transition ([`FlightPath`](src/presentation/experience/camera/FlightPath.ts)). The shapes
+are generated in a Web Worker and share the same spatial order (a Morton curve), which keeps the change from one shape
+to another continuous.
 
-| Section                     | Scene     | Object                                                                  |
-| --------------------------- | --------- | ----------------------------------------------------------------------- |
-| Hero (`#inicio`)            | `core`    | Energy globe made of particle ribbons, its silhouette lit by fresnel    |
-| About (`#sobre`)            | `orbit`   | Stopwatch-gyroscope: dial, sweep hand and gimbal rings                  |
-| NPCs (`#npcs`)              | `enigma`  | Extruded question mark with a dashed clue band and a HUD halo           |
-| Missions (`#missoes`)       | `map`     | Holographic map: round platform, spiral route and 8 energized beacons   |
-| Schedule and mentors        | `terrain` | Synthwave floor: scrolling grid, mountains and a striped sun            |
-| Grand final (`#final`)      | `stage`   | Show stage: 16:9 LED wall, truss, 8 light cannons and a bouncing crowd  |
-| Prizes (`#premios`)         | `trophy`  | Lathe-profile cup drawn in lines, tube handles and a star on top        |
-| Teams and FAQ               | `dust`    | A distant, calm galaxy with 2 spiral arms: a quiet backdrop for reading |
-| Registration (`#inscricao`) | `core`    | The globe returns calm, only breathes, charges for 0.9 s and pulses     |
+| Section                     | Scene     | Object                                                   |
+| --------------------------- | --------- | -------------------------------------------------------- |
+| Hero (`#inicio`)            | `core`    | Globe made of particle bands                             |
+| The event (`#sobre`)        | `orbit`   | Stopwatch with dial, hand and rings                      |
+| NPCs (`#npcs`)              | `enigma`  | 3D question mark                                         |
+| Missions (`#missoes`)       | `map`     | Map with a platform, a spiral route and eight markers    |
+| Schedule and mentors        | `terrain` | Grid terrain with mountains and a sun                    |
+| Final (`#final`)            | `stage`   | Stage with an LED wall, truss and light beams            |
+| Prizes (`#premios`)         | `trophy`  | Trophy                                                   |
+| Teams and FAQ               | `dust`    | Spiral galaxy, as a background for reading               |
+| Registration (`#inscricao`) | `core`    | The globe again, turning slowly, with a soft light pulse |
 
-Orbitron, the brand's official font, has its tilde redrawn in Python with fontTools: in the original, "NÃO"
-(Portuguese for "no") looked like "NÀO" in large headings ([ADR 0006](docs/adr/0006-cinematic-v2-and-official-identity.md)).
+The tilde of the Orbitron font, used in the headings, was redrawn with fontTools: in the original file, "NÃO" looked
+like "NÀO" at large sizes.
 
 ## Stack
 
-| Layer    | Technologies                                                                                                    |
-| -------- | --------------------------------------------------------------------------------------------------------------- |
-| Base     | [Astro 7](https://astro.build) (SSG), TypeScript 6 (strictest), Vite                                            |
-| 3D       | [Three.js](https://threejs.org) r186 + custom GLSL, EffectComposer, UnrealBloomPass and a custom cinematic pass |
-| Motion   | [GSAP](https://gsap.com) 3.15 (ScrollTrigger), [Lenis](https://lenis.darkroom.engineering) 1.3, `LineSplit`     |
-| Styling  | Modern CSS (custom properties, `@property`, cascade layers, `clamp()`, `content-visibility`), design tokens     |
-| Fonts    | Orbitron (with the fixed tilde), Montserrat and JetBrains Mono, self-hosted via Fontsource, latin subset only   |
-| Images   | `createImageBitmap` + canvas in the browser (WebP or JPEG), Google's image CDN for the team photos              |
-| Backend  | Google Apps Script (V8) + Google Sheets (Equipes, Integrantes and Resumo tabs) + Google Drive, serverless       |
-| Quality  | Vitest + happy-dom, ESLint 10 + typescript-eslint, Prettier, Astro Check, Playwright + Lighthouse               |
-| Workflow | Husky, lint-staged, commitlint (Conventional Commits), GitHub Actions, `npm run setup`                          |
-| Hosting  | Cloudflare Pages ([ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md))                                        |
-
-Full list of libraries, patterns and concepts (pt-BR):
-[`docs/pdf/HackaRun_LP_Stack_e_Padroes.pdf`](docs/pdf/HackaRun_LP_Stack_e_Padroes.pdf).
+| Layer     | Technologies                                                                                                                 |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Base      | [Astro 7](https://astro.build) (static site), TypeScript 6 (strictest), Vite                                                 |
+| 3D        | [Three.js](https://threejs.org) r186, custom GLSL shaders, EffectComposer, UnrealBloomPass and a custom post-processing pass |
+| Animation | [GSAP](https://gsap.com) 3.15 (ScrollTrigger) and [Lenis](https://lenis.darkroom.engineering) 1.3                            |
+| Styling   | CSS (custom properties, cascade layers, `clamp()`, `content-visibility`) and design tokens                                   |
+| Fonts     | Orbitron, Montserrat and JetBrains Mono, self-hosted, with Latin characters only                                             |
+| Images    | Photo downscaling in the browser (`createImageBitmap` and canvas) and Google's image CDN for the teams                       |
+| Backend   | Google Apps Script, Google Sheets (Equipes, Integrantes and Resumo tabs) and Google Drive                                    |
+| Quality   | Vitest, ESLint, Prettier, Astro Check, Playwright and Lighthouse                                                             |
+| Workflow  | Husky, lint-staged, commitlint (Conventional Commits) and GitHub Actions                                                     |
+| Hosting   | Cloudflare Pages                                                                                                             |
 
 ## Architecture
 
-Clean Architecture with DDD and MVVM. Dependencies point toward the domain, and ESLint (`no-restricted-imports` in
-[`eslint.config.js`](eslint.config.js)) rejects any aliased import (`@application/*`, `@infrastructure/*`…) that breaks
-the rule.
+The code follows Clean Architecture, with DDD in the domain and MVVM in the interface. Dependencies always point to
+the domain, and ESLint ([`eslint.config.js`](eslint.config.js)) flags any import between layers that breaks this rule.
 
 ```mermaid
 flowchart TB
   subgraph PRES["Presentation"]
     SEC["Astro sections"]
     MVVM["ViewModels and Views"]
-    XP["3D experience"]
-    MOT["Motion"]
+    XP["3D scene"]
+    MOT["Animations"]
   end
   subgraph APP["Application"]
     UC["Use cases"]
@@ -171,51 +149,39 @@ flowchart TB
   INFRA -. implements .-> REPO
 ```
 
-- **Domain:** imports no other layer and no framework (`three`, `gsap`, `lenis`, `astro`).
-- **Application:** depends on the domain, never on infrastructure, presentation or a framework.
-- **Presentation:** never imports `@infrastructure`; adapters are wired in `src/composition` and arrive ready to use.
+- **Domain:** does not import other layers or UI libraries (`three`, `gsap`, `lenis`, `astro`).
+- **Application:** depends only on the domain.
+- **Presentation:** uses the application ports and never imports the infrastructure; adapters are wired in
+  `src/composition`.
 - **Shared** (`EventBus`, `Observable`, `Ticker`): used by the other layers and imports none of them.
 
-**DDD building blocks:** `Entity` and `ValueObject` base types, `Result<T, E>` with `ok` and `fail`, two aggregate
-roots (`HackathonEvent` and `TeamRegistration`), entities such as `EventDay`, `Session` and `Activity`, value objects
-such as `TeamName`, `TeamMember`, `FullName`, `StudentId`, `Email`, `TeamImage`, `TimeSlot`, `Audience`, `Countdown`
-and `ScoringRule`, the `RegistrationPolicy` domain service (soon, open, closing, closed) and 12 use cases. Invalid JSON
-content fails the build, and a test checks the schedule against the event's official document.
+The domain has two aggregates (`HackathonEvent` and `TeamRegistration`), value objects such as `TeamName`, `FullName`,
+`StudentId`, `Email` and `TimeSlot`, and the `RegistrationPolicy` service, which decides whether registration is
+coming soon, open or closed. In the interface, ViewModels keep state in `Observable` and do not touch the DOM; Views
+only connect them to the page. Modules communicate through a typed `EventBus`
+([`AppEvents.ts`](src/presentation/app/AppEvents.ts)).
 
-**MVVM:** 6 DOM-free ViewModels holding state in `Observable` (countdown, HUD, pause, NPC hunt, form and teams), and
-Views that only bind the DOM. Modules talk through a typed `EventBus`
-([`AppEvents.ts`](src/presentation/app/AppEvents.ts)): `scene:enter`, `experience:charged`, `motion:paused`,
-`npc:found` and more.
-
-**In the browser**, in priority order and without holding back the first paint:
+Loading in the browser follows this order, without delaying the first content on screen:
 
 ```mermaid
 flowchart TB
-  P["First contentful paint (PaintGate)"] --> B["BootQueue: motion, views, controllers and animators"]
-  B --> Z["Section near the viewport (LazyMount): teams showcase and the missions rail"]
+  P["First content on screen (PaintGate)"] --> B["BootQueue: animations, views and controllers"]
+  B --> Z["Section near the viewport (LazyMount): teams and mission track"]
   B --> L(["load + browser idle"])
   L --> X["three.js chunk"]
   L --> W["Shapes in a Web Worker"]
-  L --> F["Frames back on pace (FrameSettle): WebGL context"]
-  F --> S["Parallel shader compile"]
+  L --> F["WebGL context (FrameSettle)"]
+  F --> S["Shaders in parallel"]
   X --> S
   W --> R["First 3D frame"]
   S --> R
 ```
 
-**Every 3D frame:** scroll → `SceneDirector` (continuous scene index) → `SceneMixer` (weights) → vertex shader (morph
-between targets) → `RenderPass` → bloom → cinematic pass → opaque canvas blended over the CSS aurora. At the end of the
-page, a motion profile of its own ([`CoreMotion`](src/presentation/experience/scene/CoreMotion.ts)) calms the globe
-down: it turns slowly, only breathes, and the charge turns into light, not agitation.
-
-**Light pages:** `/inscricao` (registration) and `/equipes` (teams) use a separate boot
-([`LightApp`](src/presentation/app/LightApp.ts)) with no 3D, GSAP or Lenis. The form is only downloaded there, and only
-while registration is open. "Voltar ao evento" (back to the event,
-[`backToEvent.ts`](src/presentation/views/navigation/backToEvent.ts)) goes back through history, so the landing page
-reappears at the same spot, straight from the bfcache.
+The `/inscricao` and `/equipes` pages use a separate entry point ([`LightApp`](src/presentation/app/LightApp.ts)),
+without 3D, GSAP or Lenis.
 
 <details>
-<summary><b>Design patterns and where they live</b></summary>
+<summary><b>Design patterns and where they are</b></summary>
 
 | Pattern              | Where                                                                                                                                                                                                                                           |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -224,186 +190,111 @@ reappears at the same spot, straight from the bfcache.
 | Registry             | [`AnimatorRegistry`](src/presentation/motion/animators/AnimatorRegistry.ts)                                                                                                                                                                     |
 | Template Method      | [`SectionAnimator`](src/presentation/motion/animators/SectionAnimator.ts)                                                                                                                                                                       |
 | Adapter              | [`SmoothScroll`](src/presentation/motion/core/SmoothScroll.ts) (Lenis), [`AppsScriptRegistrationGateway`](src/infrastructure/registration/AppsScriptRegistrationGateway.ts), [`CanvasImageCodec`](src/infrastructure/image/CanvasImageCodec.ts) |
-| Decorator            | [`RetryingRegistrationGateway`](src/infrastructure/registration/RetryingRegistrationGateway.ts): 3 attempts, exponential backoff with jitter                                                                                                    |
-| Fallback proxy       | [`FallbackTeamRepository`](src/infrastructure/repositories/FallbackTeamRepository.ts): live sheet first, build-time list as backup                                                                                                              |
-| Null Object          | [`UnavailableRegistrationGateway`](src/infrastructure/registration/UnavailableRegistrationGateway.ts): in production with no endpoint, every submission answers "closed"                                                                        |
+| Decorator            | [`RetryingRegistrationGateway`](src/infrastructure/registration/RetryingRegistrationGateway.ts): 3 attempts, with increasing waits between them                                                                                                 |
+| Proxy with fallback  | [`FallbackTeamRepository`](src/infrastructure/repositories/FallbackTeamRepository.ts): live list from the sheet, with the build-time list as a backup                                                                                           |
+| Null Object          | [`UnavailableRegistrationGateway`](src/infrastructure/registration/UnavailableRegistrationGateway.ts): without an endpoint, every submission answers "closed"                                                                                   |
 | Observer             | [`Observable`](src/shared/core/Observable.ts), [`EventBus`](src/shared/core/EventBus.ts)                                                                                                                                                        |
-| Singleton            | [`Ticker.shared`](src/shared/core/Ticker.ts) (one rAF for the whole site), [`serverContainer()`](src/composition/server.ts)                                                                                                                     |
+| Singleton            | [`Ticker.shared`](src/shared/core/Ticker.ts) (a single `requestAnimationFrame` for the site), [`serverContainer()`](src/composition/server.ts)                                                                                                  |
 | Facade               | [`GetLandingPage`](src/application/use-cases/GetLandingPage.ts), [`ExperienceStage`](src/presentation/experience/ExperienceStage.ts)                                                                                                            |
-| Composite            | [`strokes.ts`](src/presentation/experience/shapes/strokes.ts): a shape is a list of weighted strokes                                                                                                                                            |
+| Composite            | [`strokes.ts`](src/presentation/experience/shapes/strokes.ts): a shape is a list of strokes                                                                                                                                                     |
 | Builder              | [`PointBrush`](src/presentation/experience/shapes/PointBrush.ts), [`BoltBuilder`](src/presentation/motion/animators/hero/lightning/BoltBuilder.ts), [`StageBuilder`](src/presentation/experience/StageBuilder.ts)                               |
 | Repository + Mapper  | [`StaticListRepository`](src/infrastructure/repositories/StaticListRepository.ts), [`EventMapper`](src/infrastructure/mappers/EventMapper.ts)                                                                                                   |
-| Cooperative job      | [`ParticleJob`](src/presentation/experience/shapes/ParticleJob.ts): a generator that yields the thread                                                                                                                                          |
-| Dependency inversion | [`BootSteps`](src/presentation/app/BootQueue.ts), the interface the boot sees                                                                                                                                                                   |
+| Dependency inversion | [`BootSteps`](src/presentation/app/BootQueue.ts), the interface the boot sequence sees                                                                                                                                                          |
 
 </details>
 
-More in the [project guide (pt-BR)](docs/GUIA_DO_PROJETO.md#6-arquitetura) and the [ADRs](docs/adr).
-
 ## Performance
 
-Lighthouse mobile on the production build, Brave headless, median of 3 runs on 2026-10-12:
+Lighthouse mobile on the production build, median of 3 runs (10/12/2026):
 
-| Metric                                | Project target | Before   | Now         |
-| ------------------------------------- | -------------- | -------- | ----------- |
-| Performance                           | ≥ 90           | 66       | **98**      |
-| Total Blocking Time                   | –              | 1,600 ms | **98 ms**   |
-| Largest Contentful Paint              | < 2.5 s        | 2.9 s    | **2.2 s**   |
-| First Contentful Paint                | –              | –        | 1.4 s       |
-| Speed Index                           | –              | –        | 2.1 s       |
-| Cumulative Layout Shift               | < 0.05         | –        | **0.001**   |
-| Accessibility, Best practices and SEO | 100            | 100      | **100**     |
-| Initial JS (entry chunk, gzip)        | < 70 KB        | –        | **68.2 KB** |
+| Metric                                | Before   | Now     |
+| ------------------------------------- | -------- | ------- |
+| Performance                           | 66       | 98      |
+| Total Blocking Time                   | 1,600 ms | 98 ms   |
+| Largest Contentful Paint              | 2.9 s    | 2.2 s   |
+| Cumulative Layout Shift               | –        | 0.001   |
+| Accessibility, Best Practices and SEO | 100      | 100     |
+| Initial JavaScript (gzip)             | –        | 68.2 KB |
 
-<sub>Before: the score from the last report prior to the performance work. Dash: no target of its own or no earlier
-record. Initial JS: the entry script, the `App` chunk and their static imports, gzipped (1 KB = 1,024 bytes).
-`/inscricao` and `/equipes` score 99 on Performance, with a 2.0 s LCP and 0 TBT.</sub>
+The `/inscricao` and `/equipes` pages score 99 for Performance. The main measures:
 
-Every target I set myself is met. What keeps it that way:
-
-- Static HTML with the hero ready at build time. The official logo is the H1 and the LCP element, with high priority,
-  and the small CSS is inlined. On pages without a hero, the header logo gets the priority instead.
-- The app's JavaScript only downloads after the browser records the first contentful paint
-  ([`PaintGate`](src/presentation/app/PaintGate.ts), with a 3 s cap), and the boot runs in short steps that yield the
-  thread ([`BootQueue`](src/presentation/app/BootQueue.ts) with `scheduler.yield()`). Each section only sets up its
-  animations when it gets close to the viewport, and a custom `LineSplit` replaces GSAP SplitText.
-- The teams showcase and the missions rail counter are separate chunks, loaded by
-  [`LazyMount`](src/presentation/app/LazyMount.ts) when the section gets close, when the page opens on or jumps to it,
-  or when someone taps or focuses it. The form lives on the `/inscricao` page and is never downloaded on the landing
-  page.
-- three.js in its own chunk (592 KB, 152 KB gzip), imported after `load` and once the browser is idle. The shapes are
-  built in a Web Worker, the WebGL context is only created once frames are back on the display's pace
-  ([`FrameSettle`](src/presentation/experience/FrameSettle.ts)), and the shaders compile in parallel.
-- Adaptive quality: 9,000, 22,000 or 42,000 particles depending on the GPU, and bloom, resolution and tier step down if
-  FPS stays below 45.
-- Self-hosted fonts, latin subset only, two preloaded, `font-display: swap`.
-- `content-visibility: auto` on far sections, with `contain-intrinsic-size` measured at 390 and 1440 px, without
-  breaking anchors ([`anchorcheck.mjs`](scripts/qa/anchorcheck.mjs) verifies it).
-- 3D rendering pauses when the tab is hidden, and the logo lightning only runs while the hero is visible.
-- `/inscricao` and `/equipes` have no 3D, GSAP or Lenis (14 KB of initial JS). Photos come at 600 px from Google's CDN
-  with `loading="lazy"`, `decoding="async"` and a fixed width and height (no layout shift); on upload, the browser
-  already brings each photo down to ~300 KB.
-- The calm globe at the end costs no extra render pass: 4 uniforms on the particles, 1 on the lens pass and a blend of
-  a few numbers per frame.
-- Immutable caching for one year on `/_astro/*` and HTML always revalidated ([`public/_headers`](public/_headers)).
-
-<sub>Measured again on 2026-10-12, after the registration page and the calm final globe, on the production build served
-with gzip. TBT varies between runs (68 to 245 ms across these three), always from boot tasks and the 3D chunk.</sub>
+- The HTML is ready at build time, and the critical CSS ships with the page.
+- The page's JavaScript only loads after the first content appears on screen
+  ([`PaintGate`](src/presentation/app/PaintGate.ts)), and startup is split into short steps
+  ([`BootQueue`](src/presentation/app/BootQueue.ts)).
+- three.js is in a separate file, loaded after `load`. The shapes are generated in a Web Worker, and the shaders are
+  compiled in parallel.
+- The particle count (9,000, 22,000 or 42,000) depends on the GPU, and quality drops automatically if the frame rate
+  falls below 45.
+- Sections far from the top use `content-visibility: auto`.
+- The 3D stops when the tab is in the background.
 
 ## Accessibility
 
-The target is **WCAG 2.2 AA**, and Lighthouse scores accessibility at 100:
+The target is **WCAG 2.2 AA**.
 
-- A "Pular para o conteúdo" skip link and visible focus (`:focus-visible`, never `outline: none`), including Windows
-  high contrast (`forced-colors: active`).
-- `prefers-reduced-motion`: instant native scrolling, whole-scene swaps, 3D drawn on demand only and no entrance
-  animations.
-- A **pause animations** button (WCAG 2.2.2) in the header and the mobile menu: it freezes the 3D clock, the
-  lightning and the CSS loops, and the choice is saved. Its tooltip closes with Esc (WCAG 1.4.13).
-- Mobile menu with the rest of the page `inert`, a focus trap, Esc to close and focus returned to the toggle. Anchor
-  links move focus to the target section.
-- The schedule uses the WAI-ARIA tabs pattern (roving tabindex, arrow keys, Home/End and automatic activation).
-  Without JavaScript, the tab bar is hidden and the 4 days are stacked.
-- A step-by-step form with one `fieldset` per member: adding or removing someone moves focus and announces the team
-  size ("Integrante 3 adicionado. A equipe tem 3 de 5 integrantes."). The steps indicator uses `aria-current="step"`
-  and tells screen readers when a step has fields to fix. It has an error summary grouped by block, `aria-invalid` and
-  `aria-describedby`, live regions for status and screen-reader copies of the "typed" or "decoded" text. The photo
-  field has a preview, a replace button, drag and drop and an announced status. And a click on "Confirmar inscrição"
-  is not lost when a field error shows up above the button.
-- A sub-navigation on `/inscricao` and `/equipes` with `aria-current="page"` and the full accessible name even when
-  the label shortens on phones; the link to the current page scrolls to the top and moves focus to the content
-  instead of reloading.
-- The `/equipes` page has a labeled search, a count announced in a live region and "Foto ou logo da equipe X" alt text
-  on every card. On the production build, Lighthouse scores accessibility at 100 on `/equipes` and on `/inscricao`
-  while registration is open.
-- Full content without JavaScript and without WebGL: the HTML is complete at build time, and the form says so when
-  JavaScript is off.
+- Skip link and always-visible focus, including in Windows high-contrast mode.
+- With `prefers-reduced-motion`, scrolling is native and entrance animations do not run.
+- A **Pause animations** button in the header and in the mobile menu, which freezes the 3D and the CSS animations.
+- Schedule in tabs following the WAI-ARIA pattern, keyboard navigable. Without JavaScript, the four days are shown in
+  sequence.
+- Form with one `fieldset` per member, an error summary, `aria-invalid`, `aria-describedby` and screen reader
+  announcements.
+- All content works without JavaScript or WebGL.
 
-## Security and privacy (LGPD)
+## Security and LGPD
 
-- **Strict CSP** in [`public/_headers`](public/_headers): `script-src 'self'` with no inline script, `connect-src`
-  limited to the site's own origin and Apps Script, `img-src` limited to the site's own origin and
-  `lh3.googleusercontent.com` (the team photos), `object-src 'none'` and `frame-ancestors 'none'`, plus `nosniff`,
-  `X-Frame-Options: DENY`, COOP, Permissions-Policy and Referrer-Policy.
-- **Only what is needed at registration:** the team name, a photo or logo and, for each member, full name, student ID
-  and e-mail. No phone number, course or sensitive data. Official communication goes by e-mail.
-- **Minimal public data:** the teams page shows only the team name, member count and photo or logo (never people's
-  names, student IDs or e-mails), and only after the organizers confirm the registration. Cards are built from a
-  `<template>` using `textContent` (nothing from the sheet becomes HTML), and the photo URL is only built from an id in
-  the Drive id format.
-- **Draft kept in the tab only:** what is typed on `/inscricao` lives in `sessionStorage` (gone when the tab closes,
-  on a successful submit or on "Limpar rascunho"), consent is never stored, and whatever comes back from storage is
-  checked (origin from a fixed list, a submission key in the server's format, a photo with a valid type and size).
-- **One team per person:** a team name, e-mail or student ID already used by another team comes back as a conflict,
-  ignoring case and accents, and the site flags the right field. Each form session sends a UUID key, so a retry gets
-  the same protocol code back, with no duplicate row.
-- **Uploads checked on the server:** the photo is validated by its leading bytes (JPEG, PNG or WebP), the declared
-  type has to match and the cap is 400 KB. The file in Drive gets a random name, never the protocol code or anything
-  typed.
-- **Anti-spam:** a honeypot field, a 3 s minimum fill time, and per-e-mail (the counter keys on the SHA-256 hash of the
-  contact e-mail only) and global limits.
-- **Protected sheet:** formula injection (`= + - @`) is neutralized, `LockService` prevents concurrent writes and the
-  Apps Script asks only for the minimum scopes (its own spreadsheet and Drive), checked by a test.
-- **LGPD:** a privacy notice at [`/privacidade`](src/pages/privacidade.astro) in 9 sections, from who handles the data
-  to in-browser storage, including the team photo, retention and how to ask for removal. Each registration stores the
-  accepted notice version and the consent time (`CONSENT_VERSION`, currently `2026-10-v3`), and the server rejects
-  submissions without them or with an old version. Consent includes permission to publish the photo and a statement
-  that every member, and everyone in the picture, agreed.
+- **Security headers** in [`public/_headers`](public/_headers): a Content Security Policy without inline scripts,
+  `X-Frame-Options: DENY`, `nosniff` and Referrer-Policy.
+- **Only the data needed:** team name, photo or logo and, for each member, full name, student ID and e-mail.
+- **Little public information:** the teams page shows only the team name, the number of members and the photo, and
+  only after the organizers confirm the registration.
+- **No duplicates:** a team name, e-mail or student ID already used by another team is rejected, and a resubmission
+  does not create a new row in the sheet.
+- **Photo checked on the server:** the file is validated by its real format (JPEG, PNG or WebP) and by size, and gets
+  a random name in Drive.
+- **Spam protection:** a honeypot field, a minimum fill time and a submission limit.
+- **LGPD** (Brazil's data protection law): privacy notice at [`/privacidade`](src/pages/privacidade.astro). Each
+  registration stores the notice version accepted and the date of acceptance.
 
 ## Quality
 
-| Item       | Status                                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------------------------ |
-| Tests      | **828 tests in 108 files** (Vitest + happy-dom), split by layer, including 12 suites that run the real Apps Script |
-| Lint       | ESLint with no errors or warnings: layer rules, a 250 code-line cap per file, `import type`                        |
-| Types      | `astro/tsconfigs/strictest` (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, …) + Astro Check            |
-| Formatting | Prettier across the repository                                                                                     |
-| CI         | GitHub Actions on push to `main` and on PRs: `npm ci` → lint → format → tests → simulation-free build → `dist`     |
-| Commits    | Husky + lint-staged on pre-commit and commitlint on commit-msg (a scope outside the list triggers a warning)       |
-| Browser QA | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow, Web Vitals, long tasks and Lighthouse       |
-
-**By the numbers:** 439 files and 33,322 lines in `src` (TypeScript, Astro, GLSL and CSS), of which 90 files and 5,852
-lines are the 3D module; 108 test files and 12 helpers, with 10,686 lines; 1,117 lines of Apps Script in 8 files; 9
-ADRs.
+| Item           | Status                                                                                 |
+| -------------- | -------------------------------------------------------------------------------------- |
+| Tests          | Vitest, with tests per layer and Apps Script tests that run the real code              |
+| Lint and types | ESLint with no errors and TypeScript in its strictest mode, with Astro Check           |
+| Formatting     | Prettier across the repository                                                         |
+| CI             | GitHub Actions on every push to `main` and every PR: lint, formatting, tests and build |
+| Commits        | Conventional Commits, checked by commitlint                                            |
+| Visual tests   | [`scripts/qa/`](scripts/qa/README.md): screenshots, anchors, overflow and Lighthouse   |
 
 ---
 
-## For developers
+## Running it locally
 
-### Run it on your machine
+**1. Install the tools**
 
-This walkthrough is for anyone who forks the project and wants to work on it. The commands work in Git Bash,
-PowerShell and the macOS or Linux terminal; where something differs, both versions are shown.
+| Tool            | Version                      | Used for                                    |
+| --------------- | ---------------------------- | ------------------------------------------- |
+| Git             | recent                       | Cloning the project and opening PRs         |
+| Node.js         | 24 LTS (minimum 22.18)       | Running, testing and building               |
+| npm             | the one that ships with Node | Dependencies and scripts                    |
+| Brave or Chrome | current                      | Optional: visual test scripts               |
+| Python          | 3.11 or newer                | Optional: only to rebuild the Orbitron font |
 
-**1. Install the basics**
+The Node version used in CI is in the `.nvmrc` file.
 
-| Tool            | Version                             | What for                                                                              |
-| --------------- | ----------------------------------- | ------------------------------------------------------------------------------------- |
-| Git             | any recent version                  | Cloning, branching and opening PRs                                                    |
-| Node.js         | 24 LTS (`.nvmrc`; 22.18 at minimum) | Running, testing and building. With nvm: `nvm install 24` and `nvm use 24`            |
-| npm             | the one bundled with Node           | Dependencies and scripts                                                              |
-| Brave or Chrome | current                             | Optional: QA scripts (screenshots and Lighthouse) on a real GPU                       |
-| Python          | 3.11 or newer                       | Optional: only to regenerate the font or the PDF assets                               |
-| VS Code         | any recent version                  | Optional: the repo recommends the Astro, ESLint, Prettier and EditorConfig extensions |
+**2. Clone the project**
 
-On Windows, nvm is [nvm-windows](https://github.com/coreybutler/nvm-windows); `.nvmrc` holds the version CI uses.
-
-**2. Fork and clone your fork**
-
-On GitHub, click **Fork**, then:
+Team members join as collaborators and clone the original repository, so each PR gets a Cloudflare preview. The steps
+are in [CONTRIBUTING.md](CONTRIBUTING.md#fluxo-de-trabalho-da-equipe) (pt-BR).
 
 ```bash
-git clone https://github.com/<your-username>/lp-hackarun.git
+git clone https://github.com/hackarun-unicatolica/lp-hackarun.git
 cd lp-hackarun
-git remote add upstream https://github.com/hackarun-unicatolica/lp-hackarun.git
 ```
 
-`origin` is your fork (where you push) and `upstream` is the original repository (where updates come from).
-
-**On the team?** The repository lives in the `hackarun-unicatolica` GitHub organization. Ask to be added as a
-collaborator and skip the fork: clone the original
-(`git clone https://github.com/hackarun-unicatolica/lp-hackarun.git`), with no `upstream`. That way your PRs get the
-Cloudflare preview. The step by step (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTING.md#fluxo-de-trabalho-da-equipe).
+People outside the team fork the repository on GitHub and clone their fork.
 
 **3. Set up the project**
 
@@ -411,16 +302,13 @@ Cloudflare preview. The step by step (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTIN
 npm run setup
 ```
 
-The script checks your Node version, runs `npm ci` if the dependencies are not installed yet, creates `.env` from
-`.env.example` and prints the next steps. Use `npm run setup -- --qa` to also install the QA scripts and
-`npm run setup -- --check` to only check, without installing anything. If you would rather do it by hand:
+The command checks the Node version, installs the dependencies and creates the `.env` file from `.env.example`. To do
+it by hand:
 
 ```bash
 npm ci
 cp .env.example .env
 ```
-
-<sub>In the Windows cmd shell, use `copy` instead of `cp`. In Git Bash and PowerShell, `cp` works.</sub>
 
 **4. Run the site**
 
@@ -428,282 +316,142 @@ cp .env.example .env
 npm run dev
 ```
 
-Open `http://localhost:4321`; the form is at `http://localhost:4321/inscricao` (no trailing slash). The page reloads
-on every save. With `PUBLIC_REGISTRATION_ENDPOINT` empty (the `.env.example` default), registration runs in
-**simulated mode**: nothing leaves your machine and no spreadsheet is touched. The form validates everything like
-the real one, and the "registered" teams show up as confirmed, with their photo, on `/equipes` and the landing page
-while the tab stays open (they live in `sessionStorage`). To see the error states, use a contact e-mail starting with
-`falha` (network error), `servidor` (script down) or `duplicado` (duplicate registration). A team name, e-mail or
-student ID repeated across the simulated teams gives the same field error as the real server.
-
-| URL parameter                    | Effect                                                               |
-| -------------------------------- | -------------------------------------------------------------------- |
-| `?quality=low\|medium\|high`     | Forces the 3D tier and turns off the automatic FPS-based adjustment  |
-| `?now=2026-11-14T16:00:00-03:00` | Shifts the site clock to check the countdown milestones              |
-| `/inscricao?origem=hero`         | Registration origin (Origem column); anything off the list: `direct` |
+Open `http://localhost:4321`. The form is at `http://localhost:4321/inscricao`. Locally, registration runs in
+**simulated mode**: nothing is sent and no sheet is changed. Submitted teams show up at `/equipes` while the tab is
+open.
 
 **5. Check before opening a PR**
 
 ```bash
-npm test
-npm run lint
-npm run format
 npm run validate
+npm run format:check
 ```
 
-`npm run validate` runs lint, tests and the build, the same as CI. To see the build as it ships, run `npm run build`
-and then `npm run preview`.
+`npm run validate` runs lint, tests and the build, like CI.
 
-**6. QA scripts (optional)**
+**6. Test real submissions (optional)**
 
-Screenshots at several widths, anchors, overflow, Web Vitals and Lighthouse, with the installed Brave or Chrome:
-
-```bash
-npm run setup -- --qa
-```
-
-This installs Playwright and Lighthouse inside `scripts/qa/` only (same as `cd scripts/qa` and `npm install`) and warns
-you if no browser is found. Without Brave or Chrome, run `npx playwright install chromium` inside `scripts/qa/`. Usage
-examples are in [Scripts](#scripts).
-
-**7. Python asset scripts (optional)**
-
-Only needed to regenerate Orbitron with the fixed tilde or the PDF assets. Both scripts read fonts from
-`node_modules`, so run `npm ci` first:
-
-```bash
-python -m pip install -r requirements.txt
-python scripts/fonts/patch_orbitron_tilde.py
-python scripts/docs/build_pdf_assets.py
-```
-
-<sub>On Windows, if `python` is missing or opens the Microsoft Store, use `py` instead (`py -m pip install -r
-requirements.txt`).</sub>
-
-**8. Point the form at a test spreadsheet of your own**
-
-To test real submissions, use a spreadsheet of **your own**, never the official one:
-
-1. In your Google Drive, create a spreadsheet (for example, "HackaRun · teste").
-2. Follow sections 2 to 5 of [`apps-script/README.md`](apps-script/README.md) (pt-BR): paste the 8 `.gs` files and
-   `appsscript.json`, run `configurarPlanilha()` and deploy it as a **Web app**.
-3. Copy the URL ending in `/exec` into your `.env`:
-   `PUBLIC_REGISTRATION_ENDPOINT=https://script.google.com/macros/s/<id>/exec`.
-4. Stop `npm run dev` (Ctrl+C) and start it again: `.env` is only read at startup.
-
-Submissions land in the Equipes and Integrantes tabs of your spreadsheet, and a team shows up on `/equipes` once you
-set its Status to `confirmado`. `.env` stays out of Git. Do not put the URL in `event.json`, or it will ride along in
-your PR.
+Use your own sheet, never the official one. Follow [`apps-script/README.md`](apps-script/README.md) (pt-BR) to create
+the Apps Script and deploy it as a Web App. Then put the URL ending in `/exec` in your `.env`, in the
+`PUBLIC_REGISTRATION_ENDPOINT` variable, and run `npm run dev` again. The `.env` file is not committed.
 
 <details>
-<summary><b>Troubleshooting</b></summary>
+<summary><b>Common problems</b></summary>
 
-| Symptom                                              | What to do                                                                                                                                      |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run setup` rejects your Node version            | Install Node 24 LTS (`nvm install 24` and `nvm use 24`) and open a new terminal. `node -v` shows the version in use.                            |
-| `npm warn EBADENGINE` during `npm ci`                | It is only a warning: a few lint dependencies ask for Node 24.16 or newer. Update Node 24 to the latest patch and it goes away.                 |
-| Port 4321 is busy                                    | Astro tries the next free port and prints the URL in the terminal. To pick one: `npm run dev -- --port 4322`. Or close the other `npm run dev`. |
-| `&&` fails in PowerShell                             | Windows PowerShell 5.1 has no `&&`: run one command per line or separate them with `;`. The commands in this README already come one per line.  |
-| Setting an environment variable for a single command | bash: `BRAVE_PATH="/path/to/brave" node shots.mjs <url>` · PowerShell: `$env:BRAVE_PATH = 'C:\path\to\brave.exe'; node shots.mjs <url>`         |
-| `npm ci` fails with `EPERM` or `EBUSY` on Windows    | Stop `npm run dev`, close any editor or terminal using the folder and run it again.                                                             |
-| The commit is rejected                               | Husky runs commitlint and lint-staged: check the `type(scope): description` format and the ESLint errors. Do not use `--no-verify`.             |
-| I changed `.env` and nothing happened                | Variables are read at startup: stop `npm run dev` and start it again.                                                                           |
-| I want to clear the simulated teams                  | Close the tab or delete the `hackarun:dev:simulated-teams` key from `sessionStorage` (DevTools → Application).                                  |
-| The form comes back filled in                        | That is the tab's draft: use "Limpar rascunho" in the steps card or delete the `hackarun:registration-draft:v2*` keys from `sessionStorage`.    |
-| `/inscricao/` returns 404                            | URLs have no trailing slash (`trailingSlash: 'never'`): open `/inscricao`.                                                                      |
-| The 3D does not show up                              | Check that the browser has WebGL2 and that data saver is off. Try `?quality=low`. Without 3D, the page is still complete.                       |
+| Symptom                                  | What to do                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `npm run setup` rejects the Node version | Install Node 24 LTS and open a new terminal. `node -v` shows the version in use.                |
+| `npm warn EBADENGINE` during `npm ci`    | It is only a warning. Updating Node 24 to the latest release fixes it.                          |
+| Port 4321 is busy                        | Astro uses the next free port and prints the address in the terminal.                           |
+| `&&` fails in PowerShell                 | Windows PowerShell 5.1 does not accept `&&`: run one command per line.                          |
+| The commit is rejected                   | Check the `type(scope): description` format and the ESLint errors. Do not use `--no-verify`.    |
+| I changed `.env` and nothing happened    | Variables are read at startup: stop `npm run dev` and run it again.                             |
+| The form comes back filled in            | It is the draft saved in the tab. Use "Limpar rascunho" (clear draft) or close the tab.         |
+| The 3D does not show up                  | Check that the browser supports WebGL2 or try `?quality=low`. Without 3D, the page still works. |
 
 </details>
-
-### Environment variables
-
-| Variable                        | Required | Description                                                                                             |
-| ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| `PUBLIC_SITE_URL`               | no       | Public URL (canonical, sitemap, robots.txt, Open Graph). Default: `https://hackarun.pages.dev`          |
-| `PUBLIC_REGISTRATION_ENDPOINT`  | no       | Apps Script Web App URL. Empty means "inscrições em breve" (simulated mode in dev)                      |
-| `PUBLIC_REGISTRATION_SIMULATED` | no       | `true` on Cloudflare previews only: with no endpoint, registration is simulated and pages get `noindex` |
-| `DOCS_OUT_DIR`                  | no       | Extra folder where `npm run docs:pdf` copies the PDFs and the guide                                     |
-
-The QA scripts read `BRAVE_PATH` or `CHROME_PATH` to find the browser.
 
 ### Scripts
 
-| Command                           | Description                                                            |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| `npm run setup`                   | Prepares your machine: checks Node, installs dependencies, adds `.env` |
-| `npm run dev`                     | Development server at `http://localhost:4321`                          |
-| `npm run build`                   | Type check (`astro check`) + production build to `dist/`               |
-| `npm run preview`                 | Serves the build locally                                               |
-| `npm test` / `test:watch`         | Unit tests once / in watch mode                                        |
-| `npm run lint` / `lint:fix`       | ESLint (layer rules, file size) / with autofix                         |
-| `npm run format` / `format:check` | Prettier: write / verify                                               |
-| `npm run validate`                | Lint + tests + build (CI runs this plus `format:check`)                |
-| `npm run docs:pdf`                | Generates the 2 PDF docs in `docs/pdf/`                                |
+| Command                           | Description                                                   |
+| --------------------------------- | ------------------------------------------------------------- |
+| `npm run setup`                   | Sets up the project: checks Node, installs and creates `.env` |
+| `npm run dev`                     | Development server at `http://localhost:4321`                 |
+| `npm run build`                   | Type check and production build in `dist/`                    |
+| `npm run preview`                 | Serves the build locally                                      |
+| `npm test`                        | Tests                                                         |
+| `npm run lint` / `lint:fix`       | ESLint / with automatic fixes                                 |
+| `npm run format` / `format:check` | Prettier: format / check                                      |
+| `npm run validate`                | Lint, tests and build                                         |
 
-<details>
-<summary><b>Asset scripts (Python) and QA scripts (Playwright + Lighthouse)</b></summary>
-
-Script-generated assets are never edited by hand: run the script and commit the output. The Python dependencies are
-in [`requirements.txt`](requirements.txt).
-
-| Command                                        | Requires                        | Generates                                                 |
-| ---------------------------------------------- | ------------------------------- | --------------------------------------------------------- |
-| `python scripts/fonts/patch_orbitron_tilde.py` | `fonttools`, `brotli`           | `src/assets/fonts/orbitron-pt-latin-wght.woff2`           |
-| `python scripts/docs/build_pdf_assets.py`      | `fonttools`, `brotli`, `Pillow` | `scripts/docs/assets/` (TTF fonts and logos for the PDFs) |
-
-The QA scripts have their own `package.json`, so Playwright and Lighthouse stay out of the project's `npm ci`. They
-use the installed Brave or Chrome with a real GPU and take the URL as an argument. Keep the build running in one
-terminal (`npm run build`, then `npm run preview`) and, in another, inside `scripts/qa/`:
-
-```bash
-node shots.mjs http://localhost:4321/ 390 844 out/m390 "#sobre,#programacao" --mobile
-node anchorcheck.mjs http://localhost:4321/           # anchors land just below the header
-node overflow.mjs http://localhost:4321/              # nothing overflows at 360 and 390 px
-node lighthouse.mjs http://localhost:4321/ --runs=3   # Lighthouse mobile with a median
-```
-
-There are also `vitals.mjs` (LCP, CLS and time until the 3D is ready), `longtasks.mjs` (long tasks with 4x CPU
-throttling and slow 4G) and `trace.mjs` (a trace up to first paint and the boot steps). Full walkthrough in
-[`scripts/qa/README.md`](scripts/qa/README.md).
-
-</details>
+The visual test scripts are in [`scripts/qa/`](scripts/qa/README.md) and have their own install
+(`npm run setup -- --qa`).
 
 ### Project structure
 
 <details>
-<summary><b>Folder tree</b></summary>
+<summary><b>Folders</b></summary>
 
 ```text
 src/
-├── domain/          # entities, value objects, aggregates, a domain service and repository interfaces
+├── domain/          # entities, value objects, aggregates and repository interfaces
 ├── application/     # use cases, DTOs and ports
-├── infrastructure/  # JSON content, mappers, repositories, Apps Script, image, storage and clock
-├── presentation/    # app, layouts, sections, components, controllers, formatters, view-models, views, motion,
-│                    # styles and experience/ (3D: camera, input, layers, particles, post, quality, scene, shaders, shapes)
-├── shared/          # EventBus, Observable, Ticker, utilities and config/ (registration mode, production or preview)
-├── composition/     # composition roots (build and browser)
-├── assets/          # official logos and Orbitron with the redrawn tilde
-└── pages/           # index, inscricao (registration), equipes (teams), privacidade (LGPD), 404 and robots.txt
-apps-script/         # registration API, the three-tab sheet and photos in Drive (Google Apps Script) + setup guide
-design/              # briefing references and the teaser video (not shipped)
-public/              # og-image, favicon and _headers (cache, CSP and security)
-scripts/             # setup.mjs, font patch, PDF generator and qa/
-tests/               # tests split by layer
-docs/                # guide, design spec, ADRs, stack manifest, PDFs and README media
-requirements.txt     # dependencies of the Python asset scripts
+├── infrastructure/  # JSON content, mappers, repositories, Apps Script, image and storage
+├── presentation/    # pages, sections, components, view-models, views, animations and 3D scene
+├── shared/          # EventBus, Observable, Ticker and utilities
+├── composition/     # where the layers are wired together
+├── assets/          # official logos and the Orbitron font
+└── pages/           # inicio, inscricao, equipes, privacidade and 404
+apps-script/         # Google Apps Script code and setup steps
+public/              # share image, favicon and _headers
+scripts/             # setup, font patch and visual tests (qa/)
+tests/               # tests per layer
+docs/media/          # images used in this README
 ```
 
 </details>
 
 ### Content and registration
 
-- **Content** (the schedule's days, blocks and activities, missions, FAQ, prizes, mentors, partners) lives in
-  `src/infrastructure/content/*.json`. It can be edited without coding; invalid data fails the build and the tests
-  validate the real content.
-- **Registration** is team-only, 2 to 5 students, with each member's full name, student ID and e-mail, on the
-  `/inscricao` page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md), pt-BR). Every CTA on the site links
-  there with its origin in the URL (`?origem=hero`, `?origem=final`...), which lands in the Origem column. It goes to
-  a Google Sheet through Apps Script (`doPost`), and the team's photo or logo goes to a Google Drive folder. The script
-  builds the sheet by itself (`configurarPlanilha()`): the **Equipes** tab has one row per team, with the photo
-  thumbnail inside the cell (`=IMAGE()`) and the Status in a color-coded dropdown; the **Integrantes** tab has one row
-  per person; and the **Resumo** tab has the counters and the confirmed teams' e-mails ready to paste. Equipes and
-  Integrantes have a filter on every column.
-- **Teams on the site:** a team shows up on `/equipes` once the organizers set the Status column to `confirmado`, and
-  the public list (`doGet ?action=teams`) is cached for 60 s, with the cache cleared automatically when the Status,
-  name, member count or photo changes. Taking a photo down only takes clearing its **ID da foto** cell; for a removal
-  request (LGPD) or an inappropriate image, first delete the file in Drive and empty the trash. Step-by-step
-  setup (pt-BR) in [`apps-script/README.md`](apps-script/README.md).
-- **Script Properties:** `CLOSES_AT` (deadline), `CAPACITY` (max teams), `INSCRICOES_FECHADAS` (closes immediately, no
-  site redeploy) and `FOTOS_PASTA_ID` (the photo folder). Changed the privacy notice text? Bump `CONSENT_VERSION` in
-  [`SubmitRegistration.ts`](src/application/use-cases/SubmitRegistration.ts) and in
-  [`Validation.gs`](apps-script/Validation.gs), and publish the script together with the site.
+- **Content** (schedule, missions, FAQ, prizes, mentors and partners) lives in `src/infrastructure/content/*.json`.
+  Invalid data stops the build.
+- **Registration** is for teams only, with 2 to 5 students, each with full name, student ID and e-mail. The Apps
+  Script saves each team in the **Equipes** tab (with the photo in the cell itself), each person in the
+  **Integrantes** tab and the totals in the **Resumo** tab.
+- **Teams on the site:** a team appears at `/equipes` when the organizers change its Status to `confirmado` in the
+  sheet. Details are in [`apps-script/README.md`](apps-script/README.md) (pt-BR).
 
-### Contributing
+## Contributing
 
-The full workflow (pt-BR) is in [CONTRIBUTING.md](CONTRIBUTING.md). Team members are added as collaborators and clone
-the repository directly (no fork, so the PR gets its Cloudflare preview); outside contributors use a fork. In short:
+The full workflow is in [CONTRIBUTING.md](CONTRIBUTING.md) (pt-BR). In short:
 
-1. Branch off an up-to-date `main`: `git switch -c feat/<topic>` (or `fix/`, `docs/`, `refactor/`, `test/`).
-2. Make small commits in **Conventional Commits**, in English: `type(scope): description`, for example
-   `feat(sections): add day tabs to the schedule`. The allowed scopes are in
-   [`commitlint.config.js`](commitlint.config.js): `domain`, `application`, `infra`, `ui`, `sections`, `experience`,
-   `motion`, `a11y`, `perf`, `seo`, `content`, `docs`, `ci`, `deps`, `config` and `tests`.
+1. Create a branch from `main`: `git switch -c feat/<topic>` (or `fix/`, `docs/`, `refactor/`).
+2. Write commits in **Conventional Commits**, in English, for example `feat(sections): add day tabs to the schedule`.
+   The accepted scopes are in [`commitlint.config.js`](commitlint.config.js).
 3. Run `npm run validate` and `npm run format:check`.
-4. `git push -u origin feat/<topic>` and open a Pull Request against `main`, filling in the template. CI has to be
-   green, the Cloudflare preview shows up on the PR and one of the code owners ([CODEOWNERS](.github/CODEOWNERS))
-   approves it.
-5. The merge is a **Squash and merge**, with the PR title in Conventional Commits, and production updates on its own.
+4. Push the branch and open a Pull Request to `main`. CI must pass, the Cloudflare preview shows up on the PR and one
+   of the owners ([CODEOWNERS](.github/CODEOWNERS)) approves it.
+5. The merge uses **Squash and merge**, and the official site is updated right after.
 
-Each release's changes are in [CHANGELOG.md](CHANGELOG.md).
+## Deploy
 
-### Deploy
+The site runs on **Cloudflare Pages**, on the free plan: **[hackarun.pages.dev](https://hackarun.pages.dev)**.
 
-The official site runs on **Cloudflare Pages**, on the free plan with no card on file:
-**[hackarun.pages.dev](https://hackarun.pages.dev)**. I went with Cloudflare's own Git integration (no token stored in
-GitHub) and kept the site 100% static, with nothing that could be billed.
+- Each merge to `main` publishes a new version in 1 to 2 minutes.
+- Each PR gets a preview address, posted by Cloudflare on the PR itself. In the preview, registration is simulated and
+  nothing is saved to the sheet.
+- To turn registration on for the official site, set the `PUBLIC_REGISTRATION_ENDPOINT` variable in the Cloudflare
+  production environment and deploy again.
 
-- **Automatic production:** every merge into `main` deploys on its own, in 1 to 2 minutes.
-- **A preview on every PR:** the Cloudflare bot comments a dedicated address on the PR (`<hash>.hackarun.pages.dev`).
-  On the preview, registration is simulated and shows the notice "Prévia de revisão: as inscrições são simuladas e
-  nada é gravado na planilha." (review preview: registrations are simulated and nothing is written to the
-  spreadsheet), and the pages get `noindex`.
-- **Variables per environment** (Settings → Variables and Secrets on the project):
-
-| Variable                        | Production                                                                    | Preview                      |
-| ------------------------------- | ----------------------------------------------------------------------------- | ---------------------------- |
-| `NODE_VERSION`                  | `24`                                                                          | `24`                         |
-| `PUBLIC_SITE_URL`               | `https://hackarun.pages.dev`                                                  | `https://hackarun.pages.dev` |
-| `PUBLIC_REGISTRATION_ENDPOINT`  | empty until registration opens ("inscrições em breve")                        | not set                      |
-| `PUBLIC_REGISTRATION_SIMULATED` | not set (with no endpoint the build fails on purpose; with one it is ignored) | `true`                       |
-
-- **Zero cost:** Free plan with no card, no `functions/`, `_worker.js` or `wrangler.toml`. If the 500 builds of the
-  month run out, new builds just wait for the next month; the site stays up.
-
-The full setup (project, `main` protection, code owners, how to open registration and how to roll back a deploy) is
-in the [project guide, section 16 (pt-BR)](docs/GUIA_DO_PROJETO.md#16-deploy-na-cloudflare-pages-grátis). To publish
-your fork on your own account:
-
-1. Cloudflare → **Workers & Pages → Create application → Pages → Connect to Git**.
-2. Preset **Astro** · Build `npm run build` · Output `dist`.
-3. Variables: `NODE_VERSION=24`, `PUBLIC_SITE_URL` with your project's address and, if you want the form live,
-   `PUBLIC_REGISTRATION_ENDPOINT` pointing at your test spreadsheet.
-
-The comparison with other options is in [ADR 0003](docs/adr/0003-cloudflare-pages-hosting.md).
+To publish a fork on your own account: in Cloudflare, open **Workers & Pages → Create application → Pages → Connect to
+Git**, choose the repository and use `npm run build` as the build command with `dist` as the output folder.
 
 ## Roadmap
 
 - [x] Architecture, domain and official content
-- [x] Scroll-driven 3D experience with 8 objects
-- [x] Cinematic v2 redesign (Overdrive) with the official identity ([ADR 0006](docs/adr/0006-cinematic-v2-and-official-identity.md))
-- [x] Lighthouse mobile ≥ 90 on performance and 100 on accessibility, best practices and SEO
-- [x] Pause animations button (WCAG 2.2.2)
-- [x] QA scripts (Playwright + Lighthouse) versioned in the repository
-- [x] Teams page with each team's photo or logo, moderated through confirmation ([ADR 0007](docs/adr/0007-team-photos-google-drive.md))
-- [x] The event's real schedule, with both tracks, a tab per day and the HackaRun Experience
-- [x] Team-only registration form and a sheet organized in three tabs, with the photo in the cell and filters ([ADR 0008](docs/adr/0008-team-only-registration-and-organized-sheet.md))
-- [x] A guide to run and contribute from a fork, with `npm run setup`
-- [x] Mobile LCP under 2.5 s (2.2 s on 2026-10-12)
-- [x] Initial JS under 70 KB gzip (68.4 KB)
-- [x] Apps Script deployed on the registration spreadsheet and tested end to end (photo in the cell, duplicates blocked)
-- [x] Registration on a page of its own, with a draft kept in the tab and a way back to the same spot on the landing page ([ADR 0009](docs/adr/0009-registration-on-its-own-page.md))
-- [x] A calmer globe at the end of the page: it turns slowly, breathes and releases a soft pulse
-- [x] UniCatólica and course lockup (Software Engineering and Artificial Intelligence) at the top of the hero, and LAES as organizer in the partners band
-- [x] Official launch on Cloudflare Pages ([hackarun.pages.dev](https://hackarun.pages.dev)), with automatic deploys from `main` and a preview on every PR
-- [ ] Registrations switched on in the official site: once the organizers set the capacity and the deadline
-- [ ] Rules and mission scoring: the organizers present them at the opening, on November 12, at 7:35 p.m.
-- [ ] Prizes, mentors and judges: the organizers reveal them closer to the event
+- [x] Scroll-driven 3D scene with eight objects
+- [x] Second version of the design, with the event's official identity
+- [x] Lighthouse mobile above 90 for Performance and 100 in the other categories
+- [x] Button to pause the animations
+- [x] Official schedule, with both parts of the event and day tabs
+- [x] Team-only registration on its own page, with the sheet organized in three tabs
+- [x] Teams page with each team's photo or logo
+- [x] Publishing on Cloudflare Pages, with automatic deploys and a preview on every PR
+- [ ] Opening registration, once the coordinators set the number of spots and the deadline
+- [ ] Rules and mission scoring, presented at the event opening
+- [ ] Prizes, mentors and judges, announced by the organizers
 
 ## Credits
 
 - **Page design and development:** [Marcos Vinicius Muniz Arruda](https://github.com/Marcos-Codfy)
-- **Visual identity:** Eduarda Victória (Academic League)
-- **Hosted by:** UniCatólica
-- **Organized by:** LAES, the Software Engineering and Artificial Intelligence Academic League
-- **Partner:** Capim Dourado Shopping, exclusive partner of the awards
+- **Visual identity:** Eduarda Victória (Liga Acadêmica)
+- **Held by:** UniCatólica
+- **Organized by:** LAES · Liga Acadêmica de Engenharia de Software e Inteligência Artificial
+- **Partner:** Capim Dourado Shopping
 - **Fonts:** Orbitron, Montserrat and JetBrains Mono (SIL Open Font License)
 
-<sub>HackaRun, UniCatólica, LAES, Capim Dourado Shopping and their logos are trademarks of their respective owners
-and appear here only to identify the event.</sub>
+<sub>HackaRun, UniCatólica, LAES, Capim Dourado Shopping and their logos are trademarks of their respective owners and
+appear here only to identify the event.</sub>
 
 ---
 
@@ -712,6 +460,6 @@ and appear here only to identify the event.</sub>
 <sub>Page design and development by <a href="https://github.com/Marcos-Codfy">Marcos Vinicius Muniz Arruda</a> ·
 Palmas, Brazil · 2026</sub>
 
-<!-- LINKEDIN: replace with the profile link when you want it shown here. -->
+<!-- LINKEDIN: replace with the profile link when you want to show it here. -->
 
 </div>

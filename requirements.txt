@@ -1,7 +1,5 @@
 # dependências dos scripts de assets em Python (3.11 ou mais novo); o site em si não precisa de Python
 # uso: python -m pip install -r requirements.txt
 #   scripts/fonts/patch_orbitron_tilde.py  -> fonttools + brotli (lê e grava woff2)
-#   scripts/docs/build_pdf_assets.py       -> fonttools + brotli + Pillow (fontes TTF e logos dos PDFs)
 fonttools>=4.47,<5
 brotli>=1.1,<2
-Pillow>=10.2,<13
