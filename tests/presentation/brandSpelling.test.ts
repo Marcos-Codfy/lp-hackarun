@@ -1,6 +1,6 @@
 // @vitest-environment node
 // a instituição se escreve "UniCatólica" (a faixa em caixa alta "UNICATÓLICA" é outra grafia e vale).
-// O teste do conteúdo só olha os JSON: este passa pelas páginas, componentes, SEO e metadados do projeto
+// O teste do conteúdo só olha os JSON: este passa pelas páginas, componentes, SEO e o package.json
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +15,7 @@ const filesIn = (dir: string): string[] =>
     .filter((file) => TEXT.test(file))
     .map((file) => join(dir, file));
 
-const sources = [...filesIn('src'), ...filesIn('scripts/docs'), 'package.json'].map((file) => ({
+const sources = [...filesIn('src'), 'package.json'].map((file) => ({
   file: file.replaceAll('\\', '/'),
   text: readFileSync(join(ROOT, file), 'utf8'),
 }));
@@ -28,7 +28,6 @@ describe('grafia da instituição', () => {
         'src/presentation/components/layout/SiteFooter.astro',
         'src/presentation/components/layout/header/MobileMenu.astro',
         'src/presentation/components/seo/teamsPageSeo.ts',
-        'scripts/docs/pdf/PdfWriter.ts',
         'package.json',
       ]),
     );

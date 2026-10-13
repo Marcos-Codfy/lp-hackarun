@@ -7,8 +7,8 @@ O formato segue o [Keep a Changelog 1.1.0](https://keepachangelog.com/pt-BR/1.1.
 [Conventional Commits](https://www.conventionalcommits.org/pt-br/v1.0.0/), então cada entrada tem rastro no histórico
 do Git.
 
-> "v1" e "v2" são gerações do design, não números de versão. Pela política do guia (`docs/GUIA_DO_PROJETO.md`,
-> seção 18), a `1.0.0` fica reservada para o lançamento das inscrições.
+> "v1" e "v2" são gerações do design, não números de versão. A `1.0.0` fica reservada para o lançamento das
+> inscrições.
 
 ## [Unreleased]
 
@@ -28,9 +28,6 @@ revisão em cada Pull Request.
 - `.github/CODEOWNERS` com Marcos, Emilly e Amanda: uma aprovação de um deles libera o merge na `main`.
 - "Fluxo de trabalho da equipe" no `CONTRIBUTING.md`: colaborador, clone, branch, PR, CI, prévia, aprovação, Squash
   and merge, rollback e o que não fazer.
-- Guia, seção 16: o projeto `hackarun` na Cloudflare, as variáveis de Production e Preview, a proteção da `main`, os
-  donos do código, o custo zero, como abrir as inscrições, os administradores da conta e o rollback. Nota de
-  2026-10-12 na ADR 0003 (integração com o Git no lugar de uma GitHub Action com token).
 - Testes do modo da inscrição (o endpoint ganha da flag; flag ligada e desligada), da trava de produção, do `noindex`,
   do aviso da prévia e do `robots.txt`.
 - Passo "Sem simulação no bundle de produção" na CI: o build sem a flag não pode levar para o `dist/` o gateway, o
@@ -50,13 +47,13 @@ revisão em cada Pull Request.
 - A tela de sucesso da inscrição tirou os próximos passos para o `SuccessSteps.astro` (o arquivo passava do limite de
   linhas).
 - Crédito da identidade visual: ela é da Eduarda Victória (Liga Acadêmica), e o Marcos fica com o design da página e
-  o desenvolvimento. "Meu papel" e Créditos do README ("Identidade visual: Eduarda Victória (Liga Acadêmica)") e do
-  README.en ("Visual identity: Eduarda Victória (Academic League)"), guia (seções 10 e 18.1) e design spec. O rodapé
+  o desenvolvimento. Créditos do README ("Identidade visual: Eduarda Victória (Liga Acadêmica)") e do
+  README.en ("Visual identity: Eduarda Victória (Academic League)"). O rodapé
   dos dois READMEs também ficou "Design da página e desenvolvimento" ("Page design and development").
 - Repositório na organização `hackarun-unicatolica`: https://github.com/hackarun-unicatolica/lp-hackarun (o GitHub
   redireciona o endereço antigo). Links novos no `package.json` (`repository`, `homepage` e `bugs`), nos READMEs
-  (selo da CI, pôster da prévia, clone e `upstream`), no CONTRIBUTING, no guia, no manifesto da stack e nos links de
-  comparação deste changelog. Guia (seções 1, 15 e 16) e CONTRIBUTING com os papéis: Marcos (dono) e Emilly
+  (selo da CI, pôster da prévia, clone e `upstream`), no CONTRIBUTING e nos links de
+  comparação deste changelog. CONTRIBUTING com os papéis: Marcos (dono) e Emilly
   (administradora) fazem o merge direto, Amanda é dona do código e os demais colegas são colaboradores que abrem PRs.
 - O aviso de inscrições em breve ficou só com o título e uma linha ("Enquanto isso, confere a programação e já chama a
   sua equipe.", com link para `/#programacao`), e o último dos próximos passos da tela de sucesso virou "Confira a
@@ -65,7 +62,6 @@ revisão em cada Pull Request.
 - Números do README e do README.en contados de novo: 828 testes em 108 arquivos (12 suítes do Apps Script real), 12
   casos de uso, 439 arquivos e 33.322 linhas em `src`, 108 arquivos de teste e 12 helpers com 10.686 linhas e 1.117
   linhas de Apps Script.
-- PDFs de `docs/pdf` gerados de novo (`npm run docs:pdf`), com o endereço novo do repositório e sem a agenda `.ics`.
 
 ### Removed
 
@@ -73,8 +69,7 @@ revisão em cada Pull Request.
 - Todos os botões "Adicionar à agenda", antes da produção: o do aviso de inscrições em breve, o do rodapé do
   formulário (`AgendaRow`, com a linha "Não perca a largada") e o da tela de sucesso. Sem nenhum link para ele, saiu
   também o arquivo de agenda inteiro: a rota `/hackarun-2026.ics`, o caso de uso `BuildCalendarInvite`, a porta
-  `CalendarExporter`, o adaptador `IcsCalendarExporter`, os testes deles e as menções no README, no README.en, no
-  guia, na design spec e no manifesto da stack.
+  `CalendarExporter`, o adaptador `IcsCalendarExporter`, os testes deles e as menções no README e no README.en.
 
 ### Security
 
@@ -120,7 +115,7 @@ violeta sobre o globo.
   para cada parceiro, legenda e alt da LAES, a conta do tamanho ótico e papel desconhecido no `partners.json`), da
   ordem do `ListPartners`, do JSON-LD com a LAES e da ordem dos títulos de `/inscricao`.
 
-- Página `/inscricao` (ADR 0009), leve como a `/equipes` (`PageLayout` + `LightApp`, sem 3D, GSAP nem Lenis), com
+- Página `/inscricao`, leve como a `/equipes` (`PageLayout` + `LightApp`, sem 3D, GSAP nem Lenis), com
   título, descrição, canonical, Open Graph e JSON-LD próprios (`BreadcrumbList` Início › Inscrição) e entrada no
   sitemap. Traz o cartão de status (Em breve, Abertas, Encerrando ou Encerradas) com o contador, o formulário de
   sempre e o "Adicionar à agenda".
@@ -154,7 +149,6 @@ violeta sobre o globo.
 - `experience/scene/CoreMotion.ts`: perfil de movimento por cena, com `BASE_MOTION` (o movimento de sempre, hero
   incluído) e `FINALE_MOTION` (o globo do fim), misturados por um peso que vale 1 na seção com `data-scene-hold` e na
   travessia até ela. Sem essa seção (a 404), o globo segue como antes.
-- ADR 0009: inscrição numa página própria.
 - Testes do rascunho (gravação, leitura, foto à parte e versões), do `DraftKeeper`, do `PressGuard`, das etapas, do
   resumo de erros por bloco, do "Voltar ao evento", dos links da página atual, da origem, da página de inscrição (vagas
   esgotadas, encerrada, sem buscar equipes quando não há capacidade, painel escondido no sucesso), do `CoreMotion` e do
@@ -211,8 +205,8 @@ violeta sobre o globo.
 - `npm run setup` (`scripts/setup.mjs`, só com módulos do Node): confere o Node contra o `.nvmrc` e o `engines`, roda
   o `npm ci` se faltar, cria o `.env` a partir do `.env.example` e, com `--qa`, instala os scripts de QA; `--check` só
   confere. `requirements.txt` com as dependências dos scripts de assets em Python.
-- README com o guia "Como rodar no seu PC" para quem faz fork (pré-requisitos, upstream, planilha de teste, fluxo de
-  PR e problemas comuns), e ADRs 0007 (fotos no Drive) e 0008 (inscrição só de equipe e planilha em três abas).
+- README com o passo a passo "Como rodar no seu PC" para quem faz fork (pré-requisitos, upstream, planilha de teste, fluxo de
+  PR e problemas comuns).
 - Testes da programação (regras do domínio, o conteúdo real contra o documento, as abas, o JSON-LD e o `.ics`), dos
   campos de integrante, dos conflitos do servidor, das abas e fórmulas da planilha, dos duplicados, do contrato entre
   o TypeScript e o Apps Script e dos escopos do manifesto, além do caminho da foto e da carga do clímax.
@@ -245,7 +239,7 @@ violeta sobre o globo.
 - `contain-intrinsic-size` do rodapé medido de novo, porque a faixa cresceu no celular e no tablet: 1.564 px em
   390 px (era 1.341), 1.583 px a partir de 48rem (era 1.322) e 1.087 px a partir de 1024 px (era 1.103).
 - `RegistrationNotice` ganhou a prop `level` (`h2` ou `h3`, `h2` por padrão), com o mesmo visual do h3 de antes.
-- README (pt-BR e inglês), guia, design spec e asset brief atualizados para o selo de cursos e a LAES. Mídias do
+- README (pt-BR e inglês) atualizado para o selo de cursos e a LAES. Mídias do
   README refeitas: a prévia animada e o pôster, `hero-desktop.webp` e o primeiro e o último quadro de
   `sections-desktop.jpg` e de `mobile.jpg` (o último só para o contador bater com o do hero).
 - O formulário saiu da LP. A seção `#inscricao` virou só o clímax: contador, a lista curta "Tenha em mãos", o botão
@@ -260,7 +254,7 @@ violeta sobre o globo.
 - Pulso do clímax: um anel suave que nasce logo fora da borda do globo e abre até cerca de 1,6 vez o raio em 2,6 s,
   sem passar pelo título, pelo contador nem pelo CTA (era uma elipse inclinada que chegava a 2,6 vezes e cobria a
   tela). A luz sobe em 0,45 s e apaga em cerca de 2,3 s, o globo se afasta 5% do raio (eram 15%) e a ondulação do
-  passe cinematográfico acompanha a borda do globo, não o centro da tela. Na chegada do FAQ, o redemoinho da
+  passe de pós-processamento acompanha a borda do globo, não o centro da tela. Na chegada do FAQ, o redemoinho da
   travessia cai para 0,22×; a deriva da câmera, o empurrão do ponteiro, o respiro do scroll e a aproximação na carga
   também diminuem, só nessa cena. A fase do ruído passou a ser somada frame a frame, então mudar a velocidade não faz
   as fitas saltarem.
@@ -287,7 +281,7 @@ violeta sobre o globo.
 - `scripts/qa/anchorcheck.mjs`: os CTAs do header e do hero precisam abrir `/inscricao?origem=…`, e o "Voltar ao
   evento" de quem chegou direto precisa parar no `#inscricao` (em `/equipes` e em `/inscricao`); cada caso roda numa
   aba nova.
-- README (pt-BR e inglês), guia, design spec, CONTRIBUTING e mídias do README (`registration.jpg`,
+- README (pt-BR e inglês), CONTRIBUTING e mídias do README (`registration.jpg`,
   `sections-desktop.jpg`, `mobile.jpg`, `teams-page.jpg` e a prévia animada com o pôster) atualizados para a página de
   inscrição e o globo final calmo.
 - O evento passa a ser apresentado como no documento do coordenador: o 1º HackaRun, de tecnologia, inovação e
@@ -329,12 +323,11 @@ violeta sobre o globo.
 - Rodapé sem o card do repositório; no desktop o link de privacidade fecha a coluna da navegação.
 - `BaseLayout` montado sobre partes compartilhadas com a página de equipes (`DocumentHead` e `Backdrop`), sem mudar o
   HTML da LP.
-- `.prettierignore` ignora só a pasta `design/` da raiz, então `docs/design/*.md` voltou a ser formatado.
+- `.prettierignore` ignora só a pasta `design/` da raiz.
 - `apps-script/README.md` reescrito como passo a passo (planilha, os oito arquivos e o manifesto, Propriedades,
   autorização, Web App, nova versão, rotina da organização e clasp opcional).
 - README sem as seções "Bastidores" e "Desafios que resolvi", com "Roteiro visual: uma cena 3D por seção" no lugar de
-  "A corrida em 8 cenas" e o crédito da identidade visual atualizado. Guia, design spec, ADRs 0004 e 0007, manifesto da
-  stack, asset brief e CONTRIBUTING atualizados.
+  "A corrida em 8 cenas" e o crédito da identidade visual atualizado. CONTRIBUTING atualizado.
 - O aceite fala do regulamento como ele é: a equipe sabe que ele é apresentado na abertura (12/11, às 19h35) e se
   compromete a segui-lo (era "Li e aceito o regulamento"). A versão segue `2026-10-v3`, que ainda não foi publicada.
 - Canal oficial: confirmação e avisos chegam só por e-mail; o regulamento e os resultados saem no evento (aviso de
@@ -355,7 +348,7 @@ violeta sobre o globo.
 - Apps Script: o passo a passo do Resumo e o README mandam apagar o arquivo no Drive (e esvaziar a lixeira) num
   pedido de remoção ou numa imagem imprópria; `SETUP_VERSION` 4 refaz o Resumo; a lista pública lê o segredo dos ids
   uma vez por chamada (era uma leitura das Propriedades por equipe).
-- Números de performance e de testes do README e do guia medidos de novo (Lighthouse 98, LCP 2,2 s, JS inicial
+- Números de performance e de testes do README medidos de novo (Lighthouse 98, LCP 2,2 s, JS inicial
   68,4 KB).
 - `scripts/qa/overflow.mjs` trata o que rola na horizontal (o trilho das missões) como quem corta.
 
@@ -375,7 +368,7 @@ violeta sobre o globo.
 - Todo o áudio: o botão de som do header, o `AudioEngine`, o cue do globo (arquivo e versão sintetizada), o som de
   digitação, as portas `AudioCue` e `TickSound`, os eventos `sound:changed` e `ui:type`, a pasta `public/audio/` e o
   `scripts/audio/render_cues.py` (que pedia `numpy` e `lameenc`).
-- O flash branco do passe cinematográfico e o tremor de câmera do clímax.
+- O flash branco do passe de pós-processamento e o tremor de câmera do clímax.
 - O botão "Adicionar à agenda" da programação. O `.ics` continua no aviso de inscrições em breve, no lobby e na tela de
   sucesso.
 - O aviso "Corra contra o relógio, não pelos corredores" da seção de NPCs: a regra vai ser passada no dia.
@@ -416,13 +409,13 @@ violeta sobre o globo.
 - Costuras entre as seções no desktop: o véu lateral, a base do hero e os refletores da final esmaecem na borda.
 - Painel do dia da programação é uma `<section>` (`role="tabpanel"` não vale num `<article>`).
 - O logo do header é o LCP fora da home e carrega sem lazy, com `fetchpriority` alta.
-- "UniCatólica" também no rodapé, no menu, no SEO de `/equipes`, no `package.json` e nos metadados dos PDFs.
+- "UniCatólica" também no rodapé, no menu, no SEO de `/equipes`, e no `package.json`.
 
 ### Performance
 
 - LP conferida de novo depois da rodada 5 (Lighthouse mobile, 3 passadas no build de produção servido com gzip):
   Acessibilidade, Boas práticas e SEO em 100, LCP de 2,2 a 2,3 s (o logo do H1 continua o LCP), CLS 0,001 e
-  Performance de 95 a 97, com o TBT oscilando de 0 a 200 ms. O README e o guia seguem com os números da rodada 4.
+  Performance de 95 a 97, com o TBT oscilando de 0 a 200 ms. O README segue com os números da rodada 4.
 - LP no build de produção, Lighthouse mobile (mediana de 3 em 12/10/2026, depois da rodada 4): Performance 98, LCP
   2,2 s, TBT 98 ms e CLS 0,001; JS inicial de 68,2 KB gzip (era 68,4 KB), já sem o formulário e o controlador do CTA.
   `/inscricao` e `/equipes`: Performance 99, LCP 2,0 s e TBT 0.
@@ -450,19 +443,19 @@ violeta sobre o globo.
 
 ## [0.3.0] - 2026-10-11
 
-V2 cinematográfica (codinome **Overdrive**), aprovada e publicada no GitHub. Redesign completo com a identidade oficial, inscrição e
+Segunda versão do design, aprovada e publicada no GitHub. Redesign completo com a identidade oficial, inscrição e
 privacidade reforçadas, acessibilidade e um trabalho de performance que levou o Lighthouse mobile de 66 para 95.
 
 ### Added
 
-- Identidade oficial do evento (ADR 0006): logo com raios procedurais em canvas 2D, Orbitron e Montserrat, paleta
+- Identidade oficial do evento: logo com raios procedurais em canvas 2D, Orbitron e Montserrat, paleta
   neon sobre preto com aurora animada, botões inclinados com brilho, header de vidro flutuante e menu de tela cheia
   no celular.
 - Orbitron com o til redesenhado em degraus (`scripts/fonts/patch_orbitron_tilde.py`): o original parecia acento
   grave em título grande ("NÀO").
 - Faixa de parceiros "Quem faz acontecer" e rodapé novos.
-- Pós-processamento no 3D (bloom, grão, vinheta e aberração cromática), camadas de estrelas e bokeh, câmera
-  coreografada e color grading por cena.
+- Pós-processamento no 3D (bloom, grão, vinheta e aberração cromática), camadas de estrelas e bokeh, movimento de câmera
+  e color grading por cena.
 - Oito objetos de cena, cada um com animação e brilho próprios no shader: globo de fitas, cronômetro-giroscópio, "?"
   extrudado, mapa de missões em holograma, terreno synthwave, palco de show, troféu e galáxia.
 - Clímax da inscrição: o globo carrega e estoura em flash e anel de choque antes de revelar o CTA.
@@ -478,7 +471,6 @@ privacidade reforçadas, acessibilidade e um trabalho de performance que levou o
 - Testes do Apps Script rodando o código real no Node (sandbox `vm` com dublês dos serviços do Google).
 - Scripts de QA em `scripts/qa/` (capturas, âncoras, overflow, Web Vitals, tarefas longas, trace e Lighthouse), no
   Brave ou Chrome instalado e com GPU real.
-- ADR 0006, design spec v2 e PDFs da documentação com as fontes e os logos da marca.
 - README de apresentação em português (`README.md`) e inglês (`README.en.md`), e este `CHANGELOG.md`.
 
 ### Changed
@@ -496,7 +488,7 @@ privacidade reforçadas, acessibilidade e um trabalho de performance que levou o
   10 min).
 - Erro de servidor na inscrição passou a ser retentado, e o navegador espera os 3 s mínimos de preenchimento em vez
   de ter o envio recusado.
-- README, guia, design spec e ADRs reescritos para a v2.
+- README reescrito para a v2.
 
 ### Removed
 
@@ -548,7 +540,7 @@ Primeira versão completa do site (v1 do design).
 - Seções da landing (hero, o evento, NPCs, missões, programação, mentores, grande final, prêmios, equipes, FAQ e
   inscrição), componentes de layout e animadores GSAP.
 - Testes unitários de domínio, casos de uso, gateways e view-models (Vitest).
-- README, guia de handoff, ADRs 0001 a 0005, asset brief e gerador dos PDFs de documentação.
+- README do projeto.
 - CI no GitHub Actions (lint, formatação, testes e build), templates de issue e de pull request e `CONTRIBUTING.md`.
 - Logos oficiais do HackaRun e dos parceiros, imagem de compartilhamento (1200×630) e sons sintetizados
   (`scripts/audio/render_cues.py`).
@@ -565,7 +557,7 @@ Fundação do projeto.
   de repositório no domínio; casos de uso, DTOs e portas na aplicação.
 - Infraestrutura com repositórios de JSON estático, mappers do conteúdo para o domínio, exportador `.ics` e relógios.
 - Conteúdo oficial do HackaRun 2026 (programação de 11 a 14 de novembro) em `src/infrastructure/content/`.
-- Design spec, tokens de cor e tipografia, `BaseLayout` com fontes self-hosted (subset latin) e SEO com schema.org
+- Tokens de cor e tipografia, `BaseLayout` com fontes self-hosted (subset latin) e SEO com schema.org
   `Event`.
 - Bootstrap do cliente (`App`), contratos de eventos e o esqueleto das seções com a sequência de cenas do scroll.
 - Agenda `/hackarun-2026.ics` gerada no build.

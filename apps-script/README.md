@@ -123,8 +123,7 @@ Escolha **uma** das opções:
 - **Cloudflare Pages (o caminho do site oficial):** no projeto, abra **Settings > Variables and Secrets** (em telas
   antigas, **Environment variables**), escolha o ambiente **Production** e crie `PUBLIC_REGISTRATION_ENDPOINT` com a
   URL `/exec` do passo 5. Depois, **Deployments > Retry deployment** no último deploy de produção (as variáveis entram
-  no build). Nunca no ambiente Preview: as prévias dos PRs rodam simuladas e não gravam na planilha. Passo a passo no
-  guia do projeto, seção 16.7.
+  no build). Nunca no ambiente Preview: as prévias dos PRs rodam simuladas e não gravam na planilha.
 - **No código, só num fork seu com planilha de teste:** coloque a URL em `registration.endpoint` no
   `src/infrastructure/content/event.json`. No repositório oficial, nunca: ele é público e a URL iria junto.
 

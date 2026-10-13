@@ -3,8 +3,7 @@
 Valeu por ajudar no HackaRun! Este guia resume o fluxo de quem vai mexer no código. Quem é da equipe segue o
 [Fluxo de trabalho da equipe](#fluxo-de-trabalho-da-equipe) logo abaixo; quem é de fora contribui por
 [fork](#contribuição-de-fora-da-equipe-fork). Para instalar e rodar no seu PC, siga a seção
-[Como rodar no seu PC](README.md#como-rodar-no-seu-pc) do README. Os detalhes de arquitetura estão em
-[docs/GUIA_DO_PROJETO.md](docs/GUIA_DO_PROJETO.md), e a configuração da Cloudflare, na seção 16 dele.
+[Como rodar no seu PC](README.md#como-rodar-no-seu-pc) do README.
 
 ## Fluxo de trabalho da equipe
 
@@ -176,7 +175,7 @@ Quem tem acesso de escrita ao repositório original segue o [fluxo da equipe](#f
 | `perf`        | Performance                                                              |
 | `seo`         | Metadados, JSON-LD, sitemap                                              |
 | `content`     | Textos e o conteúdo de `src/infrastructure/content/*.json`               |
-| `docs`        | README, guia, ADRs, changelog e este arquivo                             |
+| `docs`        | README, changelog e este arquivo                                         |
 | `ci`          | GitHub Actions                                                           |
 | `deps`        | Dependências                                                             |
 | `config`      | Configuração de ferramentas (ESLint, Prettier, Astro, TypeScript, Husky) |
@@ -210,12 +209,11 @@ O Husky valida a mensagem (commitlint) e roda ESLint e Prettier nos arquivos do 
   `min-width`). Foco nunca com `outline: none`: use `outline: 2px solid transparent` (aparece em cores forçadas).
 - Loop de animação infinito em CSS entra na lista de `src/presentation/styles/motion-pause.css`, senão o botão
   "Pausar animações" não para ele.
-- 3D: uma `ShapeStrategy` e um `.glsl` por objeto; passo a passo em
-  [docs/GUIA_DO_PROJETO.md](docs/GUIA_DO_PROJETO.md#77-como-adicionar-uma-cena).
+- 3D: uma `ShapeStrategy` e um `.glsl` por objeto, registrados na `ShapeFactory`.
 - Conteúdo do evento (datas, horários, locais, públicos) segue o documento oficial da organização: não invente o que
   falta. Pontuação e regras só depois do regulamento.
 - Toda regra nova de negócio vem com teste em `tests/`.
-- Asset gerado por script (fonte, assets dos PDFs) não se edita à mão: rode o script e versione a saída. As
+- Asset gerado por script (como a fonte Orbitron) não se edita à mão: rode o script e versione a saída. As
   dependências em Python estão no `requirements.txt`.
 
 ## Inscrições e Apps Script

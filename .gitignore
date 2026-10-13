@@ -30,3 +30,9 @@ npm-debug.log*
 # configs locais de ferramentas
 .claude/
 scripts/qa/out/
+
+# documentação interna e o gerador dos PDFs ficam só na máquina local
+# (o README usa só as imagens de docs/media)
+/docs/*
+!/docs/media/
+/scripts/docs/
