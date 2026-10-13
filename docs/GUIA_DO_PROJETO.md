@@ -1195,7 +1195,7 @@ para o HTML.
 
 ### 16.5 Donos do código
 
-O `.github/CODEOWNERS` tem `* @Marcos-Codfy @Emyrreis @Manddyyysss`: todo PR pede a revisão dos três, e **uma
+O `.github/CODEOWNERS` tem `* @Marcos-Codfy @Emyrreis @manddyyyxx`: todo PR pede a revisão dos três, e **uma
 aprovação de qualquer um deles** libera o merge (junto com a CI verde).
 
 - Quem abre o PR não aprova o próprio: PR da Amanda precisa do Marcos ou da Emilly, e PR de um colega, de qualquer um

@@ -18,7 +18,7 @@ direto na `main`: tudo entra por PR, com a CI verde e a aprovação de um dos **
 | -------------- | --------------- | ------------------------------------------------------------------------ |
 | Marcos         | `@Marcos-Codfy` | Dono do repositório e dono do código; pode fazer o merge direto          |
 | Emilly         | `@Emyrreis`     | Administradora e dona do código; pode fazer o merge direto               |
-| Amanda         | `@Manddyyysss`  | Dona do código: revisa e aprova os PRs                                   |
+| Amanda         | `@manddyyyxx`   | Dona do código: revisa e aprova os PRs                                   |
 | Demais colegas | (cada um)       | Colaboradores: criam branches e abrem PRs, que passam pela revisão acima |
 
 "Merge direto" é a passagem de administrador do GitHub: Marcos e Emilly conseguem fazer o merge de um PR sem esperar
