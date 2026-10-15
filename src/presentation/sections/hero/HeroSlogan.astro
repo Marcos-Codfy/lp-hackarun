@@ -1,3 +1,4 @@
+
 ---
 const WORDS = [
   { text: 'Desvende', tone: 'mystic' },
@@ -10,10 +11,7 @@ const WORDS = [
   <p class="hero-slogan__line">
     {WORDS.map((word, index) => (
       <>
-        <span
-          class:list={['hero-slogan__word', `hero-slogan__word--${word.tone}`]}
-          style={`--i: ${index}`}
-        >
+        <span class:list={['hero-slogan__word', `hero-slogan__word--${word.tone}`]} style={`--i: ${index}`}>
           {word.text}.
         </span>{' '}
       </>
