@@ -38,23 +38,17 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
   data-hero
 >
   <div class="hero__scrim" aria-hidden="true"></div>
-
   <div class="container hero__frame">
     <div class="hero__content" data-hero-fade>
       <HeroCourses institution={organizer} />
-
       <div class="hero__edition hero-in" style="--d: 0.3s">
         <span>1º</span>
       </div>
-
       <HeroLogo />
-
       <p class="hero__event-name hero-in" style="--d: 0.75s">
         UNICATÓLICA + CAPIM DOURADO SHOPPING 2026
       </p>
-
       <HeroSlogan />
-
       <div class="hero-in" style="--d: 1.05s">
         <HeroMeta
           dates={dates}
@@ -63,26 +57,21 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
           finalVenue={finalVenue?.shortName ?? 'Capim Dourado'}
         />
       </div>
-
       <div class="hero__actions hero-in" style="--d: 1.2s">
         <div class="hero__countdown">
           <Countdown milestones={event.milestones} variant="hero" />
         </div>
-
         <span class="hero__divider" aria-hidden="true"></span>
-
         <div class="hero__ctas">
           <Button size="lg" href={cta.href} {...ctaAttrs}>
             {cta.label}
           </Button>
-
           <Button variant="ghost" size="lg" href="#programacao" data-nav-link>
             Ver programação
           </Button>
         </div>
       </div>
     </div>
-
     {/* a entrada (CSS) e a saída no scroll (GSAP) ficam em elementos diferentes: opacidade não briga */}
     <div class="hero-in" style="--d: 1.4s">
       <div data-hero-fade>
@@ -96,7 +85,6 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
   .hero {
     display: grid;
     min-height: 100svh;
-
     /* os raios do logo podem passar da borda no celular */
     overflow-x: clip;
     padding-block: calc(var(--header-h) + var(--space-4)) var(--space-4);
@@ -116,12 +104,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
         transparent 100%
       ),
       /* escurece a base pro contador e volta a zero na borda: sem faixa em cima do letreiro */
-      linear-gradient(
-        180deg,
-        transparent 62%,
-        rgb(2 3 11 / 0.5) 88%,
-        rgb(2 3 11 / 0) 100%
-      );
+      linear-gradient(180deg, transparent 62%, rgb(2 3 11 / 0.5) 88%, rgb(2 3 11 / 0) 100%);
   }
 
   .hero__frame {
@@ -241,12 +224,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
       display: block;
       width: 1px;
       height: 5.5rem;
-      background: linear-gradient(
-        180deg,
-        transparent,
-        rgb(150 175 255 / 0.35),
-        transparent
-      );
+      background: linear-gradient(180deg, transparent, rgb(150 175 255 / 0.35), transparent);
     }
 
     /* CTAs empilhados com a mesma largura: o bloco fica do tamanho do logo */
