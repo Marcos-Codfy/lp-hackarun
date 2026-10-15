@@ -1,4 +1,4 @@
----
+
 import type { LandingPageDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
@@ -42,8 +42,19 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
   <div class="container hero__frame">
     <div class="hero__content" data-hero-fade>
       <HeroCourses institution={organizer} />
+
+      <div class="hero__edition hero-in" style="--d: 0.3s">
+        <span>1º</span>
+      </div>
+
       <HeroLogo />
+
+      <p class="hero__event-name hero-in" style="--d: 0.75s">
+        UNICATÓLICA + CAPIM DOURADO SHOPPING 2026
+      </p>
+
       <HeroSlogan />
+
       <div class="hero-in" style="--d: 1.05s">
         <HeroMeta
           dates={dates}
@@ -57,11 +68,14 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
         <div class="hero__countdown">
           <Countdown milestones={event.milestones} variant="hero" />
         </div>
+
         <span class="hero__divider" aria-hidden="true"></span>
+
         <div class="hero__ctas">
           <Button size="lg" href={cta.href} {...ctaAttrs}>
             {cta.label}
           </Button>
+
           <Button variant="ghost" size="lg" href="#programacao" data-nav-link>
             Ver programação
           </Button>
@@ -82,6 +96,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
   .hero {
     display: grid;
     min-height: 100svh;
+
     /* os raios do logo podem passar da borda no celular */
     overflow-x: clip;
     padding-block: calc(var(--header-h) + var(--space-4)) var(--space-4);
@@ -101,7 +116,12 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
         transparent 100%
       ),
       /* escurece a base pro contador e volta a zero na borda: sem faixa em cima do letreiro */
-      linear-gradient(180deg, transparent 62%, rgb(2 3 11 / 0.5) 88%, rgb(2 3 11 / 0) 100%);
+      linear-gradient(
+        180deg,
+        transparent 62%,
+        rgb(2 3 11 / 0.5) 88%,
+        rgb(2 3 11 / 0) 100%
+      );
   }
 
   .hero__frame {
@@ -119,6 +139,43 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
     justify-items: center;
     gap: var(--space-5);
     text-align: center;
+  }
+
+  .hero__edition {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2.75rem);
+    font-weight: 800;
+    color: #7ff0ff;
+    text-align: center;
+    line-height: 1;
+    text-shadow: 0 0 20px rgb(0 229 255 / 0.5);
+  }
+
+  .hero__event-name {
+    max-width: 100%;
+    margin: 0 0 1.5rem;
+    padding-inline: 0.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.85rem, 1.45vw, 1.45rem);
+    font-weight: 800;
+    letter-spacing: 0.045em;
+    line-height: 1.5;
+    text-align: center;
+    color: #ffbd59;
+    text-shadow: 0 0 18px rgb(255 170 50 / 0.3);
+  }
+
+  @media (max-width: 639px) {
+    .hero__edition {
+      font-size: 1.65rem;
+    }
+
+    .hero__event-name {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      text-wrap: balance;
+    }
   }
 
   .hero__actions {
@@ -184,7 +241,12 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
       display: block;
       width: 1px;
       height: 5.5rem;
-      background: linear-gradient(180deg, transparent, rgb(150 175 255 / 0.35), transparent);
+      background: linear-gradient(
+        180deg,
+        transparent,
+        rgb(150 175 255 / 0.35),
+        transparent
+      );
     }
 
     /* CTAs empilhados com a mesma largura: o bloco fica do tamanho do logo */
