@@ -46,7 +46,7 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
       </div>
       <HeroLogo />
       <p class="hero__event-name hero-in" style="--d: 0.75s">
-        UNICATÓLICA + CAPIM DOURADO SHOPPING 2026
+        UNICATÓLICA & CAPIM DOURADO SHOPPING 2026
       </p>
       <HeroSlogan />
       <div class="hero-in" style="--d: 1.05s">
@@ -116,58 +116,60 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
   /* coluna presa na largura do container: a trilha auto crescia até o min-content do logo (94vw) e o
      bloco inteiro pendia pra direita no celular */
   .hero__content {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    justify-items: center;
-    gap: var(--space-5);
-    text-align: center;
-  }
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
 
   .hero__edition {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 3vw, 2.75rem);
-    font-weight: 800;
-    color: #7ff0ff;
-    text-align: center;
-    line-height: 1;
-    text-shadow: 0 0 20px rgb(0 229 255 / 0.5);
+  margin-bottom: calc(var(--space-4) * -1);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.75rem);
+  font-weight: 800;
+  color: #7ff0ff;
+  text-align: center;
+  line-height: 1;
+  text-shadow: 0 0 20px rgb(0 229 255 / 0.5);
+}
+
+  .hero__event-name {
+  max-width: 100%;
+  margin: calc(var(--space-5) * -1) 0 0;
+  padding-inline: 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(0.85rem, 1.45vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  line-height: 1.35;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 0 0 14px rgb(255 255 255 / 0.2);
+}
+
+ @media (max-width: 639px) {
+  .hero__edition {
+    font-size: 1.65rem;
+    margin-bottom: calc(var(--space-3) * -1);
   }
 
   .hero__event-name {
-    max-width: 100%;
-    margin: 0 0 1.5rem;
-    padding-inline: 0.5rem;
-    font-family: var(--font-display);
-    font-size: clamp(0.85rem, 1.45vw, 1.45rem);
-    font-weight: 800;
-    letter-spacing: 0.045em;
-    line-height: 1.5;
-    text-align: center;
-    color: #ffbd59;
-    text-shadow: 0 0 18px rgb(255 170 50 / 0.3);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    margin: calc(var(--space-4) * -1) 0 0;
+    text-wrap: balance;
   }
-
-  @media (max-width: 639px) {
-    .hero__edition {
-      font-size: 1.65rem;
-    }
-
-    .hero__event-name {
-      font-size: 0.85rem;
-      line-height: 1.6;
-      margin-bottom: 1rem;
-      text-wrap: balance;
-    }
-  }
+}
 
   .hero__actions {
-    display: grid;
-    justify-items: center;
-    gap: var(--space-6);
-    width: 100%;
-    margin-top: var(--space-2);
-  }
+  display: grid;
+  justify-items: center;
+  gap: var(--space-6);
+  width: 100%;
+  margin-top: 0;
+ }
 
   .hero__countdown {
     display: grid;
