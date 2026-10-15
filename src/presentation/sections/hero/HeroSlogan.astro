@@ -1,6 +1,4 @@
 ---
-// slogan oficial + linha de apoio. Cada verbo tem a cor do seu papel na paleta:
-// desvendar = mistério (violeta), programar = energia (azul), conquistar = prêmio (ouro)
 const WORDS = [
   { text: 'Desvende', tone: 'mystic' },
   { text: 'Programe', tone: 'blue' },
@@ -18,14 +16,13 @@ const WORDS = [
       </>
     ))}
   </p>
-  <p class="hero-slogan__support">Encontre os NPCs, decifre as pistas e codifique contra o relógio.</p>
 </div>
 
 <style>
   .hero-slogan {
     display: grid;
     justify-items: center;
-    gap: var(--space-3);
+    gap: 0;
     text-align: center;
   }
 
@@ -34,6 +31,7 @@ const WORDS = [
     flex-wrap: wrap;
     justify-content: center;
     gap: 0 0.7em;
+    margin: 0;
     font-family: var(--font-display);
     font-size: clamp(1.0625rem, 0.72rem + 1.5vw, 1.875rem);
     font-weight: 800;
@@ -70,16 +68,6 @@ const WORDS = [
     --word-glow: rgb(255 133 47 / 0.55);
   }
 
-  .hero-slogan__support {
-    max-width: 34ch;
-    color: var(--text-muted);
-    font-size: var(--fs-base);
-    font-weight: 500;
-    line-height: 1.55;
-    text-shadow: 0 1px 18px rgb(2 3 11 / 0.95);
-    animation: word-in 0.9s 0.95s var(--ease-out) both;
-  }
-
   @keyframes word-in {
     from {
       opacity: 0;
@@ -87,16 +75,8 @@ const WORDS = [
     }
   }
 
-  @media (min-width: 768px) {
-    .hero-slogan__support {
-      max-width: none;
-      font-size: var(--fs-lg);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .hero-slogan__word,
-    .hero-slogan__support {
+    .hero-slogan__word {
       animation: none;
     }
   }
