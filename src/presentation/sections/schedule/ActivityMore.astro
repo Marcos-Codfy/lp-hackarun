@@ -7,7 +7,8 @@ interface Props {
 }
 
 const { activity } = Astro.props;
-const hasMore = Boolean(activity.details) || activity.checklist.length > 0;
+const hasMore = Boolean(activity.details) || activity.checklist.length > 0 || Boolean(activity.speaker);
+const speaker = activity.speaker;
 const label = activity.kind === 'workshop' ? 'Miniementa' : 'Detalhes';
 ---
 
@@ -28,6 +29,12 @@ const label = activity.kind === 'workshop' ? 'Miniementa' : 'Detalhes';
               <li>{item}</li>
             ))}
           </ul>
+        </>
+      )}
+      {speaker && (
+        <>
+          <p class="more__caption">{speaker.name ? `Sobre ${speaker.name}` : 'Sobre o palestrante'}</p>
+          <p class:list={[!speaker.bio && 'more__pending']}>{speaker.bio ?? 'Mini currículo em breve.'}</p>
         </>
       )}
     </div>
@@ -130,6 +137,11 @@ const label = activity.kind === 'workshop' ? 'Miniementa' : 'Detalhes';
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
+  }
+
+  .more__pending {
+    color: var(--text-dim);
+    font-style: italic;
   }
 
   .more__list {

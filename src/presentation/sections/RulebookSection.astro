@@ -1,0 +1,42 @@
+---
+// regulamento em seção própria (o painel que ficava no fim das Missões, enquanto elas estão fora da LP):
+// sem pontuação publicada, mostra quando o regulamento sai (horário lido da programação)
+import type { LandingPageDTO } from '@application/index';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
+import ScoringPanel from './missions/ScoringPanel.astro';
+import RulebookPanel from './missions/RulebookPanel.astro';
+import './sections.css';
+
+interface Props {
+  data: LandingPageDTO;
+}
+
+const { missions, schedule } = Astro.props.data;
+const { scoring } = missions;
+const lookup = new ScheduleLookup(schedule);
+const rulebook = lookup.activity('rulebook');
+const launch = lookup.activity('challenge-launch');
+---
+
+<section
+  id="regulamento"
+  class="section tone-cyan"
+  data-scene="dust"
+  data-checkpoint="Regulamento"
+  aria-label="Regulamento"
+>
+  <div class="container">
+    {scoring ? (
+      <ScoringPanel scoring={scoring} />
+    ) : (
+      rulebook && (
+        <RulebookPanel
+          date={lookup.shortDate(rulebook.day).replace('/', '.')}
+          hour={lookup.startOf(rulebook)}
+          dateLong={lookup.longDate(rulebook.day)}
+          launchAt={launch ? lookup.startOf(launch) : null}
+        />
+      )
+    )}
+  </div>
+</section>

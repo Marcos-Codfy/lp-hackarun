@@ -18,6 +18,15 @@ export interface ActivityPart {
   slot: TimeSlot;
 }
 
+// quem conduz a atividade (oficina, palestra): tudo opcional enquanto não tem nome, foto e mini currículo
+export interface ActivitySpeaker {
+  name: string | null;
+  // caminho da foto em public/ (ex.: "/palestrantes/fulano.jpg")
+  photo: string | null;
+  // mini currículo, mostrado dentro da miniementa
+  bio: string | null;
+}
+
 export interface ActivityProps {
   id: string;
   title: string;
@@ -32,6 +41,7 @@ export interface ActivityProps {
   flags: ActivityFlag[];
   parts: ActivityPart[];
   checklist: string[];
+  speaker?: ActivitySpeaker | null;
 }
 
 // item da programação dentro de um bloco do dia
@@ -45,6 +55,7 @@ export class Activity extends Entity {
   readonly flags: readonly ActivityFlag[];
   readonly parts: readonly ActivityPart[];
   readonly checklist: readonly string[];
+  readonly speaker: ActivitySpeaker | null;
 
   private constructor(props: ActivityProps) {
     super(props.id);
@@ -67,6 +78,13 @@ export class Activity extends Entity {
       slot: p.slot,
     }));
     this.checklist = props.checklist.map((item) => assertNonEmpty(item, 'Activity.checklist'));
+    this.speaker = props.speaker
+      ? {
+          name: props.speaker.name?.trim() || null,
+          photo: props.speaker.photo?.trim() || null,
+          bio: props.speaker.bio?.trim() || null,
+        }
+      : null;
   }
 
   static create(props: ActivityProps): Activity {

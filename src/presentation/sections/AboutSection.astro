@@ -1,12 +1,12 @@
 ---
 import type { LandingPageDTO } from '@application/index';
-import Button from '@presentation/components/ui/Button.astro';
+// import Button from '@presentation/components/ui/Button.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
-import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+// import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import SectionHeader from './shared/SectionHeader.astro';
 import TrackCard from './about/TrackCard.astro';
 import AboutTicker from './about/AboutTicker.astro';
-import AboutStats from './about/AboutStats.astro';
+// import AboutStats from './about/AboutStats.astro';
 import './sections.css';
 
 interface Props {
@@ -14,29 +14,29 @@ interface Props {
 }
 
 const { event } = Astro.props.data;
-const { stats } = event;
-const stands = stats.stands;
-const cta = new RegistrationCopy().cta(event.registration.status, 'about');
-const ctaAttrs = cta.isRegistration ? { registrationCta: 'about' } : {};
+//const { stats } = event;
+// const stands = stats.stands;
+// const cta = new RegistrationCopy().cta(event.registration.status, 'about');
+// const ctaAttrs = cta.isRegistration ? { registrationCta: 'about' } : {};
 
 const ticker = [
   'Oficinas',
   'Palestras',
-  'Exposição',
+  'Exposições',
   'Hackathon',
-  `${stats.stations} missões`,
-  'NPCs à solta',
+  `Jogos`,
+  'NPCs',
   new DayLabelFormatter().range(event.firstDate, event.lastDate),
   'Final no Capim Dourado Shopping',
   'UNICATÓLICA',
 ];
 
-const readout = [
-  { value: stats.days, label: 'dias de evento' },
-  { value: stats.workshops, label: 'oficinas' },
-  ...(stands ? [{ value: stands, prefix: 'até', label: 'estandes na exposição' }] : []),
-  { value: 1, label: 'final no Capim Dourado Shopping' },
-];
+// const readout = [
+//   { value: stats.days, label: 'dias de evento' },
+//   { value: stats.workshops, label: 'oficinas' },
+//   ...(stands ? [{ value: stands, prefix: 'até', label: 'estandes na exposição' }] : []),
+//   { value: 1, label: 'final no Capim Dourado Shopping' },
+// ];
 ---
 
 <section
@@ -55,25 +55,27 @@ const readout = [
         code="01"
         eyebrow="O evento"
         title="Da sala de aula ao <em>palco</em>."
-        lead="O 1º HackaRun é tecnologia, inovação e empreendedorismo na UniCatólica, em duas frentes: uma programação aberta ao público e um hackathon dos alunos, com final no palco do Capim Dourado Shopping."
+        lead="O 1º HackaRun é um evento da UniCatólica que reúne tecnologia, inovação e empreendedorismo, com atividades abertas ao público e um hackathon dinâmico e gamificado. O evento termina com a apresentação dos projetos e a premiação no Capim Dourado Shopping."
       />
 
       <ul class="about__tracks" role="list" data-reveal-group>
-        <TrackCard
-          index={0}
-          tone="open"
-          badge="Aberto ao público"
-          title="Programação aberta"
-          text={`Oficinas práticas, palestras e exposição de produtos e soluções tecnológicas${stands ? ` em até ${stands} estandes` : ''}.`}
+        {/*
           facts={[
             { label: 'Para', value: 'Comunidade de tecnologia e estudantes do 3º ano do ensino médio' },
             { label: 'Quando', value: '11 a 13/11, a partir das 19h · UniCatólica, Bloco II' },
           ]}
-        >
           <Button variant="ghost" href="#programacao" data-nav-link>
             Ver programação
           </Button>
-        </TrackCard>
+        */}
+        <TrackCard
+          index={0}
+          tone="open"
+          badge="Quem pode participar?"
+          title="Público alvo"
+          text="Estudantes da UniCatólica, especialmente dos cursos de Engenharia de Software e Inteligência Artificial; universitários de outras instituições; profissionais e entusiastas da área de tecnologia."
+        />
+        {/*
         <TrackCard
           index={1}
           tone="hackathon"
@@ -93,9 +95,10 @@ const readout = [
             {cta.label}
           </Button>
         </TrackCard>
+        */}
       </ul>
 
-      <AboutStats stats={readout} />
+      {/* <AboutStats stats={readout} /> */}
     </div>
   </div>
 </section>

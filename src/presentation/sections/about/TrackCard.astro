@@ -8,10 +8,11 @@ interface Props {
   badge: string;
   title: string;
   text: string;
-  facts: { label: string; value: string }[];
+  facts?: { label: string; value: string }[];
 }
 
-const { index, tone, badge, title, text, facts } = Astro.props;
+const { index, tone, badge, title, text, facts = [] } = Astro.props;
+const hasCta = Astro.slots.has('default');
 ---
 
 <li class:list={['track sx-glass sx-corners', `track--${tone}`]}>
@@ -21,17 +22,21 @@ const { index, tone, badge, title, text, facts } = Astro.props;
   <AudienceBadge as="p" tone={tone} label={badge} />
   <h3 class="track__title">{title}</h3>
   <p class="track__text">{text}</p>
-  <dl class="track__facts">
-    {facts.map((fact) => (
-      <div class="track__fact">
-        <dt>{fact.label}</dt>
-        <dd>{fact.value}</dd>
-      </div>
-    ))}
-  </dl>
-  <div class="track__cta">
-    <slot />
-  </div>
+  {facts.length > 0 && (
+    <dl class="track__facts">
+      {facts.map((fact) => (
+        <div class="track__fact">
+          <dt>{fact.label}</dt>
+          <dd>{fact.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )}
+  {hasCta && (
+    <div class="track__cta">
+      <slot />
+    </div>
+  )}
 </li>
 
 <style>

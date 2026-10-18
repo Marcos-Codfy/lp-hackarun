@@ -38,6 +38,8 @@ export interface RawActivity extends RawTimeRange {
   flags?: ActivityFlag[];
   parts?: (RawTimeRange & { label: string })[];
   checklist?: string[];
+  // palestrante/instrutor da atividade; campos em null mostram o espaço reservado
+  speaker?: { name?: string | null; photo?: string | null; bio?: string | null } | null;
 }
 
 export interface RawSession extends RawTimeRange {

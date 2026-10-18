@@ -20,7 +20,7 @@ const slot = (id: string) => {
 describe('programação oficial (event.json)', () => {
   it('quatro dias, de 11 a 14/11, com rótulo curto pro seletor', () => {
     expect(event.days.map((d) => d.date)).toEqual(['2026-11-11', '2026-11-12', '2026-11-13', '2026-11-14']);
-    expect(event.days.map((d) => d.label)).toEqual(['Oficinas', 'Abertura', 'Mercado', 'Final']);
+    expect(event.days.map((d) => d.label)).toEqual(['Oficinas', 'Abertura', 'Desenvolvimento', 'Final']);
   });
 
   it('marcos: largada 11/11 19h, fim do desenvolvimento 14/11 13h e a final a partir das 17h', () => {
@@ -52,29 +52,28 @@ describe('programação oficial (event.json)', () => {
       'Bloco II',
       'open',
     ]);
-    expect(slot('teams-and-mentors')).toEqual(['19:15', '19:35']);
-    expect(slot('rulebook')).toEqual(['19:35', '19:55']);
-    expect(slot('challenge-launch')).toEqual(['19:55', '20:15']);
+    expect(slot('teams-and-mentors')).toEqual(['19:15', '19:45']);
+    expect(slot('rulebook')).toEqual(['19:45', '20:00']);
+    expect(slot('challenge-launch')).toEqual(['20:00', '20:15']);
     expect(['teams-and-mentors', 'rulebook', 'challenge-launch'].map((id) => activity(id)?.track)).toEqual([
       'hackathon',
       'hackathon',
       'hackathon',
     ]);
-    expect(slot('expo')).toEqual(['19:00', '21:30']);
-    expect(activity('expo')?.has('parallel')).toBe(true);
-    expect(activity('tech-workshop')?.has('tbd')).toBe(true);
+    expect(slot('first-mission')).toEqual(['20:15', '21:00']);
+    expect(slot('networking')).toEqual(['21:00', '22:00']);
   });
 
-  it('13/11: oficinas 1, 2 e 3 com tema a definir e o espaço dos alunos em paralelo', () => {
-    const workshops = activity('market-workshops');
-    expect(workshops?.parts.map((p) => [p.label, p.slot.start, p.slot.end])).toEqual([
-      ['Oficina 1', '19:00', '19:50'],
-      ['Oficina 2', '20:00', '20:50'],
-      ['Oficina 3', '21:00', '21:50'],
+  it('13/11: noite de desenvolvimento com a Hora do Código no Bloco II', () => {
+    const [block] = day('2026-11-13')?.sessions ?? [];
+    expect([block?.slot.start, block?.slot.end, block?.place, block?.audience]).toEqual([
+      '19:00',
+      '22:00',
+      'Bloco II',
+      'open',
     ]);
-    expect(workshops?.has('tbd')).toBe(true);
-    expect(slot('students-space')).toEqual(['19:00', '22:00']);
-    expect(activity('students-space')?.has('parallel')).toBe(true);
+    expect(block?.activities.map((a) => a.id)).toEqual(['market-workshops']);
+    expect(slot('market-workshops')).toEqual(['19:00', '22:00']);
   });
 
   it('14/11: desenvolvimento só de equipes e mentores, depois a HackaRun Experience no shopping', () => {
@@ -93,19 +92,17 @@ describe('programação oficial (event.json)', () => {
     ]);
     expect(experience?.activities.map((a) => a.slot.start)).toEqual([
       '17:00',
-      '17:15',
-      '18:15',
-      '18:45',
-      '19:15',
-      '19:45',
+      '17:30',
+      '18:35',
+      '19:00',
+      '19:30',
     ]);
-    expect(slot('awards')).toEqual(['19:15', '19:45']);
-    expect(activity('cosplay')?.has('optional')).toBe(true);
+    expect(slot('awards')).toEqual(['19:00', '19:30']);
   });
 
-  it('7 oficinas e até 10 estandes', () => {
+  it('6 oficinas e até 10 estandes', () => {
     const workshops = event.days.flatMap((d) => d.sessions).reduce((acc, s) => acc + s.workshopCount, 0);
-    expect(workshops).toBe(7);
+    expect(workshops).toBe(6);
     expect(event.maxStands).toBe(10);
   });
 });

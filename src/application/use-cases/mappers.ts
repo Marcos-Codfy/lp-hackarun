@@ -59,6 +59,7 @@ export const toActivityDTO = (a: Activity): ActivityDTO => ({
   flags: [...a.flags],
   parts: a.parts.map((p) => ({ label: p.label, ...toTimeRangeDTO(p.slot) })),
   checklist: [...a.checklist],
+  speaker: a.speaker ? { ...a.speaker } : null,
 });
 
 export const toSessionDTO = (s: Session, venue: Venue): SessionDTO => ({

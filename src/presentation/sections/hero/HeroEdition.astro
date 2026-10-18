@@ -1,0 +1,59 @@
+---
+// selo "1º" acima do logo: numeral em degradê entre dois fios, no tom do selo dos cursos
+---
+
+<p class="hero__edition" aria-label="1ª edição">
+  <span class="hero__edition-rule" aria-hidden="true"></span>
+  <span class="hero__edition-num" aria-hidden="true">
+    1<sup>º</sup>
+  </span>
+  <span class="hero__edition-rule" aria-hidden="true"></span>
+</p>
+
+<style>
+  .hero__edition {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 calc(var(--space-4) * -1);
+    line-height: 1;
+  }
+
+  .hero__edition-num {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: clamp(2.15rem, 3vw, 3rem);
+    font-weight: 900;
+    background: linear-gradient(180deg, #ffffff 15%, #7ff0ff 55%, #00a8ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 16px rgb(0 229 255 / 0.6));
+  }
+
+  .hero__edition-num sup {
+    margin-left: 0.04em;
+    font-size: 0.45em;
+    vertical-align: 0.9em;
+  }
+
+  .hero__edition-rule {
+    width: clamp(1.5rem, 3vw, 2.75rem);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-cyan));
+  }
+
+  .hero__edition-rule:last-child {
+    background: linear-gradient(90deg, var(--c-violet), transparent);
+  }
+
+  @media (max-width: 639px) {
+    .hero__edition {
+      margin-bottom: calc(var(--space-3) * -1);
+    }
+
+    .hero__edition-num {
+      font-size: 1.85rem;
+    }
+  }
+</style>

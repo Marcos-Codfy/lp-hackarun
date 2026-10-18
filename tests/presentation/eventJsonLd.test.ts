@@ -41,7 +41,7 @@ describe('buildEventJsonLd', () => {
     const [event] = await graph();
     const subs = event?.['subEvent'] as Node[];
     expect(subs.map((s) => [s['name'], s['startDate'], s['endDate']])).toEqual([
-      ['Oficinas práticas', '2026-11-11T19:00:00-03:00', '2026-11-11T21:50:00-03:00'],
+      ['Oficinas práticas', '2026-11-11T19:00:00-03:00', '2026-11-11T22:00:00-03:00'],
       ['Abertura oficial e lançamento do HackaRun', '2026-11-12T19:00:00-03:00', '2026-11-12T22:00:00-03:00'],
       [
         'Oficinas e interação com projetos acadêmicos',

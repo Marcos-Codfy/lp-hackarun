@@ -1,0 +1,100 @@
+---
+import type { ActivitySpeakerDTO } from '@application/index';
+
+// quem conduz a atividade: foto redonda e o nome embaixo. Sem foto, uma silhueta; sem nome, "A definir"
+interface Props {
+  speaker: ActivitySpeakerDTO;
+}
+
+const { speaker } = Astro.props;
+const name = speaker.name ?? 'A definir';
+---
+
+<figure class="speaker">
+  <span class="speaker__ring">
+    {speaker.photo ? (
+      <img
+        class="speaker__photo"
+        src={speaker.photo}
+        alt=""
+        width="160"
+        height="160"
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <svg class="speaker__ghost" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="24" r="11" />
+        <path d="M10 60c2-12 11-19 22-19s20 7 22 19z" />
+      </svg>
+    )}
+  </span>
+  <figcaption class:list={['speaker__name', !speaker.name && 'is-pending']}>
+    <span class="sr-only">Com </span>
+    {name}
+  </figcaption>
+</figure>
+
+<style>
+  .speaker {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  /* anel em degradê ciano → violeta, no tom dos selos da LP */
+  .speaker__ring {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    aspect-ratio: 1;
+    padding: 2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c-cyan), var(--c-violet));
+    box-shadow: 0 0 16px rgb(0 229 255 / 0.25);
+  }
+
+  .speaker__photo,
+  .speaker__ghost {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--c-void);
+    object-fit: cover;
+  }
+
+  .speaker__ghost {
+    padding: 18% 18% 0;
+    fill: color-mix(in srgb, var(--sx-accent) 35%, transparent);
+  }
+
+  .speaker__name {
+    color: var(--text);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .speaker__name.is-pending {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* tablet pra cima: coluna à esquerda do horário, foto em cima e nome embaixo */
+  @media (min-width: 640px) {
+    .speaker {
+      flex-direction: column;
+      gap: var(--space-2);
+      text-align: center;
+    }
+
+    .speaker__ring {
+      width: 4.5rem;
+    }
+  }
+</style>
