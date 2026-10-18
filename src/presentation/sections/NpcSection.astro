@@ -2,7 +2,7 @@
 import type { LandingPageDTO } from '@application/index';
 import SectionHeader from './shared/SectionHeader.astro';
 import QuestLog from './npc/QuestLog.astro';
-import NpcTerminal from './npc/NpcTerminal.astro';
+// import NpcTerminal from './npc/NpcTerminal.astro';
 import './sections.css';
 
 interface Props {
@@ -28,12 +28,14 @@ const { data: _data } = Astro.props;
         code="02"
         eyebrow="NPCs"
         title="Os <em>NPCs</em> estão entre nós."
-        lead="Além de desenvolver seus projetos e pensar em soluções criativas, as equipes terão um período dedicado a missões-surpresas, contando com os NPCs para encontrar pistas, descobrir informações e desvendar os desafios que surgirem pelo caminho."
+        lead="Além de desenvolver seus projetos e pensar em soluções criativas, as equipes terão um período dedicado a missões, contando com os NPCs para encontrar pistas, descobrir informações e desvendar os desafios que surgirem pelo caminho."
       />
 
+      {/*
       <div data-reveal="up">
         <NpcTerminal />
       </div>
+      */}
 
       <QuestLog />
     </div>
