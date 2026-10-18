@@ -37,8 +37,8 @@ describe('programação oficial (event.json)', () => {
     expect(block?.place).toBe('Auditório do Bloco II');
     expect(block?.audience).toBe('open');
     expect(block?.activities.map((a) => [a.title, a.slot.start, a.slot.end])).toEqual([
-      ['Ideia boa ou furada?', '19:00', '19:50'],
-      ['Do zero ao código', '20:00', '20:50'],
+      ['De onde surgem as ideias', '19:00', '19:50'],
+      ['Do Commit ao Código: Git e GitHub na prática', '20:00', '20:50'],
       ['Hackeando ideias com IA', '21:00', '21:50'],
     ]);
     expect(block?.activities.every((a) => a.details)).toBe(true);
@@ -52,16 +52,14 @@ describe('programação oficial (event.json)', () => {
       'Bloco II',
       'open',
     ]);
-    expect(slot('teams-and-mentors')).toEqual(['19:15', '19:45']);
-    expect(slot('rulebook')).toEqual(['19:45', '20:00']);
+    expect(slot('teams-and-mentors')).toEqual(['19:15', '19:35']);
+    expect(slot('rulebook')).toEqual(['19:35', '19:55']);
     expect(slot('challenge-launch')).toEqual(['20:00', '20:15']);
     expect(['teams-and-mentors', 'rulebook', 'challenge-launch'].map((id) => activity(id)?.track)).toEqual([
       'hackathon',
       'hackathon',
       'hackathon',
     ]);
-    expect(slot('first-mission')).toEqual(['20:15', '21:00']);
-    expect(slot('networking')).toEqual(['21:00', '22:00']);
   });
 
   it('13/11: noite de desenvolvimento com a Hora do Código no Bloco II', () => {
@@ -70,7 +68,7 @@ describe('programação oficial (event.json)', () => {
       '19:00',
       '22:00',
       'Bloco II',
-      'open',
+      'hackathon',
     ]);
     expect(block?.activities.map((a) => a.id)).toEqual(['market-workshops']);
     expect(slot('market-workshops')).toEqual(['19:00', '22:00']);
@@ -84,7 +82,7 @@ describe('programação oficial (event.json)', () => {
       'unicatolica',
       'teams',
     ]);
-    expect(dev?.note).toContain('regulamento');
+    expect(dev?.note).toContain('Missões-surpresas');
     expect([experience?.slot.start, experience?.slot.end, experience?.venueId]).toEqual([
       '17:00',
       null,
@@ -93,16 +91,16 @@ describe('programação oficial (event.json)', () => {
     expect(experience?.activities.map((a) => a.slot.start)).toEqual([
       '17:00',
       '17:30',
-      '18:35',
+      '18:30',
       '19:00',
       '19:30',
     ]);
     expect(slot('awards')).toEqual(['19:00', '19:30']);
   });
 
-  it('6 oficinas e até 10 estandes', () => {
+  it('4 oficinas e até 10 estandes', () => {
     const workshops = event.days.flatMap((d) => d.sessions).reduce((acc, s) => acc + s.workshopCount, 0);
-    expect(workshops).toBe(6);
+    expect(workshops).toBe(4);
     expect(event.maxStands).toBe(10);
   });
 });

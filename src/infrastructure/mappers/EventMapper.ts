@@ -78,7 +78,7 @@ export class EventMapper {
       title: raw.title,
       kind: raw.kind,
       slot: EventMapper.slot(raw),
-      summary: raw.summary,
+      summary: raw.summary ?? null,
       details: raw.details ?? null,
       track: raw.track ? toAudience(raw.track, `Activity ${raw.id}`) : null,
       flags: raw.flags ?? [],
