@@ -8,16 +8,33 @@ interface Props {
   date: string;
   hour: string;
   dateLong: string;
-  launchAt: string | null;
+  // não aparece mais no painel; segue opcional porque o MissionsSection ainda passa
+  launchAt?: string | null;
 }
 
-const { date, hour, dateLong, launchAt } = Astro.props;
+const { date, hour, dateLong } = Astro.props;
+// resumo de cada tópico do regulamento (o texto completo é apresentado na abertura)
 const topics = [
-  'Regras da competição',
-  'Critérios de pontuação',
-  'Prazos',
-  'Uso de inteligência artificial',
-  'Critérios de desempate',
+  {
+    title: 'Regras da competição',
+    text: 'Cumprir as missões e os prazos, respeitar a autoria dos materiais e garantir que a solução funcione. Fraude ou plágio podem custar pontos ou a desclassificação.',
+  },
+  {
+    title: 'Critérios de pontuação',
+    text: 'Banca com notas de 0 a 10: funcionalidade 30%, qualidade técnica 20%, inovação e IA 20%, missões e evidências 20% e pitch 10%. Missões valem até +1 ponto (máx. 10).',
+  },
+  {
+    title: 'Prazos',
+    text: 'Missões de 12 a 14/11, com entrega final até às 13h do dia 14. Finalistas serão anunciados até às 16h30 e pitches das 17h30 às 18h30, no Capim Dourado Shopping.',
+  },
+  {
+    title: 'Uso de inteligência artificial',
+    text: 'Liberado na ideação, no código, nos testes e na documentação, desde que declarado. A equipe responde pelo que a IA gerar.',
+  },
+  {
+    title: 'Critérios de desempate',
+    text: 'Maior nota em funcionalidade, depois qualidade técnica, missões, evidências e inovação com IA. Persistindo o empate, a banca decide.',
+  },
 ];
 ---
 
@@ -25,7 +42,7 @@ const topics = [
   <div class="rulebook__grid">
     <div class="rulebook__intro">
       <p class="sx-hud">// Regulamento</p>
-      <h3 class="rulebook__title">As regras saem na abertura.</h3>
+      <h3 class="rulebook__title">As regras serão apresentadas na abertura.</h3>
       <p class="rulebook__stamp sx-grad-text">
         <span aria-hidden="true">
           {date} · {hour.toUpperCase()}
@@ -34,27 +51,19 @@ const topics = [
           {dateLong}, às {hour}
         </span>
       </p>
-      {launchAt && (
-        <p class="section-note section-note--time rulebook__note">
-          <Icon name="clock" />
-          <span>
-            <strong>Às {launchAt}, o lançamento do desafio:</strong> missões, pistas, estações tecnológicas,
-            entregas e o sistema de pontuação.
-          </span>
-        </p>
-      )}
     </div>
 
     <ul class="rulebook__list" role="list" aria-label="O que o regulamento traz">
       {topics.map((topic) => (
         <li class="rule">
           <div class="rule__head">
-            <span class="rule__label">{topic}</span>
+            <span class="rule__label">{topic.title}</span>
             <span class="rule__lock" aria-hidden="true">
               <Icon name="lock" size={14} />
               {date}
             </span>
           </div>
+          <p class="rule__text">{topic.text}</p>
           <span class="rule__track" aria-hidden="true"></span>
         </li>
       ))}
@@ -95,7 +104,7 @@ const topics = [
 
   .rulebook__list {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-4);
   }
 
   .rule__head {
@@ -110,6 +119,13 @@ const topics = [
   .rule__label {
     color: var(--text);
     font-weight: 600;
+  }
+
+  .rule__text {
+    margin-bottom: var(--space-2);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
   }
 
   .rule__lock {
