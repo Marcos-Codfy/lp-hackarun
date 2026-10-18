@@ -3,7 +3,7 @@
     "id": "what",
     "category": "Evento",
     "question": "O que é o HackaRun?",
-    "answer": "É um evento de tecnologia, inovação e empreendedorismo promovido pela UniCatólica, na 1ª edição. Tem duas frentes: uma programação aberta, com oficinas práticas, palestras e exposição de produtos e soluções em estandes, e um hackathon exclusivo para alunos da UniCatólica, no formato de corrida por objetivos. O encerramento é a premiação no Capim Dourado Shopping, parceiro exclusivo da premiação."
+    "answer": "É um evento de tecnologia, inovação e empreendedorismo promovido pela UniCatólica, na 1ª edição. Tem duas frentes: uma programação aberta, com oficinas práticas, palestras e exposição de produtos e soluções em estandes, e um hackathon no formato de corrida por objetivos, aberto a estudantes da UniCatólica e de outras instituições, profissionais e entusiastas de tecnologia. O encerramento é a premiação no Capim Dourado Shopping, parceiro exclusivo da premiação."
   },
   {
     "id": "when-where",
@@ -15,7 +15,7 @@
     "id": "who",
     "category": "Evento",
     "question": "Quem pode participar?",
-    "answer": "A programação aberta recebe a comunidade de tecnologia, profissionais da área, estudantes universitários e alunos do 3º ano do ensino médio interessados em conhecer os cursos de graduação e a área de tecnologia. O hackathon é exclusivo para alunos da UniCatólica, em equipes."
+    "answer": "A programação aberta recebe a comunidade de tecnologia, profissionais da área, estudantes universitários e alunos do 3º ano do ensino médio interessados em conhecer os cursos de graduação e a área de tecnologia. O hackathon é aberto a estudantes da UniCatólica, estudantes de outras instituições, profissionais e entusiastas de tecnologia, com inscrição individual. Quem tem menos de 18 anos participa com a autorização do responsável."
   },
   {
     "id": "experience",
@@ -81,12 +81,24 @@
     "id": "signup",
     "category": "Inscrição",
     "question": "Como faço a inscrição no hackathon?",
-    "answer": "Pela página de inscrição do site, que abre em qualquer botão de inscrição: uma pessoa inscreve a equipe toda, num envio só. O hackathon é exclusivo para alunos da UniCatólica e a corrida é disputada em equipes."
+    "answer": "Pela página de inscrição do site oficial, de 19/10 a 08/11. A inscrição é individual: cada pessoa preenche a própria, com nome completo, e-mail, WhatsApp e se estuda atualmente (com curso, período e instituição, quando for o caso). Por enquanto, são 75 vagas. A inscrição não garante vaga numa equipe: só participa do sorteio quem estiver presente e credenciado em 12/11."
+  },
+  {
+    "id": "teams",
+    "category": "Inscrição",
+    "question": "Como as equipes são formadas?",
+    "answer": "Por sorteio presencial, em 12/11, das 19h15 às 19h35, no Bloco II da UniCatólica. Só entram no sorteio os inscritos presentes e credenciados nesse horário. As equipes têm, de preferência, 4 pessoas, e no máximo 5. Cada equipe escolhe um representante."
+  },
+  {
+    "id": "minors",
+    "category": "Inscrição",
+    "question": "Tenho menos de 18 anos. Posso participar?",
+    "answer": "Pode. Faça a inscrição normalmente e entregue no credenciamento, em 12/11, a autorização assinada pelo responsável legal, exigida pelo item 2.5 do regulamento."
   },
   {
     "id": "contact",
     "category": "Inscrição",
     "question": "Como recebo os avisos oficiais?",
-    "answer": "Por e-mail: a comunicação oficial do hackathon é feita pelo e-mail informado na inscrição. Use um endereço que você acompanha."
+    "answer": "Pelo e-mail e pelo WhatsApp informados na inscrição. Use contatos que você acompanha."
   }
 ]
