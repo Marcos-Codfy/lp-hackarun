@@ -1,0 +1,136 @@
+---
+// lista do formulário (período, área): label + select nativo + dica + erro. A primeira opção é o "Escolha"
+// vazio, então o campo nasce sem resposta e o domínio acusa se ficar assim
+import FieldError from './FieldError.astro';
+
+interface Props {
+  id: string;
+  label: string;
+  field: string;
+  options: readonly { value: string; label: string }[];
+  hint?: string;
+  placeholder?: string;
+}
+
+const { id, label, field, options, hint, placeholder = 'Escolha uma opção' } = Astro.props;
+const hintId = hint ? `${id}-hint` : undefined;
+---
+
+<div class="field">
+  <label class="field__label" for={id}>
+    {label}
+  </label>
+  {hint && (
+    <p class="field__hint" id={hintId}>
+      {hint}
+    </p>
+  )}
+  <div class="select">
+    <select
+      id={id}
+      class="select__control"
+      name={field}
+      data-field={field}
+      data-describedby-base={hintId}
+      aria-describedby={hintId}
+      aria-required="true"
+    >
+      <option value="">{placeholder}</option>
+      {options.map((option) => (
+        <option value={option.value}>{option.label}</option>
+      ))}
+    </select>
+    <span class="select__chevron" aria-hidden="true"></span>
+  </div>
+  <FieldError id={`${id}-error`} field={field} />
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+
+  .field__label {
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .field__hint {
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+  }
+
+  .select {
+    position: relative;
+  }
+
+  .select__control {
+    width: 100%;
+    min-height: 52px;
+    padding: var(--space-3) var(--space-7) var(--space-3) var(--space-4);
+    border: 1px solid var(--control-line);
+    border-radius: 3px;
+    background: var(--control-bg);
+    color: var(--text);
+    /* 16px+ evita o zoom automático do iOS */
+    font-size: max(16px, var(--fs-base));
+    appearance: none;
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  /* a lista aberta usa as cores do sistema: fundo escuro pra o texto claro não sumir */
+  .select__control option {
+    background: var(--surface-solid);
+    color: var(--text);
+  }
+
+  .select__control:hover {
+    border-color: color-mix(in srgb, var(--c-cyan) 45%, transparent);
+  }
+
+  .select__control:focus-visible {
+    outline: 2px solid transparent;
+    border-color: var(--c-cyan);
+    background: var(--control-bg-focus);
+    box-shadow:
+      0 0 0 1px var(--c-cyan),
+      0 0 0 5px color-mix(in srgb, var(--c-cyan) 14%, transparent),
+      0 0 30px color-mix(in srgb, var(--c-cyan) 22%, transparent);
+  }
+
+  .select__control[aria-invalid='true'] {
+    border-color: var(--c-danger);
+    box-shadow:
+      0 0 0 1px var(--c-danger),
+      0 0 24px color-mix(in srgb, var(--c-danger) 18%, transparent);
+  }
+
+  .select__control:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .select__chevron {
+    position: absolute;
+    top: 50%;
+    right: var(--space-4);
+    width: 0.6rem;
+    height: 0.6rem;
+    border-right: 2px solid var(--ink-cyan);
+    border-bottom: 2px solid var(--ink-cyan);
+    pointer-events: none;
+    transform: translateY(-70%) rotate(45deg);
+  }
+
+  @media (forced-colors: active) {
+    .select__chevron {
+      border-color: CanvasText;
+    }
+  }
+</style>

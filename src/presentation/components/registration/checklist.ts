@@ -11,32 +11,36 @@ export interface ChecklistItem {
   detail: string;
 }
 
-export function prepChecklist(teamSize: { min: number; max: number }): ChecklistItem[] {
+// drawAt = "12/11, às 19h15" (lido da programação); sem ele a lista fala só "no dia do sorteio"
+export function prepChecklist(
+  teamSize: { min: number; max: number },
+  drawAt: string | null = null,
+): ChecklistItem[] {
   const { min, max } = teamSize;
   return [
     {
-      icon: 'users',
-      title: `${min} a ${max} alunos da UniCatólica`,
-      short: `${min} a ${max} alunos da UniCatólica`,
-      detail: 'O hackathon é exclusivo para alunos da UniCatólica, em equipes.',
-    },
-    {
       icon: 'id-card',
-      title: 'Nome completo, matrícula e e-mail de cada um',
-      short: 'Nome, matrícula e e-mail',
-      detail: 'O integrante 1 é o contato da equipe.',
+      title: 'Nome completo, e-mail e WhatsApp',
+      short: 'Nome, e-mail e WhatsApp',
+      detail: 'É por eles que a organização fala com você.',
     },
     {
-      icon: 'image',
-      title: 'Foto ou logo da equipe',
-      short: 'Foto ou logo da equipe',
-      detail: 'JPG, PNG ou WebP. O tamanho a gente ajusta aqui mesmo.',
+      icon: 'cap',
+      title: 'Curso e período, se você estuda',
+      short: 'Curso e período, se estuda',
+      detail: 'Quem estuda na UniCatólica pode informar também a matrícula.',
     },
     {
-      icon: 'mail',
-      title: 'E-mail é o canal oficial',
-      short: 'E-mail é o canal oficial',
-      detail: 'Confirmação e avisos chegam só por e-mail, nunca por WhatsApp.',
+      icon: 'users',
+      title: drawAt ? `Presença no sorteio, em ${drawAt}` : 'Presença no sorteio das equipes',
+      short: 'Presença no sorteio',
+      detail: `As equipes de ${min} pessoas (até ${max}) são formadas na hora, só com quem estiver presente.`,
+    },
+    {
+      icon: 'shield',
+      title: 'Menor de 18 anos: autorização do responsável',
+      short: 'Menor de 18: autorização',
+      detail: 'Leve a autorização assinada no credenciamento.',
     },
   ];
 }

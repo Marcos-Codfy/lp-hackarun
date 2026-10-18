@@ -10,9 +10,9 @@ import {
   stepsWithErrors,
 } from '@presentation/view-models/registration/registrationSteps';
 
-const FIRST_CONTROL = 'input:not([type="hidden"]):not([tabindex="-1"]), button, a[href]';
+const FIRST_CONTROL = 'input:not([type="hidden"]):not([tabindex="-1"]), select, button, a[href]';
 
-// o "Remover" do contato vem antes dos campos no card, mas fica escondido e desligado: pula quem não recebe foco
+// campo escondido pelo perfil ou desligado não recebe foco: pula pro próximo
 const canFocus = (el: HTMLElement): boolean =>
   !el.closest('[hidden], [inert]') && !(el as HTMLButtonElement | HTMLInputElement).disabled;
 

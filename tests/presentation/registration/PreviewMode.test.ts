@@ -10,7 +10,7 @@ import type { AppEvents } from '@presentation/app/AppEvents';
 import { formStatus } from '@presentation/components/registration/formStatus';
 import { RegistrationFormView } from '@presentation/views/RegistrationFormView';
 import { formMarkup } from './formMarkup';
-import { fillValidTeam, setupForm } from './formSetup';
+import { fillValid, setupForm } from './formSetup';
 
 // caminho montado pelo node:path: o URL do happy-dom não resolve file:// relativo
 const SRC = resolve(dirname(fileURLToPath(import.meta.url)), '../../../src/presentation');
@@ -24,7 +24,7 @@ function registration(overrides: Partial<RegistrationDTO> = {}): RegistrationDTO
     endpoint: null,
     closesAt: null,
     slots: { capacity: null, taken: 0, remaining: null, level: 'unknown' },
-    teamSize: { min: 2, max: 5 },
+    teamSize: { min: 4, max: 5 },
     ...overrides,
   };
 }
@@ -61,7 +61,7 @@ describe('aviso "Prévia de revisão" no HTML', () => {
   it('só entra no formulário em modo simulado: no topo e no slot da tela de sucesso', () => {
     expect(form).toContain('{simulated && <PreviewBanner />}');
     expect(form).toContain(
-      '<RegistrationSuccess>{simulated && <PreviewBanner compact />}</RegistrationSuccess>',
+      '<RegistrationSuccess drawAt={drawAt}>{simulated && <PreviewBanner compact />}</RegistrationSuccess>',
     );
     expect(form.match(/<PreviewBanner\b/g)).toHaveLength(2);
     expect(form).toContain("data-simulated={simulated ? 'true' : undefined}");
@@ -104,7 +104,7 @@ describe('anúncio do sucesso', () => {
     const { vm, gateway } = setupForm();
     const root = document.querySelector<HTMLElement>('[data-registration-form]') as HTMLElement;
     new View(root, vm, new EventBus<AppEvents>()).mount();
-    fillValidTeam(vm);
+    fillValid(vm);
     await vm.submit();
     expect(gateway.calls).toHaveLength(1);
     return root.querySelector('[data-reg-live]')?.textContent ?? '';

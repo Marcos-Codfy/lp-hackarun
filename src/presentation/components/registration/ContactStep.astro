@@ -1,0 +1,68 @@
+---
+// etapa 01 do formulário: nome, e-mail, WhatsApp e a idade (menor de 18 vê o aviso da autorização)
+import Icon from '@presentation/components/ui/Icon.astro';
+import { ADULT_OPTIONS } from '@presentation/formatters/ParticipantLabels';
+import TextField from './TextField.astro';
+import ChoiceField from './ChoiceField.astro';
+import FormStep from './FormStep.astro';
+
+interface Props {
+  // "12/11, às 19h15"; null = horário ainda não publicado
+  drawAt: string | null;
+}
+
+const { drawAt } = Astro.props;
+---
+
+<FormStep index="01" title="Seus dados" lead="É por eles que a organização fala com você.">
+  <TextField
+    id="reg-name"
+    field="name"
+    label="Nome completo"
+    autocomplete="name"
+    autocapitalize="words"
+    maxlength={80}
+    wide
+  />
+  <div class="regform__pair">
+    <TextField
+      id="reg-email"
+      field="email"
+      label="E-mail"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      autocapitalize="off"
+      maxlength={120}
+    />
+    <TextField
+      id="reg-whatsapp"
+      field="whatsapp"
+      label="WhatsApp"
+      hint="Com DDD."
+      type="tel"
+      autocomplete="tel-national"
+      inputmode="tel"
+      placeholder="(63) 99999-9999"
+      maxlength={20}
+    />
+  </div>
+  <ChoiceField
+    id="reg-adult"
+    field="adult"
+    legend="Você tem 18 anos ou mais?"
+    options={ADULT_OPTIONS}
+    columns={2}
+  />
+  <div class="regform__notice regform__notice--warn" data-minor-notice role="note" hidden>
+    <Icon name="shield" size={18} />
+    <p>
+      Menores de 18 anos participam com autorização do responsável. Leve a autorização assinada no
+      credenciamento{drawAt ? `, em ${drawAt}` : ''}.{' '}
+      <a href="/autorizacao" target="_blank" rel="noopener">
+        Ver o modelo de autorização
+      </a>
+      .
+    </p>
+  </div>
+</FormStep>

@@ -8,9 +8,8 @@ import type {
   RegistrationFormState,
   RegistrationFormViewModel,
 } from '@presentation/view-models/registration/RegistrationFormViewModel';
-import { textAt } from '@presentation/view-models/registration/RegistrationFields';
+import { isFieldPath } from '@presentation/view-models/registration/RegistrationFields';
 import { DIRECT_SOURCE } from '@presentation/view-models/registration/registrationOrigin';
-import { pathOf } from './fieldLookup';
 
 export interface DraftKeeperDeps {
   // [data-registration-form]
@@ -29,10 +28,11 @@ const SAVE_DELAY_MS = 400;
 const TEXT = {
   restored: 'Rascunho recuperado: está tudo como você deixou.',
   saved: 'Rascunho salvo nesta aba',
-  pickAgain: 'A foto não coube no rascunho: escolha de novo.',
-  tooBig: 'A foto não cabe no rascunho: se sair da página, escolha de novo ao voltar.',
   cleared: 'Rascunho apagado. O formulário voltou ao começo.',
 };
+
+// campos do formulário que o rascunho preenche e o "Limpar rascunho" zera
+const CONTROLS = 'input[data-field], select[data-field]';
 
 // rascunho da aba: devolve o que foi digitado quando a pessoa volta pra /inscricao e salva enquanto ela
 // preenche. O aceite nunca volta marcado; enviou, o rascunho some
@@ -51,7 +51,7 @@ export class DraftKeeper {
     this.source = deps.source;
   }
 
-  // antes do RegistrationFormView montar: o VM já nasce com o rascunho (os cards extras saem dele)
+  // antes do RegistrationFormView montar: o VM já nasce com o rascunho
   restore(): void {
     if (!this.deps.vm.isOpen) return;
     const data = this.deps.draft.load();
@@ -68,7 +68,7 @@ export class DraftKeeper {
     if (!vm.isOpen) return;
     if (this.restored) {
       this.fillInputs();
-      this.show(TEXT.restored, this.restored.imageDropped ? TEXT.pickAgain : null);
+      this.show(TEXT.restored);
       this.announce('Rascunho recuperado.');
     }
     vm.state.subscribe((state, prev) => this.onState(state, prev), { immediate: false });
@@ -104,13 +104,10 @@ export class DraftKeeper {
 
   private render(result: DraftSaveResult): void {
     // armazenamento indisponível (aba anônima antiga, cota cheia): segue sem rascunho, sem alarde
-    if (result === 'empty' || result === 'failed') return this.show(null, null);
-    const pickAgain = this.restored?.imageDropped && !this.deps.vm.fields.teamImage;
-    const note = result === 'saved-without-image' ? TEXT.tooBig : pickAgain ? TEXT.pickAgain : null;
-    this.show(TEXT.saved, note);
+    this.show(result === 'saved' ? TEXT.saved : null);
   }
 
-  // "Limpar rascunho": apaga o salvo e zera o formulário (o foco vai pro nome da equipe). Com o envio em
+  // "Limpar rascunho": apaga o salvo e zera o formulário (o foco vai pro nome). Com o envio em
   // andamento nada muda: os campos na tela continuam sendo o que está indo pra planilha
   private clear(): void {
     if (!this.deps.vm.reset()) return;
@@ -118,43 +115,45 @@ export class DraftKeeper {
     this.dirty = false;
     this.deps.draft.clear();
     this.restored = null;
-    qsa<HTMLInputElement>('input[data-field], input[data-member-field]', this.deps.root).forEach((el) => {
-      if (el.type === 'checkbox') el.checked = false;
-      else if (el.type !== 'file') el.value = '';
+    qsa<HTMLInputElement | HTMLSelectElement>(CONTROLS, this.deps.root).forEach((el) => {
+      if (el instanceof HTMLInputElement && (el.type === 'checkbox' || el.type === 'radio'))
+        el.checked = false;
+      else el.value = '';
     });
-    this.show(null, null);
+    this.show(null);
     this.announce(TEXT.cleared);
   }
 
   private stop(): void {
     this.stopped = true;
     window.clearTimeout(this.timer);
-    this.show(null, null);
+    this.show(null);
   }
 
-  // valor do rascunho só onde o campo está vazio: o que a pessoa já digitou nesta visita ganha
+  // valor do rascunho só onde o campo está vazio: o que a pessoa já digitou nesta visita ganha.
+  // Opção (radio) marca a do rascunho se nenhuma do grupo estiver marcada
   private fillInputs(): void {
     const { fields } = this.deps.vm;
-    qsa<HTMLInputElement>('input[data-field="teamName"], input[data-member-field]', this.deps.root).forEach(
-      (el) => {
-        const path = pathOf(el);
-        const value = path ? textAt(fields, path) : null;
-        if (value && !el.value) el.value = value;
-      },
-    );
+    qsa<HTMLInputElement | HTMLSelectElement>(CONTROLS, this.deps.root).forEach((el) => {
+      const path = el.dataset['field'] ?? '';
+      if (!isFieldPath(path) || path === 'honeypot') return;
+      const value = fields[path];
+      if (!value) return;
+      if (el instanceof HTMLInputElement && el.type === 'radio') {
+        const group = qsa<HTMLInputElement>(`input[type="radio"][data-field="${path}"]`, this.deps.root);
+        if (!group.some((r) => r.checked)) el.checked = el.value === value;
+      } else if (!el.value) {
+        el.value = value;
+      }
+    });
   }
 
-  private show(text: string | null, note: string | null): void {
+  private show(text: string | null): void {
     const { bar } = this.deps;
     if (!bar) return;
     bar.hidden = text === null;
     const label = qs('[data-draft-text]', bar);
     if (label && text) label.textContent = text;
-    const extra = qs('[data-draft-note]', bar);
-    if (extra) {
-      extra.hidden = !note;
-      extra.textContent = note ?? '';
-    }
   }
 
   private announce(text: string): void {

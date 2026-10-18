@@ -30,8 +30,7 @@ export class SubmitStatusPresenter {
     const retry = qs('[data-reg-retry]', this.root);
     if (retry) retry.hidden = !state.retryable;
     if (submitting) this.announce('Enviando inscrição…');
-    if (state.status === 'success')
-      this.showSuccess(state.protocol ?? '', state.fields.members[0]?.email ?? '');
+    if (state.status === 'success') this.showSuccess(state);
   }
 
   announce(text: string): void {
@@ -39,16 +38,20 @@ export class SubmitStatusPresenter {
     if (live) live.textContent = text;
   }
 
-  private showSuccess(protocol: string, contactEmail: string): void {
+  private showSuccess(state: RegistrationFormState): void {
+    const protocol = state.protocol ?? '';
     const form = qs('[data-reg-form]', this.root);
     const success = qs('[data-reg-success]', this.root);
     if (!form || !success) return;
     // cópia fiel pro leitor de tela; a visível "decodifica"
     const code = qs('[data-reg-protocol]', success);
     if (code) code.textContent = protocol;
-    // é por esse e-mail que a organização fala com a equipe (comunicação oficial)
+    // é por esse e-mail que a organização fala com a pessoa (comunicação oficial)
     const mail = qs('[data-reg-contact-email]', success);
-    if (mail) mail.textContent = contactEmail.trim().toLowerCase() || 'o e-mail do contato';
+    if (mail) mail.textContent = state.fields.email.trim().toLowerCase() || 'o seu e-mail';
+    // menor de idade: o lembrete da autorização do responsável aparece no sucesso
+    const guardian = qs('[data-reg-guardian]', success);
+    if (guardian) guardian.hidden = !state.needsGuardianConsent;
     const typed = qs('[data-reg-protocol-typed]', success);
     form.hidden = true;
     success.hidden = false;

@@ -1,15 +1,15 @@
 ---
-// campo do formulário: label + controle + dica + erro (aria-describedby é ligado pela View)
+// campo do formulário: label + controle + dica + erro (aria-describedby é ligado pela View).
+// suggestions vira um datalist: sugere sem prender a pessoa à lista
 import type { HTMLAttributes } from 'astro/types';
 import FieldError from './FieldError.astro';
 
 interface Props {
   id: string;
   label: string;
-  // caminho no VM ("teamName"); os cards de integrante usam memberField
-  field?: string;
-  memberField?: 'name' | 'studentId' | 'email';
-  type?: 'text' | 'email';
+  // caminho no VM ("name", "whatsapp")
+  field: string;
+  type?: 'text' | 'email' | 'tel';
   autocomplete?: HTMLAttributes<'input'>['autocomplete'];
   inputmode?: HTMLAttributes<'input'>['inputmode'];
   autocapitalize?: HTMLAttributes<'input'>['autocapitalize'];
@@ -19,13 +19,13 @@ interface Props {
   maxlength?: number;
   placeholder?: string;
   wide?: boolean;
+  suggestions?: readonly string[];
 }
 
 const {
   id,
   label,
   field,
-  memberField,
   type = 'text',
   autocomplete,
   inputmode,
@@ -36,9 +36,11 @@ const {
   maxlength,
   placeholder,
   wide = false,
+  suggestions = [],
 } = Astro.props;
 
 const hintId = hint ? `${id}-hint` : undefined;
+const listId = suggestions.length ? `${id}-options` : undefined;
 ---
 
 <div class:list={['field', { 'field--wide': wide }]}>
@@ -55,9 +57,9 @@ const hintId = hint ? `${id}-hint` : undefined;
     <input
       id={id}
       class="field__control"
-      name={field ?? memberField}
+      name={field}
       data-field={field}
-      data-member-field={memberField}
+      list={listId}
       data-describedby-base={hintId}
       aria-describedby={hintId}
       aria-required={optional ? undefined : 'true'}
@@ -69,8 +71,15 @@ const hintId = hint ? `${id}-hint` : undefined;
       placeholder={placeholder}
       spellcheck={spellcheck === undefined ? undefined : spellcheck ? 'true' : 'false'}
     />
+    {listId && (
+      <datalist id={listId}>
+        {suggestions.map((option) => (
+          <option value={option} />
+        ))}
+      </datalist>
+    )}
   </div>
-  <FieldError id={`${id}-error`} field={field} memberField={memberField} />
+  <FieldError id={`${id}-error`} field={field} />
 </div>
 
 <style>

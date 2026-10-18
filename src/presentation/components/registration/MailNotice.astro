@@ -1,6 +1,6 @@
 ---
-// aviso do canal oficial: o HackaRun fala com as equipes só por e-mail. Aparece junto dos e-mails
-// (etapa Integrantes) e, numa versão curta, na tela de sucesso
+// aviso do canal oficial: o HackaRun fala com os inscritos por e-mail (e pelo WhatsApp, se precisar).
+// Aparece na tela de sucesso
 interface Props {
   id?: string;
   compact?: boolean;
@@ -19,8 +19,8 @@ const { id, compact = false } = Astro.props;
   <p class="mail__title">Comunicação oficial por e-mail</p>
   <p class="mail__text">
     <slot>
-      Confirmação e avisos do HackaRun chegam só por e-mail, nunca por WhatsApp. Confira cada endereço com
-      calma e, nos dias do evento, dê uma olhada também no spam.
+      Os avisos do HackaRun chegam por e-mail e, se for preciso, pelo WhatsApp informado. Nos dias do evento,
+      confira também a caixa de spam.
     </slot>
   </p>
 </div>

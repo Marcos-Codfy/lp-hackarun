@@ -1,44 +1,40 @@
 ---
-// painel "o que você precisa ter em mãos" da página de inscrição + três regras curtas (textos que o site já
-// usa). Só no desktop, ao lado do formulário; no celular e no tablet a lista vem recolhida
-// (RegistrationBriefToggle) e cada regra aparece no próprio formulário
-import type { EventDayDTO } from '@application/index';
+// painel "o que você precisa ter em mãos" da página de inscrição + três regras curtas. Só no desktop, ao lado
+// do formulário; no celular e no tablet a lista vem recolhida (RegistrationBriefToggle) e cada regra aparece no
+// próprio formulário
 import Icon from '@presentation/components/ui/Icon.astro';
 import PrepChecklist from '@presentation/components/registration/PrepChecklist.astro';
-import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 
 interface Props {
   teamSize: { min: number; max: number };
-  schedule: readonly EventDayDTO[];
+  drawAt: string | null;
 }
 
-const { teamSize, schedule } = Astro.props;
-const lookup = new ScheduleLookup(schedule);
-const rulebook = lookup.activity('rulebook');
-const rulebookAt = rulebook ? `${lookup.shortDate(rulebook.day)}, às ${lookup.startOf(rulebook)}` : null;
+const { teamSize, drawAt } = Astro.props;
 ---
 
 <div class="brief sx-glass">
-  <PrepChecklist teamSize={teamSize} variant="panel" id="reg-brief-title" />
+  <PrepChecklist teamSize={teamSize} drawAt={drawAt} variant="panel" id="reg-brief-title" />
   <ul class="brief__notes" role="list" aria-label="Bom saber">
     <li>
-      <Icon name="shield" size={16} />
+      <Icon name="users" size={16} />
       <span>
-        A equipe aparece em <a href="/equipes">Equipes</a> depois que a organização confere os dados e a foto
-        e confirma a inscrição.
+        A inscrição é individual e não garante vaga: as equipes saem do sorteio, só com quem estiver presente.
       </span>
     </li>
-    {rulebookAt && (
-      <li>
-        <Icon name="book" size={16} />
-        <span>O regulamento é apresentado na abertura, em {rulebookAt}.</span>
-      </li>
-    )}
+    <li>
+      <Icon name="book" size={16} />
+      <span>
+        Leia o{' '}
+        <a href="/regulamento-hackarun-2026.pdf" download>
+          regulamento (PDF)
+        </a>{' '}
+        antes de se inscrever.
+      </span>
+    </li>
     <li>
       <Icon name="lock" size={16} />
-      <span>
-        Os dados ficam só com a organização. No site aparecem só o nome, a foto e o número de integrantes.
-      </span>
+      <span>Os dados ficam só com a organização do HackaRun.</span>
     </li>
   </ul>
 </div>

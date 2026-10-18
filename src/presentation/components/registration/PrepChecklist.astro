@@ -6,6 +6,8 @@ import { prepChecklist } from './checklist';
 
 interface Props {
   teamSize: { min: number; max: number };
+  // "12/11, às 19h15"; sem ele a lista fala do sorteio sem horário
+  drawAt?: string | null;
   variant?: 'compact' | 'panel';
   // id do título que nomeia a lista
   id: string;
@@ -13,8 +15,8 @@ interface Props {
   hideTitle?: boolean;
 }
 
-const { teamSize, variant = 'compact', id, hideTitle = false } = Astro.props;
-const items = prepChecklist(teamSize);
+const { teamSize, drawAt = null, variant = 'compact', id, hideTitle = false } = Astro.props;
+const items = prepChecklist(teamSize, drawAt);
 const Title = variant === 'panel' ? 'h2' : 'p';
 ---
 

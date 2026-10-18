@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fillValidTeam, setupForm as setup, windowClosingAt } from './formSetup';
+import { fillValid, setupForm as setup, windowClosingAt } from './formSetup';
 
 describe('RegistrationFormViewModel · status no navegador', () => {
   it('build aberto, prazo já vencido: fecha ao montar e não envia', async () => {
@@ -7,7 +7,7 @@ describe('RegistrationFormViewModel · status no navegador', () => {
     expect(vm.isOpen).toBe(true);
     vm.refreshAvailability();
     expect(vm.isOpen).toBe(false);
-    fillValidTeam(vm);
+    fillValid(vm);
     await vm.submit();
     expect(gateway.calls).toHaveLength(0);
   });
@@ -41,7 +41,7 @@ describe('RegistrationFormViewModel · status no navegador', () => {
 
   it('não fecha no meio de um envio', async () => {
     const { vm, clock } = setup({ window: windowClosingAt('2026-11-01T12:00:02Z') });
-    fillValidTeam(vm);
+    fillValid(vm);
     const sending = vm.submit();
     clock.advance(10_000);
     vm.refreshAvailability();

@@ -1,23 +1,29 @@
 import type { EventBus } from '@shared/core/EventBus';
 import { qs, qsa } from '@shared/utils/dom';
 import type { AppEvents } from '@presentation/app/AppEvents';
-import type { TextPath } from '@presentation/view-models/registration/RegistrationFields';
+import {
+  isFieldPath,
+  visibleFields,
+  type FieldPath,
+} from '@presentation/view-models/registration/RegistrationFields';
 import type {
   RegistrationFormState,
   RegistrationFormViewModel,
 } from '@presentation/view-models/registration/RegistrationFormViewModel';
 import { ClosedLobby } from './registration/ClosedLobby';
 import { ErrorPresenter } from './registration/ErrorPresenter';
-import { MemberRows } from './registration/MemberRows';
 import { PressGuard } from './registration/PressGuard';
 import { SubmitStatusPresenter } from './registration/SubmitStatusPresenter';
-import { TeamImagePicker } from './registration/TeamImagePicker';
 import { controlFor, pathOf } from './registration/fieldLookup';
 
 // rolagem do app (Lenis ou nativa): o alvo para logo abaixo do header fixo
 export type ScrollToElement = (el: HTMLElement) => void;
 
-// [data-registration-form]: liga o DOM ao VM; valores moram nos inputs, o VM só espelha
+type Control = HTMLInputElement | HTMLSelectElement;
+
+const CONTROLS = 'input[data-field], select[data-field]';
+
+// [data-registration-form]: liga o DOM ao VM; valores moram nos campos, o VM só espelha
 export class RegistrationFormView {
   private readonly root: HTMLElement;
   private readonly vm: RegistrationFormViewModel;
@@ -25,8 +31,6 @@ export class RegistrationFormView {
   private readonly status: SubmitStatusPresenter;
   private readonly lobby: ClosedLobby;
   private readonly scrollTo: ScrollToElement;
-  private rows: MemberRows | null = null;
-  private image: TeamImagePicker | null = null;
   private lastFocusSeq = 0;
 
   constructor(
@@ -48,50 +52,31 @@ export class RegistrationFormView {
     // o build já fechou (ou ainda não abriu): o HTML estático basta
     if (!form || !this.vm.isOpen) return;
     this.vm.refreshAvailability();
-    const list = qs('[data-members-list]', this.root);
-    const template = qs<HTMLTemplateElement>('template[data-member-template]', this.root);
-    const press = new PressGuard(form);
-    if (list && template) {
-      this.rows = new MemberRows(list, template, {
-        input: (i, field, value) => this.vm.setText(`members.${i}.${field}`, value),
-        // a posição vale na hora de validar: o "Remover" segurado pelo PressGuard pode ter tirado a linha
-        // (ou subido as de baixo) entre o blur e a validação
-        blur: (i, field) => {
-          const row = list.children[i];
-          press.run(() => {
-            const index = Array.prototype.indexOf.call(list.children, row) as number;
-            if (index >= 0) this.vm.blur(`members.${index}.${field}`);
-          });
-        },
-        remove: (i) => this.vm.removeMember(i),
-      });
-    }
-    this.image = new TeamImagePicker(form, (file) => void this.vm.chooseTeamImage(file));
-    this.bindForm(form, press);
+    this.bindForm(form, new PressGuard(form));
     this.restoreFromDom(form);
     this.vm.state.subscribe((state, prev) => this.render(state, prev === state ? null : prev));
   }
 
   private bindForm(form: HTMLFormElement, press: PressGuard): void {
-    form.addEventListener('input', (e) => {
+    // texto a cada tecla; lista e opção no change (o input do select e do radio chega junto)
+    const onValue = (e: Event) => {
       const el = e.target;
-      // o arquivo da foto é do TeamImagePicker (change); os integrantes são do MemberRows
-      if (!(el instanceof HTMLInputElement) || el.type === 'file') return;
-      const path = el.dataset['field'];
-      if (!path) return;
-      if (el.type === 'checkbox') this.vm.setAcceptedTerms(el.checked);
-      else this.vm.setText(path as TextPath, el.value);
-    });
-    // a foto não valida no blur: abrir o seletor de arquivo já tira o foco e o erro piscaria à toa
+      if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) return;
+      this.read(el);
+    };
+    form.addEventListener('input', onValue);
+    form.addEventListener('change', onValue);
+    // opção (radio) valida no change: o blur de passar de uma opção pra outra piscaria o erro à toa
     form.addEventListener('focusout', (e) => {
-      const path = e.target instanceof HTMLElement ? e.target.dataset['field'] : undefined;
-      if (path && path !== 'honeypot' && path !== 'teamImage') press.run(() => this.vm.blur(path));
+      const el = e.target instanceof HTMLElement ? e.target : null;
+      const path = el ? pathOf(el) : null;
+      if (!path || path === 'honeypot' || (el instanceof HTMLInputElement && el.type === 'radio')) return;
+      press.run(() => this.vm.blur(path));
     });
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       void this.vm.submit();
     });
-    qs('[data-member-add]', this.root)?.addEventListener('click', () => this.vm.addMember());
     qs('[data-reg-retry]', this.root)?.addEventListener('click', () => void this.vm.retry());
     qs('[data-error-summary]', this.root)?.addEventListener('click', (e) => {
       const link =
@@ -102,16 +87,23 @@ export class RegistrationFormView {
     });
   }
 
-  // autofill, voltar no histórico ou o que foi digitado nos cards do HTML antes do chunk chegar
+  private read(el: Control): void {
+    const path = el.dataset['field'] ?? '';
+    if (path === 'acceptedTerms' && el instanceof HTMLInputElement) {
+      this.vm.setAcceptedTerms(el.checked);
+      return;
+    }
+    if (!isFieldPath(path)) return;
+    // radio desmarcado não muda nada: o marcado do mesmo grupo é quem fala
+    if (el instanceof HTMLInputElement && el.type === 'radio' && !el.checked) return;
+    if (el.value !== this.vm.fields[path]) this.vm.setValue(path, el.value);
+  }
+
+  // autofill, voltar no histórico ou o que foi digitado antes do chunk chegar
   private restoreFromDom(form: HTMLFormElement): void {
-    qsa<HTMLInputElement>('input[data-field], input[data-member-field]', form).forEach((el) => {
-      const path = pathOf(el);
-      if (!path || el.type === 'file') return;
-      if (el.type === 'checkbox') {
-        if (el.checked) this.vm.setAcceptedTerms(true);
-      } else if (el.value) {
-        this.vm.setText(path as TextPath, el.value);
-      }
+    qsa<Control>(CONTROLS, form).forEach((el) => {
+      const checkable = el instanceof HTMLInputElement && (el.type === 'checkbox' || el.type === 'radio');
+      if (checkable ? (el as HTMLInputElement).checked : el.value) this.read(el);
     });
   }
 
@@ -121,16 +113,8 @@ export class RegistrationFormView {
       return;
     }
     const { fields } = state;
-    if (!prev || prev.fields.members !== fields.members || prev.canRemoveMember !== state.canRemoveMember) {
-      this.rows?.sync(fields.members, state.canRemoveMember);
-    }
-    this.renderCounters(state);
-    if (state.announcement && state.announcement !== prev?.announcement) {
-      this.status.announce(state.announcement.text);
-    }
-    if (!prev || prev.imageStatus !== state.imageStatus || prev.fields.teamImage !== fields.teamImage) {
-      this.image?.render(state);
-    }
+    if (!prev || prev.fields.profile !== fields.profile) this.renderSections(fields.profile);
+    if (!prev || prev.fields.adult !== fields.adult) this.renderMinorNotice(fields.adult === 'no');
     this.errors.render(state.errors);
     this.errors.renderSummary(state.attempted, state.orderedErrors);
     if (!prev || prev.status !== state.status) this.status.render(state);
@@ -140,22 +124,23 @@ export class RegistrationFormView {
     }
   }
 
-  private renderCounters(state: RegistrationFormState): void {
-    const max = Number(this.root.dataset['teamMax'] ?? 0);
-    const size = state.fields.members.length;
-    const squad = qs('[data-reg-squad]', this.root);
-    if (squad) squad.textContent = `Esquadrão ${size}/${max}`;
-    const count = qs('[data-member-count]', this.root);
-    if (count) count.textContent = `${size}/${max}`;
-    const add = qs<HTMLButtonElement>('[data-member-add]', this.root);
-    if (add) add.disabled = !state.canAddMember;
-    const addLabel = qs('[data-member-add-label]', this.root);
-    if (addLabel)
-      addLabel.textContent = state.canAddMember ? 'Adicionar integrante' : `Equipe completa · ${max}/${max}`;
+  // [data-show-field="course"]: o bloco do campo só aparece pro perfil que pede ele
+  private renderSections(profile: RegistrationFormState['fields']['profile']): void {
+    const visible = visibleFields(profile);
+    qsa('[data-show-field]', this.root).forEach((el) => {
+      el.hidden = !visible.has(el.dataset['showField'] as FieldPath);
+    });
+    const details = qs('[data-profile-details]', this.root);
+    if (details) details.hidden = !profile;
+  }
+
+  private renderMinorNotice(minor: boolean): void {
+    const notice = qs('[data-minor-notice]', this.root);
+    if (notice) notice.hidden = !minor;
   }
 
   // envio com vários erros: o foco vai pro resumo (título e lista inteiros na tela, logo abaixo do header),
-  // que se anuncia pelo título ("Faltam ajustar 9 campos:"). Com um erro só, direto pro campo
+  // que se anuncia pelo título ("Faltam ajustar 3 campos:"). Com um erro só, direto pro campo
   private focusPath(path: string, announceErrors: boolean): void {
     const count = this.vm.state.value.orderedErrors.length;
     const summary = qs('[data-error-summary]', this.root);
