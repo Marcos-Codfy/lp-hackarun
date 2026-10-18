@@ -1,37 +1,97 @@
 ---
-// log de missão estilo jogo: os 4 passos de cada pista, ligados por um traço violeta
-const steps = [
-  { title: 'Encontre o NPC', text: 'Eles estão pela faculdade. Fique de olho em quem parece saber demais.' },
-  { title: 'Arranque a pista', text: 'Converse, negocie, prove que a sua equipe merece a dica.' },
+// log de missão estilo jogo: as 3 missões sequenciais do hackathon, ligadas por um traço violeta
+interface Step {
+  title: string;
+  text: string;
+  items?: string[];
+  deadline?: string;
+}
+
+const steps: Step[] = [
   {
-    title: 'Resolva a missão',
-    text: 'Decifrem o enigma e descubram o que precisa ser feito para superar o desafio.',
+    title: 'Problemas e Requisitos',
+    text: 'A missão começa em 12/11, às 20h15, e vocês terão até 13/11, às 10h para definir a base do projeto.',
+    items: [
+      'Delimitação do problema',
+      'Definição do público-alvo e da proposta de valor',
+      'Canvas simplificado',
+      'Backlog priorizado',
+    ],
   },
   {
-    title: 'Cumpra e avance',
-    text: 'Coloquem a ideia em prática, cumpram a missão e avancem para a próxima etapa.',
+    title: 'Desenvolvimento e Validação do Protótipo',
+    text: 'Com a primeira etapa concluída, é hora de colocar a mão na massa! Desenvolvam a solução, implementem o fluxo principal e comprovem seu funcionamento.',
+    items: [
+      'Protótipo funcional',
+      'Código versionado',
+      'Fluxo principal implementado',
+      'Evidências de testes e correções',
+    ],
+    deadline: 'Período: de 13/11, às 10h, até 14/11, às 10h.',
+  },
+  {
+    title: 'Produto Final e Pitch em Vídeo',
+    text: 'Chegou a hora de entregar o projeto completo! Finalizem a solução, organizem os materiais e preparem um pitch em vídeo para apresentar o resultado.',
+    items: [
+      'Versão final da solução',
+      'Repositório do projeto',
+      'Instruções de execução e documentação',
+      'Vídeo de pitch com duração de 1min15s a 2min',
+    ],
+    deadline: 'Período: de 14/11, às 10h, até 14/11, às 13h.',
   },
 ];
 ---
 
-<ol class="quest" role="list" data-reveal-group>
-  {steps.map((step, index) => (
-    <li class="quest__step">
-      <span class="quest__num sx-grad-text" aria-hidden="true">
-        {String(index + 1).padStart(2, '0')}
-      </span>
-      <div class="quest__body">
-        <h3 class="quest__title">
-          <span class="sr-only">Passo {index + 1}: </span>
-          {step.title}
-        </h3>
-        <p class="quest__text">{step.text}</p>
-      </div>
-    </li>
-  ))}
-</ol>
+<div class="quest-wrap">
+  <h3 class="quest-wrap__title">3 Missões Sequenciais</h3>
+  <ol class="quest" role="list" data-reveal-group>
+    {steps.map((step, index) => (
+      <li class="quest__step">
+        <span class="quest__num sx-grad-text" aria-hidden="true">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <div class="quest__body">
+          <h4 class="quest__title">
+            <span class="sr-only">Missão {index + 1}: </span>
+            {step.title}
+          </h4>
+          <p class="quest__text">{step.text}</p>
+          {step.items && (
+            <ul class="quest__items" role="list">
+              {step.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          )}
+          {step.deadline && <p class="quest__deadline">{step.deadline}</p>}
+        </div>
+      </li>
+    ))}
+  </ol>
+</div>
 
 <style>
+  .quest-wrap {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  /* mini título no estilo HUD dos selos da LP */
+  .quest-wrap__title {
+    color: #d2a8ff;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .quest-wrap__title::before {
+    content: '// ';
+    color: var(--c-magenta);
+  }
+
   .quest {
     display: grid;
     gap: var(--space-3);
@@ -44,10 +104,9 @@ const steps = [
     gap: var(--space-4);
     align-items: start;
     padding: var(--space-4) var(--space-4) var(--space-4) 0;
-    transition: background var(--dur) var(--ease-out);
   }
 
-  /* traço que liga os passos */
+  /* traço que liga as missões: são sequenciais, então a linha fica em todas as telas */
   .quest__step::before {
     content: '';
     position: absolute;
@@ -89,14 +148,37 @@ const steps = [
     line-height: 1.55;
   }
 
-  @media (min-width: 640px) {
-    .quest {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-2) var(--space-5);
-    }
+  .quest__items {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+  }
 
-    .quest__step::before {
-      display: none;
-    }
+  .quest__items li {
+    position: relative;
+    padding-left: 1.1rem;
+    color: var(--text);
+  }
+
+  /* marcador em losango, igual aos selos */
+  .quest__items li::before {
+    content: '';
+    position: absolute;
+    top: 0.5em;
+    left: 0.15rem;
+    width: 0.4rem;
+    height: 0.4rem;
+    background: var(--c-magenta);
+    transform: rotate(45deg);
+  }
+
+  .quest__deadline {
+    margin-top: var(--space-3);
+    color: #d2a8ff;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.06em;
   }
 </style>
