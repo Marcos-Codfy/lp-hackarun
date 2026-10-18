@@ -30,9 +30,9 @@
   ],
   "registration": {
     "endpoint": "",
-    "closesAt": null,
-    "capacity": null,
-    "teamSize": { "min": 2, "max": 5 }
+    "closesAt": "2026-11-08T23:59:00-03:00",
+    "capacity": 75,
+    "teamSize": { "min": 4, "max": 5 }
   },
   "maxStands": 10,
   "days": [

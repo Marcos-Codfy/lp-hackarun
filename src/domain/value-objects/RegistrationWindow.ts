@@ -1,6 +1,11 @@
 import { ValueObject } from '../shared/ValueObject';
 import type { Slots } from './Slots';
-import type { TeamSizeRule } from '../entities/TeamRegistration';
+
+// tamanho das equipes que o sorteio forma (regulamento: 4 de preferência, até 5)
+export interface TeamSizeRule {
+  min: number;
+  max: number;
+}
 
 interface RegistrationWindowProps {
   endpoint: string | null;
@@ -9,7 +14,8 @@ interface RegistrationWindowProps {
   teamSize: TeamSizeRule;
 }
 
-// endpoint = Web App do Apps Script que grava na planilha; null = inscrições ainda fechadas
+// endpoint = Web App do Apps Script que grava na planilha; null = inscrições ainda fechadas.
+// slots = vagas de inscritos (pessoas), não de equipes
 export class RegistrationWindow extends ValueObject<RegistrationWindowProps> {
   static create(props: RegistrationWindowProps): RegistrationWindow {
     return new RegistrationWindow({ ...props, endpoint: props.endpoint?.trim() || null });

@@ -2,24 +2,11 @@ import { describe, expect, it } from 'vitest';
 import eventData from '@infrastructure/content/event.json';
 import type { RawEvent } from '@infrastructure/content/schema';
 import { GetEventOverview } from '@application/index';
-import {
-  RegistrationPolicy,
-  ScoringRule,
-  Station,
-  Team,
-  type StationRepository,
-  type TeamRepository,
-} from '@domain/index';
+import { RegistrationPolicy, ScoringRule, Station, type StationRepository } from '@domain/index';
 import { StaticEventRepository } from '@infrastructure/repositories/StaticEventRepository';
 import { FixedClock } from '@infrastructure/clock/SystemClock';
-import { teamName } from '../helpers/fixtures';
 
 const raw = eventData as RawEvent;
-
-const team = (id: string, status: 'confirmed' | 'pending') =>
-  Team.create({ id, name: teamName(`Equipe ${id}`), memberCount: 3, status });
-
-const teams = (list: Team[]): TeamRepository => ({ list: async () => list });
 
 const stations: StationRepository = {
   list: async () => [
@@ -45,49 +32,51 @@ const stations: StationRepository = {
   scoring: async () => ScoringRule.create(100, [{ key: 'x', label: 'X', points: 100 }]),
 };
 
-function overview(event: RawEvent, list: Team[], now = '2026-10-10T12:00:00-03:00') {
+function overview(event: RawEvent, now = '2026-10-10T12:00:00-03:00') {
   return new GetEventOverview({
     events: new StaticEventRepository(event),
     stations,
-    teams: teams(list),
     policy: new RegistrationPolicy(),
     clock: new FixedClock(new Date(now)),
   }).execute();
 }
 
 describe('GetEventOverview', () => {
-  it('conta só equipes confirmadas como vagas ocupadas', async () => {
+  it('vagas de pessoas: no build ninguém conta como inscrito (a página conta pela planilha)', async () => {
     const withCapacity: RawEvent = {
       ...raw,
-      registration: { ...raw.registration, endpoint: 'https://x/exec', capacity: 4 },
+      registration: { ...raw.registration, endpoint: 'https://x/exec', capacity: 75 },
     };
-    const dto = await overview(withCapacity, [
-      team('1', 'confirmed'),
-      team('2', 'pending'),
-      team('3', 'confirmed'),
-    ]);
-    expect(dto.registration.slots).toEqual({ capacity: 4, taken: 2, remaining: 2, level: 'filling' });
+    const dto = await overview(withCapacity);
+    expect(dto.registration.slots).toEqual({ capacity: 75, taken: 0, remaining: 75, level: 'plenty' });
     expect(dto.registration.status).toBe('open');
   });
 
   it('sem endpoint fica "em breve" e sem capacidade o nível é desconhecido', async () => {
-    const dto = await overview({ ...raw, registration: { ...raw.registration, endpoint: '' } }, []);
+    const dto = await overview({
+      ...raw,
+      registration: { ...raw.registration, endpoint: '', capacity: null },
+    });
     expect(dto.registration.status).toBe('soon');
     expect(dto.registration.slots.level).toBe('unknown');
-    expect(dto.registration.teamSize).toEqual({ min: 2, max: 5 });
+    expect(dto.registration.teamSize).toEqual({ min: 4, max: 5 });
   });
 
-  it('vagas esgotadas fecham a inscrição', async () => {
-    const full: RawEvent = {
+  it('prazo vencido fecha a inscrição', async () => {
+    const late: RawEvent = {
       ...raw,
-      registration: { ...raw.registration, endpoint: 'https://x/exec', capacity: 1 },
+      registration: {
+        ...raw.registration,
+        endpoint: 'https://x/exec',
+        closesAt: '2026-11-08T23:59:00-03:00',
+      },
     };
-    const dto = await overview(full, [team('1', 'confirmed')]);
+    const dto = await overview(late, '2026-11-09T08:00:00-03:00');
     expect(dto.registration.status).toBe('closed');
   });
 
   it('monta as estatísticas e as datas do evento', async () => {
-    const dto = await overview(raw, []);
+    const dto = await overview(raw);
     // oficinas contam por horário (as "Oficinas 1, 2 e 3" do dia 13 valem três): 3 + 1 + 3 no documento
     const workshops = raw.days
       .flatMap((d) => d.sessions.flatMap((s) => s.activities))

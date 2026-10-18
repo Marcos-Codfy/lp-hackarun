@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { RegistrationGatewayError, SubmitRegistration } from '@application/index';
 import { FixedClock } from '@infrastructure/clock/SystemClock';
-import { FakeGateway, TEAM_SIZE, teamInput } from '../helpers/fixtures';
+import { FakeGateway, TEAM_SIZE, participantInput } from '../helpers/fixtures';
 
 const META = { honeypot: '', elapsedMs: 8000 };
 
@@ -16,41 +16,27 @@ function setup() {
   return { gateway, useCase };
 }
 
-describe('SubmitRegistration · já inscrito em outra equipe', () => {
-  it('nome repetido vira erro no campo do nome', async () => {
+describe('SubmitRegistration · já tem inscrição', () => {
+  it.each([
+    ['duplicate-email', 'email', 'Esse e-mail já tem uma inscrição.'],
+    ['duplicate-whatsapp', 'whatsapp', 'Esse WhatsApp já tem uma inscrição.'],
+    ['duplicate-student-id', 'studentId', 'Essa matrícula já tem uma inscrição.'],
+  ] as const)('%s vira erro no campo %s', async (kind, field, message) => {
     const { gateway, useCase } = setup();
-    gateway.willThrow(new RegistrationGatewayError('duplicate-team-name', 'x'));
-    expect(await useCase.execute(teamInput(), META)).toEqual({
-      status: 'conflict',
-      reason: 'duplicate-team-name',
-      errors: { teamName: 'Esse nome já é de outra equipe inscrita. Escolha outro.' },
-      message: 'Já existe uma equipe inscrita com esse nome. Escolha outro.',
-    });
+    gateway.willThrow(new RegistrationGatewayError(kind, 'x'));
+    const result = await useCase.execute(participantInput(), META);
+    expect(result.status).toBe('conflict');
+    expect(result.status === 'conflict' && result.errors).toEqual({ [field]: message });
+    expect(result.status === 'conflict' && result.message).toContain('Cada pessoa se inscreve uma vez só.');
   });
 
-  it('e-mail e matrícula repetidos apontam o integrante certo', async () => {
+  it('inscrição repetida inteira (mesmo envio já gravado de outro jeito) é falha sem "Tentar de novo"', async () => {
     const { gateway, useCase } = setup();
-    gateway
-      .willThrow(new RegistrationGatewayError('duplicate-email', 'x', [1]))
-      .willThrow(new RegistrationGatewayError('duplicate-student-id', 'x', [0, 1]));
-    const email = await useCase.execute(teamInput(), META);
-    expect(email.status === 'conflict' && email.errors).toEqual({
-      'members.1.email': 'Esse e-mail já está em outra equipe inscrita.',
-    });
-    const ids = await useCase.execute(teamInput(), META);
-    expect(ids.status === 'conflict' && Object.keys(ids.errors)).toEqual([
-      'members.0.studentId',
-      'members.1.studentId',
-    ]);
-  });
-
-  it('sem a posição (ou com posição fora da equipe) vira a mensagem geral, sem "Tentar de novo"', async () => {
-    const { gateway, useCase } = setup();
-    gateway.willThrow(new RegistrationGatewayError('duplicate-email', 'x', [7]));
-    expect(await useCase.execute(teamInput(), META)).toEqual({
+    gateway.willThrow(new RegistrationGatewayError('duplicate', 'x'));
+    expect(await useCase.execute(participantInput(), META)).toEqual({
       status: 'failed',
-      reason: 'duplicate-email',
-      message: 'Um dos e-mails já está em outra equipe inscrita. Cada pessoa participa de uma equipe só.',
+      reason: 'duplicate',
+      message: 'Essa inscrição já foi registrada.',
       retryable: false,
     });
   });
