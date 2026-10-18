@@ -9,9 +9,11 @@ interface Props {
   title: string;
   text: string;
   facts?: { label: string; value: string }[];
+  // observação em letra menor no rodapé do card (as "entrelinhas")
+  note?: string;
 }
 
-const { index, tone, badge, title, text, facts = [] } = Astro.props;
+const { index, tone, badge, title, text, facts = [], note } = Astro.props;
 const hasCta = Astro.slots.has('default');
 ---
 
@@ -22,6 +24,7 @@ const hasCta = Astro.slots.has('default');
   <AudienceBadge as="p" tone={tone} label={badge} />
   <h3 class="track__title">{title}</h3>
   <p class="track__text">{text}</p>
+  {note && <p class="track__note">{note}</p>}
   {facts.length > 0 && (
     <dl class="track__facts">
       {facts.map((fact) => (
@@ -68,6 +71,16 @@ const hasCta = Astro.slots.has('default');
     color: var(--text-muted);
     font-size: var(--fs-sm);
     line-height: 1.6;
+  }
+
+  .track__note {
+    justify-self: stretch;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--sx-line);
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+    font-style: italic;
+    line-height: 1.5;
   }
 
   .track__facts {
