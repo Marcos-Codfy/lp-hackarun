@@ -1,12 +1,15 @@
 // limites em tempo de execução: prazo e capacidade (Propriedades do script) + limite de envios.
 // o build do site também fecha o formulário, mas quem chama a URL direto só esbarra aqui.
 
-// 10 tentativas por e-mail de contato a cada 10 min cobrem os retries automáticos do site (3 por clique)
+// 10 tentativas por e-mail a cada 10 min cobrem os retries automáticos do site (3 por clique)
 const EMAIL_MAX_ATTEMPTS = 10;
 const EMAIL_WINDOW_SECONDS = 600;
 const GLOBAL_MAX_PER_MINUTE = 120;
+// vagas ocupadas que o site consulta (?action=slots); nova inscrição e o onEdit do Status limpam na hora
+const SLOTS_CACHE_KEY = 'slots:v1';
+const SLOTS_CACHE_SECONDS = 30;
 
-// INSCRICOES_FECHADAS=sim fecha na mão; CLOSES_AT = data ISO com fuso; CAPACITY = máximo de equipes
+// INSCRICOES_FECHADAS=sim fecha na mão; CLOSES_AT = data ISO com fuso; CAPACITY = máximo de inscritos (pessoas)
 function readConfig_() {
   const props = PropertiesService.getScriptProperties().getProperties();
   return {
@@ -36,11 +39,30 @@ function closedByConfig_(config, nowMs) {
   return config.closesAt !== null && nowMs >= config.closesAt;
 }
 
-// conta equipes que ainda ocupam vaga (pendentes e confirmadas); lotou, fecha as inscrições
-function capacityReached_(config, teams) {
-  if (config.capacity === null) return false;
-  const taken = teams.filter((r) => !isRejected_(r[COL.status])).length;
-  return !(taken < config.capacity);
+// conta quem ainda ocupa vaga (tudo menos cancelado); lotou, fecha as inscrições
+function capacityReached_(config, taken) {
+  return config.capacity !== null && !(taken < config.capacity);
+}
+
+// { ok, open, capacity, taken }: o contador de vagas do site. Só a contagem fica no cache (30 s); prazo e
+// propriedades são lidos a cada chamada, então INSCRICOES_FECHADAS vale na hora
+function slotsStatus_() {
+  const config = readConfig_();
+  const taken = takenSlots_();
+  const capacity = Number.isFinite(config.capacity) ? config.capacity : null;
+  const open = !closedByConfig_(config, Date.now()) && !capacityReached_(config, taken);
+  return { ok: true, open: open, capacity: capacity, taken: taken };
+}
+
+function takenSlots_() {
+  const cache = CacheService.getScriptCache();
+  const hit = cache.get(SLOTS_CACHE_KEY);
+  if (hit !== null && hit !== undefined && /^\d+$/.test(hit)) return Number(hit);
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(REGISTRATIONS_SHEET);
+  // aba ainda não criada (ou com outro layout): ninguém inscrito pelo layout atual
+  const taken = hasHeaders_(sheet, REGISTRATION_HEADERS) ? loadRegistry_(sheet).active : 0;
+  cache.put(SLOTS_CACHE_KEY, String(taken), SLOTS_CACHE_SECONDS);
+  return taken;
 }
 
 // true = segura o envio. O e-mail esbarra no limite dele antes de contar no global: um script

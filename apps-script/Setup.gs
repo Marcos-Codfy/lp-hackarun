@@ -1,24 +1,35 @@
-// monta e formata a planilha: abas, títulos, filtros, Status com menu e cores, faixas alternadas e proteção.
+// monta e formata a planilha: abas, títulos, filtros, menus com cores, faixas alternadas e proteção.
 // Pode rodar quantas vezes quiser (não apaga dado nem duplica filtro, faixa ou proteção)
 
 // subiu o layout? suba a versão: a próxima inscrição refaz a formatação sozinha
-const SETUP_VERSION = '6';
+const SETUP_VERSION = '7';
 const SETUP_PROPERTY = 'PLANILHA_VERSAO';
-// primeira aba vazia de planilha nova ("Página1", "Sheet1"...) vira a aba Equipes
+// primeira aba vazia de planilha nova ("Página1", "Sheet1"...) vira a aba Inscritos
 const DEFAULT_SHEET_NAME = /^(p[áa]gina|sheet|planilha|folha|hoja|feuille)\s*1$/i;
-const BRAND = { night: '#060B24', ice: '#F5F8FF', white: '#FFFFFF', band: '#F2F5FF', dim: '#5B6275' };
-// [fundo, texto]: contraste AA nos três
-const STATUS_STYLES = {
+// abas da inscrição por equipe (layout 6 ou anterior): ficam guardadas com outro nome, nunca apagadas
+const LEGACY_TABS = ['Equipes', 'Integrantes'];
+const LEGACY_SUFFIX = ' (inscrição antiga)';
+// prettier-ignore
+const BRAND = {
+  night: '#060B24', ice: '#F5F8FF', white: '#FFFFFF', band: '#F2F5FF', dim: '#5B6275',
+  cyan: '#00E5FF', blue: '#1264FF', violet: '#941BFF',
+};
+// [fundo, texto]: contraste AA em todos
+const CHOICE_STYLES = {
+  inscrito: ['#E3ECFF', '#1A3A8A'],
+  credenciado: ['#D9F5E8', '#0B5A38'],
+  ausente: ['#FFF1CC', '#6B4400'],
+  cancelado: ['#FDE1E8', '#8A1530'],
   pendente: ['#FFF1CC', '#6B4400'],
+  entregue: ['#D9F5E8', '#0B5A38'],
   confirmado: ['#D9F5E8', '#0B5A38'],
-  recusado: ['#FDE1E8', '#8A1530'],
 };
 const HEADER_PROTECTION = 'HackaRun · títulos (o script usa esses nomes)';
-// regra de cor do script pela fórmula (=LOWER(TRIM($F2))="pendente"), em inglês ou no idioma da planilha
-const STATUS_RULE_FORMULA = /\(\$[A-Z]{1,3}2\)\)\s*=\s*"(pendente|confirmado|recusado)"$/;
+// regra de cor do script pela fórmula (=LOWER(TRIM($O2))="inscrito"), em inglês ou no idioma da planilha
+const SCRIPT_RULE_FORMULA = /\(\$[A-Z]{1,3}2\)\)\s*=\s*"[^"]+"$/;
 
 // rode uma vez no editor (selecione configurarPlanilha e clique em Executar): cria as abas, autoriza a
-// planilha e o Drive, cria a pasta das fotos e o segredo dos ids públicos
+// planilha e o Drive, cria a pasta das insígnias e o segredo dos ids públicos
 function configurarPlanilha() {
   // a mesma fila do doPost: inscrição chegando no meio da migração espera, não grava na coluna errada
   const lock = LockService.getScriptLock();
@@ -29,83 +40,79 @@ function configurarPlanilha() {
     tabs = setupBook_(SpreadsheetApp.getActiveSpreadsheet(), readConfig_());
     idSecret_();
     folder = imageFolder_();
-    // grava tudo antes de soltar o lock: quem está na fila já lê a planilha migrada
+    // grava tudo antes de soltar o lock: quem está na fila já lê a planilha pronta
     SpreadsheetApp.flush();
   } finally {
     lock.releaseLock();
   }
-  console.log('Planilha pronta: abas ' + [TEAMS_SHEET, MEMBERS_SHEET, SUMMARY_SHEET].join(', ') + '.');
-  console.log('Pasta das fotos: ' + folder.getUrl());
+  console.log('Planilha pronta: abas ' + [REGISTRATIONS_SHEET, TEAMS_SHEET, SUMMARY_SHEET].join(', ') + '.');
+  console.log('Pasta das insígnias: ' + folder.getUrl());
   return tabs;
 }
 
 // planilha nova ou layout de uma versão anterior: a primeira gravação monta tudo sozinha
 function workbook_(config) {
   const book = SpreadsheetApp.getActiveSpreadsheet();
+  const registrations = book.getSheetByName(REGISTRATIONS_SHEET);
   const teams = book.getSheetByName(TEAMS_SHEET);
-  const members = book.getSheetByName(MEMBERS_SHEET);
   // a config foi lida antes do lock: quem esperou na fila confere a versão de novo
   const ready =
     config.setupVersion === SETUP_VERSION ||
     String(PropertiesService.getScriptProperties().getProperty(SETUP_PROPERTY) || '') === SETUP_VERSION;
-  if (teams && members && ready) return { teams: teams, members: members };
+  if (registrations && teams && ready) return { registrations: registrations, teams: teams };
   return setupBook_(book, config);
 }
 
 function setupBook_(book, config) {
-  const teams = ensureTab_(book, TEAMS_SHEET, 0);
-  const members = ensureTab_(book, MEMBERS_SHEET, 1);
+  archiveLegacyTabs_(book);
+  const registrations = ensureTab_(book, REGISTRATIONS_SHEET, 0);
+  const teams = ensureTab_(book, TEAMS_SHEET, 1);
   const summary = ensureTab_(book, SUMMARY_SHEET, 2);
-  addRosterColumn_(teams);
-  styleTable_(teams, TEAM_COLUMNS, 3, '#1264FF');
-  styleTable_(members, MEMBER_COLUMNS, 2, '#00E5FF');
-  styleStatus_(teams, COL.status, TEAM_COLUMNS.length, true);
-  styleStatus_(members, MCOL.status, MEMBER_COLUMNS.length, false);
-  const last = teams.getLastRow();
-  if (last > 1) teams.setRowHeights(2, last - 1, PHOTO_ROW_HEIGHT);
+  styleTable_(registrations, REGISTRATION_COLUMNS, 3, BRAND.cyan);
+  styleTable_(teams, TEAM_COLUMNS, 1, BRAND.blue);
+  styleChoices_(registrations, REGISTRATION_COLUMNS.length, [
+    { col: RCOL.guardian, options: GUARDIAN_OPTIONS, colored: ['pendente', 'entregue'] },
+    { col: RCOL.status, options: STATUS_OPTIONS, colored: STATUS_OPTIONS, dims: 'cancelado' },
+  ]);
+  styleChoices_(teams, TEAM_COLUMNS.length, [
+    { col: TCOL.status, options: TEAM_STATUS_OPTIONS, colored: TEAM_STATUS_OPTIONS },
+  ]);
+  teamDropdown_(registrations, teams);
+  prepareTeamRows_(teams);
+  for (let row = 2; row <= registrations.getLastRow(); row++) {
+    setScriptFormula_(registrations.getRange(row, RCOL.chat + 1), chatFormula_(row));
+  }
   writeSummary_(summary, config);
-  fillRosters_(teams, members);
-  refreshFormulas_(teams, members);
   PropertiesService.getScriptProperties().setProperty(SETUP_PROPERTY, SETUP_VERSION);
-  // layout novo: a lista pública não fica com a leitura do layout antigo
-  CacheService.getScriptCache().remove(TEAMS_CACHE_KEY);
-  return { teams: teams, members: members };
+  // layout novo: as leituras públicas não ficam com o que veio do layout antigo
+  const cache = CacheService.getScriptCache();
+  cache.remove(TEAMS_CACHE_KEY);
+  cache.remove(SLOTS_CACHE_KEY);
+  return { registrations: registrations, teams: teams };
+}
+
+// aba Equipes ou Integrantes da inscrição por equipe (o 1º título é "Protocolo") muda de nome e fica intacta
+function archiveLegacyTabs_(book) {
+  LEGACY_TABS.forEach((name) => {
+    const sheet = book.getSheetByName(name);
+    if (!sheet || sheet.getLastColumn() === 0) return;
+    if (String(sheet.getRange(1, 1).getValues()[0][0]).trim() !== 'Protocolo') return;
+    let target = name + LEGACY_SUFFIX;
+    for (let n = 2; book.getSheetByName(target); n++) target = name + LEGACY_SUFFIX + ' ' + n;
+    sheet.setName(target);
+  });
 }
 
 function ensureTab_(book, name, position) {
   const existing = book.getSheetByName(name);
   if (existing) return existing;
-  if (name === TEAMS_SHEET) {
+  if (name === REGISTRATIONS_SHEET) {
     const blank = book
       .getSheets()
       .find((s) => DEFAULT_SHEET_NAME.test(s.getName()) && s.getLastRow() === 0 && s.getLastColumn() === 0);
     if (blank) return blank.setName(name);
   }
   return book.insertSheet(name, Math.min(position, book.getSheets().length));
-}
-
-// layout 5 -> 6: a coluna Integrantes entra logo depois do Status como coluna de verdade (insertColumnAfter),
-// então os dados da direita andam junto e nada é sobrescrito. Só reconhece o layout 5 (depois do Status vinha o
-// E-mail de contato): planilha já migrada ou com outro formato não ganha coluna
-function addRosterColumn_(sheet) {
-  const width = sheet.getLastColumn();
-  if (width <= COL.roster) return;
-  const header = sheet
-    .getRange(1, 1, 1, width)
-    .getValues()[0]
-    .map((v) => String(v).trim());
-  const title = (key) => TEAM_COLUMNS[COL[key]].title;
-  const legacy = header[COL.status] === title('status') && header[COL.roster] === title('contact');
-  if (!legacy) return;
-  sheet.insertColumnAfter(COL.status + 1);
-  // título na hora: se algo cair depois daqui, a coluna já tem nome e rodar de novo não insere outra
-  // (depois do Status deixou de vir o E-mail de contato, então o layout 5 não é mais reconhecido)
-  sheet.getRange(1, COL.roster + 1).setValue(title('roster'));
-  // a coluna nova herda o formato e o menu do Status; o styleTable_ formata ela do zero
-  sheet
-    .getRange(2, COL.roster + 1, sheet.getMaxRows() - 1, 1)
-    .clearDataValidations()
-    .clearFormat();
 }
 
 function styleTable_(sheet, columns, frozenColumns, tabColor) {
@@ -134,7 +141,7 @@ function styleTable_(sheet, columns, frozenColumns, tabColor) {
   coverTable_(sheet, header, sheet.getRange(1, 1, rows, width));
 }
 
-// filtro, faixas e aviso dos títulos cobrindo a tabela toda, inclusive depois de uma coluna nova
+// filtro, faixas e aviso dos títulos cobrindo a tabela toda
 function coverTable_(sheet, header, table) {
   const width = table.getNumColumns();
   // filtro básico em todas as linhas (as novas já entram nele). Estreito demais é refeito: os dados ficam,
@@ -159,46 +166,77 @@ function coverTable_(sheet, header, table) {
   else if (protection.getRange().getLastColumn() < width) protection.setRange(header);
 }
 
-// menu suspenso (só na aba Equipes) + cor por status nas duas abas; equipe recusada fica apagada
-function styleStatus_(sheet, col, width, withDropdown) {
+// menu suspenso + cor por opção em cada coluna de escolha; `dims` apaga a linha inteira (inscrição cancelada)
+function styleChoices_(sheet, width, specs) {
   const rows = sheet.getMaxRows() - 1;
-  const range = sheet.getRange(2, col + 1, rows, 1);
-  const cell = '$' + colLetter_(col) + '2';
-  if (withDropdown) {
+  const ours = [];
+  specs.forEach((spec) => {
+    const range = sheet.getRange(2, spec.col + 1, rows, 1);
+    const cell = '$' + colLetter_(spec.col) + '2';
+    const when = (option) => '=LOWER(TRIM(' + cell + '))="' + option + '"';
     const rule = SpreadsheetApp.newDataValidation()
-      .requireValueInList(STATUS_OPTIONS, true)
+      .requireValueInList(spec.options, true)
       .setAllowInvalid(false)
-      .setHelpText('Escolha pendente, confirmado ou recusado.')
+      .setHelpText('Escolha uma das opções: ' + spec.options.join(', ') + '.')
       .build();
     range.setDataValidation(rule);
-  }
-  const ours = STATUS_OPTIONS.map((status) =>
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=LOWER(TRIM(' + cell + '))="' + status + '"')
-      .setBackground(STATUS_STYLES[status][0])
-      .setFontColor(STATUS_STYLES[status][1])
-      .setBold(true)
-      .setRanges([range])
-      .build(),
-  );
-  const dimmed = SpreadsheetApp.newConditionalFormatRule()
-    .whenFormulaSatisfied('=LOWER(TRIM(' + cell + '))="recusado"')
-    .setFontColor(BRAND.dim)
-    .setRanges([sheet.getRange(2, 1, rows, width)])
-    .build();
+    spec.colored.forEach((option) =>
+      ours.push(
+        SpreadsheetApp.newConditionalFormatRule()
+          .whenFormulaSatisfied(when(option))
+          .setBackground(CHOICE_STYLES[option][0])
+          .setFontColor(CHOICE_STYLES[option][1])
+          .setBold(true)
+          .setRanges([range])
+          .build(),
+      ),
+    );
+    if (!spec.dims) return;
+    ours.push(
+      SpreadsheetApp.newConditionalFormatRule()
+        .whenFormulaSatisfied(when(spec.dims))
+        .setFontColor(BRAND.dim)
+        .setItalic(true)
+        .setRanges([sheet.getRange(2, 1, rows, width)])
+        .build(),
+    );
+  });
   // regra que a organização criou em outra coluna fica; as do script são trocadas pelas novas
-  const others = sheet.getConditionalFormatRules().filter((rule) => !isScriptRule_(rule, col + 1, width));
-  sheet.setConditionalFormatRules(others.concat(ours, [dimmed]));
+  const columns = specs.map((spec) => spec.col + 1);
+  const others = sheet.getConditionalFormatRules().filter((rule) => !isScriptRule_(rule, columns, width));
+  sheet.setConditionalFormatRules(others.concat(ours));
 }
 
-// as do script: a coluna Status, a linha inteira (A2 até a última coluna da tabela) ou a fórmula de status
-// (coluna inserida pode ter esticado o intervalo de uma regra antiga)
-function isScriptRule_(rule, statusColumn, width) {
+// as do script: numa coluna de escolha, na linha inteira (A2 até a última coluna) ou com a fórmula do script
+function isScriptRule_(rule, columns, width) {
   const wholeRow = (r) => r.getColumn() === 1 && r.getRow() === 2 && r.getNumColumns() === width;
   const byRange = rule
     .getRanges()
-    .some((r) => (r.getColumn() === statusColumn && r.getNumColumns() === 1) || wholeRow(r));
+    .some((r) => (columns.indexOf(r.getColumn()) >= 0 && r.getNumColumns() === 1) || wholeRow(r));
   const condition = rule.getBooleanCondition();
   const formula = condition ? String(condition.getCriteriaValues()[0] || '') : '';
-  return byRange || STATUS_RULE_FORMULA.test(formula);
+  return byRange || SCRIPT_RULE_FORMULA.test(formula);
+}
+
+// coluna Equipe da aba Inscritos: só aceita um nome que existe na coluna Equipe da aba Equipes
+function teamDropdown_(registrations, teams) {
+  const names = teams.getRange(2, TCOL.name + 1, teams.getMaxRows() - 1, 1);
+  const rule = SpreadsheetApp.newDataValidation()
+    .requireValueInRange(names, true)
+    .setAllowInvalid(false)
+    .setHelpText('Escolha uma equipe criada na aba Equipes (coluna Equipe).')
+    .build();
+  registrations.getRange(2, RCOL.team + 1, registrations.getMaxRows() - 1, 1).setDataValidation(rule);
+}
+
+// fórmulas prontas em TEAM_ROWS linhas (mais, se a organização já passou disso) e altura pra miniatura
+function prepareTeamRows_(teams) {
+  const last = Math.max(TEAM_ROWS + 1, teams.getLastRow());
+  for (let row = 2; row <= last; row++) {
+    const formulas = teamFormulas_(row);
+    Object.keys(formulas).forEach((col) =>
+      setScriptFormula_(teams.getRange(row, Number(col) + 1), formulas[col]),
+    );
+  }
+  teams.setRowHeights(2, last - 1, BADGE_ROW_HEIGHT);
 }

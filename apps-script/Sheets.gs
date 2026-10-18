@@ -1,51 +1,77 @@
-// layout da planilha (abas e colunas) e a gravação de cada inscrição: uma linha por equipe em "Equipes"
-// e uma por pessoa em "Integrantes". Fórmulas do próprio script usam nomes em inglês e o separador de argumento
-// do idioma da planilha (pt_BR usa ";", ver setScriptFormula_); o que a pessoa digitou passa pelo sheetSafe_
+// layout da planilha (abas e colunas) e a gravação de cada inscrição: uma linha por pessoa em "Inscritos".
+// A aba "Equipes" é da organização (sorteio de 12/11): as colunas de integrantes saem por fórmula da aba Inscritos.
+// Fórmulas do próprio script usam nomes em inglês e o separador de argumento do idioma da planilha (pt_BR usa
+// ";", ver setScriptFormula_); o que a pessoa digitou passa pelo sheetSafe_
 
+const REGISTRATIONS_SHEET = 'Inscritos';
 const TEAMS_SHEET = 'Equipes';
-const MEMBERS_SHEET = 'Integrantes';
 const SUMMARY_SHEET = 'Resumo';
-const STATUS_OPTIONS = ['pendente', 'confirmado', 'recusado'];
-// a miniatura da foto aparece dentro da célula (=IMAGE); a linha cresce pra dar pra ver
-const PHOTO_ROW_HEIGHT = 84;
-const PHOTO_THUMB_WIDTH = 240;
+const STATUS_OPTIONS = ['inscrito', 'credenciado', 'ausente', 'cancelado'];
+const GUARDIAN_OPTIONS = ['pendente', 'entregue', 'não precisa'];
+const TEAM_STATUS_OPTIONS = ['pendente', 'confirmado'];
+// equipes com fórmula pronta na aba Equipes (linhas 2 a 31); o configurarPlanilha estende se passar disso
+const TEAM_ROWS = 30;
+// a miniatura da insígnia aparece dentro da célula (=IMAGE); a linha cresce pra dar pra ver
+const BADGE_ROW_HEIGHT = 84;
+const BADGE_THUMB_WIDTH = 240;
+
+// rótulos em pt-BR do que o site manda em código
+const PROFILE_LABELS = {
+  unicatolica: 'Estuda na UniCatólica',
+  'other-institution': 'Estuda em outra instituição',
+  graduate: 'Já se formou',
+  'self-taught': 'Trabalha ou estuda por conta própria',
+};
+const AREA_LABELS = {
+  development: 'Desenvolvimento',
+  'data-ai': 'Dados e IA',
+  design: 'Design e UX',
+  infra: 'Redes e infraestrutura',
+  security: 'Segurança',
+  product: 'Produto e gestão',
+  other: 'Outra',
+};
 
 // key = nome no código; title = título na planilha; format '@' = texto puro (matrícula 0012 não vira 12)
 // prettier-ignore
-const TEAM_COLUMNS = [
+const REGISTRATION_COLUMNS = [
   { key: 'protocol', title: 'Protocolo', width: 120 },
   { key: 'date', title: 'Data/hora', width: 130, format: 'dd/MM/yyyy HH:mm' },
-  { key: 'team', title: 'Equipe', width: 200, format: '@' },
-  { key: 'size', title: 'Integrantes (qtd)', width: 100, format: '0', align: 'center' },
-  { key: 'photo', title: 'Foto', width: 96, align: 'center' },
+  { key: 'name', title: 'Nome completo', width: 230, format: '@', wrap: true },
+  { key: 'email', title: 'E-mail', width: 240, format: '@' },
+  { key: 'whatsapp', title: 'WhatsApp', width: 140, format: '@' },
+  { key: 'chat', title: 'Conversar', width: 130, align: 'center' },
+  { key: 'profile', title: 'Perfil', width: 210, wrap: true },
+  { key: 'institution', title: 'Instituição', width: 190, format: '@', wrap: true },
+  { key: 'course', title: 'Curso', width: 210, format: '@', wrap: true },
+  { key: 'period', title: 'Período', width: 80, format: '@', align: 'center' },
+  { key: 'studentId', title: 'Matrícula', width: 130, format: '@' },
+  { key: 'area', title: 'Área', width: 170, wrap: true },
+  { key: 'adult', title: '18 anos ou mais', width: 100, align: 'center' },
+  { key: 'guardian', title: 'Autorização do responsável', width: 150, align: 'center', wrap: true },
   { key: 'status', title: 'Status', width: 120, align: 'center' },
-  // uma pessoa por linha na célula; com fonte 9 e 520 px quase todo mundo cabe sem quebrar. Nome ou e-mail
-  // comprido quebra e a linha cresce além da altura da foto (o setRowHeight não trava): nada fica escondido
-  { key: 'roster', title: 'Integrantes', width: 520, format: '@', wrap: true, fontSize: 9 },
-  { key: 'contact', title: 'E-mail de contato', width: 230, format: '@' },
-  { key: 'emails', title: 'E-mails da equipe', width: 360, format: '@', wrap: true },
-  { key: 'link', title: 'Link da foto', width: 120 },
-  { key: 'imageId', title: 'ID da foto', width: 200, format: '@' },
+  { key: 'team', title: 'Equipe', width: 180 },
   { key: 'source', title: 'Origem', width: 110 },
   { key: 'consent', title: 'Consentimento', width: 240 },
   { key: 'key', title: 'Chave de envio', width: 200, format: '@' },
 ];
 // prettier-ignore
-const MEMBER_COLUMNS = [
-  { key: 'protocol', title: 'Protocolo', width: 120 },
-  { key: 'team', title: 'Equipe', width: 200, format: '@' },
-  { key: 'order', title: 'Nº', width: 48, format: '0', align: 'center' },
-  { key: 'name', title: 'Nome completo', width: 240, format: '@' },
-  { key: 'studentId', title: 'Matrícula', width: 140, format: '@' },
-  { key: 'email', title: 'E-mail', width: 240, format: '@' },
-  { key: 'contact', title: 'Contato', width: 80, align: 'center' },
-  { key: 'status', title: 'Status da equipe', width: 130, align: 'center' },
+const TEAM_COLUMNS = [
+  { key: 'name', title: 'Equipe', width: 200, format: '@' },
+  { key: 'badge', title: 'Insígnia', width: 96, align: 'center' },
+  { key: 'count', title: 'Integrantes (qtd)', width: 100, format: '0', align: 'center' },
+  { key: 'roster', title: 'Integrantes', width: 260, wrap: true, fontSize: 9 },
+  { key: 'emails', title: 'E-mails', width: 300, wrap: true, fontSize: 9 },
+  { key: 'phones', title: 'WhatsApps', width: 220, wrap: true, fontSize: 9 },
+  { key: 'status', title: 'Status', width: 120, align: 'center' },
+  { key: 'badgeId', title: 'ID da insígnia', width: 200, format: '@' },
+  { key: 'link', title: 'Link da insígnia', width: 130 },
 ];
+const REGISTRATION_HEADERS = REGISTRATION_COLUMNS.map((c) => c.title);
 const TEAM_HEADERS = TEAM_COLUMNS.map((c) => c.title);
-const MEMBER_HEADERS = MEMBER_COLUMNS.map((c) => c.title);
-// posição (base 0) de cada coluna: COL.status, MCOL.email...
-const COL = columnIndex_(TEAM_COLUMNS);
-const MCOL = columnIndex_(MEMBER_COLUMNS);
+// posição (base 0) de cada coluna: RCOL.status, TCOL.badgeId...
+const RCOL = columnIndex_(REGISTRATION_COLUMNS);
+const TCOL = columnIndex_(TEAM_COLUMNS);
 
 function columnIndex_(columns) {
   const index = {};
@@ -71,135 +97,90 @@ function readRows_(sheet, width) {
   return last > 1 ? sheet.getRange(2, 1, last - 1, width).getValues() : [];
 }
 
-// integrantes primeiro e a equipe por último: a linha da equipe é a que "vale". Se algo falhar no meio,
-// integrante sem equipe é ignorado (o Registry.gs só conta protocolo que existe na aba Equipes)
-function writeRegistration_(tabs, protocol, data, imageId) {
-  appendMembers_(tabs.members, protocol, data);
-  appendTeam_(tabs.teams, protocol, data, imageId);
+// a aba tem o layout atual? (aba antiga com o mesmo nome não é lida com as posições novas)
+function hasHeaders_(sheet, headers) {
+  if (!sheet || sheet.getLastColumn() < headers.length) return false;
+  const found = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
+  return headers.every((title, i) => String(found[i]).trim() === title);
 }
 
-function appendTeam_(sheet, protocol, data, imageId) {
+function appendRegistration_(sheet, protocol, data) {
+  const p = data.participant;
   const row = sheet.getLastRow() + 1;
-  const values = TEAM_COLUMNS.map(() => '');
-  values[COL.protocol] = protocol;
-  values[COL.date] = new Date();
-  values[COL.team] = sheetSafe_(data.teamName);
-  values[COL.size] = data.members.length;
-  values[COL.status] = 'pendente';
-  values[COL.roster] = sheetSafe_(rosterText_(data.members));
-  values[COL.contact] = sheetSafe_(data.members[0].email);
-  // "; " cola direto no campo Para do e-mail
-  values[COL.emails] = sheetSafe_(data.members.map((m) => m.email).join('; '));
-  values[COL.imageId] = imageId || '';
-  values[COL.source] = sheetSafe_(data.source);
-  values[COL.consent] = sheetSafe_(data.consent);
-  values[COL.key] = data.idempotencyKey;
+  const values = REGISTRATION_COLUMNS.map(() => '');
+  values[RCOL.protocol] = protocol;
+  values[RCOL.date] = new Date();
+  values[RCOL.name] = sheetSafe_(p.name);
+  values[RCOL.email] = sheetSafe_(p.email);
+  values[RCOL.whatsapp] = p.whatsapp;
+  values[RCOL.profile] = PROFILE_LABELS[p.profile];
+  values[RCOL.institution] = sheetSafe_(p.institution);
+  values[RCOL.course] = sheetSafe_(p.course);
+  values[RCOL.period] = p.period ? p.period + 'º' : '';
+  values[RCOL.studentId] = sheetSafe_(p.studentId);
+  values[RCOL.area] = p.area ? AREA_LABELS[p.area] : '';
+  values[RCOL.adult] = p.adult ? 'Sim' : 'Não';
+  // menor de 18 leva a autorização do responsável no credenciamento (regulamento, 2.5)
+  values[RCOL.guardian] = p.adult ? 'não precisa' : 'pendente';
+  values[RCOL.status] = 'inscrito';
+  values[RCOL.source] = sheetSafe_(data.source);
+  values[RCOL.consent] = sheetSafe_(data.consent);
+  values[RCOL.key] = data.idempotencyKey;
   sheet.appendRow(values);
-  setScriptFormula_(sheet.getRange(row, COL.photo + 1), photoFormula_(row));
-  setScriptFormula_(sheet.getRange(row, COL.link + 1), linkFormula_(row));
-  sheet.setRowHeight(row, PHOTO_ROW_HEIGHT);
+  setScriptFormula_(sheet.getRange(row, RCOL.chat + 1), chatFormula_(row));
 }
 
-function appendMembers_(sheet, protocol, data) {
-  const first = sheet.getLastRow() + 1;
-  data.members.forEach((member, i) => {
-    const values = MEMBER_COLUMNS.map(() => '');
-    values[MCOL.protocol] = protocol;
-    values[MCOL.team] = sheetSafe_(data.teamName);
-    values[MCOL.order] = i + 1;
-    values[MCOL.name] = sheetSafe_(member.name);
-    values[MCOL.studentId] = sheetSafe_(member.studentId);
-    values[MCOL.email] = sheetSafe_(member.email);
-    values[MCOL.contact] = i === 0 ? 'sim' : 'não';
-    sheet.appendRow(values);
-    setScriptFormula_(sheet.getRange(first + i, MCOL.status + 1), memberStatusFormula_(first + i));
-  });
+// link do WhatsApp montado da célula WhatsApp da mesma linha: corrigiu o número, o link acompanha
+function chatFormula_(row) {
+  const phone = colLetter_(RCOL.whatsapp) + row;
+  const url = '"https://wa.me/55"&REGEXREPLACE(TO_TEXT(' + phone + '),"\\D","")';
+  return '=IF(' + phone + '="","",HYPERLINK(' + url + ',"Abrir WhatsApp"))';
 }
 
-// "1. Nome · Matrícula · E-mail (contato)", um por linha e na ordem da inscrição. Começa com o número,
-// então nunca vira fórmula (o sheetSafe_ de quem chama fica de garantia); o clean_ já tirou as quebras de linha
-function rosterText_(people) {
-  return people
-    .map((p, i) => i + 1 + '. ' + [p.name, p.studentId, p.email].join(' · ') + (i === 0 ? ' (contato)' : ''))
-    .join('\n');
+// referência a uma coluna da aba Inscritos, sem o título ('Inscritos'!P2:P)
+function registrationsColumn_(key) {
+  const letter = colLetter_(RCOL[key]);
+  return "'" + REGISTRATIONS_SHEET + "'!" + letter + '2:' + letter;
 }
 
-// célula Integrantes vazia (coluna recém-criada ou apagada à mão) é refeita a partir da aba Integrantes.
-// Só escreve nas vazias, em blocos seguidos: a primeira migração preenche a coluna toda numa chamada
-function fillRosters_(teams, members) {
-  const rows = readRows_(teams, TEAM_HEADERS.length);
-  const blank = (r) => String(r[COL.protocol]).trim() !== '' && String(r[COL.roster]).trim() === '';
-  if (!rows.some(blank)) return;
-  const people = peopleByProtocol_(members);
-  let start = -1;
-  let cells = [];
-  const flush = () => {
-    if (cells.length) teams.getRange(start + 2, COL.roster + 1, cells.length, 1).setValues(cells);
-    cells = [];
-  };
-  rows.forEach((r, i) => {
-    if (!blank(r)) return flush();
-    if (!cells.length) start = i;
-    const team = people[String(r[COL.protocol]).trim()] || [];
-    cells.push([team.length ? sheetSafe_(rosterText_(team)) : '']);
-  });
-  flush();
-}
-
-// protocolo -> integrantes em ordem de Nº, sem o apóstrofo do sheetSafe_
-function peopleByProtocol_(members) {
-  const groups = {};
-  readRows_(members, MEMBER_HEADERS.length).forEach((r) => {
-    const protocol = String(r[MCOL.protocol]).trim();
-    if (!protocol) return;
-    (groups[protocol] = groups[protocol] || []).push(r);
-  });
-  const text = (value) => cellText_(value).trim();
-  Object.keys(groups).forEach((protocol) => {
-    groups[protocol] = groups[protocol]
-      .sort((a, b) => (Number(a[MCOL.order]) || 0) - (Number(b[MCOL.order]) || 0))
-      .map((r) => ({
-        name: text(r[MCOL.name]),
-        studentId: text(r[MCOL.studentId]),
-        email: text(r[MCOL.email]),
-      }));
-  });
-  return groups;
-}
-
-// a foto sai do ID da foto da mesma linha: apagou o ID (moderação), a miniatura some junto
-function photoFormula_(row) {
-  const id = colLetter_(COL.imageId) + row;
-  const url = '"https://lh3.googleusercontent.com/d/"&' + id + '&"=w' + PHOTO_THUMB_WIDTH + '"';
-  return '=IF(' + id + '="","",IMAGE(' + url + '))';
-}
-
-function linkFormula_(row) {
-  const id = colLetter_(COL.imageId) + row;
-  const url = '"https://drive.google.com/file/d/"&' + id + '&"/view"';
-  return '=IF(' + id + '="","",HYPERLINK(' + url + ',"Abrir no Drive"))';
-}
-
-// status da equipe puxado da aba Equipes pelo protocolo: filtrar Integrantes por status funciona
-function memberStatusFormula_(row) {
-  const teams = "'" + TEAMS_SHEET + "'!";
-  const status = colLetter_(COL.status);
-  const protocol = colLetter_(COL.protocol);
-  const key = '$' + colLetter_(MCOL.protocol) + row;
-  const statusCol = teams + '$' + status + ':$' + status;
-  const protocolCol = teams + '$' + protocol + ':$' + protocol;
-  return '=IFERROR(INDEX(' + statusCol + ',MATCH(' + key + ',' + protocolCol + ',0)),"")';
-}
-
-// refaz as fórmulas das linhas que já existem (rodar o configurarPlanilha conserta uma planilha antiga)
-function refreshFormulas_(teams, members) {
-  for (let row = 2; row <= teams.getLastRow(); row++) {
-    setScriptFormula_(teams.getRange(row, COL.photo + 1), photoFormula_(row));
-    setScriptFormula_(teams.getRange(row, COL.link + 1), linkFormula_(row));
-  }
-  for (let row = 2; row <= members.getLastRow(); row++) {
-    setScriptFormula_(members.getRange(row, MCOL.status + 1), memberStatusFormula_(row));
-  }
+// quem está na equipe desta linha e não cancelou. Linha sem nome de equipe fica em branco
+function teamFormulas_(row) {
+  const team = '$' + colLetter_(TCOL.name) + row;
+  const active = 'LOWER(TRIM(' + registrationsColumn_('status') + '))<>"cancelado"';
+  const members = registrationsColumn_('team') + '=' + team;
+  const join = (key, separator) =>
+    '=IF(' +
+    team +
+    '="","",IFERROR(TEXTJOIN(' +
+    separator +
+    ',TRUE,FILTER(' +
+    registrationsColumn_(key) +
+    ',' +
+    members +
+    ',' +
+    active +
+    ')),""))';
+  const count =
+    '=IF(' +
+    team +
+    '="","",COUNTIFS(' +
+    registrationsColumn_('team') +
+    ',' +
+    team +
+    ',' +
+    registrationsColumn_('status') +
+    ',"<>cancelado"))';
+  const id = colLetter_(TCOL.badgeId) + row;
+  const image = '"https://lh3.googleusercontent.com/d/"&' + id + '&"=w' + BADGE_THUMB_WIDTH + '"';
+  const drive = '"https://drive.google.com/file/d/"&' + id + '&"/view"';
+  const formulas = {};
+  formulas[TCOL.count] = count;
+  formulas[TCOL.roster] = join('name', 'CHAR(10)');
+  formulas[TCOL.emails] = join('email', '"; "');
+  formulas[TCOL.phones] = join('whatsapp', '", "');
+  formulas[TCOL.badge] = '=IF(' + id + '="","",IMAGE(' + image + '))';
+  formulas[TCOL.link] = '=IF(' + id + '="","",HYPERLINK(' + drive + ',"Abrir no Drive"))';
+  return formulas;
 }
 
 // o setFormula lê a fórmula no idioma da planilha: em pt_BR (e nos idiomas de vírgula decimal) o argumento
