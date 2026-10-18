@@ -1,0 +1,94 @@
+---
+// assinatura logo abaixo do HackaRun: "UniCatólica" colada no logo e a edição (Capim Dourado, em dourado)
+---
+
+<div class="hero__event">
+  <p class="hero__host">UniCatólica</p>
+  <p class="hero__event-name">
+    <span class="hero__event-label">Edição:</span>{' '}
+    <span class="hero__event-value">Capim Dourado Shopping</span>
+  </p>
+</div>
+
+<style>
+  .hero__event {
+    display: grid;
+    justify-items: center;
+  }
+
+  /* assinatura da UniCatólica colada no logo: o HackaRun é "da" UniCatólica */
+  .hero__host {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: calc(var(--space-5) * -1) 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(0.7rem, 1vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: 0.55em;
+    /* o letter-spacing sobra no fim: compensa pra ficar centralizado */
+    margin-right: -0.55em;
+    text-transform: uppercase;
+    color: #dbe6ff;
+    text-shadow: 0 0 12px rgb(18 100 255 / 0.6);
+  }
+
+  .hero__host::before,
+  .hero__host::after {
+    content: '';
+    width: clamp(1.5rem, 4vw, 3.5rem);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-cyan));
+  }
+
+  .hero__host::after {
+    margin-left: -0.55em;
+    background: linear-gradient(90deg, var(--c-violet), transparent);
+  }
+
+  .hero__event-name {
+    max-width: 100%;
+    margin: 0 0 var(--space-3);
+    padding-inline: 0.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.85rem, 1.35vw, 1.3rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    line-height: 1.35;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+
+  .hero__event-label {
+    color: #dbe6ff;
+    font-weight: 600;
+  }
+
+  /* Capim Dourado em dourado */
+  .hero__event-value {
+    background: var(--grad-time);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgb(255 194 74 / 0.35));
+  }
+
+  @media (max-width: 639px) {
+    .hero__host {
+      margin-top: calc(var(--space-4) * -1);
+      letter-spacing: 0.4em;
+      margin-right: -0.4em;
+    }
+
+    .hero__host::after {
+      margin-left: -0.4em;
+    }
+
+    .hero__event-name {
+      font-size: 0.85rem;
+      line-height: 1.45;
+      text-wrap: balance;
+    }
+  }
+</style>

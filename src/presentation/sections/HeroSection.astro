@@ -2,12 +2,14 @@
 import type { LandingPageDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
-import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
+//import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import HeroCourses from './hero/HeroCourses.astro';
+import HeroEdition from './hero/HeroEdition.astro';
+import HeroEventName from './hero/HeroEventName.astro';
 import HeroLogo from './hero/HeroLogo.astro';
 import HeroSlogan from './hero/HeroSlogan.astro';
-import HeroMeta from './hero/HeroMeta.astro';
+//import HeroMeta from './hero/HeroMeta.astro';
 import HeroFooter from './hero/HeroFooter.astro';
 import './sections.css';
 
@@ -16,11 +18,11 @@ interface Props {
 }
 
 const { event, partners } = Astro.props.data;
-const days = new DayLabelFormatter();
-const first = days.format(event.firstDate);
-const last = days.format(event.lastDate);
-const dates = `${days.range(event.firstDate, event.lastDate)} ${event.edition}`;
-const datesLong = `De ${Number(first.day)} a ${last.long.split(', ')[1] ?? ''} de ${event.edition}`;
+//const days = new DayLabelFormatter();
+//const first = days.format(event.firstDate);
+//const last = days.format(event.lastDate);
+//const dates = `${days.range(event.firstDate, event.lastDate)} ${event.edition}`;
+//const datesLong = `De ${Number(first.day)} a ${last.long.split(', ')[1] ?? ''} de ${event.edition}`;
 const host = event.venues.find((v) => v.role === 'host')?.shortName ?? 'UniCatólica';
 const finalVenue = event.venues.find((v) => v.role === 'final');
 const organizer = partners.find((p) => p.role === 'organizer')?.name ?? host;
@@ -41,22 +43,23 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
   <div class="container hero__frame">
     <div class="hero__content" data-hero-fade>
       <HeroCourses institution={organizer} />
-      <div class="hero__edition hero-in" style="--d: 0.3s">
-        <span>1º</span>
+      <div class="hero-in" style="--d: 0.3s">
+        <HeroEdition />
       </div>
       <HeroLogo />
-      <p class="hero__event-name hero-in" style="--d: 0.75s">
-        UNICATÓLICA & CAPIM DOURADO SHOPPING 2026
-      </p>
+      <div class="hero-in" style="--d: 0.75s">
+        <HeroEventName />
+      </div>
       <HeroSlogan />
-      <div class="hero-in" style="--d: 1.05s">
+      {/*
+    <div class="hero-in" style="--d: 1.05s">
         <HeroMeta
           dates={dates}
           datesLong={datesLong}
           host={host}
-          finalVenue={finalVenue?.shortName ?? 'Capim Dourado'}
+          finalVenue={finalVenue?.shortName ?? 'Capim Dourado Shopping'}
         />
-      </div>
+      </div>*/}
       <div class="hero__actions hero-in" style="--d: 1.2s">
         <div class="hero__countdown">
           <Countdown milestones={event.milestones} variant="hero" />
@@ -122,45 +125,6 @@ const ctaAttrs = cta.isRegistration ? { registrationCta: 'hero' } : {};
     justify-items: center;
     gap: var(--space-2);
     text-align: center;
-  }
-
-  .hero__edition {
-    margin-bottom: calc(var(--space-4) * -1);
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 3vw, 2.75rem);
-    font-weight: 800;
-    color: #7ff0ff;
-    text-align: center;
-    line-height: 1;
-    text-shadow: 0 0 20px rgb(0 229 255 / 0.5);
-  }
-
-  .hero__event-name {
-    max-width: 100%;
-    margin: calc(var(--space-5) * -1) 0 0;
-    padding-inline: 0.5rem;
-    font-family: var(--font-display);
-    font-size: clamp(0.85rem, 1.45vw, 1.45rem);
-    font-weight: 800;
-    letter-spacing: 0.045em;
-    line-height: 1.35;
-    text-align: center;
-    color: #ffffff;
-    text-shadow: 0 0 14px rgb(255 255 255 / 0.2);
-  }
-
-  @media (max-width: 639px) {
-    .hero__edition {
-      font-size: 1.65rem;
-      margin-bottom: calc(var(--space-3) * -1);
-    }
-
-    .hero__event-name {
-      font-size: 0.85rem;
-      line-height: 1.45;
-      margin: calc(var(--space-4) * -1) 0 0;
-      text-wrap: balance;
-    }
   }
 
   .hero__actions {
