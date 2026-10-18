@@ -84,6 +84,13 @@ export class EventMapper {
       flags: raw.flags ?? [],
       parts: (raw.parts ?? []).map((p) => ({ label: p.label, slot: EventMapper.slot(p) })),
       checklist: raw.checklist ?? [],
+      speaker: raw.speaker
+        ? {
+            name: raw.speaker.name ?? null,
+            photo: raw.speaker.photo ?? null,
+            bio: raw.speaker.bio ?? null,
+          }
+        : null,
     });
   }
 }

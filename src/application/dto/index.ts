@@ -32,6 +32,12 @@ export interface TimeRangeDTO {
   startHint: string | null;
 }
 
+export interface ActivitySpeakerDTO {
+  name: string | null;
+  photo: string | null;
+  bio: string | null;
+}
+
 export interface ActivityDTO extends TimeRangeDTO {
   id: string;
   title: string;
@@ -42,6 +48,7 @@ export interface ActivityDTO extends TimeRangeDTO {
   flags: ActivityFlag[];
   parts: (TimeRangeDTO & { label: string })[];
   checklist: string[];
+  speaker: ActivitySpeakerDTO | null;
 }
 
 export interface SessionDTO extends TimeRangeDTO {

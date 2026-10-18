@@ -63,7 +63,8 @@
               "start": "19:00",
               "end": "19:50",
               "summary": "Validar o problema, o público e a proposta de valor antes do código.",
-              "details": "Identificação e validação de problemas reais, definição do público-alvo, proposta de valor e análise inicial de viabilidade técnica e comercial. Utilização de Canvas simplificado para estruturar ideias, avaliar hipóteses e identificar soluções inviáveis ou sem potencial de adoção."
+              "details": "Identificação e validação de problemas reais, definição do público-alvo, proposta de valor e análise inicial de viabilidade técnica e comercial. Utilização de Canvas simplificado para estruturar ideias, avaliar hipóteses e identificar soluções inviáveis ou sem potencial de adoção.",
+              "speaker": { "name": null, "photo": null, "bio": null }
             },
             {
               "id": "zero-to-code",
@@ -72,7 +73,8 @@
               "start": "20:00",
               "end": "20:50",
               "summary": "Lógica de programação aplicada à resolução de problemas.",
-              "details": "Fundamentos de lógica de programação aplicados à resolução de problemas, decomposição de requisitos, algoritmos, estruturas condicionais e implementação de funcionalidades simples. Execução e teste de código."
+              "details": "Fundamentos de lógica de programação aplicados à resolução de problemas, decomposição de requisitos, algoritmos, estruturas condicionais e implementação de funcionalidades simples. Execução e teste de código.",
+              "speaker": { "name": null, "photo": null, "bio": null }
             },
             {
               "id": "hacking-ideas-ai",
@@ -81,7 +83,8 @@
               "start": "21:00",
               "end": "21:50",
               "summary": "Do prompt técnico ao protótipo funcional com IA generativa.",
-              "details": "Aplicação de inteligência artificial generativa no desenvolvimento de software, elaboração de prompts técnicos, geração e refinamento de código, prototipação de interfaces e validação de funcionalidades. Demonstração prática da construção de um protótipo funcional com apoio de ferramentas de IA, considerando testes, limitações e cuidados básicos de segurança."
+              "details": "Aplicação de inteligência artificial generativa no desenvolvimento de software, elaboração de prompts técnicos, geração e refinamento de código, prototipação de interfaces e validação de funcionalidades. Demonstração prática da construção de um protótipo funcional com apoio de ferramentas de IA, considerando testes, limitações e cuidados básicos de segurança.",
+              "speaker": { "name": null, "photo": null, "bio": null }
             }
           ]
         }

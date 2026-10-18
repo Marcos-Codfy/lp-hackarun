@@ -4,6 +4,7 @@ import { AudienceLabel } from '@presentation/formatters/AudienceLabel';
 import { SessionTimeFormatter } from '@presentation/formatters/SessionTimeFormatter';
 import AudienceBadge from '../shared/AudienceBadge.astro';
 import ActivityMore from './ActivityMore.astro';
+import ActivitySpeaker from './ActivitySpeaker.astro';
 
 // uma linha da programação: horário, título, uma frase e, se houver, o texto longo num "ver mais".
 // Celular: o horário vira a 1ª linha do texto (sobra largura pro título); do tablet pra cima, coluna à esquerda do trilho
@@ -23,7 +24,8 @@ const flags = activity.flags.filter((f) => f !== 'parallel');
 const hasTags = Boolean(track) || flags.length > 0;
 ---
 
-<li class:list={['act', track && `act--${track}`]}>
+<li class:list={['act', track && `act--${track}`, activity.speaker && 'act--speaker']}>
+  {activity.speaker && <ActivitySpeaker speaker={activity.speaker} />}
   <p class="act__time" aria-hidden="true">
     {activity.start && <span class="act__start">{time.hour(activity.start)}</span>}
     {activity.end && <span class="act__end">{time.hour(activity.end)}</span>}
@@ -183,10 +185,44 @@ const hasTags = Boolean(track) || flags.length > 0;
     text-transform: uppercase;
   }
 
+  /* com palestrante: no celular a foto entra antes do texto; do tablet pra cima vira a 1ª coluna */
+  .act--speaker {
+    grid-template-areas:
+      'node speaker'
+      'node body';
+  }
+
+  .act--speaker > :global(.speaker) {
+    grid-area: speaker;
+    margin-bottom: var(--space-3);
+  }
+
+  .act--speaker .act__node {
+    grid-area: node;
+  }
+
+  .act--speaker .act__body {
+    grid-area: body;
+  }
+
   @media (min-width: 640px) {
     .act {
       grid-template-columns: 4rem 1px minmax(0, 1fr);
       column-gap: var(--space-5);
+    }
+
+    .act--speaker {
+      grid-template-columns: 6.5rem 4rem 1px minmax(0, 1fr);
+      grid-template-areas: 'speaker time node body';
+    }
+
+    .act--speaker > :global(.speaker) {
+      align-self: start;
+      margin-bottom: var(--space-5);
+    }
+
+    .act--speaker .act__time {
+      grid-area: time;
     }
 
     .act__time {
