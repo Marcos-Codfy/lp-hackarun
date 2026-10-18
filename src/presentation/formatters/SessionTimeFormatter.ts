@@ -19,6 +19,11 @@ export class SessionTimeFormatter {
     if (start) return `${this.hour(start)}+`;
     return end ? `até ${this.hour(end)}` : '';
   }
+  // relógio da linha do tempo, sempre com minutos: "20:00" -> "20h00" · "08:00" -> "8h00"
+  clock(hhmm: string): string {
+    const [h = '0', m = '00'] = hhmm.split(':');
+    return `${Number(h)}h${m}`;
+  }
 
   // "19:00" -> "19h" · "19:30" -> "19h30" · "08:00" -> "8h"
   hour(hhmm: string): string {

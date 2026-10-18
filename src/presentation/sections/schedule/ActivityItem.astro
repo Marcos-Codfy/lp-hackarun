@@ -27,8 +27,8 @@ const hasTags = Boolean(track) || flags.length > 0;
 <li class:list={['act', track && `act--${track}`, activity.speaker && 'act--speaker']}>
   {activity.speaker && <ActivitySpeaker speaker={activity.speaker} />}
   <p class="act__time" aria-hidden="true">
-    {activity.start && <span class="act__start">{time.hour(activity.start)}</span>}
-    {activity.end && <span class="act__end">{time.hour(activity.end)}</span>}
+    {activity.start && <span class="act__start">{time.clock(activity.start)}</span>}
+    {activity.end && <span class="act__end">{time.clock(activity.end)}</span>}
   </p>
   <span class="act__node" aria-hidden="true"></span>
   <div class="act__body">
@@ -37,7 +37,7 @@ const hasTags = Boolean(track) || flags.length > 0;
       <span class="sr-only">{time.format(activity)}</span>
     </p>
     <Heading class="act__title">{activity.title}</Heading>
-    <p class="act__summary">{activity.summary}</p>
+    {activity.summary && <p class="act__summary">{activity.summary}</p>}
     {hasTags && (
       <ul class="act__tags" role="list">
         {track && <AudienceBadge as="li" tone={track} label={labels.of(track)} />}
