@@ -1,6 +1,6 @@
 // @vitest-environment node
 // a inscrição mudou de casa: o formulário saiu da LP (fica o clímax com o CTA) e mora em /inscricao, página leve
-// com a SubNav que troca com /equipes. Confere no código das páginas o que o build vai gerar
+// com a SubNav (a /equipes fica escondida até o sorteio). Confere no código das páginas o que o build vai gerar
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,11 +36,13 @@ describe('LP sem formulário', () => {
     expect(read('presentation/sections/registration/ChargeCta.astro')).toContain('data-charge-reveal');
   });
 
-  it('o CTA final leva pra /inscricao (com a origem), com o rótulo do status, e o secundário pras equipes', () => {
+  it('o CTA final leva pra /inscricao (com a origem), com o rótulo do status, e o secundário pro sorteio', () => {
     const cta = read('presentation/sections/registration/ChargeCta.astro');
     expect(cta).toContain("copy.cta(registration.status, 'final')");
     expect(cta).toContain('copy.actionLabel(registration.status)');
-    expect(cta).toContain('href="/equipes"');
+    // o secundário sobe pra seção que explica o sorteio; /equipes está escondida
+    expect(cta).toContain('href="#equipes"');
+    expect(cta).not.toContain('/equipes');
   });
 
   it('nenhum CTA de inscrição aponta pra âncora do formulário que saiu da LP', () => {
@@ -79,6 +81,15 @@ describe('página /inscricao', () => {
     expect(read('pages/equipes.astro')).toContain('<SubNav page="teams" />');
   });
 
+  it('SEO: inscrição individual, aberta a quem não é da UniCatólica, com o máximo das equipes do sorteio', () => {
+    const seo = registrationPageSeo({ min: 4, max: 5 });
+    expect(seo.title).toBe('Inscrição individual · HackaRun 2026');
+    expect(seo.description).toContain('19/10 a 08/11');
+    expect(seo.description).toContain('até 5 por sorteio');
+    expect(seo.description).not.toMatch(/exclusiv|sua equipe|matrícula/i);
+    expect(registrationPageSeo({ min: 3, max: 6 }).description).toContain('até 6');
+  });
+
   it('SEO: título e descrição no tamanho da busca, URLs absolutas e trilha Início > Inscrição', () => {
     const seo = registrationPageSeo({ min: 2, max: 5 });
     expect(seo.path).toBe(REGISTRATION_PAGE_PATH);
@@ -92,9 +103,11 @@ describe('página /inscricao', () => {
     expect(JSON.stringify(graph[1])).toContain('"name":"Inscrição"');
   });
 
-  it('o aviso de privacidade explica o rascunho na aba', () => {
+  it('o aviso de privacidade explica o rascunho na aba, sem falar de equipe nem foto', () => {
     const privacy = read('pages/privacidade.astro');
-    expect(privacy).toMatch(/rascunho[\s\S]*só nesta aba do navegador/);
+    expect(privacy).toMatch(/rascunho[\s\S]*só nesta aba\s+do navegador/);
     expect(privacy).toContain("registrationHref('privacidade')");
+    expect(privacy).toContain('versão {CONSENT_VERSION} · outubro de 2026');
+    expect(privacy).not.toMatch(/foto|integrantes|das equipes/i);
   });
 });

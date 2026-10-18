@@ -1,16 +1,17 @@
 ---
-// seção de equipes da LP: vira chamada pra página própria (/equipes); a galáxia 3D continua passando aqui
+// seção de equipes da LP: como o sorteio forma as equipes (a inscrição é individual). A página /equipes fica
+// escondida até o sorteio; a galáxia 3D continua passando aqui (id, cena e checkpoint iguais)
 import type { LandingPageDTO } from '@application/index';
 import Icon from '@presentation/components/ui/Icon.astro';
 import SectionHeader from './shared/SectionHeader.astro';
-import TeamsTeaser from './teams/TeamsTeaser.astro';
+import TeamDraw from './teams/TeamDraw.astro';
 import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { teams, event } = Astro.props.data;
+const { registration } = Astro.props.data.event;
 ---
 
 <section
@@ -25,18 +26,19 @@ const { teams, event } = Astro.props.data;
       id="equipes-title"
       code="08"
       eyebrow="Equipes"
-      title="Quem já está na <em>largada</em>"
-      lead="As equipes confirmadas têm uma página só delas, com a foto ou a logo de cada time. Veja quem já garantiu vaga."
+      title="Equipes formadas no <em>sorteio</em>"
+      lead="A inscrição é individual. As equipes são montadas por sorteio, presencialmente, com quem estiver credenciado na abertura do hackathon."
     />
 
     <div data-reveal="up">
-      <TeamsTeaser teams={teams} registration={event.registration} />
+      <TeamDraw registration={registration} />
     </div>
 
     <p class="section-note section-note--time" data-reveal="up">
-      <Icon name="users" />
+      <Icon name="clock" />
       <span>
-        <strong>Vagas limitadas à capacidade dos laboratórios.</strong> Monte o time e garanta a sua.
+        <strong>A inscrição não garante vaga numa equipe.</strong> Só participa do sorteio quem estiver
+        presente e credenciado no horário.
       </span>
     </p>
   </div>

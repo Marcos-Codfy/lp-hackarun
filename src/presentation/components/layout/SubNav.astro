@@ -1,6 +1,6 @@
 ---
 // barra fina embaixo do header nas páginas leves (/inscricao e /equipes): "← Voltar ao evento" à esquerda e
-// o seletor entre as duas páginas à direita. O voltar é um link pro fim da LP; com JS, quem veio da LP volta
+// o seletor de páginas à direita (só "Inscrição" enquanto /equipes está escondida). O voltar é um link pro fim da LP; com JS, quem veio da LP volta
 // no histórico pro mesmo ponto (views/navigation/backToEvent.ts). No celular estreito os rótulos encurtam,
 // e o nome acessível continua o completo. A barra tem a largura e o recuo da barra do header logo acima: as
 // duas linhas de navegação começam e terminam juntas
@@ -15,7 +15,7 @@ const { page } = Astro.props;
 const links = subNavLinksFor(page);
 ---
 
-<nav class="subnav" aria-label="Inscrição e equipes">
+<nav class="subnav" aria-label="Navegação da inscrição">
   <a class="subnav__back" href={EVENT_RETURN_HREF} data-back-to-event>
     <span class="subnav__back-icon" aria-hidden="true">
       <Icon name="arrow-left" size={16} />
@@ -101,7 +101,7 @@ const links = subNavLinksFor(page);
     box-shadow: 0 0 18px rgb(0 229 255 / 0.4);
   }
 
-  /* trilho do seletor: as duas abas inclinadas lado a lado, a atual acesa */
+  /* trilho do seletor: abas inclinadas lado a lado, a atual acesa */
   .subnav__switch {
     display: flex;
     flex: none;
