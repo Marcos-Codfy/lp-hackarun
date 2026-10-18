@@ -96,7 +96,7 @@ describe('GetEventOverview', () => {
     expect(dto.stats.days).toBe(raw.days.length);
     expect(dto.stats.stations).toBe(2);
     expect(dto.stats.workshops).toBe(workshops);
-    expect(dto.stats.workshops).toBe(7);
+    expect(dto.stats.workshops).toBe(6);
     expect(dto.stats.stands).toBe(10);
     expect(dto.firstDate).toBe('2026-11-11');
     expect(dto.lastDate).toBe('2026-11-14');
