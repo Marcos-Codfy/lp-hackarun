@@ -1,25 +1,29 @@
 ---
 import type { LandingPageDTO } from '@application/index';
 import Icon from '@presentation/components/ui/Icon.astro';
-import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
-import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
+// import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
+// import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
 import SectionHeader from './shared/SectionHeader.astro';
-import CrewCard from './crew/CrewCard.astro';
-import LockedMentorCard from './crew/LockedMentorCard.astro';
+// import CrewCard from './crew/CrewCard.astro';
+// import LockedMentorCard from './crew/LockedMentorCard.astro';
 import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-const { speakers, schedule } = Astro.props.data;
-const roles = new SpeakerRoleLabel();
-// quando equipes e mentores são apresentados (lido da programação)
-const lookup = new ScheduleLookup(schedule);
-const reveal = lookup.activity('teams-and-mentors');
-const revealAt = reveal
-  ? ` Equipes e mentores são apresentados na abertura, em ${lookup.shortDate(reveal.day)}, às ${lookup.startOf(reveal)}.`
-  : '';
+// cards dos mentores comentados por enquanto (voltam quando os nomes forem revelados)
+// a prop fica pelo contrato da página
+const { data: _data } = Astro.props;
+
+// const { speakers, schedule } = Astro.props.data;
+// const roles = new SpeakerRoleLabel();
+// // quando equipes e mentores são apresentados (lido da programação)
+// const lookup = new ScheduleLookup(schedule);
+// const reveal = lookup.activity('teams-and-mentors');
+// const revealAt = reveal
+//   ? ` Equipes e mentores são apresentados na abertura, em ${lookup.shortDate(reveal.day)}, às ${lookup.startOf(reveal)}.`
+//   : '';
 ---
 
 <section
@@ -35,9 +39,10 @@ const revealAt = reveal
       code="05"
       eyebrow="Mentores"
       title="Quem vai estar <em>do seu lado</em>"
-      lead={`Vocês poderão contar com o apoio de mentores, incluindo professores, alunos egressos e voluntários, que estarão disponíveis para esclarecer dúvidas, compartilhar conhecimentos e ajudar a encontrar caminhos ao longo da jornada.${revealAt}`}
+      lead="Vocês poderão contar com o apoio de mentores para esclarecer dúvidas e orientar o desenvolvimento do projeto, desde a ideia até os testes e a documentação. Todas as equipes poderão solicitar orientação, respeitando a disponibilidade dos mentores, que não poderão executar tarefas ou desenvolver soluções em nome dos participantes."
     />
 
+    {/*
     <ul class="crew__grid" role="list" data-reveal-group>
       {speakers.map((speaker, index) =>
         speaker.revealed ? (
@@ -47,6 +52,7 @@ const revealAt = reveal
         ),
       )}
     </ul>
+    */}
 
     <div class="crew__rules sx-glass sx-corners" data-reveal="up">
       <p class="sx-hud">// Regras da mentoria</p>
@@ -57,17 +63,18 @@ const revealAt = reveal
           </span>
           <p>
             <strong>O mentor orienta, mas não escreve a solução.</strong>
-            Arquitetura, planejamento e boas práticas. No desenvolvimento final, em 14/11, as equipes contam
-            com mentorias técnicas.
+            As equipes são responsáveis por suas entregas, e mentores não poderão avaliar equipes que tenham
+            orientado.
           </p>
         </li>
         <li>
           <span class="sx-icon">
-            <Icon name="trophy" size={20} />
+            <Icon name="route" size={20} />
           </span>
           <p>
-            <strong>O mentor da equipe campeã também é premiado.</strong>E os mentores são reconhecidos na
-            premiação oficial, no Capim Dourado Shopping.
+            <strong>Os mentores ajudam a encontrar o caminho.</strong>
+            Orientações sobre produto, programação, arquitetura, testes, segurança, documentação e gestão do
+            tempo, conforme a disponibilidade durante o evento.
           </p>
         </li>
       </ul>
