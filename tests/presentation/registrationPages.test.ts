@@ -36,10 +36,13 @@ describe('LP sem formulário', () => {
     expect(read('presentation/sections/registration/ChargeCta.astro')).toContain('data-charge-reveal');
   });
 
-  it('o CTA final leva pra /inscricao (com a origem), com o rótulo do status, e o secundário pro sorteio', () => {
+  it('o CTA final leva pra /inscricao (com a origem), com o rótulo do status, sozinho e centralizado', () => {
     const cta = read('presentation/sections/registration/ChargeCta.astro');
     expect(cta).toContain("copy.cta(registration.status, 'final')");
     expect(cta).toContain('copy.actionLabel(registration.status)');
+
+    // o secundário (#equipes) saiu junto com a seção das equipes; /equipes segue escondida
+    expect(cta).not.toContain('#equipes');
     // o secundário leva ao FAQ, que explica o sorteio; /equipes está escondida e a LP não tem seção de equipes
     expect(cta).toContain('href="#faq"');
     expect(cta).not.toContain('/equipes');

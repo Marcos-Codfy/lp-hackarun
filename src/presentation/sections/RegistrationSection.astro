@@ -4,7 +4,7 @@
 // status da inscrição, que é individual
 import type { LandingPageDTO } from '@application/index';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
-import PrepChecklist from '@presentation/components/registration/PrepChecklist.astro';
+// import PrepChecklist from '@presentation/components/registration/PrepChecklist.astro';
 import SectionHeader from './shared/SectionHeader.astro';
 import ChargeCta from './registration/ChargeCta.astro';
 import './sections.css';
@@ -41,9 +41,11 @@ const { registration, milestones } = Astro.props.data.event;
         <div class="registration__countdown">
           <Countdown milestones={milestones} variant="compact" />
         </div>
+        {/* "Tenha em mãos" comentado por enquanto
         {registration.status !== 'closed' && (
           <PrepChecklist teamSize={registration.teamSize} id="inscricao-prep" />
         )}
+        */}
         <ChargeCta registration={registration} />
       </div>
     </div>

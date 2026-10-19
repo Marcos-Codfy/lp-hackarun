@@ -1,5 +1,6 @@
 ---
 import Icon from '@presentation/components/ui/Icon.astro';
+import { REGULATION_PDF } from '@presentation/components/layout/documents';
 
 // enquanto o regulamento não sai: o que ele vai trazer e quando, no lugar do painel de pontuação.
 // Os medidores ficam vazios de propósito (a pontuação "carrega" na abertura)
@@ -41,7 +42,13 @@ const topics = [
 <div class="rulebook sx-glass sx-corners" data-reveal="up">
   <div class="rulebook__grid">
     <div class="rulebook__intro">
-      <p class="sx-hud">// Regulamento</p>
+      <p class="rulebook__meta">
+        <span class="rulebook__code" aria-hidden="true">
+          03
+        </span>
+        <span class="rulebook__rule" aria-hidden="true"></span>
+        <span class="rulebook__eyebrow">Regulamento</span>
+      </p>
       <h3 class="rulebook__title">As regras serão apresentadas na abertura.</h3>
       <p class="rulebook__stamp sx-grad-text">
         <span aria-hidden="true">
@@ -51,6 +58,12 @@ const topics = [
           {dateLong}, às {hour}
         </span>
       </p>
+      {/* o regulamento só baixa (download + Content-Disposition no public/_headers), como no rodapé e no FAQ */}
+      <a class="rulebook__doc" href={REGULATION_PDF.href} download={REGULATION_PDF.fileName}>
+        <span>Confira o regulamento completo</span>
+        <Icon name="arrow-right" size={16} />
+        <span class="rulebook__doc-size">PDF · {REGULATION_PDF.size}</span>
+      </a>
     </div>
 
     <ul class="rulebook__list" role="list" aria-label="O que o regulamento traz">
@@ -85,6 +98,93 @@ const topics = [
     display: grid;
     gap: var(--space-4);
     align-content: start;
+  }
+
+  /* mesmo selo das outras seções (o "02" dos NPCs): número no paralelogramo + fio + nome */
+  .rulebook__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 500;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .rulebook__code {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.25rem;
+    height: 1.5rem;
+    padding-inline: 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--sx-accent) 60%, transparent);
+    background: color-mix(in srgb, var(--sx-accent) 16%, transparent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--sx-accent) 30%, transparent);
+    color: var(--text);
+    letter-spacing: 0.08em;
+    transform: skewX(var(--skew));
+  }
+
+  .rulebook__rule {
+    width: clamp(1.5rem, 4vw, 3.5rem);
+    height: 1px;
+    background: linear-gradient(90deg, var(--sx-accent), transparent);
+  }
+
+  .rulebook__eyebrow {
+    color: var(--sx-ink);
+  }
+
+  /* link do PDF: texto com sublinhado em degradê que cresce no hover e a seta que anda */
+  .rulebook__doc {
+    justify-self: start;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-2);
+    padding-block: var(--space-2);
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .rulebook__doc > span:first-child {
+    background: linear-gradient(90deg, var(--sx-accent), transparent) left bottom / 40% 1px no-repeat;
+    padding-bottom: 0.25em;
+    transition: background-size var(--dur) var(--ease-out);
+  }
+
+  .rulebook__doc :global(.icon) {
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .rulebook__doc:hover {
+    color: var(--text);
+  }
+
+  .rulebook__doc:hover > span:first-child {
+    background-size: 100% 1px;
+  }
+
+  .rulebook__doc:hover :global(.icon) {
+    transform: translateX(4px);
+  }
+
+  .rulebook__doc:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+  }
+
+  .rulebook__doc-size {
+    color: var(--text-dim);
+    font-weight: 500;
+    letter-spacing: 0.12em;
   }
 
   .rulebook__title {
