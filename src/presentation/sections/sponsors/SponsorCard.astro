@@ -1,0 +1,195 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// um patrocinador: selo HUD em cima, logo oficial branca no centro e uma legenda curta embaixo
+interface Props {
+  index: number;
+  name: string;
+  logo: ImageMetadata;
+  // altura da logo no desktop, em rem (cada marca tem uma proporção, então o tamanho ótico muda)
+  height: number;
+  tone: 'gold' | 'sun';
+  caption?: string;
+}
+
+const { index, name, logo, height, tone, caption } = Astro.props;
+const widthRem = (logo.width / logo.height) * height;
+const widths = [1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 16 * d)));
+---
+
+<li class:list={['sponsor sx-glass sx-corners', `sponsor--${tone}`]}>
+  <span class="sponsor__fx" aria-hidden="true">
+    <span class="sponsor__sweep"></span>
+  </span>
+  <p class="sponsor__tag">
+    <span class="sponsor__dot" aria-hidden="true"></span>
+    Patrocinador
+    <span class="sponsor__num" aria-hidden="true">
+      {String(index + 1).padStart(2, '0')}
+    </span>
+  </p>
+  <span class="sponsor__mark" style={`--h: ${height}rem`}>
+    <Image
+      class="sponsor__img"
+      src={logo}
+      alt={name}
+      widths={[...new Set(widths)]}
+      sizes={`${widthRem}rem`}
+      loading="lazy"
+    />
+  </span>
+  {caption && <p class="sponsor__caption">{caption}</p>}
+</li>
+
+<style>
+  .sponsor {
+    --accent: var(--c-gold);
+    --accent-2: var(--c-orange);
+    --ink: var(--ink-gold);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
+    align-items: center;
+    gap: var(--space-5);
+    min-height: 17rem;
+    padding: var(--space-6) var(--space-5);
+    text-align: center;
+    transition:
+      transform var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  /* Pronto Fibra: o amarelo da marca com um toque do azul dela */
+  .sponsor--sun {
+    --accent: #f5b82a;
+    --accent-2: #1264ff;
+    --ink: #ffe08a;
+  }
+
+  .sponsor > :not(.sponsor__fx) {
+    position: relative;
+  }
+
+  .sponsor:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 70px -24px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+
+  /* refletor no topo + um feixe de luz que atravessa a placa de tempos em tempos */
+  .sponsor__fx {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    background:
+      radial-gradient(60% 55% at 50% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+      radial-gradient(
+        50% 40% at 50% 100%,
+        color-mix(in srgb, var(--accent-2) 10%, transparent),
+        transparent 70%
+      );
+    pointer-events: none;
+  }
+
+  .sponsor__sweep {
+    position: absolute;
+    inset: -20% auto -20% -40%;
+    width: 35%;
+    background: linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, var(--accent) 16%, transparent),
+      transparent
+    );
+    transform: skewX(-18deg);
+    animation: sponsor-sweep 6s var(--ease-in-out) infinite;
+  }
+
+  .sponsor--sun .sponsor__sweep {
+    animation-delay: 3s;
+  }
+
+  .sponsor__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+
+  .sponsor__dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    transform: rotate(45deg);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .sponsor__num {
+    color: var(--text-dim);
+  }
+
+  .sponsor__mark {
+    display: grid;
+    place-items: center;
+    max-width: 100%;
+  }
+
+  /* a logo encolhe junto com a placa no celular, sem passar da altura pedida */
+  .sponsor__img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: calc(var(--h) * 0.8);
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 35%, transparent));
+  }
+
+  .sponsor__caption {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    text-wrap: balance;
+  }
+
+  @keyframes sponsor-sweep {
+    0%,
+    55% {
+      transform: translateX(0) skewX(-18deg);
+    }
+    100% {
+      transform: translateX(520%) skewX(-18deg);
+    }
+  }
+
+  @media (min-width: 640px) {
+    .sponsor {
+      min-height: 19rem;
+      padding: var(--space-7) var(--space-6);
+    }
+
+    .sponsor__img {
+      max-height: var(--h);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sponsor {
+      transition: none;
+    }
+
+    .sponsor:hover {
+      transform: none;
+    }
+
+    .sponsor__sweep {
+      animation: none;
+      opacity: 0;
+    }
+  }
+</style>
