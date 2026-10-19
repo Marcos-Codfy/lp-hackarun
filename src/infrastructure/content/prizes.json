@@ -3,21 +3,21 @@
     "id": "champion",
     "rank": 1,
     "title": "Equipe campeã",
-    "description": "Prêmio principal para a equipe vencedora do HackaRun, anunciada na premiação oficial.",
+    "description": "",
     "reward": null
   },
   {
     "id": "podium",
     "rank": 2,
-    "title": "Equipes classificadas",
-    "description": "Troféus, certificados e prêmios para as equipes do pódio.",
+    "title": "Equipe Vice-Campeã",
+    "description": "",
     "reward": null
   },
   {
     "id": "mentor",
     "rank": 3,
-    "title": "Mentor da equipe campeã",
-    "description": "Prêmio individual para o mentor egresso oficialmente vinculado à equipe vencedora.",
+    "title": "Equipe Destaque",
+    "description": "",
     "reward": null
   }
 ]

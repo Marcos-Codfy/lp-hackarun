@@ -32,8 +32,8 @@ export interface ActivityProps {
   title: string;
   kind: ActivityKind;
   slot: TimeSlot;
-  // uma linha curta, sempre visível
-  summary: string;
+  // uma linha curta, sempre visível (opcional: sem ela, só o título)
+  summary?: string | null;
   // texto longo (miniementa), atrás de um "ver mais"
   details: string | null;
   // trilha diferente da do bloco (ex.: item do hackathon numa noite aberta)
@@ -49,7 +49,7 @@ export class Activity extends Entity {
   readonly title: string;
   readonly kind: ActivityKind;
   readonly slot: TimeSlot;
-  readonly summary: string;
+  readonly summary: string | null;
   readonly details: string | null;
   readonly track: Audience | null;
   readonly flags: readonly ActivityFlag[];
@@ -69,7 +69,7 @@ export class Activity extends Entity {
     this.title = assertNonEmpty(props.title, 'Activity.title');
     this.kind = props.kind;
     this.slot = props.slot;
-    this.summary = assertNonEmpty(props.summary, 'Activity.summary');
+    this.summary = props.summary?.trim() || null;
     this.details = props.details?.trim() || null;
     this.track = props.track;
     this.flags = [...new Set(props.flags)];

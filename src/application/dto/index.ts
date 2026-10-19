@@ -41,7 +41,7 @@ export interface ActivityDTO extends TimeRangeDTO {
   id: string;
   title: string;
   kind: ActivityKind;
-  summary: string;
+  summary: string | null;
   details: string | null;
   track: Audience | null;
   flags: ActivityFlag[];

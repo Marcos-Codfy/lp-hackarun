@@ -9,6 +9,8 @@ interface Props {
 
 const { prize, featured = false } = Astro.props;
 const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
+// cada palavra inteira numa linha: "Vice-Campeã" não quebra no hífen
+const words = prize.title.split(' ');
 ---
 
 <li class:list={['prize sx-glass sx-corners sx-hover', featured && 'prize--featured']}>
@@ -24,8 +26,15 @@ const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
       <Icon name={featured ? 'trophy' : 'crown'} size={featured ? 34 : 24} />
     </span>
   </div>
-  <h3 class="prize__title">{prize.title}</h3>
-  <p class="prize__desc">{prize.description}</p>
+  <h3 class="prize__title">
+    {words.map((word, i) => (
+      <>
+        <span class="prize__word">{word}</span>
+        {i < words.length - 1 && ' '}
+      </>
+    ))}
+  </h3>
+  {prize.description && <p class="prize__desc">{prize.description}</p>}
   {prize.revealed ? (
     <p class="prize__reward">{prize.reward}</p>
   ) : (
@@ -129,6 +138,10 @@ const rank = prize.rank !== null ? String(prize.rank).padStart(2, '0') : '—';
     position: relative;
     font-size: var(--fs-lg);
     line-height: 1.1;
+  }
+
+  .prize__word {
+    white-space: nowrap;
   }
 
   .prize--featured .prize__title {
