@@ -40,6 +40,10 @@ describe('textos do card de equipe', () => {
   });
 });
 
+
+describe('navegação entre a LP e /equipes', () => {
+  it('o menu só tem âncoras da LP, com "Patrocinadores" no lugar de "Equipes"', () => {
+    expect(NAV_LINKS.find((l) => l.label === 'Patrocinadores')?.href).toBe('#patrocinadores');
 describe('/equipes escondida até o sorteio', () => {
   it('o menu não tem "Equipes" nem link de página: só âncoras da LP', () => {
     expect(NAV_LINKS.find((l) => l.label === 'Equipes')).toBeUndefined();
@@ -51,6 +55,15 @@ describe('/equipes escondida até o sorteio', () => {
     expect(links.every((l) => l.ariaCurrent === undefined)).toBe(true);
     expect(links.find((l) => l.label === 'Sobre')?.href).toBe('#sobre');
     expect(topHref('home')).toBe('#inicio');
+
+    // sem link de página no menu, ninguém precisa do spy extra (as âncoras acendem sozinhas)
+    expect(links.every((l) => l.spy === undefined)).toBe(true);
+  });
+
+  it('em /equipes as âncoras voltam pra LP e nenhum item do menu fica como página atual', () => {
+    const links = navLinksFor('teams');
+    expect(links.find((l) => l.label === 'Sobre')?.href).toBe('/#sobre');
+    expect(links.find((l) => l.label === 'Patrocinadores')?.href).toBe('/#patrocinadores');
     expect(links.filter((l) => l.spy)).toEqual([]);
   });
 

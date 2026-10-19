@@ -12,7 +12,8 @@ import ScheduleSection from '@presentation/sections/ScheduleSection.astro';
 import CrewSection from '@presentation/sections/CrewSection.astro';
 import GrandFinalSection from '@presentation/sections/GrandFinalSection.astro';
 import PrizesSection from '@presentation/sections/PrizesSection.astro';
-import TeamsSection from '@presentation/sections/TeamsSection.astro';
+// import TeamsSection from '@presentation/sections/TeamsSection.astro';
+import SponsorsSection from '@presentation/sections/SponsorsSection.astro';
 import FaqSection from '@presentation/sections/FaqSection.astro';
 import RegistrationSection from '@presentation/sections/RegistrationSection.astro';
 import { serverContainer } from '@composition/server';
@@ -46,7 +47,8 @@ const seo = {
     <CrewSection data={data} />
     <GrandFinalSection data={data} />
     <PrizesSection data={data} />
-    <TeamsSection data={data} />
+    {/* <TeamsSection data={data} /> */}
+    <SponsorsSection data={data} />
     <FaqSection data={data} />
     <RegistrationSection data={data} />
   </main>

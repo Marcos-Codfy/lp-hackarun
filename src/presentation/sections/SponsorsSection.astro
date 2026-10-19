@@ -1,0 +1,71 @@
+---
+// patrocinadores no lugar da chamada de equipes (o TeamsSection fica comentado no index.astro)
+import type { LandingPageDTO } from '@application/index';
+import capimLogo from '../../assets/brand/capim-dourado-white.png';
+import prontoLogo from '../../assets/brand/pronto-fibra-white.png';
+import SectionHeader from './shared/SectionHeader.astro';
+import SponsorCard from './sponsors/SponsorCard.astro';
+import './sections.css';
+
+interface Props {
+  data: LandingPageDTO;
+}
+
+// a seção não depende de dados; a prop fica pelo contrato da página
+const { data: _data } = Astro.props;
+
+// novo patrocinador: logo branca (PNG sem fundo) em src/assets/brand e mais um item aqui
+const sponsors = [
+  {
+    name: 'Capim Dourado Shopping',
+    logo: capimLogo,
+    height: 7,
+    tone: 'gold' as const,
+    caption: 'Palco da grande final',
+  },
+  { name: 'Pronto Fibra', logo: prontoLogo, height: 5, tone: 'sun' as const },
+];
+---
+
+<section
+  id="patrocinadores"
+  class="section sponsors tone-cyan"
+  data-scene="dust"
+  data-checkpoint="Patrocinadores"
+  aria-labelledby="patrocinadores-title"
+>
+  <div class="container section-stack">
+    <SectionHeader
+      id="patrocinadores-title"
+      code="08"
+      eyebrow="Patrocinadores"
+      title="Quem impulsiona <em>essa corrida</em>"
+      lead="Grandes ideias precisam de parceiros que acreditam nelas. Conheça as marcas que apoiam o HackaRun e impulsionam o futuro da tecnologia."
+      align="center"
+    />
+
+    <ul class="sponsors__grid" role="list" data-reveal-group>
+      {sponsors.map((sponsor, index) => (
+        <SponsorCard index={index} {...sponsor} />
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* placas centralizadas: uma embaixo da outra no celular, lado a lado do tablet pra cima */
+  .sponsors__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    width: 100%;
+    max-width: 52rem;
+    margin-inline: auto;
+  }
+
+  @media (min-width: 640px) {
+    .sponsors__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
