@@ -61,6 +61,12 @@ describe('programação', () => {
     );
   });
 
+  it('os painéis ficam dentro de um palco que o controlador segura na troca de dia', () => {
+    const section = read('presentation/sections/ScheduleSection.astro');
+    expect(section).toMatch(/data-day-stage[\s\S]*days__panels/);
+    expect(read('presentation/controllers/DayTabsController.ts')).toContain("'[data-day-stage]'");
+  });
+
   it('"Detalhes" tem contorno e fundo de botão', () => {
     const more = read('presentation/sections/schedule/ActivityMore.astro');
     expect(more).toMatch(/\.more__summary \{[^}]*border: 1px solid/);
