@@ -99,16 +99,26 @@ const units = [
     color: var(--time);
   }
 
-  /* ponto "ao vivo" */
+  /* ponto "ao vivo": só opacity e transform animam, então rodam no compositor. O box-shadow que crescia aqui
+     repintava a página inteira a cada quadro (no celular, com o contador fora da tela também) */
   .countdown__pulse {
+    position: relative;
     width: 6px;
     height: 6px;
     border-radius: 50%;
     background: var(--c-orange);
-    box-shadow:
-      0 0 0 3px rgb(255 133 47 / 0.18),
-      0 0 12px var(--c-orange);
+    box-shadow: 0 0 12px var(--c-orange);
     animation: cd-pulse 1.6s var(--ease-in-out) infinite;
+  }
+
+  /* o anel de 3 px em volta do ponto: cresce e some (antes era o espalhamento do box-shadow) */
+  .countdown__pulse::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border: 3px solid rgb(255 133 47 / 0.18);
+    border-radius: 50%;
+    animation: cd-pulse-ring 1.6s var(--ease-in-out) infinite;
   }
 
   .countdown__digits {
@@ -129,9 +139,13 @@ const units = [
   @keyframes cd-pulse {
     50% {
       opacity: 0.3;
-      box-shadow:
-        0 0 0 6px rgb(255 133 47 / 0),
-        0 0 6px var(--c-orange);
+    }
+  }
+
+  @keyframes cd-pulse-ring {
+    50% {
+      opacity: 0;
+      transform: scale(1.5);
     }
   }
 
@@ -157,7 +171,8 @@ const units = [
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .countdown__pulse {
+    .countdown__pulse,
+    .countdown__pulse::after {
       animation: none;
     }
   }

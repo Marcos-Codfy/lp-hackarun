@@ -1,0 +1,28 @@
+/* loops infinitos pausados nas seções longe da tela (OffscreenMotionController põe .is-offscreen na seção).
+   Mesma lista do motion-pause.css, de propósito: loop novo entra nos dois (o teste motionLists confere).
+   !important na layer: ganha do shorthand "animation" dos componentes (que zera o play-state) */
+@layer utilities {
+  .is-offscreen
+    :is(
+      .tape__track,
+      .beams__beam,
+      .locked__q,
+      .locked__beam,
+      .locked__status i,
+      .btn__sheen,
+      .sponsor__sweep,
+      .scroll-cue__comet,
+      .countdown__pulse,
+      .notice-badge__dot,
+      .regstatus__dot,
+      .lineup__label i,
+      .lineup__scan,
+      .terminal__signal i,
+      .terminal__caret
+    ),
+  .is-offscreen .countdown__unit::before,
+  .is-offscreen .countdown__pulse::after,
+  .is-offscreen .prize__redacted::after {
+    animation-play-state: paused !important;
+  }
+}
