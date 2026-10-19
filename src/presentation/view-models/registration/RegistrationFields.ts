@@ -1,105 +1,118 @@
-import type { MemberField, RegistrationInput } from '@domain/index';
-import type { PreparedTeamImageDTO } from '@application/index';
+import { isParticipantProfile, isStudying, isTechArea, needsArea, Phone } from '@domain/index';
+import type { ParticipantInput, ParticipantProfile, TechArea } from '@domain/index';
 
-export type MemberKey = MemberField;
-
-export interface MemberFields {
-  // chave estável da linha no DOM (o índice muda quando alguém remove)
-  key: number;
-  name: string;
-  studentId: string;
-  email: string;
-}
-
+// o que a pessoa preencheu, como está nos campos (texto cru; o domínio limpa e valida)
 export interface RegistrationFields {
-  teamName: string;
-  // foto/logo já preparada no aparelho (null até a pessoa escolher uma que passe)
-  teamImage: PreparedTeamImageDTO | null;
-  // o integrante 1 é o contato da equipe
-  members: MemberFields[];
+  name: string;
+  email: string;
+  whatsapp: string;
+  profile: ParticipantProfile | '';
+  institution: string;
+  course: string;
+  period: string;
+  studentId: string;
+  area: TechArea | '';
+  adult: 'yes' | 'no' | '';
   acceptedTerms: boolean;
   honeypot: string;
 }
 
-export type TextPath = 'teamName' | `members.${number}.${MemberKey}` | 'honeypot';
+// campos de valor (texto, lista ou opção); o aceite é o checkbox à parte
+export type FieldPath = Exclude<keyof RegistrationFields, 'acceptedTerms'>;
 
-export const MEMBER_KEYS: readonly MemberKey[] = ['name', 'studentId', 'email'];
+export const FIELD_PATHS: readonly FieldPath[] = [
+  'name',
+  'email',
+  'whatsapp',
+  'adult',
+  'profile',
+  'institution',
+  'course',
+  'period',
+  'studentId',
+  'area',
+  'honeypot',
+];
 
-export const emptyMember = (key: number): MemberFields => ({ key, name: '', studentId: '', email: '' });
+export const isFieldPath = (path: string): path is FieldPath =>
+  (FIELD_PATHS as readonly string[]).includes(path);
 
-export function emptyFields(memberRows: number): RegistrationFields {
+export function emptyFields(): RegistrationFields {
   return {
-    teamName: '',
-    teamImage: null,
-    members: Array.from({ length: memberRows }, (_, i) => emptyMember(i)),
+    name: '',
+    email: '',
+    whatsapp: '',
+    profile: '',
+    institution: '',
+    course: '',
+    period: '',
+    studentId: '',
+    area: '',
+    adult: '',
     acceptedTerms: false,
     honeypot: '',
   };
 }
 
-// o que volta de um rascunho: textos e a foto já preparada (o aceite nunca volta marcado)
-export interface RestoredFields {
-  teamName: string;
-  members: readonly { name: string; studentId: string; email: string }[];
-  teamImage: PreparedTeamImageDTO | null;
+// opção fora da lista (rascunho velho, DOM mexido) vira "não escolheu"
+function choice(path: FieldPath, value: string): string {
+  if (path === 'profile') return isParticipantProfile(value) ? value : '';
+  if (path === 'area') return isTechArea(value) ? value : '';
+  if (path === 'adult') return value === 'yes' || value === 'no' ? value : '';
+  return value;
 }
 
-// rascunho -> campos, dentro do tamanho da equipe (sobra corta, falta vira card vazio)
-export function fieldsFromDraft(draft: RestoredFields, min: number, max: number): RegistrationFields {
-  const rows = Math.min(max, Math.max(min, draft.members.length));
-  const members = Array.from({ length: rows }, (_, i) => {
-    const { name = '', studentId = '', email = '' } = draft.members[i] ?? {};
-    return { key: i, name, studentId, email };
-  });
-  return { ...emptyFields(0), teamName: draft.teamName, members, teamImage: draft.teamImage };
+// atualização imutável por campo
+export function withValue(fields: RegistrationFields, path: FieldPath, value: string): RegistrationFields {
+  return { ...fields, [path]: choice(path, value) };
 }
 
-const MEMBER_PATH = /^members\.(\d+)\.(name|studentId|email)$/;
-
-// atualização imutável por caminho ("teamName", "members.1.email")
-export function withText(fields: RegistrationFields, path: TextPath, value: string): RegistrationFields {
-  const member = MEMBER_PATH.exec(path);
-  if (member) {
-    const index = Number(member[1]);
-    const key = member[2] as MemberKey;
-    return { ...fields, members: fields.members.map((m, i) => (i === index ? { ...m, [key]: value } : m)) };
-  }
-  if (path === 'teamName' || path === 'honeypot') return { ...fields, [path]: value };
-  return fields;
+// campos que aparecem pro perfil escolhido (os outros ficam escondidos e o domínio ignora)
+export function visibleFields(profile: RegistrationFields['profile']): Set<FieldPath> {
+  const visible = new Set<FieldPath>(['name', 'email', 'whatsapp', 'adult', 'profile']);
+  if (!profile) return visible;
+  if (profile !== 'self-taught') visible.add('course');
+  if (isStudying(profile)) visible.add('period');
+  if (profile === 'other-institution') visible.add('institution');
+  if (profile === 'unicatolica') visible.add('studentId');
+  if (needsArea(profile)) visible.add('area');
+  return visible;
 }
 
-// valor atual de um campo de texto (as conferências do servidor comparam com ele)
-export function textAt(fields: RegistrationFields, path: string): string | null {
-  const member = MEMBER_PATH.exec(path);
-  if (member) return fields.members[Number(member[1])]?.[member[2] as MemberKey] ?? null;
-  return path === 'teamName' ? fields.teamName : null;
+// valor de um campo (as conferências do servidor comparam com ele); o WhatsApp compara só os dígitos
+export function comparableValue(fields: RegistrationFields, path: string): string | null {
+  if (!isFieldPath(path)) return null;
+  const value = fields[path];
+  return path === 'whatsapp' ? Phone.digitsOf(value) : value.trim().toLowerCase();
 }
 
-export function toInput(fields: RegistrationFields): RegistrationInput {
+export function toInput(f: RegistrationFields): ParticipantInput {
   return {
-    teamName: fields.teamName,
-    teamImage: fields.teamImage && { mimeType: fields.teamImage.mimeType, base64: fields.teamImage.base64 },
-    members: fields.members.map(({ name, studentId, email }) => ({ name, studentId, email })),
-    acceptedTerms: fields.acceptedTerms,
+    name: f.name,
+    email: f.email,
+    whatsapp: f.whatsapp,
+    profile: f.profile,
+    institution: f.institution,
+    course: f.course,
+    period: f.period,
+    studentId: f.studentId,
+    area: f.area,
+    adult: f.adult,
+    acceptedTerms: f.acceptedTerms,
   };
 }
 
 // ordem visual dos campos: define o primeiro inválido e a ordem do resumo de erros
-export function fieldOrder(fields: RegistrationFields): string[] {
-  return [
-    'teamName',
-    'teamImage',
-    ...fields.members.flatMap((_, i) => MEMBER_KEYS.map((k) => `members.${i}.${k}`)),
-    'members',
-    'acceptedTerms',
-  ];
-}
-
-// remover a linha i desloca os caminhos das linhas de baixo
-export function shiftMemberPath(path: string, removed: number): string | null {
-  const match = /^members\.(\d+)\.(.+)$/.exec(path);
-  if (!match) return path;
-  const index = Number(match[1]);
-  if (index === removed) return null;
-  return index > removed ? `members.${index - 1}.${match[2]}` : path;
-}
+export const FIELD_ORDER: readonly string[] = [
+  'name',
+  'email',
+  'whatsapp',
+  'adult',
+  'profile',
+  'institution',
+  'course',
+  'period',
+  'studentId',
+  'area',
+  'acceptedTerms',
+];

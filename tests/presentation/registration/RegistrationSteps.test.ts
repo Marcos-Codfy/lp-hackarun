@@ -6,38 +6,39 @@ import { StepProgressView } from '@presentation/views/registration/StepProgressV
 import { EventBus } from '@shared/core/EventBus';
 import type { AppEvents } from '@presentation/app/AppEvents';
 import { stepStates } from '@presentation/view-models/registration/registrationSteps';
-import { preparedImage } from '../../helpers/images';
-import { fillMember, fillValidTeam, setupForm } from './formSetup';
+import { fillValid, setupForm } from './formSetup';
 
 describe('etapas · prontas', () => {
-  it('formulário vazio: nenhuma pronta; nome sem foto não fecha a etapa 01', () => {
+  it('formulário vazio: nenhuma pronta; seus dados ficam prontos com nome, e-mail, WhatsApp e idade', () => {
     const { vm } = setupForm();
     expect(vm.state.value.steps).toEqual([false, false, false]);
-    vm.setText('teamName', 'Bug Busters');
+    vm.setValue('name', 'Ana Souza');
+    vm.setValue('email', 'ana@exemplo.com');
+    vm.setValue('whatsapp', '63999991234');
     expect(vm.state.value.steps[0]).toBe(false);
-    vm.setTeamImage(preparedImage());
+    vm.setValue('adult', 'no');
     expect(vm.state.value.steps).toEqual([true, false, false]);
   });
 
-  it('integrantes prontos só com todos os cards válidos; aceite fecha a 03', () => {
+  it('perfil só fica pronto com os campos que ele pede; aceite fecha a 03', () => {
     const { vm } = setupForm();
-    fillMember(vm, 0);
+    vm.setValue('profile', 'other-institution');
     expect(vm.state.value.steps[1]).toBe(false);
-    fillMember(vm, 1);
+    vm.setValue('course', 'Direito');
+    vm.setValue('period', '2');
     expect(vm.state.value.steps[1]).toBe(true);
-    vm.addMember();
+    vm.setValue('profile', 'graduate');
     expect(vm.state.value.steps[1]).toBe(false);
-    vm.removeMember(2);
     vm.setAcceptedTerms(true);
-    expect(vm.state.value.steps).toEqual([false, true, true]);
+    expect(vm.state.value.steps).toEqual([false, false, true]);
   });
 
-  it('nome já inscrito (conflito do servidor) reabre a etapa 01', async () => {
+  it('WhatsApp já inscrito (conflito do servidor) reabre a etapa 01', async () => {
     const { vm, gateway } = setupForm();
-    fillValidTeam(vm);
+    fillValid(vm);
     expect(vm.state.value.steps).toEqual([true, true, true]);
     const { RegistrationGatewayError } = await import('@application/index');
-    gateway.willThrow(new RegistrationGatewayError('duplicate-team-name', 'x'));
+    gateway.willThrow(new RegistrationGatewayError('duplicate-whatsapp', 'x'));
     await vm.submit();
     expect(vm.state.value.steps[0]).toBe(false);
   });
@@ -59,14 +60,12 @@ const markup = `
       )
       .join('')}</ol>
   </div>
-  <div data-registration-form data-status="open" data-team-min="2" data-team-max="5">
+  <div data-registration-form data-status="open">
     <form data-reg-form>
-      <fieldset id="reg-step-01" data-step="0"><input id="reg-team-name" data-field="teamName" /></fieldset>
+      <fieldset id="reg-step-01" data-step="0"><input id="reg-name" data-field="name" /></fieldset>
       <fieldset id="reg-step-02" data-step="1">
-        <ol data-members-list><li data-member-row data-member-key="0">
-          <button type="button" data-member-remove hidden disabled>Remover</button>
-          <input id="first-member" data-member-field="name" />
-        </li></ol>
+        <div data-show-field="institution" hidden><input id="reg-institution" data-field="institution" /></div>
+        <input type="radio" id="reg-profile-graduate" name="profile" value="graduate" data-field="profile" />
       </fieldset>
       <fieldset id="reg-step-03" data-step="2"><input id="reg-terms" type="checkbox" data-field="acceptedTerms" /></fieldset>
     </form>
@@ -92,8 +91,10 @@ describe('StepProgressView', () => {
   it('marca pronta, atual (aria-current="step") e a contagem; o foco muda a atual', () => {
     const { vm, root, item } = mount();
     expect(item(0).querySelector('a')?.getAttribute('aria-current')).toBe('step');
-    vm.setText('teamName', 'Bug Busters');
-    vm.setTeamImage(preparedImage());
+    vm.setValue('name', 'Ana Souza');
+    vm.setValue('email', 'ana@exemplo.com');
+    vm.setValue('whatsapp', '63999991234');
+    vm.setValue('adult', 'yes');
     expect(item(0).hasAttribute('data-done')).toBe(true);
     expect(item(0).querySelector('[data-step-sr]')?.textContent).toBe(', pronta');
     expect(item(1).querySelector('a')?.getAttribute('aria-current')).toBe('step');
@@ -125,15 +126,15 @@ describe('StepProgressView', () => {
     item(1).querySelector('a')?.dispatchEvent(click);
     expect(click.defaultPrevented).toBe(true);
     expect(scroll).toHaveBeenCalledWith({ block: 'start', behavior: 'instant' });
-    // o "Remover" do contato vem antes no card, mas está escondido: o foco vai pro nome
-    expect(document.activeElement?.id).toBe('first-member');
+    // a instituição vem antes, mas está escondida pelo perfil: o foco vai pra primeira opção
+    expect(document.activeElement?.id).toBe('reg-profile-graduate');
     expect(history.length).toBe(before);
     expect(location.hash).toBe('');
   });
 
   it('some com o formulário enviado', async () => {
     const { vm, root } = mount();
-    fillValidTeam(vm);
+    fillValid(vm);
     await vm.submit();
     expect(root.hidden).toBe(true);
   });

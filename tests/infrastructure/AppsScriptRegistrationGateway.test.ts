@@ -1,13 +1,31 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RegistrationPayload } from '@application/index';
+import { AppsScriptRegistrationCounter } from '@infrastructure/registration/AppsScriptRegistrationCounter';
 import { AppsScriptClient, type FetchLike } from '@infrastructure/registration/AppsScriptClient';
 import { AppsScriptRegistrationGateway } from '@infrastructure/registration/AppsScriptRegistrationGateway';
 
 const ENDPOINT = 'https://script.google.com/macros/s/abc/exec';
-const payload = {
-  teamName: 'Bug Busters',
-  members: [{ name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' }],
-} as RegistrationPayload;
+const payload: RegistrationPayload = {
+  participant: {
+    name: 'Ana Souza',
+    email: 'ana@exemplo.com',
+    whatsapp: '(63) 99999-1234',
+    profile: 'unicatolica',
+    institution: 'UniCatólica',
+    course: 'Engenharia de Software',
+    period: 3,
+    studentId: '2024100123',
+    area: '',
+    adult: true,
+  },
+  submittedAt: '2026-10-20T12:00:00.000Z',
+  source: 'landing-page',
+  consentVersion: '2026-10-v4',
+  consentAt: '2026-10-20T12:00:00.000Z',
+  honeypot: '',
+  elapsedMs: 9000,
+  idempotencyKey: '',
+};
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -32,7 +50,10 @@ describe('AppsScriptRegistrationGateway', () => {
       redirect: 'follow',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     });
-    expect(JSON.parse(String(init?.body))).toMatchObject({ action: 'register', teamName: 'Bug Busters' });
+    expect(JSON.parse(String(init?.body))).toMatchObject({
+      action: 'register',
+      participant: { email: 'ana@exemplo.com', whatsapp: '(63) 99999-1234' },
+    });
   });
 
   it('a chave de idempotência vai no corpo', async () => {
@@ -44,8 +65,8 @@ describe('AppsScriptRegistrationGateway', () => {
 
   it.each([
     ['duplicate', 'duplicate'],
-    ['duplicate_team_name', 'duplicate-team-name'],
     ['duplicate_email', 'duplicate-email'],
+    ['duplicate_whatsapp', 'duplicate-whatsapp'],
     ['duplicate_student_id', 'duplicate-student-id'],
     ['constructor', 'rejected'],
     ['closed', 'closed'],
@@ -56,16 +77,6 @@ describe('AppsScriptRegistrationGateway', () => {
   ])('erro "%s" do servidor vira "%s"', async (error, kind) => {
     const { gateway } = gatewayWith(async () => jsonResponse({ ok: false, error }));
     await expect(gateway.submit(payload)).rejects.toMatchObject({ kind });
-  });
-
-  it('conflito traz a posição de cada integrante já inscrito (e ignora posição torta)', async () => {
-    const { gateway } = gatewayWith(async () =>
-      jsonResponse({ ok: false, error: 'duplicate_email', members: [1, '2', -1, 3.5, 40, 3] }),
-    );
-    await expect(gateway.submit(payload)).rejects.toMatchObject({
-      kind: 'duplicate-email',
-      memberIndexes: [1, 3],
-    });
   });
 
   it('sem rede vira "network"', async () => {
@@ -91,7 +102,7 @@ describe('AppsScriptRegistrationGateway', () => {
     });
   });
 
-  it('dá 30s pro envio (a foto sobe junto) e depois aborta', async () => {
+  it('dá 20s pro envio e depois aborta', async () => {
     vi.useFakeTimers();
     let aborted = false;
     const { gateway } = gatewayWith(
@@ -104,9 +115,33 @@ describe('AppsScriptRegistrationGateway', () => {
         }),
     );
     const result = gateway.submit(payload).catch((e: unknown) => e);
-    await vi.advanceTimersByTimeAsync(15_000);
+    await vi.advanceTimersByTimeAsync(19_000);
     expect(aborted).toBe(false);
-    await vi.advanceTimersByTimeAsync(15_000);
+    await vi.advanceTimersByTimeAsync(1_000);
     await expect(result).resolves.toMatchObject({ kind: 'network', message: 'Timeout' });
+  });
+});
+
+describe('AppsScriptRegistrationCounter', () => {
+  const counterWith = (fetchFn: FetchLike) =>
+    new AppsScriptRegistrationCounter(new AppsScriptClient(ENDPOINT, fetchFn));
+
+  it('lê as vagas ocupadas do GET ?action=slots', async () => {
+    const spy = vi.fn<FetchLike>(async () => jsonResponse({ ok: true, open: true, capacity: 75, taken: 12 }));
+    await expect(counterWith(spy).taken()).resolves.toBe(12);
+    expect(String(spy.mock.calls[0]?.[0])).toBe(`${ENDPOINT}?action=slots`);
+  });
+
+  it.each([
+    ['ok false', { ok: false, error: 'unknown-action' }],
+    ['número torto', { ok: true, taken: 2.5 }],
+    ['negativo', { ok: true, taken: -1 }],
+    ['texto', { ok: true, taken: '12' }],
+  ])('%s vira null (vale o build)', async (_case, body) => {
+    await expect(counterWith(async () => jsonResponse(body)).taken()).resolves.toBeNull();
+  });
+
+  it('falha de rede vira null, sem quebrar a página', async () => {
+    await expect(counterWith(() => Promise.reject(new TypeError('offline'))).taken()).resolves.toBeNull();
   });
 });

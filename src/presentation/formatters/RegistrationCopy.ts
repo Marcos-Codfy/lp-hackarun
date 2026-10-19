@@ -13,41 +13,43 @@ export interface CtaCopy {
   isRegistration: boolean;
 }
 
-// texto dos CTAs e da linha de status conforme o momento da inscrição. Todo CTA de inscrição leva pra
-// página /inscricao com a origem no endereço (a planilha guarda de onde cada equipe veio)
+// texto dos CTAs e da linha de status conforme o momento da inscrição (individual: as equipes saem do sorteio).
+// Todo CTA de inscrição leva pra página /inscricao com a origem no endereço (a planilha guarda de onde cada
+// inscrito veio). Encerrada, o CTA vira só navegação pra mesma página, que mostra o aviso de encerramento
 export class RegistrationCopy {
   cta(status: Status, origin: RegistrationOrigin): CtaCopy {
-    if (status === 'closed') return { label: 'Ver equipes', href: '/equipes', isRegistration: false };
+    if (status === 'closed')
+      return { label: 'Inscrições encerradas', href: registrationHref(), isRegistration: false };
     const href = registrationHref(origin);
     if (status === 'soon') return { label: 'Quero participar', href, isRegistration: true };
     return { label: 'Garantir minha vaga', href, isRegistration: true };
   }
 
-  // rótulo longo dos CTAs de inscrição no corpo da página (fim da LP, equipes, 404). Em breve convida em vez de
-  // prometer o envio: a página de inscrição mostra o que preparar e quando abre
+  // rótulo longo dos CTAs de inscrição no corpo da página (fim da LP, seção de equipes, 404). Em breve convida
+  // em vez de prometer o envio: a página de inscrição mostra o que preparar e quando abre
   actionLabel(status: Status): string {
-    if (status === 'closed') return 'Ver as equipes';
+    if (status === 'closed') return 'Inscrições encerradas';
     if (status === 'soon') return 'Quero participar';
-    return 'Inscrever minha equipe';
+    return 'Fazer minha inscrição';
   }
 
   // versão curta pro header, que não tem espaço
   headerLabel(status: Status): string {
-    if (status === 'closed') return 'Equipes';
+    if (status === 'closed') return 'Encerradas';
     if (status === 'soon') return 'Participar';
     return 'Inscrever';
   }
 
+  // a inscrição é individual; o tamanho das equipes é o que o sorteio monta
   statusLine(registration: RegistrationDTO): string {
-    const { min, max } = registration.teamSize;
-    const team = `Equipes de ${min} a ${max} pessoas`;
+    const how = `Individual · Equipes de até ${registration.teamSize.max} por sorteio`;
     switch (registration.status) {
       case 'soon':
-        return `Inscrições abrem em breve · ${team}`;
+        return `Inscrições abrem em breve · ${how}`;
       case 'open':
-        return `Inscrições abertas · ${team}`;
+        return `Inscrições abertas · ${how}`;
       case 'closing':
-        return `Últimas horas de inscrição · ${team}`;
+        return `Últimas horas de inscrição · ${how}`;
       case 'closed':
         return 'Inscrições encerradas · nos vemos na final';
     }

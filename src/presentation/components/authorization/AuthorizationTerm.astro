@@ -1,0 +1,196 @@
+---
+// termo de autorização do responsável (menor de 18 anos) da página /autorizacao: uma folha preto no branco
+// já na tela, com as linhas pra preencher à mão. Na impressão (authorization-print.css) a página mostra só ele
+import { TEAM_DRAW } from '@presentation/formatters/TeamDrawCopy';
+import './authorization-print.css';
+
+// campos preenchidos à mão, na ordem do termo
+const groups = [
+  { title: 'Participante', fields: ['Nome completo do participante', 'Data de nascimento'] },
+  {
+    title: 'Responsável legal',
+    fields: [
+      'Nome completo do responsável legal',
+      'CPF ou RG do responsável',
+      'Parentesco ou vínculo com o participante',
+      'Telefone (WhatsApp) do responsável',
+    ],
+  },
+];
+---
+
+<article class="term" aria-labelledby="termo-title">
+  <header class="term__head">
+    <p class="term__event">HackaRun 2026 · UniCatólica · Palmas – TO</p>
+    <h2 id="termo-title" class="term__title">
+      Termo de autorização para participação de menor de 18 anos
+    </h2>
+  </header>
+
+  {groups.map((group) => (
+    <>
+      <h3 class="term__section">{group.title}</h3>
+      {group.fields.map((label) => (
+        <p class="term__field">
+          <span class="term__label">{label}:</span>
+          <span class="term__line" aria-hidden="true"></span>
+        </p>
+      ))}
+    </>
+  ))}
+
+  <h3 class="term__section">Declaração</h3>
+  <p class="term__text">
+    Eu, responsável legal identificado acima, <strong>autorizo</strong> o participante identificado acima a
+    participar do HackaRun 2026, promovido pelo Centro Universitário Católica do Tocantins (UniCatólica), em
+    todas as atividades realizadas de <strong>11 a 14 de novembro de 2026</strong>
+    na UniCatólica (Bloco II), em Palmas – TO, inclusive o credenciamento e o sorteio das equipes, e na etapa
+    final, no <strong>Capim Dourado Shopping</strong>, em Palmas – TO.
+  </p>
+  <p class="term__text">
+    Declaro que conheço o regulamento oficial do HackaRun 2026 e que o participante deverá cumprir as suas
+    regras, as orientações da organização e as normas dos locais do evento.
+  </p>
+  <p class="term__text">
+    Declaro estar ciente de que, conforme o regulamento (item 13), os dados pessoais do participante serão
+    tratados para organização, comunicação, credenciamento, formação das equipes, avaliação e execução do
+    evento, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018), e de que a captação e a
+    divulgação de imagem, voz e demais registros do evento observarão as informações de privacidade, as
+    autorizações exigíveis e as exigências legais aplicáveis a menores de idade.
+  </p>
+
+  <p class="term__place">
+    Palmas – TO, <span class="term__blank term__blank--day" aria-hidden="true"></span> de
+    <span class="term__blank term__blank--month" aria-hidden="true"></span> de 2026.
+  </p>
+
+  <div class="term__signatures">
+    <p class="term__signature">Assinatura do responsável legal</p>
+    <p class="term__signature">Assinatura do participante</p>
+  </div>
+
+  <p class="term__foot">
+    Entregar no credenciamento do HackaRun 2026, em {TEAM_DRAW.date}, na {TEAM_DRAW.place}. Regulamento e
+    aviso de privacidade no site oficial do evento.
+  </p>
+</article>
+
+<style>
+  /* o termo é uma folha: preto no branco já na tela, igual ao que sai na impressora */
+  .term {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-5);
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 30px 60px -36px rgb(0 0 0 / 0.9);
+    color: #111;
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .term__head {
+    display: grid;
+    gap: var(--space-2);
+    padding-bottom: var(--space-3);
+    border-bottom: 2px solid #111;
+  }
+
+  .term__event {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .term__title {
+    color: #111;
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  .term__section {
+    margin-top: var(--space-3);
+    color: #111;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* rótulo + linha pra escrever à mão; no celular a linha desce pra baixo do rótulo */
+  .term__field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0 var(--space-2);
+  }
+
+  .term__label {
+    flex: none;
+  }
+
+  .term__line {
+    flex: 1 1 12rem;
+    min-height: 1.9rem;
+    border-bottom: 1px solid #111;
+  }
+
+  .term__text {
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .term__text strong {
+    color: #111;
+  }
+
+  .term__place {
+    margin-top: var(--space-4);
+  }
+
+  .term__blank {
+    display: inline-block;
+    border-bottom: 1px solid #111;
+  }
+
+  .term__blank--day {
+    width: 3rem;
+  }
+
+  .term__blank--month {
+    width: 9rem;
+  }
+
+  .term__signatures {
+    display: grid;
+    gap: var(--space-8);
+    margin-top: var(--space-8);
+  }
+
+  .term__signature {
+    padding-top: var(--space-2);
+    border-top: 1px solid #111;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .term__foot {
+    margin-top: var(--space-5);
+    padding-top: var(--space-3);
+    border-top: 1px solid #999;
+    color: #333;
+    font-size: 0.75rem;
+  }
+
+  @media (min-width: 40rem) {
+    .term {
+      padding: var(--space-8) var(--space-7);
+    }
+
+    .term__signatures {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-7);
+    }
+  }
+</style>

@@ -1,5 +1,5 @@
 // parte pesada da página /inscricao (VM + View do formulário, rascunho, etapas e o que eles puxam): chunk à
-// parte, que o LightApp baixa junto com os serviços de envio e foto
+// parte, que o LightApp baixa junto com os serviços de envio
 import type { EventBus } from '@shared/core/EventBus';
 import { qs } from '@shared/utils/dom';
 import type { ClientContainer, RegistrationServices } from '@composition/client';
@@ -11,7 +11,6 @@ import {
 } from '@presentation/view-models/registration/RegistrationDraft';
 import { RegistrationFormViewModel } from '@presentation/view-models/registration/RegistrationFormViewModel';
 import { sourceFromSearch } from '@presentation/view-models/registration/registrationOrigin';
-import { TeamsViewModel } from '@presentation/view-models/teams/TeamsViewModel';
 import { RegistrationFormView } from '../RegistrationFormView';
 import { DraftKeeper } from './DraftKeeper';
 import { StatusBadgeView } from './StatusBadgeView';
@@ -23,7 +22,7 @@ export interface RegistrationPageDeps {
   config: AppConfig;
   bus: EventBus<AppEvents>;
   services: RegistrationServices;
-  container: Pick<ClientContainer, 'clock' | 'listTeams'>;
+  container: Pick<ClientContainer, 'clock'>;
   reducedMotion: boolean;
 }
 
@@ -36,25 +35,19 @@ function tabStorage(): DraftStorage | null {
   }
 }
 
-// com teto de vagas, a lista ao vivo da planilha diz se ainda cabe equipe (vagas esgotadas fecham o formulário)
-function watchCapacity(deps: RegistrationPageDeps, vm: RegistrationFormViewModel): void {
-  const { slots } = deps.config.registration;
-  const { listTeams } = deps.container;
-  if (slots.capacity === null || !listTeams || !vm.isOpen) return;
-  const teams = new TeamsViewModel({ initial: [], slots, listTeams });
-  teams.state.subscribe((state) => {
-    if (state.status === 'ready') vm.refreshAvailability(state.slots.taken);
-  });
-  void teams.refresh();
+// com teto de vagas, a contagem da planilha diz se ainda cabe gente (vagas esgotadas fecham o formulário)
+async function watchCapacity(deps: RegistrationPageDeps, vm: RegistrationFormViewModel): Promise<void> {
+  const { counter } = deps.services;
+  if (deps.config.registration.slots.capacity === null || !counter || !vm.isOpen) return;
+  const taken = await counter.taken();
+  if (taken !== null) vm.refreshAvailability(taken);
 }
 
 export function mountRegistrationPage(deps: RegistrationPageDeps): RegistrationFormViewModel {
-  const { root, config, bus, services, container, reducedMotion } = deps;
+  const { root, bus, services, container, reducedMotion } = deps;
   const status = root.dataset['status'];
   const vm = new RegistrationFormViewModel({
     submit: services.submitRegistration,
-    prepareImage: services.prepareTeamImage,
-    teamSize: config.registration.teamSize,
     isOpen: status === 'open' || status === 'closing',
     clock: container.clock,
   });
@@ -81,6 +74,6 @@ export function mountRegistrationPage(deps: RegistrationPageDeps): RegistrationF
   if (progress) new StepProgressView(progress, root, vm, reducedMotion).mount();
   const badge = qs('[data-reg-status]');
   if (badge) new StatusBadgeView(badge, vm).mount();
-  watchCapacity(deps, vm);
+  void watchCapacity(deps, vm);
   return vm;
 }

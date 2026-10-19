@@ -49,7 +49,7 @@ function createServerContainer() {
   const partners = new StaticPartnerRepository(partnersData as RawPartner[]);
   const faq = new StaticFaqRepository(faqData as RawFaqItem[]);
 
-  const overview = new GetEventOverview({ events, stations, teams, policy: new RegistrationPolicy(), clock });
+  const overview = new GetEventOverview({ events, stations, policy: new RegistrationPolicy(), clock });
 
   return {
     getLandingPage: new GetLandingPage({

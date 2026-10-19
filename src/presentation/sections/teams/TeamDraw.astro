@@ -1,0 +1,185 @@
+---
+// como as equipes se formam (inscrição individual + sorteio presencial): três etapas numeradas, o aviso de
+// quem tem menos de 18 anos e o CTA da inscrição. Celular: uma coluna. Desktop: as etapas lado a lado
+import type { RegistrationDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { AUTHORIZATION_PATH } from '@presentation/components/layout/navLinks';
+import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
+import { teamDrawSteps } from '@presentation/formatters/TeamDrawCopy';
+
+interface Props {
+  registration: RegistrationDTO;
+}
+
+const { registration } = Astro.props;
+const steps = teamDrawSteps(registration);
+const copy = new RegistrationCopy();
+const cta = copy.cta(registration.status, 'teams');
+---
+
+<div class="draw sx-glass sx-corners">
+  <p class="draw__hud sx-hud">
+    <span class="draw__dot" aria-hidden="true"></span>
+    Formação das equipes
+  </p>
+  <ol class="draw__steps" role="list">
+    {steps.map((step, i) => (
+      <li class="draw__step">
+        <span class="draw__mark" aria-hidden="true">
+          <span class="draw__num">{String(i + 1).padStart(2, '0')}</span>
+          <span class="draw__icon">
+            <Icon name={step.icon} size={18} />
+          </span>
+        </span>
+        <h3 class="draw__title">{step.title}</h3>
+        <p class="draw__text">{step.text}</p>
+      </li>
+    ))}
+  </ol>
+  <p class="draw__minor">
+    <Icon name="shield" size={18} />
+    <span>
+      <strong>Menor de 18 anos?</strong> Traga a autorização assinada pelo responsável no credenciamento (item
+      2.5 do regulamento). <a href={AUTHORIZATION_PATH}>Modelo de autorização para imprimir</a>.
+    </span>
+  </p>
+  {cta.isRegistration && (
+    <div class="draw__actions">
+      <Button href={cta.href} size="lg" registrationCta="teams">
+        {copy.actionLabel(registration.status)}
+        <Icon slot="icon" name="arrow-right" />
+      </Button>
+    </div>
+  )}
+</div>
+
+<style>
+  /* minmax(0, 1fr): o rótulo do botão (que não quebra) não alarga a trilha além do card */
+  .draw {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .draw__hud {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .draw__dot {
+    width: 6px;
+    height: 6px;
+    background: var(--c-cyan);
+    box-shadow: 0 0 10px var(--c-cyan);
+    transform: rotate(45deg);
+  }
+
+  .draw__steps {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  /* número e ícone numa linha, o título com a largura toda embaixo: "Credenciamento" nunca quebra no meio */
+  .draw__step {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+  }
+
+  .draw__mark {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .draw__num {
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+  }
+
+  .draw__icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid rgb(0 229 255 / 0.45);
+    border-radius: 3px;
+    color: var(--c-cyan);
+  }
+
+  .draw__title {
+    margin-top: var(--space-1);
+    font-size: var(--fs-lg);
+    overflow-wrap: normal;
+  }
+
+  .draw__text {
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .draw__minor {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-left: 2px solid var(--c-orange);
+    background: linear-gradient(90deg, rgb(255 133 47 / 0.1), transparent 85%);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .draw__minor :global(.icon) {
+    flex: none;
+    margin-top: 0.15em;
+    color: var(--c-orange);
+  }
+
+  .draw__minor strong {
+    color: var(--text);
+  }
+
+  .draw__minor a {
+    color: var(--ink-cyan);
+    text-underline-offset: 3px;
+  }
+
+  /* celular estreito: o botão ocupa a largura e, se ainda faltar espaço, o rótulo quebra em vez de vazar */
+  .draw__actions :global(.btn) {
+    --btn-px: 1.25rem;
+    max-width: 100%;
+  }
+
+  .draw__actions :global(.btn__label) {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  @media (min-width: 40rem) {
+    .draw {
+      gap: var(--space-6);
+      padding: var(--space-7);
+    }
+
+    .draw__actions :global(.btn) {
+      --btn-px: 2.1rem;
+    }
+
+    .draw__actions :global(.btn__label) {
+      white-space: nowrap;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .draw__steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+</style>

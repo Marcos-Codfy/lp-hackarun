@@ -1,7 +1,7 @@
 ---
 // selo de status da página de inscrição (em breve, abertas, encerrando, encerradas) + o contador da largada.
 // Se o prazo passar com a página aberta, a View troca o selo pra "Encerradas" (data-reg-status).
-// Celular e tablet: uma linha só embaixo do título (o lead já diz o tamanho da equipe e a LP mostra o contador);
+// Celular e tablet: uma linha só embaixo do título (o lead já diz como funciona e a LP mostra o contador);
 // desktop: o card completo ao lado do título
 import type { MilestoneDTO, RegistrationDTO } from '@application/index';
 import Countdown from '@presentation/components/countdown/Countdown.astro';
@@ -9,13 +9,14 @@ import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 
 interface Props {
   status: RegistrationDTO['status'];
-  teamSize: { min: number; max: number };
+  // vagas de inscritos; null = sem limite anunciado
+  capacity: number | null;
   milestones: MilestoneDTO[];
 }
 
-const { status, teamSize, milestones } = Astro.props;
+const { status, capacity, milestones } = Astro.props;
 const copy = new RegistrationCopy();
-const team = `Equipes de ${teamSize.min} a ${teamSize.max} pessoas, só alunos da UniCatólica`;
+const team = capacity ? `${capacity} vagas · equipes formadas no sorteio` : 'Equipes formadas no sorteio';
 ---
 
 {/* vidro sólido: no desktop o halo de HUD passa atrás do card e os tiques não podem aparecer através dele */}

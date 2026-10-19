@@ -1,0 +1,47 @@
+/* impressão: só o termo, preto no branco, sem header, rodapé, fundo animado nem instruções */
+@media print {
+  @page {
+    margin: 16mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body > :not(main) {
+    display: none !important;
+  }
+
+  body > main.auth-page {
+    padding: 0 !important;
+  }
+
+  .auth-page .auth {
+    padding: 0 !important;
+  }
+
+  .auth-page .auth__intro,
+  .auth-page .auth__note {
+    display: none !important;
+  }
+
+  .auth-page .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .auth-page .term {
+    padding: 0 !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    font-size: 11pt;
+  }
+
+  .auth-page .term__signatures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    break-inside: avoid;
+  }
+}

@@ -1,7 +1,7 @@
 import { ValueObject } from '../shared/ValueObject';
 import { fail, ok, type Result } from '../shared/Result';
 
-// matrícula da UniCatólica (o hackathon é exclusivo dos alunos): sem espaço nas pontas e em maiúsculas.
+// matrícula da UniCatólica (opcional, só pra quem estuda lá): sem espaço nas pontas e em maiúsculas.
 // Mesmas regras do STUDENT_ID_PATTERN do apps-script/Validation.gs (um teste confere)
 export class StudentId extends ValueObject<{ value: string }> {
   static readonly MIN = 4;

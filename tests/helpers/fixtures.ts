@@ -1,4 +1,4 @@
-import { TeamName, type RegistrationInput } from '@domain/index';
+import { TeamName, type ParticipantInput } from '@domain/index';
 import type {
   MilestoneDTO,
   RegistrationGateway,
@@ -6,9 +6,9 @@ import type {
   RegistrationReceipt,
 } from '@application/index';
 import type { Clock } from '@application/index';
-import { TEAM_IMAGE } from './images';
 
-export const TEAM_SIZE = { min: 2, max: 5 };
+// equipes do sorteio: 4 de preferência, até 5
+export const TEAM_SIZE = { min: 4, max: 5 };
 
 // nome de equipe válido sem desembrulhar o Result em todo teste
 export function teamName(raw: string): TeamName {
@@ -23,22 +23,20 @@ export const MILESTONES: MilestoneDTO[] = [
   { key: 'ceremony', label: 'A premiação começa em', at: '2026-11-14T18:00:00-03:00' },
 ];
 
-export const MEMBER_ANA = { name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' };
-export const MEMBER_BRUNO = { name: 'Bruno Lima', studentId: '2024100456', email: 'bruno@exemplo.com' };
-
-// integrante válido número n (matrícula e e-mail únicos)
-export const member = (n: number) => ({
-  name: 'Pessoa Integrante',
-  studentId: `RA-${String(n).padStart(4, '0')}`,
-  email: `p${n}@exemplo.com`,
-});
-
-export function teamInput(overrides: Partial<RegistrationInput> = {}): RegistrationInput {
+// inscrição válida de aluna da UniCatólica (os testes trocam só o que interessa)
+export function participantInput(overrides: Partial<ParticipantInput> = {}): ParticipantInput {
   return {
-    teamName: 'Bug Busters',
-    members: [{ ...MEMBER_ANA }, { ...MEMBER_BRUNO }],
+    name: 'Ana Souza',
+    email: 'ana@exemplo.com',
+    whatsapp: '(63) 99999-1234',
+    profile: 'unicatolica',
+    institution: '',
+    course: 'Engenharia de Software',
+    period: '3',
+    studentId: '2024100123',
+    area: '',
+    adult: 'yes',
     acceptedTerms: true,
-    teamImage: TEAM_IMAGE,
     ...overrides,
   };
 }

@@ -1,15 +1,14 @@
 ---
-// erro de um TextField: nasce vazio e escondido; a View preenche o texto e liga o aria-describedby
+// erro de um campo: nasce vazio e escondido; a View preenche o texto e liga o aria-describedby
 interface Props {
   id: string;
   field?: string | undefined;
-  memberField?: string | undefined;
 }
 
-const { id, field, memberField } = Astro.props;
+const { id, field } = Astro.props;
 ---
 
-<p class="field-error" id={id} data-error-for={field} data-member-error={memberField} hidden></p>
+<p class="field-error" id={id} data-error-for={field} hidden></p>
 
 <style>
   .field-error {

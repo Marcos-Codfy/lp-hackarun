@@ -1,13 +1,11 @@
-// resumo de erros por bloco: o envio vazio vira 4 linhas curtas (equipe, cada integrante, aceite) em vez de 9
-// frases repetidas; bloco com um erro só mantém a frase exata (o e-mail já inscrito, por exemplo)
+// resumo de erros: uma linha por campo, com o rótulo (ou a pergunta) e a frase exata, levando até ele
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RegistrationGatewayError } from '@application/index';
 import { EventBus } from '@shared/core/EventBus';
 import type { AppEvents } from '@presentation/app/AppEvents';
 import { RegistrationFormView } from '@presentation/views/RegistrationFormView';
-import { groupErrors, joinParts } from '@presentation/views/registration/errorGroups';
 import { formMarkup } from './formMarkup';
-import { fillValidTeam, setupForm } from './formSetup';
+import { fillValid, setupForm } from './formSetup';
 
 function mount() {
   document.body.innerHTML = formMarkup();
@@ -27,38 +25,17 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('groupErrors', () => {
-  it('junta por bloco na ordem do formulário e guarda o nome curto de cada campo', () => {
-    const groups = groupErrors([
-      { path: 'teamName', message: 'a' },
-      { path: 'teamImage', message: 'b' },
-      { path: 'members.1.studentId', message: 'c' },
-      { path: 'members.1.email', message: 'd' },
-      { path: 'acceptedTerms', message: 'e' },
-    ]);
-    expect(groups.map((g) => [g.title, g.parts])).toEqual([
-      ['Equipe', ['nome', 'foto ou logo']],
-      ['Integrante 2', ['matrícula', 'e-mail']],
-      [null, ['acceptedTerms']],
-    ]);
-  });
-
-  it('lista em português: "a, b e c"', () => {
-    expect(joinParts(['nome'])).toBe('nome');
-    expect(joinParts(['nome', 'e-mail'])).toBe('nome e e-mail');
-    expect(joinParts(['nome', 'matrícula', 'e-mail'])).toBe('nome, matrícula e e-mail');
-  });
-});
-
 describe('resumo de erros na tela', () => {
-  it('envio vazio: 4 linhas, cada uma levando pro 1º campo do bloco', async () => {
+  it('envio vazio: uma linha por campo obrigatório, na ordem do formulário', async () => {
     const { vm, items, title } = mount();
     await vm.submit();
-    expect(title()).toBe('Faltam ajustar 9 campos:');
+    expect(title()).toBe('Faltam ajustar 6 campos:');
     expect(items()).toEqual([
-      { text: 'Equipe: nome e foto ou logo', path: 'teamName' },
-      { text: 'Integrante 1: nome, matrícula e e-mail', path: 'members.0.name' },
-      { text: 'Integrante 2: nome, matrícula e e-mail', path: 'members.1.name' },
+      { text: 'Nome completo: Informe o nome completo.', path: 'name' },
+      { text: 'E-mail: Informe o e-mail.', path: 'email' },
+      { text: 'WhatsApp: Informe o WhatsApp com DDD.', path: 'whatsapp' },
+      { text: 'Você tem 18 anos ou mais?: Responda se você tem 18 anos ou mais.', path: 'adult' },
+      { text: 'Você estuda atualmente?: Escolha a opção que mais combina com você.', path: 'profile' },
       {
         text: 'Regulamento e LGPD: É preciso concordar com o regulamento e o uso dos dados.',
         path: 'acceptedTerms',
@@ -66,16 +43,23 @@ describe('resumo de erros na tela', () => {
     ]);
   });
 
-  it('erro do servidor num campo só: a frase exata continua no resumo', async () => {
-    const { vm, gateway, items } = mount();
-    fillValidTeam(vm);
-    gateway.willThrow(new RegistrationGatewayError('duplicate-email', 'x', [1]));
+  it('erro do servidor num campo só: título no singular e a frase exata', async () => {
+    const { vm, gateway, items, title } = mount();
+    fillValid(vm);
+    gateway.willThrow(new RegistrationGatewayError('duplicate-student-id', 'x'));
     await vm.submit();
+    expect(title()).toBe('Falta ajustar 1 campo:');
     expect(items()).toEqual([
-      {
-        text: 'Integrante 2 · E-mail: Esse e-mail já está em outra equipe inscrita.',
-        path: 'members.1.email',
-      },
+      { text: 'Matrícula na UniCatólica: Essa matrícula já tem uma inscrição.', path: 'studentId' },
     ]);
+  });
+
+  it('o link do resumo leva o foco pro campo', async () => {
+    const { vm, root } = mount();
+    vm.setValue('profile', 'graduate');
+    await vm.submit();
+    const link = root.querySelector<HTMLAnchorElement>('[data-focus-path="course"]');
+    link?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(document.activeElement?.id).toBe('reg-course');
   });
 });

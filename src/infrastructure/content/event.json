@@ -30,9 +30,9 @@
   ],
   "registration": {
     "endpoint": "",
-    "closesAt": null,
-    "capacity": null,
-    "teamSize": { "min": 2, "max": 5 }
+    "closesAt": "2026-11-08T23:59:00-03:00",
+    "capacity": 75,
+    "teamSize": { "min": 4, "max": 5 }
   },
   "maxStands": 10,
   "days": [
@@ -53,7 +53,7 @@
           "venueId": "unicatolica",
           "place": "Auditório do Bloco II",
           "audience": "open",
-          "description": "Três oficinas práticas abertas ao público: Ideia boa ou furada?, Do zero ao código e Hackeando ideias com IA.",
+          "description": "Três oficinas de capacitação: De onde surgem as ideias?, Do Commit ao Código (Git e GitHub) e Hackeando ideias com IA.",
           "activities": [
             {
               "id": "idea-check",
@@ -103,7 +103,7 @@
           "venueId": "unicatolica",
           "place": "Bloco II",
           "audience": "open",
-          "description": "Abertura oficial, apresentação das equipes e mentores, regulamento, lançamento do desafio, oficina de tecnologia e exposição de produtos e soluções tecnológicas.",
+          "description": "Abertura oficial, apresentação do staff e sorteio das equipes, regulamento e lançamento do desafio.",
           "activities": [
             {
               "id": "official-opening",
@@ -116,13 +116,13 @@
             },
             {
               "id": "teams-and-mentors",
-              "title": "Apresentação das equipes e mentores",
+              "title": "Apresentação do staff e sorteio das equipes",
               "kind": "hackathon",
               "track": "hackathon",
               "start": "19:15",
               "end": "19:35",
-              "summary": "As equipes do HackaRun e os mentores que vão orientá-las.",
-              "details": "Apresentação da equipe de apoio do HackaRun, incluindo organização, mentores e demais responsáveis pela condução das atividades. Em seguida, realização do sorteio para formação das equipes participantes, com orientações iniciais sobre a dinâmica de trabalho e o acompanhamento durante a competição."
+              "summary": "O staff e os mentores se apresentam e as equipes são formadas por sorteio.",
+              "details": "Apresentação da equipe de apoio do HackaRun, incluindo organização, mentores e demais responsáveis pela condução das atividades. Em seguida, sorteio presencial para formação das equipes, de preferência com 4 pessoas e no máximo 5, com orientações iniciais sobre a dinâmica de trabalho. Participa do sorteio quem estiver presente e credenciado."
             },
             {
               "id": "rulebook",
@@ -158,14 +158,14 @@
       "sessions": [
         {
           "id": "market",
-          "title": "Oficinas e interação com projetos acadêmicos",
+          "title": "Desenvolvimento e missões",
           "kind": "workshop",
           "start": "19:00",
           "end": "22:00",
           "venueId": "unicatolica",
           "place": "Bloco II",
           "audience": "hackathon",
-          "description": "Oficinas de tecnologia aplicada ao mercado e o Espaço de Desenvolvimento dos Alunos.",
+          "description": "Período reservado para as equipes executarem missões, programarem, testarem e receberem mentorias.",
           "activities": [
             {
               "id": "market-workshops",
@@ -191,7 +191,7 @@
           "id": "final-development",
           "title": "Desenvolvimento final",
           "kind": "challenge",
-          "start": "08:00",
+          "start": "10:00",
           "end": "13:00",
           "venueId": "unicatolica",
           "audience": "teams",
@@ -203,7 +203,7 @@
               "id": "final-sprint",
               "title": "Desenvolvimento das soluções",
               "kind": "hackathon",
-              "start": "08:00",
+              "start": "10:00",
               "end": "13:00",
               "summary": "Concluir missões, integrar, testar e preparar a entrega final, com mentoria.",
               "details": "Período destinado à continuidade do desenvolvimento das soluções, conclusão das missões, integração das funcionalidades, realização de testes e preparação da entrega final. As equipes contam com acompanhamento e orientação dos mentores, respeitando as regras da competição. As atividades presenciais de desenvolvimento terminam às 13h.",
@@ -226,6 +226,7 @@
           "venueId": "capim-dourado",
           "audience": "final",
           "description": "Etapa final do HackaRun: apresentação das soluções desenvolvidas pelas equipes, atividades de entretenimento e cerimônia de premiação.",
+          "note": "A partir das 10h, o painel de LED do shopping exibe conteúdos do evento.",
           "activities": [
             {
               "id": "retrospective",
@@ -243,7 +244,7 @@
               "start": "17:30",
               "end": "18:30",
               "summary": "As finalistas apresentam suas soluções à banca avaliadora.",
-              "details": "Apresentação das soluções desenvolvidas pelas equipes finalistas à banca avaliadora, conforme os critérios estabelecidos no regulamento da competição."
+              "details": "Apresentação presencial das soluções pelas equipes finalistas (até sete, anunciadas até as 16h30) à banca avaliadora, com até cinco minutos cada, conforme os critérios estabelecidos no regulamento da competição. O vídeo entregue na Missão 3 não substitui o pitch presencial."
             },
             {
               "id": "band",

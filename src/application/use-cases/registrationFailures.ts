@@ -9,33 +9,24 @@ export const FAILURE_MESSAGES: Record<GatewayFailure, string> = {
   server: 'O servidor das inscrições falhou por um instante. Seus dados continuam aqui: tente de novo.',
   rejected: 'A inscrição foi recusada. Revise os dados e tente novamente.',
   closed: 'As inscrições estão encerradas.',
-  duplicate: 'Essa equipe já tem uma inscrição registrada.',
-  'rate-limited': 'Muita gente se inscrevendo agora. Tenta de novo em alguns segundos.',
-  'duplicate-team-name': 'Já existe uma equipe inscrita com esse nome. Escolha outro.',
-  'duplicate-email':
-    'Um dos e-mails já está em outra equipe inscrita. Cada pessoa participa de uma equipe só.',
-  'duplicate-student-id':
-    'Uma das matrículas já está em outra equipe inscrita. Cada pessoa participa de uma equipe só.',
+  duplicate: 'Essa inscrição já foi registrada.',
+  'rate-limited': 'Muita gente se inscrevendo agora. Tente de novo em alguns segundos.',
+  'duplicate-email': 'Esse e-mail já tem uma inscrição. Cada pessoa se inscreve uma vez só.',
+  'duplicate-whatsapp': 'Esse WhatsApp já tem uma inscrição. Cada pessoa se inscreve uma vez só.',
+  'duplicate-student-id': 'Essa matrícula já tem uma inscrição. Cada pessoa se inscreve uma vez só.',
 };
 
-const CONFLICT_FIELDS: Record<Exclude<ConflictFailure, 'duplicate-team-name'>, [string, string]> = {
-  'duplicate-email': ['email', 'Esse e-mail já está em outra equipe inscrita.'],
-  'duplicate-student-id': ['studentId', 'Essa matrícula já está em outra equipe inscrita.'],
+// conflito -> campo do formulário onde o erro aparece
+const CONFLICT_FIELDS: Record<ConflictFailure, [string, string]> = {
+  'duplicate-email': ['email', 'Esse e-mail já tem uma inscrição.'],
+  'duplicate-whatsapp': ['whatsapp', 'Esse WhatsApp já tem uma inscrição.'],
+  'duplicate-student-id': ['studentId', 'Essa matrícula já tem uma inscrição.'],
 };
 
 export const isConflict = (kind: GatewayFailure): kind is ConflictFailure =>
-  kind === 'duplicate-team-name' || kind === 'duplicate-email' || kind === 'duplicate-student-id';
+  Object.prototype.hasOwnProperty.call(CONFLICT_FIELDS, kind);
 
-// conflito -> erro no campo certo; sem saber qual integrante (servidor antigo), devolve {} e vale a mensagem geral
-export function conflictErrors(
-  kind: ConflictFailure,
-  memberIndexes: readonly number[],
-  memberCount: number,
-): RegistrationErrors {
-  if (kind === 'duplicate-team-name') {
-    return { teamName: 'Esse nome já é de outra equipe inscrita. Escolha outro.' };
-  }
+export function conflictErrors(kind: ConflictFailure): RegistrationErrors {
   const [field, message] = CONFLICT_FIELDS[kind];
-  const valid = memberIndexes.filter((i) => Number.isInteger(i) && i >= 0 && i < memberCount);
-  return Object.fromEntries(valid.map((i) => [`members.${i}.${field}`, message]));
+  return { [field]: message };
 }

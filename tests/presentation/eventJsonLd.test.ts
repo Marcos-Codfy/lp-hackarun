@@ -43,12 +43,8 @@ describe('buildEventJsonLd', () => {
     expect(subs.map((s) => [s['name'], s['startDate'], s['endDate']])).toEqual([
       ['Oficinas práticas', '2026-11-11T19:00:00-03:00', '2026-11-11T22:00:00-03:00'],
       ['Abertura oficial e lançamento do HackaRun', '2026-11-12T19:00:00-03:00', '2026-11-12T22:00:00-03:00'],
-      [
-        'Oficinas e interação com projetos acadêmicos',
-        '2026-11-13T19:00:00-03:00',
-        '2026-11-13T22:00:00-03:00',
-      ],
-      ['Desenvolvimento final', '2026-11-14T08:00:00-03:00', '2026-11-14T13:00:00-03:00'],
+      ['Desenvolvimento e missões', '2026-11-13T19:00:00-03:00', '2026-11-13T22:00:00-03:00'],
+      ['Desenvolvimento final', '2026-11-14T10:00:00-03:00', '2026-11-14T13:00:00-03:00'],
       ['HackaRun Experience', '2026-11-14T17:00:00-03:00', undefined],
     ]);
     expect((subs[0]?.['location'] as Node)['name']).toBe(

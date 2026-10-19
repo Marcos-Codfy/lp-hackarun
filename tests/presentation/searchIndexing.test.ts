@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import type { APIContext } from 'astro';
 import { describe, expect, it } from 'vitest';
 import { GET } from '../../src/pages/robots.txt';
+import { UNLISTED_PATHS, isListedInSitemap } from '../../astro.config.mjs';
 
 async function robots(site?: string): Promise<{ text: string; type: string | null }> {
   const context = { site: site ? new URL(site) : undefined } as unknown as APIContext;
@@ -37,8 +38,9 @@ describe('meta robots do Seo.astro', () => {
     'utf8',
   );
 
-  it('noindex só quando o build não é indexável (prévia da Cloudflare ou inscrição simulada)', () => {
-    expect(seo).toContain('{!indexable && <meta name="robots" content="noindex" />}');
+  it('noindex quando o build não é indexável (prévia ou inscrição simulada) ou quando a página pede', () => {
+    expect(seo).toContain('{(!indexable || noindex) && <meta name="robots" content="noindex" />}');
+    expect(seo).toContain('noindex = false,');
     expect(seo).toMatch(/isIndexable\(\{\s*cfPages: import\.meta\.env\.CF_PAGES,/);
     expect(seo).toContain('branch: import.meta.env.CF_PAGES_BRANCH');
     expect(seo).toContain('simulationFlag: SIMULATION_FLAG');
@@ -47,5 +49,29 @@ describe('meta robots do Seo.astro', () => {
   it('o canonical cai no endereço oficial quando o config não tem site', () => {
     expect(seo).toContain('Astro.site ?? new URL(DEFAULT_SITE_URL)');
     expect(seo).not.toContain('lp-hackarun.pages.dev');
+  });
+});
+
+describe('páginas escondidas: fora do sitemap e com noindex', () => {
+  const SRC = new URL('../../src/', import.meta.url);
+  const read = (path: string) => readFileSync(fileURLToPath(new URL(path, SRC)), 'utf8');
+
+  it('o sitemap deixa de fora /equipes (até o sorteio) e /autorizacao, com ou sem barra no fim', () => {
+    expect(UNLISTED_PATHS).toEqual(['/equipes', '/autorizacao']);
+    expect(isListedInSitemap('https://hackarun.pages.dev/equipes')).toBe(false);
+    expect(isListedInSitemap('https://hackarun.pages.dev/equipes/')).toBe(false);
+    expect(isListedInSitemap('https://hackarun.pages.dev/autorizacao')).toBe(false);
+  });
+
+  it('o resto continua no sitemap (inclusive nomes parecidos)', () => {
+    for (const path of ['/', '/inscricao', '/privacidade', '/equipes-2027']) {
+      expect(isListedInSitemap(`https://hackarun.pages.dev${path}`)).toBe(true);
+    }
+  });
+
+  it('as duas páginas pedem noindex ao Seo.astro', () => {
+    expect(read('presentation/components/seo/teamsPageSeo.ts')).toContain('noindex: true');
+    expect(read('pages/equipes.astro')).toContain('...TEAMS_PAGE');
+    expect(read('pages/autorizacao.astro')).toContain('noindex: true');
   });
 });

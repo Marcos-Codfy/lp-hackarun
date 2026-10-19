@@ -1,10 +1,16 @@
 ---
 // próximos passos da tela de sucesso (RegistrationSuccess), numerados em HUD
+interface Props {
+  // "12/11, às 19h15"; null = horário ainda não publicado
+  drawAt: string | null;
+}
+
+const { drawAt } = Astro.props;
 const steps = [
-  'Guarde o protocolo: é ele que identifica a inscrição da equipe.',
-  'A organização confere os dados e a foto e confirma a equipe por e-mail.',
-  'Confirmada, a equipe aparece com a foto ou a logo na página de equipes do site.',
-  'Confira a programação no site pra não perder a largada.',
+  'Guarde o protocolo: é ele que identifica a sua inscrição.',
+  `Vá ao sorteio das equipes${drawAt ? `, em ${drawAt}` : ''}, na UniCatólica, Bloco II. Só participa quem estiver presente e credenciado.`,
+  'No sorteio, as equipes são formadas com 4 pessoas (até 5) e cada uma escolhe um representante.',
+  'Confira a programação no site para não perder nenhuma etapa.',
 ];
 ---
 

@@ -1,5 +1,5 @@
-// links entre a LP, /inscricao e /equipes: a SubNav das páginas leves, o CTA do header (atual na própria
-// página), o rodapé e a origem de cada CTA (coluna "Origem" da planilha)
+// links entre a LP e /inscricao (a /equipes fica escondida até o sorteio): a SubNav das páginas leves, o CTA do
+// header (atual na própria página), o rodapé e a origem de cada CTA (coluna "Origem" da planilha)
 import { describe, expect, it } from 'vitest';
 import {
   EVENT_RETURN_HREF,
@@ -8,6 +8,7 @@ import {
   headerCtaLink,
   navLinksFor,
   subNavLinksFor,
+  type SitePage,
 } from '@presentation/components/layout/navLinks';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
 import {
@@ -43,34 +44,64 @@ describe('origem do CTA de inscrição', () => {
     }
   });
 
-  it('CTAs da LP: inscrição aberta ou em breve vai pra /inscricao; encerrada, pras equipes', () => {
+  it('CTAs da LP: inscrição aberta ou em breve vai pra /inscricao; encerrada, pro aviso na mesma página', () => {
     const copy = new RegistrationCopy();
     expect(copy.cta('open', 'hero').href).toBe('/inscricao?origem=hero');
     expect(copy.cta('soon', 'about').href).toBe('/inscricao?origem=about');
     expect(copy.cta('closing', 'menu').href).toBe('/inscricao?origem=menu');
-    expect(copy.cta('closed', 'hero')).toMatchObject({ href: '/equipes', isRegistration: false });
+    // encerrada não marca origem (não é inscrição) e nunca leva pra /equipes, escondida até o sorteio
+    expect(copy.cta('closed', 'hero')).toEqual({
+      label: 'Inscrições encerradas',
+      href: '/inscricao',
+      isRegistration: false,
+    });
   });
 
-  it('rótulo longo (fim da LP, equipes, 404): em breve convida, sem prometer o envio', () => {
+  it('rótulos falam de inscrição individual, nunca de inscrever equipe', () => {
     const copy = new RegistrationCopy();
     expect(copy.actionLabel('soon')).toBe('Quero participar');
-    expect(copy.actionLabel('open')).toBe('Inscrever minha equipe');
-    expect(copy.actionLabel('closing')).toBe('Inscrever minha equipe');
-    expect(copy.actionLabel('closed')).toBe('Ver as equipes');
+    expect(copy.actionLabel('open')).toBe('Fazer minha inscrição');
+    expect(copy.actionLabel('closing')).toBe('Fazer minha inscrição');
+    expect(copy.actionLabel('closed')).toBe('Inscrições encerradas');
+    expect(copy.headerLabel('closed')).toBe('Encerradas');
+    const statuses = ['soon', 'open', 'closing', 'closed'] as const;
+    for (const status of statuses) {
+      const labels = [copy.actionLabel(status), copy.headerLabel(status), copy.cta(status, 'hero').label];
+      expect(labels.join(' ')).not.toMatch(/equipe/i);
+    }
+  });
+
+  it('linha de status: individual e equipes do sorteio com o máximo do event.json', () => {
+    const copy = new RegistrationCopy();
+    const registration = {
+      status: 'open' as const,
+      endpoint: null,
+      closesAt: null,
+      slots: { capacity: 75, taken: 0, remaining: 75, level: 'plenty' as const },
+      teamSize: { min: 4, max: 5 },
+    };
+    expect(copy.statusLine(registration).split(' · ')).toEqual([
+      'Inscrições abertas',
+      'Individual',
+      'Equipes de até 5 por sorteio',
+    ]);
+    expect(copy.statusLine({ ...registration, teamSize: { min: 3, max: 4 } })).toContain('até 4');
+    expect(copy.statusLine({ ...registration, status: 'closed' })).not.toContain('sorteio');
   });
 });
 
 describe('SubNav de /inscricao e /equipes', () => {
-  it('em /inscricao, "Inscrição" é a página atual (endereço limpo)', () => {
-    const [registration, teams] = subNavLinksFor('registration');
-    expect(registration).toMatchObject({ href: '/inscricao', ariaCurrent: 'page' });
-    expect(teams).toMatchObject({ href: '/equipes', ariaCurrent: undefined, label: 'Equipes inscritas' });
+  it('em /inscricao, "Inscrição" é a página atual (endereço limpo) e não há aba de equipes', () => {
+    expect(subNavLinksFor('registration')).toEqual([
+      { href: '/inscricao', label: 'Inscrição', short: 'Inscrição', ariaCurrent: 'page' },
+    ]);
   });
 
-  it('em /equipes, "Equipes inscritas" é a atual e "Inscrição" leva a origem subnav', () => {
-    const [registration, teams] = subNavLinksFor('teams');
-    expect(registration).toMatchObject({ href: '/inscricao?origem=subnav', ariaCurrent: undefined });
-    expect(teams).toMatchObject({ href: '/equipes', ariaCurrent: 'page' });
+  it('em /equipes (escondida), só "Inscrição", com a origem subnav e sem link pra própria página', () => {
+    const links = subNavLinksFor('teams');
+    expect(links).toHaveLength(1);
+    expect(links[0]).toMatchObject({ href: '/inscricao?origem=subnav', ariaCurrent: undefined });
+    expect(links.some((l) => l.href.includes('/equipes'))).toBe(false);
   });
 
   it('rótulo curto do celular é o começo do nome acessível (WCAG 2.5.3)', () => {
@@ -95,9 +126,10 @@ describe('header, menu e rodapé', () => {
     });
   });
 
-  it('inscrições encerradas: o CTA vira "Equipes", atual em /equipes', () => {
-    expect(headerCtaLink(closed, 'teams')).toEqual({ href: '/equipes', ariaCurrent: 'page' });
-    expect(headerCtaLink(closed, 'home').ariaCurrent).toBeUndefined();
+  it('inscrições encerradas: o CTA leva pro aviso em /inscricao, atual só lá', () => {
+    expect(headerCtaLink(closed, 'registration')).toEqual({ href: '/inscricao', ariaCurrent: 'page' });
+    expect(headerCtaLink(closed, 'home')).toEqual({ href: '/inscricao', ariaCurrent: undefined });
+    expect(headerCtaLink(closed, 'teams').ariaCurrent).toBeUndefined();
   });
 
   it('na página atual o botão perde o preenchimento e não marca origem', () => {
@@ -116,6 +148,27 @@ describe('header, menu e rodapé', () => {
     const links = navLinksFor('registration');
     expect(links.find((l) => l.label === 'FAQ')?.href).toBe('/#faq');
     expect(links.every((l) => l.ariaCurrent === undefined)).toBe(true);
+  });
+
+  it.each<SitePage>(['home', 'teams', 'registration', 'authorization'])(
+    'em %s, nenhum link do header, menu ou rodapé leva pra /equipes',
+    (page) => {
+      const hrefs = [...navLinksFor(page), ...footerLinksFor(page)].map((l) => l.href);
+      expect(hrefs.length).toBeGreaterThan(0);
+      expect(hrefs.filter((href) => href.includes('/equipes'))).toEqual([]);
+      expect(navLinksFor(page).every((l) => l.spy === undefined)).toBe(true);
+    },
+  );
+
+  it('em /autorizacao as seções voltam pra LP e nada é a página atual (ela fica fora do menu)', () => {
+    const links = footerLinksFor('authorization');
+    expect(links.find((l) => l.label === 'Sobre')?.href).toBe('/#sobre');
+    expect(links.every((l) => l.ariaCurrent === undefined)).toBe(true);
+    expect(links.some((l) => l.href.includes('/autorizacao'))).toBe(false);
+    expect(headerCtaLink(open, 'authorization')).toEqual({
+      href: '/inscricao?origem=header',
+      ariaCurrent: undefined,
+    });
   });
 
   it('o rodapé ganha "Inscrição" (atual na própria página, com a origem nas outras)', () => {

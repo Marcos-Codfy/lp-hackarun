@@ -1,10 +1,11 @@
 // SEO da página /inscricao: título e descrição no tamanho que a busca mostra inteiro (≤ 60 e ≤ 160)
 export const REGISTRATION_PAGE_PATH = '/inscricao';
 
+// inscrição individual: as equipes (até teamSize.max pessoas) saem do sorteio presencial
 export function registrationPageSeo(teamSize: { min: number; max: number }) {
   return {
-    title: 'Inscrição de equipe · HackaRun 2026',
-    description: `Inscreva sua equipe no hackathon do HackaRun 2026, exclusivo para alunos da UniCatólica: de ${teamSize.min} a ${teamSize.max} pessoas, com nome, matrícula e e-mail.`,
+    title: 'Inscrição individual · HackaRun 2026',
+    description: `Inscreva-se no hackathon do HackaRun 2026, em Palmas, de 19/10 a 08/11. Aberto a estudantes, profissionais e entusiastas. Equipes de até ${teamSize.max} por sorteio.`,
     path: REGISTRATION_PAGE_PATH,
   };
 }

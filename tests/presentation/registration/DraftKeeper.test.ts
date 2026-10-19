@@ -1,6 +1,6 @@
-// rascunho na tela: quem volta pra /inscricao acha o que digitou (cards extras, foto pronta, aceite desmarcado),
-// a faixa avisa, "Limpar rascunho" zera tudo (menos com o envio em andamento) e o envio que entra apaga o
-// rascunho. A chave do envio volta com ele: resposta perdida + recarregar não vira um envio novo
+// rascunho na tela: quem volta pra /inscricao acha o que digitou (aceite desmarcado), a faixa avisa, "Limpar
+// rascunho" zera tudo (menos com o envio em andamento) e o envio que entra apaga o rascunho. A chave do envio
+// volta com ele: resposta perdida + recarregar não vira um envio novo
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RegistrationReceipt } from '@application/index';
 import { EventBus } from '@shared/core/EventBus';
@@ -9,26 +9,25 @@ import { DRAFT_KEY, RegistrationDraft } from '@presentation/view-models/registra
 import { emptyFields } from '@presentation/view-models/registration/RegistrationFields';
 import { RegistrationFormView } from '@presentation/views/RegistrationFormView';
 import { DraftKeeper } from '@presentation/views/registration/DraftKeeper';
-import { preparedImage } from '../../helpers/images';
 import { formMarkup } from './formMarkup';
-import { fillMember, fillValidTeam, setupForm } from './formSetup';
+import { fillValid, setupForm } from './formSetup';
 
 const BAR = `
   <div data-draft hidden>
-    <p><span data-draft-text></span><span data-draft-note hidden></span></p>
+    <p><span data-draft-text></span></p>
     <button type="button" data-draft-clear>Limpar rascunho</button>
   </div>`;
 
 const SAVED = {
-  v: 2,
-  teamName: 'Bug Busters',
-  members: [
-    { name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' },
-    { name: 'Bruno Lima', studentId: '', email: '' },
-    { name: 'Carla Dias', studentId: '', email: 'carla@exemplo.com' },
-  ],
-  // a foto mora na chave ao lado (DRAFT_KEY:image)
-  image: true,
+  v: 3,
+  fields: {
+    name: 'Ana Souza',
+    email: 'ana@exemplo.com',
+    adult: 'no',
+    profile: 'other-institution',
+    institution: 'Faculdade Exemplo',
+    period: '2',
+  },
   source: 'hero',
 };
 
@@ -36,10 +35,7 @@ const LOST_KEY = '6b1f0c2e-9a7d-4c3b-8e5f-1d2c3b4a5f60';
 
 function mount(options: { saved?: unknown; source?: string; before?: (root: HTMLElement) => void } = {}) {
   document.body.innerHTML = formMarkup(BAR);
-  if (options.saved) {
-    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(options.saved));
-    sessionStorage.setItem(`${DRAFT_KEY}:image`, JSON.stringify(preparedImage()));
-  }
+  if (options.saved) sessionStorage.setItem(DRAFT_KEY, JSON.stringify(options.saved));
   const form = setupForm();
   const root = document.querySelector<HTMLElement>('[data-registration-form]') as HTMLElement;
   options.before?.(root);
@@ -54,13 +50,13 @@ function mount(options: { saved?: unknown; source?: string; before?: (root: HTML
   keeper.restore();
   new RegistrationFormView(root, form.vm, new EventBus<AppEvents>(), vi.fn()).mount();
   keeper.mount();
-  const value = (selector: string) => root.querySelector<HTMLInputElement>(selector)?.value;
-  const rows = () => root.querySelectorAll('[data-member-row]');
-  return { ...form, root, bar: bar as HTMLElement, value, rows };
+  const input = <T extends HTMLInputElement | HTMLSelectElement = HTMLInputElement>(selector: string) =>
+    root.querySelector<T>(selector) as T;
+  return { ...form, root, bar: bar as HTMLElement, input };
 }
 
 const stored = () =>
-  JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? 'null') as Record<string, unknown> | null;
+  JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? 'null') as { fields?: Record<string, string> } | null;
 
 beforeEach(() => {
   sessionStorage.clear();
@@ -73,54 +69,46 @@ afterEach(() => {
 });
 
 describe('DraftKeeper · volta pra página', () => {
-  it('devolve campos, cards extras e a foto; o aceite volta desmarcado e a faixa avisa', () => {
-    const { vm, value, rows, bar, root } = mount({ saved: SAVED });
-    expect(rows()).toHaveLength(3);
-    expect(value('#reg-team-name')).toBe('Bug Busters');
-    expect(value('#member-0-studentId')).toBe('2024100123');
-    expect(rows()[2]?.querySelector<HTMLInputElement>('[data-member-field="email"]')?.value).toBe(
-      'carla@exemplo.com',
-    );
-    expect(vm.fields.teamImage).toEqual(preparedImage());
-    expect(vm.fields.acceptedTerms).toBe(false);
-    expect(root.querySelector<HTMLInputElement>('#reg-terms')?.checked).toBe(false);
+  it('devolve textos, lista e opções marcadas; o aceite volta desmarcado e a faixa avisa', () => {
+    const { vm, input, bar, root } = mount({ saved: SAVED });
+    expect(input('#reg-name').value).toBe('Ana Souza');
+    expect(input('#reg-institution').value).toBe('Faculdade Exemplo');
+    expect(input<HTMLSelectElement>('#reg-period').value).toBe('2');
+    expect(input('#reg-profile-other-institution').checked).toBe(true);
+    expect(input('#reg-adult-no').checked).toBe(true);
+    // a resposta já mostra os campos dela e o aviso de menor de idade
+    expect(root.querySelector<HTMLElement>('[data-show-field="institution"]')?.hidden).toBe(false);
+    expect(root.querySelector<HTMLElement>('[data-minor-notice]')?.hidden).toBe(false);
+    expect(vm.fields).toMatchObject({ profile: 'other-institution', adult: 'no', acceptedTerms: false });
+    expect(input('#reg-terms').checked).toBe(false);
     expect(bar.hidden).toBe(false);
     expect(bar.textContent).toContain('Rascunho recuperado');
     expect(root.querySelector('[data-reg-live]')?.textContent).toBe('Rascunho recuperado.');
   });
 
   it('o que a pessoa já digitou nesta visita (antes do JS) ganha do rascunho', () => {
-    const { vm, value } = mount({
+    const { vm, input } = mount({
       saved: SAVED,
       before: (root) => {
-        const team = root.querySelector<HTMLInputElement>('#reg-team-name');
-        if (team) team.value = 'Cerrado Devs';
+        const name = root.querySelector<HTMLInputElement>('#reg-name');
+        if (name) name.value = 'Bruna Lima';
       },
     });
-    expect(value('#reg-team-name')).toBe('Cerrado Devs');
-    expect(vm.fields.teamName).toBe('Cerrado Devs');
-    expect(vm.fields.members[0]?.name).toBe('Ana Souza');
-  });
-
-  it('foto que não coube no rascunho: pede pra escolher de novo', () => {
-    const { bar, vm } = mount({ saved: { ...SAVED, image: false, imageDropped: true } });
-    expect(vm.fields.teamImage).toBeNull();
-    expect(bar.querySelector<HTMLElement>('[data-draft-note]')?.hidden).toBe(false);
-    expect(bar.textContent).toContain('escolha de novo');
+    expect(input('#reg-name').value).toBe('Bruna Lima');
+    expect(vm.fields.name).toBe('Bruna Lima');
+    expect(vm.fields.email).toBe('ana@exemplo.com');
   });
 
   it('sem origem no endereço, vale a do rascunho; com origem, a do endereço', async () => {
     const restored = mount({ saved: SAVED });
-    fillValidTeam(restored.vm);
-    fillMember(restored.vm, 2);
+    fillValid(restored.vm);
     vi.useRealTimers();
     await restored.vm.submit();
     expect(restored.gateway.calls[0]?.source).toBe('hero');
 
     vi.useFakeTimers();
     const fresh = mount({ saved: SAVED, source: 'faq' });
-    fillValidTeam(fresh.vm);
-    fillMember(fresh.vm, 2);
+    fillValid(fresh.vm);
     vi.useRealTimers();
     await fresh.vm.submit();
     expect(fresh.gateway.calls[0]?.source).toBe('faq');
@@ -130,30 +118,34 @@ describe('DraftKeeper · volta pra página', () => {
 describe('DraftKeeper · enquanto preenche', () => {
   it('salva depois de uma pausa na digitação e marca "Rascunho salvo nesta aba"', () => {
     const { vm, bar } = mount({ source: 'final' });
-    vm.setText('teamName', 'Bug Busters');
+    vm.setValue('name', 'Ana Souza');
     expect(stored()).toBeNull();
     vi.advanceTimersByTime(450);
-    expect(stored()).toMatchObject({ teamName: 'Bug Busters', source: 'final', sessionKey: 'chave-0001' });
+    expect(stored()).toMatchObject({
+      fields: { name: 'Ana Souza' },
+      source: 'final',
+      sessionKey: 'chave-0001',
+    });
     expect(bar.hidden).toBe(false);
     expect(bar.textContent).toContain('Rascunho salvo nesta aba');
   });
 
   it('saindo da página (pagehide) grava na hora', () => {
     const { vm } = mount();
-    vm.setText('members.0.name', 'Ana Souza');
+    vm.setValue('email', 'ana@exemplo.com');
     window.dispatchEvent(new Event('pagehide'));
-    expect((stored()?.['members'] as { name: string }[])[0]?.name).toBe('Ana Souza');
+    expect(stored()?.fields?.['email']).toBe('ana@exemplo.com');
   });
 
-  it('"Limpar rascunho" apaga o salvo, zera campos e cards e leva o foco pro nome da equipe', () => {
-    const { vm, value, rows, bar, root } = mount({ saved: SAVED });
+  it('"Limpar rascunho" apaga o salvo, zera campos e opções e leva o foco pro nome', () => {
+    const { vm, input, bar, root } = mount({ saved: SAVED });
     bar.querySelector<HTMLButtonElement>('[data-draft-clear]')?.click();
     expect(sessionStorage.getItem(DRAFT_KEY)).toBeNull();
-    expect(vm.fields).toEqual(emptyFields(2));
-    expect(rows()).toHaveLength(2);
-    expect(value('#reg-team-name')).toBe('');
-    expect(value('#member-0-name')).toBe('');
-    expect(document.activeElement?.id).toBe('reg-team-name');
+    expect(vm.fields).toEqual(emptyFields());
+    expect(input('#reg-name').value).toBe('');
+    expect(input<HTMLSelectElement>('#reg-period').value).toBe('');
+    expect(input('#reg-profile-other-institution').checked).toBe(false);
+    expect(document.activeElement?.id).toBe('reg-name');
     expect(bar.hidden).toBe(true);
     expect(root.querySelector('[data-reg-live]')?.textContent).toContain('Rascunho apagado');
   });
@@ -161,7 +153,7 @@ describe('DraftKeeper · enquanto preenche', () => {
   it('pagehide e visibilitychange juntos gravam uma vez só (e nada sem mudança)', () => {
     const { vm } = mount();
     const write = vi.spyOn(sessionStorage, 'setItem');
-    vm.setText('teamName', 'Bug Busters');
+    vm.setValue('name', 'Ana Souza');
     window.dispatchEvent(new Event('pagehide'));
     Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
     document.dispatchEvent(new Event('visibilitychange'));
@@ -171,9 +163,8 @@ describe('DraftKeeper · enquanto preenche', () => {
   });
 
   it('"Limpar rascunho" com o envio em andamento: o botão desliga e nada é apagado', async () => {
-    const { vm, gateway, bar, value } = mount({ saved: SAVED });
-    fillValidTeam(vm);
-    fillMember(vm, 2);
+    const { vm, gateway, bar } = mount({ saved: SAVED });
+    fillValid(vm);
     let answer: (receipt: RegistrationReceipt) => void = () => undefined;
     vi.spyOn(gateway, 'submit').mockImplementation((payload) => {
       gateway.calls.push(payload);
@@ -184,11 +175,10 @@ describe('DraftKeeper · enquanto preenche', () => {
     await vi.waitFor(() => expect(gateway.calls).toHaveLength(1));
     const clear = bar.querySelector<HTMLButtonElement>('[data-draft-clear]') as HTMLButtonElement;
     expect(clear.disabled).toBe(true);
-    // mesmo que o clique chegue (botão religado à força), o formulário na tela continua o que está indo
+    // mesmo que o clique chegue (botão religado à força), o que está indo pra planilha continua na tela
     clear.disabled = false;
     clear.click();
-    expect(value('#reg-team-name')).toBe('Bug Busters');
-    expect(vm.fields.teamName).toBe('Bug Busters');
+    expect(vm.fields.name).toBe('Ana Souza');
     expect(sessionStorage.getItem(DRAFT_KEY)).not.toBeNull();
     answer({ protocol: 'HR26-OK0001' });
     await sending;
@@ -197,8 +187,7 @@ describe('DraftKeeper · enquanto preenche', () => {
 
   it('resposta perdida + recarregar: o rascunho devolve a chave e o reenvio é o mesmo envio', async () => {
     const { vm, gateway } = mount({ saved: { ...SAVED, sessionKey: LOST_KEY } });
-    fillValidTeam(vm);
-    fillMember(vm, 2);
+    fillValid(vm);
     vi.useRealTimers();
     await vm.submit();
     expect(gateway.calls[0]?.idempotencyKey).toBe(LOST_KEY);
@@ -206,8 +195,7 @@ describe('DraftKeeper · enquanto preenche', () => {
 
   it('inscrição enviada: o rascunho some e nada mais é salvo', async () => {
     const { vm } = mount({ saved: SAVED });
-    fillValidTeam(vm);
-    fillMember(vm, 2);
+    fillValid(vm);
     vi.advanceTimersByTime(450);
     expect(stored()).not.toBeNull();
     vi.useRealTimers();

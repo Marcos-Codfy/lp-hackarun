@@ -29,10 +29,10 @@ export class ClosedLobby {
     title.tabIndex = -1;
     title.textContent = 'Inscrições encerradas';
     const text = document.createElement('p');
-    text.textContent = 'O prazo terminou. Valeu pelo interesse! Acompanhe quem vai correr.';
+    text.textContent = 'O prazo terminou ou as vagas acabaram. Obrigado pelo interesse!';
     const link = document.createElement('a');
-    link.href = '/equipes';
-    link.textContent = 'Ver equipes confirmadas';
+    link.href = '/#programacao';
+    link.textContent = 'Ver a programação';
     notice.append(title, text, link);
     this.root.insertBefore(notice, before && before.parentElement === this.root ? before : null);
     return notice;

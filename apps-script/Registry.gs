@@ -1,18 +1,18 @@
-// quem já está inscrito: nome de equipe, e-mails e matrículas das equipes que não foram recusadas.
-// Cada pessoa participa de uma equipe só; recusar uma equipe libera o nome, os e-mails e as matrículas
+// quem já está inscrito: e-mails, WhatsApps e matrículas das inscrições que não foram canceladas.
+// Cada pessoa se inscreve uma vez só; Status cancelado libera a vaga, o e-mail, o WhatsApp e a matrícula
 
-// comparação sem acento, sem caixa e sem espaço sobrando ("Bug  Busters" = "bug busters" = "Bug Bústers")
+// comparação sem acento, sem caixa e sem espaço sobrando ("Equipe  Pikachu" = "equipe pikachu")
 function nameKey_(value) {
-  return cellText_(value)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
+  return cellText_(value).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
 function emailKey_(value) {
   return cellText_(value).trim().toLowerCase();
+}
+
+// "(63) 99999-9999", "63999999999" e "+55 63 99999-9999" são o mesmo número
+function phoneKey_(value) {
+  return phoneDigits_(cellText_(value));
 }
 
 function studentIdKey_(value) {
@@ -24,45 +24,44 @@ function cellText_(value) {
   return String(value == null ? '' : value).replace(/^'/, '');
 }
 
-function loadRegistry_(tabs) {
-  const teams = readRows_(tabs.teams, TEAM_HEADERS.length).filter((r) => String(r[COL.protocol]).trim());
-  const active = new Set();
-  const names = new Set();
-  teams.forEach((r) => {
-    if (isRejected_(r[COL.status])) return;
-    active.add(String(r[COL.protocol]).trim());
-    names.add(nameKey_(r[COL.team]));
-  });
+function loadRegistry_(sheet) {
+  const rows = readRows_(sheet, REGISTRATION_HEADERS.length).filter((r) => String(r[RCOL.protocol]).trim());
   const emails = new Set();
+  const phones = new Set();
   const studentIds = new Set();
-  readRows_(tabs.members, MEMBER_HEADERS.length).forEach((r) => {
-    // integrante de equipe recusada (ou de uma linha de equipe apagada) não segura mais nada
-    if (!active.has(String(r[MCOL.protocol]).trim())) return;
-    emails.add(emailKey_(r[MCOL.email]));
-    studentIds.add(studentIdKey_(r[MCOL.studentId]));
+  let active = 0;
+  rows.forEach((r) => {
+    if (isCancelled_(r[RCOL.status])) return;
+    active++;
+    // célula apagada à mão não segura nada
+    [
+      [emails, emailKey_(r[RCOL.email])],
+      [phones, phoneKey_(r[RCOL.whatsapp])],
+      [studentIds, studentIdKey_(r[RCOL.studentId])],
+    ].forEach((pair) => {
+      if (pair[1]) pair[0].add(pair[1]);
+    });
   });
-  return { teams: teams, names: names, emails: emails, studentIds: studentIds };
+  return { rows: rows, active: active, emails: emails, phones: phones, studentIds: studentIds };
 }
 
-// a resposta perdida do 1º envio: mesma chave do formulário + mesmo contato = o protocolo já gravado
+// a resposta perdida do 1º envio: mesma chave do formulário + mesmo e-mail = o protocolo já gravado
 function savedProtocol_(registry, data) {
   if (!data.idempotencyKey) return '';
-  const contact = data.members[0].email;
-  const row = registry.teams.find(
-    (r) => String(r[COL.key]) === data.idempotencyKey && emailKey_(r[COL.contact]) === contact,
+  const email = data.participant.email;
+  const row = registry.rows.find(
+    (r) => String(r[RCOL.key]) === data.idempotencyKey && emailKey_(r[RCOL.email]) === email,
   );
-  return row ? String(row[COL.protocol]) : '';
+  return row ? String(row[RCOL.protocol]) : '';
 }
 
-// null ou a resposta de erro, com a posição de cada integrante já inscrito (o site aponta o campo)
+// null ou a resposta de erro; o site aponta o campo pelo código
 function findConflict_(registry, data) {
-  if (registry.names.has(nameKey_(data.teamName))) {
-    return { ok: false, error: 'duplicate_team_name', members: [] };
+  const p = data.participant;
+  if (registry.emails.has(p.email)) return { ok: false, error: 'duplicate_email' };
+  if (registry.phones.has(p.phoneDigits)) return { ok: false, error: 'duplicate_whatsapp' };
+  if (p.studentId && registry.studentIds.has(p.studentId)) {
+    return { ok: false, error: 'duplicate_student_id' };
   }
-  const taken = (set, key) => data.members.map((m, i) => (set.has(key(m)) ? i : -1)).filter((i) => i >= 0);
-  const emails = taken(registry.emails, (m) => m.email);
-  if (emails.length) return { ok: false, error: 'duplicate_email', members: emails };
-  const studentIds = taken(registry.studentIds, (m) => m.studentId);
-  if (studentIds.length) return { ok: false, error: 'duplicate_student_id', members: studentIds };
   return null;
 }
