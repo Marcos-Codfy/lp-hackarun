@@ -27,12 +27,15 @@ const { title, label = 'Descrição' } = Astro.props;
     interpolate-size: allow-keywords;
   }
 
+  /* cara de botão (igual ao "Detalhes" da programação): contorno e fundo suave deixam claro que dá pra tocar */
   .more__summary {
     display: inline-flex;
     align-items: center;
     gap: var(--space-3);
-    min-height: 2rem;
-    padding-right: var(--space-3);
+    min-height: 2.5rem;
+    padding: var(--space-1) var(--space-4) var(--space-1) var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--sx-accent) 45%, transparent);
+    background: color-mix(in srgb, var(--sx-accent) 9%, transparent);
     color: var(--sx-ink);
     font-family: var(--font-mono);
     font-size: var(--fs-hud);
@@ -50,6 +53,8 @@ const { title, label = 'Descrição' } = Astro.props;
   }
 
   .more__summary:hover {
+    border-color: var(--sx-accent);
+    background: color-mix(in srgb, var(--sx-accent) 18%, transparent);
     color: var(--text);
   }
 

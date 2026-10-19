@@ -1,6 +1,10 @@
 import type { QualityTier } from '@presentation/app/AppEvents';
 
-// pós-processamento: bloom inteiro, bloom em meia resolução ou render direto (glow fake no sprite)
+// pós-processamento: bloom inteiro, bloom em meia resolução ou render direto (glow fake no sprite).
+// Todos os tiers nascem em 'off': o bloom deixava as partículas com um neon borrado que machucava a vista na
+// primeira abertura da aba, e só sumia quando o monitor de FPS cortava o pós. O render direto é o visual
+// nítido que a organização aprovou. 'full' e 'half' seguem no código (StageRenderer, ComposerPipeline) pra
+// quem precisar do bloom de volta: basta trocar o `effects` do tier
 export type EffectsLevel = 'full' | 'half' | 'off';
 
 const EFFECTS_ORDER: readonly EffectsLevel[] = ['off', 'half', 'full'];
@@ -51,7 +55,7 @@ export class MediumQuality implements QualityProfile {
   readonly maxDpr = 1.5;
   readonly pointScale = 1.2;
   readonly alpha = 0.85;
-  readonly effects = 'half';
+  readonly effects = 'off';
   readonly stars = 1800;
   readonly bokeh = 22;
 
@@ -66,7 +70,7 @@ export class HighQuality implements QualityProfile {
   readonly maxDpr = 2;
   readonly pointScale = 1;
   readonly alpha = 0.75;
-  readonly effects = 'full';
+  readonly effects = 'off';
   readonly stars = 3200;
   readonly bokeh = 30;
 
