@@ -1,13 +1,14 @@
 ---
 import type { FaqItemDTO } from '@application/index';
 import NpcToken from '@presentation/components/npc/NpcToken.astro';
+import type { FaqLink } from './faqLinks';
 
 interface Props {
   item: FaqItemDTO;
   number: number;
   withToken?: boolean;
   // atalho no fim da resposta (ex.: "Como faço a inscrição?" leva pra /inscricao)
-  link?: { href: string; label: string } | null;
+  link?: FaqLink | null;
 }
 
 const { item, number, withToken = false, link = null } = Astro.props;
@@ -25,7 +26,7 @@ const { item, number, withToken = false, link = null } = Astro.props;
     <p>{item.answer}</p>
     {link && (
       <p>
-        <a class="faq-entry__link" href={link.href}>
+        <a class="faq-entry__link" href={link.href} download={link.download}>
           {link.label}
           <span aria-hidden="true"> →</span>
         </a>

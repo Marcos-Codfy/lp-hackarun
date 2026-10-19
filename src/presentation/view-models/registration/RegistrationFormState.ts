@@ -1,11 +1,8 @@
 import type { RegistrationErrors } from '@domain/index';
-import { fieldOrder, type RegistrationFields } from './RegistrationFields';
+import { FIELD_ORDER, type RegistrationFields } from './RegistrationFields';
 import { NO_STEP_DONE, type StepCompletion } from './registrationSteps';
 
 export type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
-
-// foto/logo: nada escolhido, preparando no aparelho, pronta pro envio ou recusada (o erro diz o porquê)
-export type TeamImageStatus = 'empty' | 'processing' | 'ready' | 'invalid';
 
 export interface FieldError {
   path: string;
@@ -29,31 +26,22 @@ export interface RegistrationFormState {
   // já tentou enviar: a View passa a mostrar o resumo de erros
   attempted: boolean;
   protocol: string | null;
+  // a inscrição que entrou é de menor de idade: o sucesso lembra da autorização do responsável
+  needsGuardianConsent: boolean;
   failure: string | null;
   // a falha passa com o mesmo envio (rede, servidor): a View mostra o "Tentar de novo"
   retryable: boolean;
   // aceita envio agora; começa com o status do build e o navegador só pode fechar
   open: boolean;
   focus: FocusRequest | null;
-  canAddMember: boolean;
-  // tem integrante além do mínimo: as linhas 2 em diante ganham o "Remover" (o contato nunca sai)
-  canRemoveMember: boolean;
-  imageStatus: TeamImageStatus;
-  // aviso pro leitor de tela ao somar ou tirar integrante; seq muda a cada aviso
-  announcement: Announcement | null;
   // etapas sem nenhum erro de validação (indicador de progresso), tocadas ou não
   steps: StepCompletion;
 }
 
-export interface Announcement {
-  text: string;
-  seq: number;
-}
-
 // erros na ordem visual do formulário (o primeiro é quem ganha o foco)
-export function orderErrors(errors: RegistrationErrors, fields: RegistrationFields): FieldError[] {
-  const order = fieldOrder(fields);
-  const rank = (path: string) => (order.includes(path) ? order.indexOf(path) : order.length);
+export function orderErrors(errors: RegistrationErrors): FieldError[] {
+  const rank = (path: string) =>
+    FIELD_ORDER.includes(path) ? FIELD_ORDER.indexOf(path) : FIELD_ORDER.length;
   return Object.entries(errors)
     .map(([path, message]) => ({ path, message }))
     .sort((a, b) => rank(a.path) - rank(b.path));
@@ -71,11 +59,7 @@ export const submittingState = (s: RegistrationFormState): RegistrationFormState
 });
 
 // formulário recém-montado: vazio, sem erro à vista e com o status do build
-export function initialState(
-  fields: RegistrationFields,
-  open: boolean,
-  bounds: Pick<RegistrationFormState, 'canAddMember' | 'canRemoveMember'>,
-): RegistrationFormState {
+export function initialState(fields: RegistrationFields, open: boolean): RegistrationFormState {
   return {
     fields,
     errors: {},
@@ -83,13 +67,11 @@ export function initialState(
     status: 'idle',
     attempted: false,
     protocol: null,
+    needsGuardianConsent: false,
     failure: null,
     retryable: false,
     open,
     focus: null,
-    imageStatus: 'empty',
-    announcement: null,
     steps: NO_STEP_DONE,
-    ...bounds,
   };
 }

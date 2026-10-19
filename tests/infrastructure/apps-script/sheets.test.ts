@@ -1,30 +1,61 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { FakeSheet } from '../../helpers/apps-script/sheetFakes';
+import { FakeSheet, type FakeRange } from '../../helpers/apps-script/sheetFakes';
 import { AppsScriptSandbox, registrationBody } from '../../helpers/apps-script/sandbox';
+import { configure, snapshot } from '../../helpers/apps-script/legacyLayout';
 
-const configure = (script: AppsScriptSandbox) => script.evaluate<() => unknown>('configurarPlanilha')();
+const REGISTRATION_TITLES = [
+  'Protocolo',
+  'Data/hora',
+  'Nome completo',
+  'E-mail',
+  'WhatsApp',
+  'Conversar',
+  'Perfil',
+  'Instituição',
+  'Curso',
+  'Período',
+  'Matrícula',
+  'Área',
+  '18 anos ou mais',
+  'Autorização do responsável',
+  'Status',
+  'Equipe',
+  'Origem',
+  'Consentimento',
+  'Chave de envio',
+];
+const TEAM_TITLES = [
+  'Equipe',
+  'Insígnia',
+  'Integrantes (qtd)',
+  'Integrantes',
+  'E-mails',
+  'WhatsApps',
+  'Status',
+  'ID da insígnia',
+  'Link da insígnia',
+];
 
-describe('Apps Script · planilha organizada', () => {
-  it('configurarPlanilha cria Equipes, Integrantes e Resumo, renomeando a "Página1" vazia', () => {
+type Spec = Record<string, unknown[]>;
+const validation = (sheet: FakeSheet, a1: string) => sheet.validations.find((v) => v.a1 === a1)?.rule as Spec;
+const ruleFormulas = (sheet: FakeSheet) =>
+  sheet.conditionalRules.map((r) => (r as { spec: Spec }).spec['whenFormulaSatisfied']?.[0]);
+
+describe('Apps Script · configurarPlanilha monta as três abas', () => {
+  it('cria Inscritos (a "Página1" vazia), Equipes e Resumo, com os títulos certos', () => {
     const script = new AppsScriptSandbox();
     script.book.add(new FakeSheet('Página1'));
     configure(script);
-    expect(script.book.sheets.map((s) => s.name)).toEqual(['Equipes', 'Integrantes', 'Resumo']);
-    expect(script.teams.rows[0]).toEqual(script.evaluate('TEAM_HEADERS'));
-    expect(script.members.rows[0]).toEqual([
-      'Protocolo',
-      'Equipe',
-      'Nº',
-      'Nome completo',
-      'Matrícula',
-      'E-mail',
-      'Contato',
-      'Status da equipe',
+    expect(script.book.sheets.map((s) => s.name)).toEqual(['Inscritos', 'Equipes', 'Resumo']);
+    expect(script.registrations.rows[0]).toEqual(REGISTRATION_TITLES);
+    expect(script.teams.rows[0]).toEqual(TEAM_TITLES);
+    expect(script.properties['PLANILHA_VERSAO']).toBe('7');
+    // também autoriza o Drive: pasta das insígnias e segredo dos ids públicos prontos antes do sorteio
+    expect([...script.drive.folders.values()].map((f) => f.name)).toEqual([
+      'HackaRun 2026 · Insígnias das equipes',
     ]);
-    expect(script.properties['PLANILHA_VERSAO']).toBe(script.evaluate('SETUP_VERSION'));
-    // também autoriza o Drive: pasta das fotos e segredo dos ids públicos prontos antes da 1ª inscrição
-    expect(script.drive.folders.size).toBe(1);
+    expect(script.properties['FOTOS_PASTA_ID']).toBe([...script.drive.folders.keys()][0]);
     expect(script.properties['ID_SEGREDO']).toBeTruthy();
   });
 
@@ -32,137 +63,121 @@ describe('Apps Script · planilha organizada', () => {
     const script = new AppsScriptSandbox();
     script.book.add(new FakeSheet('Página1')).appendRow(['anotação da organização']);
     configure(script);
-    expect(script.book.sheets.map((s) => s.name)).toEqual(['Equipes', 'Integrantes', 'Resumo', 'Página1']);
+    expect(script.book.sheets.map((s) => s.name)).toEqual(['Inscritos', 'Equipes', 'Resumo', 'Página1']);
+    expect(script.tab('Página1').rows).toEqual([['anotação da organização']]);
   });
 
-  it('formata as tabelas: congela título e equipe, filtro, faixas, status com menu e cores, títulos protegidos', () => {
+  it('Inscritos: congela título e 3 colunas, filtro, faixas, cores de aba e títulos com aviso', () => {
     const script = new AppsScriptSandbox();
     configure(script);
-    const { teams, members } = script;
-    expect(teams.frozen).toEqual({ rows: 1, columns: 3 });
-    expect(members.frozen).toEqual({ rows: 1, columns: 2 });
-    expect(teams.filter?.a1).toBe('A1:N1000');
-    expect(members.filter?.a1).toBe('A1:H1000');
-    expect(teams.bandings).toHaveLength(1);
-    expect(teams.validations).toEqual([{ a1: 'F2:F1000', rule: expect.anything() }]);
-    // 3 cores de status + a linha apagada das recusadas
-    const formulas = teams.conditionalRules.map(
-      (r) => (r as { spec: Record<string, unknown[]> }).spec['whenFormulaSatisfied']?.[0],
-    );
-    expect(formulas).toEqual([
-      '=LOWER(TRIM($F2))="pendente"',
-      '=LOWER(TRIM($F2))="confirmado"',
-      '=LOWER(TRIM($F2))="recusado"',
-      '=LOWER(TRIM($F2))="recusado"',
+    const { registrations, teams, summary } = script;
+    expect(registrations.frozen).toEqual({ rows: 1, columns: 3 });
+    expect(teams.frozen).toEqual({ rows: 1, columns: 1 });
+    expect(registrations.filter?.a1).toBe('A1:S1000');
+    expect(teams.filter?.a1).toBe('A1:I1000');
+    expect([registrations.tabColor, teams.tabColor, summary.tabColor]).toEqual([
+      '#00E5FF',
+      '#1264FF',
+      '#941BFF',
     ]);
-    expect(members.conditionalRules).toHaveLength(4);
-    expect(teams.protections).toEqual([
-      expect.objectContaining({ type: 'RANGE', a1: 'A1:N1', warningOnly: true }),
+    expect(registrations.bandings).toHaveLength(1);
+    expect(registrations.protections).toEqual([
+      expect.objectContaining({ type: 'RANGE', a1: 'A1:S1', warningOnly: true }),
     ]);
-    const formats = teams.calls.filter((c) => c.method === 'setNumberFormat').map((c) => [c.a1, c.args[0]]);
+    const formats = registrations.calls
+      .filter((c) => c.method === 'setNumberFormat')
+      .map((c) => [c.a1, c.args[0]]);
     expect(formats).toContainEqual(['B2:B1000', 'dd/MM/yyyy HH:mm']);
-    expect(members.calls.filter((c) => c.method === 'setNumberFormat').map((c) => c.a1)).toContain(
-      'E2:E1000',
+    // matrícula e WhatsApp como texto: zero à esquerda não some
+    expect(formats).toContainEqual(['K2:K1000', '@']);
+    expect(formats).toContainEqual(['E2:E1000', '@']);
+  });
+
+  it('menus: Status, Autorização e Equipe (só nomes da aba Equipes) recusam valor fora da lista', () => {
+    const script = new AppsScriptSandbox();
+    configure(script);
+    const { registrations, teams } = script;
+    expect(validation(registrations, 'O2:O1000')['requireValueInList']?.[0]).toEqual([
+      'inscrito',
+      'credenciado',
+      'ausente',
+      'cancelado',
+    ]);
+    expect(validation(registrations, 'N2:N1000')['requireValueInList']?.[0]).toEqual([
+      'pendente',
+      'entregue',
+      'não precisa',
+    ]);
+    const team = validation(registrations, 'P2:P1000');
+    const source = team['requireValueInRange']?.[0] as FakeRange;
+    expect([source.getSheet().name, source.getA1Notation()]).toEqual(['Equipes', 'A2:A1000']);
+    expect(validation(teams, 'G2:G1000')['requireValueInList']?.[0]).toEqual(['pendente', 'confirmado']);
+    [team, validation(registrations, 'O2:O1000'), validation(teams, 'G2:G1000')].forEach((rule) =>
+      expect(rule['setAllowInvalid']).toEqual([false]),
     );
   });
 
-  it('rodar de novo não duplica filtro, faixa, proteção nem as regras de cor', () => {
+  it('cores: cada status, autorização pendente/entregue e a linha cancelada apagada', () => {
     const script = new AppsScriptSandbox();
     configure(script);
+    expect(ruleFormulas(script.registrations)).toEqual([
+      '=LOWER(TRIM($N2))="pendente"',
+      '=LOWER(TRIM($N2))="entregue"',
+      '=LOWER(TRIM($O2))="inscrito"',
+      '=LOWER(TRIM($O2))="credenciado"',
+      '=LOWER(TRIM($O2))="ausente"',
+      '=LOWER(TRIM($O2))="cancelado"',
+      '=LOWER(TRIM($O2))="cancelado"',
+    ]);
+    const dimmed = script.registrations.conditionalRules.at(-1) as { spec: Spec; getRanges(): FakeRange[] };
+    expect(dimmed.getRanges().map((r) => r.getA1Notation())).toEqual(['A2:S1000']);
+    expect(ruleFormulas(script.teams)).toEqual([
+      '=LOWER(TRIM($G2))="pendente"',
+      '=LOWER(TRIM($G2))="confirmado"',
+    ]);
+  });
+
+  it('rodar de novo não duplica nada nem mexe nos dados; a regra de cor da organização fica', () => {
+    const script = new AppsScriptSandbox();
     configure(script);
-    const { teams } = script;
-    expect(teams.bandings).toHaveLength(1);
-    expect(teams.protections).toHaveLength(1);
-    expect(teams.conditionalRules).toHaveLength(4);
-    expect(script.tab('Resumo').protections).toHaveLength(1);
+    script.post(registrationBody());
+    const orgRule = {
+      getRanges: () => [script.registrations.getRange('I2:I1000')],
+      getBooleanCondition: () => null,
+    };
+    script.registrations.setConditionalFormatRules([orgRule, ...script.registrations.conditionalRules]);
+    const before = [snapshot(script.registrations), snapshot(script.teams)];
+    configure(script);
+    expect([snapshot(script.registrations), snapshot(script.teams)]).toEqual(before);
+    expect(script.registrations.conditionalRules).toHaveLength(8);
+    expect(script.registrations.conditionalRules[0]).toBe(orgRule);
+    expect(script.registrations.bandings).toHaveLength(1);
+    expect(script.registrations.protections).toHaveLength(1);
+    expect(script.summary.protections).toHaveLength(1);
     expect(script.book.sheets).toHaveLength(3);
   });
 
-  it('a primeira inscrição monta a planilha sozinha (sem ter rodado o configurarPlanilha)', () => {
+  it('a primeira inscrição monta a planilha sozinha; versão nova do layout refaz a formatação', () => {
     const script = new AppsScriptSandbox();
     expect(script.post(registrationBody()).ok).toBe(true);
-    expect(script.book.sheets.map((s) => s.name)).toEqual(['Equipes', 'Integrantes', 'Resumo']);
-    expect(script.teams.filter).not.toBeNull();
-  });
-
-  it('cada inscrição vira 1 linha em Equipes (com foto e link por fórmula) e 1 por pessoa em Integrantes', () => {
-    const script = new AppsScriptSandbox();
-    const { protocol } = script.post(registrationBody());
-    const imageId = script.drive.allFiles[0]?.id;
-    expect(script.row(script.teams, 0)['ID da foto']).toBe(imageId);
-    expect(script.teams.formulaAt(2, 5)).toBe(
-      '=IF(K2="","",IMAGE("https://lh3.googleusercontent.com/d/"&K2&"=w240"))',
-    );
-    expect(script.teams.formulaAt(2, 10)).toBe(
-      '=IF(K2="","",HYPERLINK("https://drive.google.com/file/d/"&K2&"/view","Abrir no Drive"))',
-    );
-    expect(script.teams.rowHeights.get(2)).toBe(84);
-    expect(script.members.data).toHaveLength(2);
-    expect(script.row(script.members, 0)).toMatchObject({
-      Protocolo: protocol,
-      Equipe: 'Bug Busters',
-      Nº: 1,
-      'Nome completo': 'Ana Souza',
-      Matrícula: '2024100123',
-      'E-mail': 'ana@exemplo.com',
-      Contato: 'sim',
+    expect(script.book.sheets.map((s) => s.name)).toEqual(['Inscritos', 'Equipes', 'Resumo']);
+    script.properties['PLANILHA_VERSAO'] = '6';
+    script.registrations.calls.length = 0;
+    script.post({
+      ...registrationBody({ email: 'outra@exemplo.com', whatsapp: '63988887777', studentId: '' }),
     });
-    expect(script.row(script.members, 1)).toMatchObject({ Nº: 2, Contato: 'não' });
-    expect(script.members.formulaAt(3, 8)).toBe(
-      "=IFERROR(INDEX('Equipes'!$F:$F,MATCH($A3,'Equipes'!$A:$A,0)),\"\")",
-    );
+    expect(script.registrations.calls.some((c) => c.method === 'setFontWeight')).toBe(true);
+    expect(script.properties['PLANILHA_VERSAO']).toBe('7');
   });
 
-  it('o Resumo conta tudo por fórmula e junta os e-mails das confirmadas pra colar no e-mail', () => {
-    const script = new AppsScriptSandbox();
-    script.properties['CAPACITY'] = '30';
-    configure(script);
-    const summary = script.tab('Resumo');
-    const label = (row: number) => summary.rows[row - 1]?.[0];
-    expect(label(5)).toBe('Equipes inscritas');
-    expect(summary.formulaAt(5, 2)).toBe("=COUNTA('Equipes'!A2:A)");
-    expect(summary.formulaAt(6, 2)).toBe('=COUNTIF(\'Equipes\'!F2:F,"confirmado")');
-    expect(summary.formulaAt(9, 2)).toBe("=SUM('Equipes'!D2:D)");
-    expect(summary.rows[10]?.[1]).toBe(30);
-    expect(summary.formulaAt(12, 2)).toBe('=IF(ISNUMBER(B11),MAX(0,B11-(B5-B8)),"sem limite")');
-    expect(label(14)).toBe('E-mails das equipes confirmadas');
-    expect(summary.formulaAt(14, 2)).toBe(
-      '=IFERROR(TEXTJOIN("; ",TRUE,FILTER(\'Equipes\'!I2:I,LOWER(TRIM(\'Equipes\'!F2:F))="confirmado")),"Nenhuma equipe confirmada ainda.")',
-    );
-    const howto = summary.rows.map((r) => String(r[1] ?? '')).join(' ');
-    expect(howto).toContain('Copie a célula B14');
-    expect(summary.protections).toEqual([expect.objectContaining({ type: 'SHEET', warningOnly: true })]);
-  });
-
-  it('planilha em pt_BR: argumentos com ";" (vírgula dentro de texto fica) e o configurar conserta linhas antigas', () => {
-    const script = new AppsScriptSandbox();
-    script.book.locale = 'pt_BR';
-    script.post(registrationBody());
-    expect(script.teams.formulaAt(2, 5)).toBe(
-      '=IF(K2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&K2&"=w240"))',
-    );
-    expect(script.teams.formulaAt(2, 10)).toBe(
-      '=IF(K2="";"";HYPERLINK("https://drive.google.com/file/d/"&K2&"/view";"Abrir no Drive"))',
-    );
-    expect(script.members.formulaAt(3, 8)).toBe(
-      "=IFERROR(INDEX('Equipes'!$F:$F;MATCH($A3;'Equipes'!$A:$A;0));\"\")",
-    );
-    const summary = script.tab('Resumo');
-    expect(summary.formulaAt(14, 2)).toContain('TEXTJOIN("; ";TRUE;FILTER(');
-    script.teams.formulas.set('2,5', '=IF(K2="","",IMAGE("quebrada"))');
-    configure(script);
-    expect(script.teams.formulaAt(2, 5)).toBe(
-      '=IF(K2="";"";IMAGE("https://lh3.googleusercontent.com/d/"&K2&"=w240"))',
-    );
-  });
-
-  it('versão nova do layout refaz a formatação na próxima inscrição', () => {
+  it('configurarPlanilha entra na fila do lock e grava tudo (flush) antes de soltar', () => {
+    const busy = new AppsScriptSandbox();
+    busy.lock.busy = true;
+    expect(() => configure(busy)).toThrow();
+    expect(busy.book.sheets).toHaveLength(0);
     const script = new AppsScriptSandbox();
     configure(script);
-    script.properties['PLANILHA_VERSAO'] = '1';
-    script.teams.calls.length = 0;
-    script.post(registrationBody());
-    expect(script.teams.calls.some((c) => c.method === 'setFontWeight')).toBe(true);
-    expect(script.properties['PLANILHA_VERSAO']).toBe(script.evaluate('SETUP_VERSION'));
+    expect(script.flushes).toEqual([true]);
+    expect(script.lock.held).toBe(false);
   });
 });

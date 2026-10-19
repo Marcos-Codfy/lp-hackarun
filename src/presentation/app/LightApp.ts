@@ -13,6 +13,7 @@ import { CountdownView } from '@presentation/views/CountdownView';
 import { MotionPreferenceView } from '@presentation/views/motion/MotionPreferenceView';
 import { BackToEventLinks } from '@presentation/views/navigation/backToEvent';
 import { CurrentPageLinks } from '@presentation/views/navigation/currentPageLinks';
+import { PrintButtons } from '@presentation/views/print/PrintButtons';
 import { mountTeams } from '@presentation/views/teams/mountTeams';
 import { readAppConfig, type AppConfig } from './AppConfig';
 import type { AppEvents } from './AppEvents';
@@ -66,8 +67,9 @@ async function mountRegistration(
   mountRegistrationPage({ root, config, bus, services, container: c, reducedMotion: prefersReducedMotion() });
 }
 
-// boot das páginas leves (/equipes, /inscricao): header, navegação, "Pausar animações", contador, equipes ao
-// vivo e o formulário. Nada de GSAP, Lenis ou three.js: o HTML já chega pronto e o JS só liga o interativo
+// boot das páginas leves (/equipes, /inscricao, /autorizacao): header, navegação, "Pausar animações",
+// contador, equipes ao vivo, o formulário e o botão de imprimir. Nada de GSAP, Lenis ou three.js: o HTML já
+// chega pronto e o JS só liga o interativo
 export class LightApp {
   private static booted = false;
 
@@ -94,6 +96,7 @@ export class LightApp {
     };
     boot.add('header', mountHeader);
     boot.add('navigation', () => mountNavigation(reducedMotion));
+    boot.add('print', () => new PrintButtons().mount());
     boot.add('views container', () => {
       container.current = createClientContainer(config, { simulation: SIMULATION_ENABLED });
     });

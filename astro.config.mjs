@@ -6,9 +6,18 @@ import sitemap from '@astrojs/sitemap';
 // conta como não definido. Igual ao DEFAULT_SITE_URL de src/shared/config/deploy.ts (um teste confere)
 const site = process.env.PUBLIC_SITE_URL || 'https://hackarun.pages.dev';
 
+// páginas fora do sitemap (também têm noindex no Seo.astro): /equipes fica escondida até o sorteio e
+// /autorizacao é só o modelo para imprimir
+export const UNLISTED_PATHS = ['/equipes', '/autorizacao'];
+
+// a página entra no sitemap? (o filtro recebe a URL completa)
+/** @param {string} page */
+export const isListedInSitemap = (page) =>
+  !UNLISTED_PATHS.includes(new URL(page).pathname.replace(/\/$/, ''));
+
 export default defineConfig({
   site,
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: isListedInSitemap })],
   devToolbar: { enabled: false },
   // endereços sem barra no fim (/inscricao, /equipes): o build gera inscricao.html, que o Cloudflare Pages
   // serve em /inscricao direto (pasta/index.html custaria um redirect 308 pra /inscricao/ a cada clique) e o

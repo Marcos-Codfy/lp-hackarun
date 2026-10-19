@@ -1,8 +1,9 @@
 ---
 import Icon from '@presentation/components/ui/Icon.astro';
+import { REGULATION_PDF } from '../documents';
 import { footerLinksFor, type SitePage } from '../navLinks';
 
-// navegação numerada do rodapé (as seções da LP, Equipes e Inscrição) + aviso de privacidade
+// navegação numerada do rodapé (as seções da LP e a Inscrição) + regulamento (só download) e aviso de privacidade
 interface Props {
   page?: SitePage;
 }
@@ -29,10 +30,23 @@ const { page = 'home' } = Astro.props;
     </ul>
   </nav>
 
-  <a class="fnav__legal" href="/privacidade">
-    <Icon name="shield" size={16} />
-    Aviso de privacidade · LGPD
-  </a>
+  <div class="fnav__docs">
+    <a
+      class="fnav__legal"
+      href={REGULATION_PDF.href}
+      download={REGULATION_PDF.fileName}
+      type="application/pdf"
+      data-regulation-download
+    >
+      <Icon name="book" size={16} />
+      {REGULATION_PDF.label}
+      <span class="fnav__size">· {REGULATION_PDF.size}</span>
+    </a>
+    <a class="fnav__legal" href="/privacidade">
+      <Icon name="shield" size={16} />
+      Aviso de privacidade · LGPD
+    </a>
+  </div>
 </div>
 
 <style>
@@ -109,6 +123,19 @@ const { page = 'home' } = Astro.props;
       text-decoration-color var(--dur-fast) var(--ease-out);
   }
 
+  /* regulamento e privacidade, um embaixo do outro */
+  .fnav__docs {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-1);
+  }
+
+  .fnav__size {
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+
   .fnav__legal:hover {
     color: var(--accent);
     text-decoration-color: currentColor;
@@ -134,7 +161,7 @@ const { page = 'home' } = Astro.props;
       grid-template-rows: auto 1fr;
     }
 
-    .fnav__legal {
+    .fnav__docs {
       align-self: end;
     }
   }

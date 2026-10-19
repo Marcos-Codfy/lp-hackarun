@@ -1,0 +1,64 @@
+---
+// etapa 02 do formulário: "Você estuda atualmente?" e os campos que a resposta pede ([data-show-field],
+// que a RegistrationFormView mostra e esconde)
+import {
+  AREA_OPTIONS,
+  COURSE_SUGGESTIONS,
+  PERIOD_OPTIONS,
+  PROFILE_OPTIONS,
+} from '@presentation/formatters/ParticipantLabels';
+import TextField from './TextField.astro';
+import SelectField from './SelectField.astro';
+import ChoiceField from './ChoiceField.astro';
+import FormStep from './FormStep.astro';
+---
+
+<FormStep index="02" title="Perfil" lead="Ajuda a organização a montar equipes equilibradas no sorteio.">
+  <ChoiceField id="reg-profile" field="profile" legend="Você estuda atualmente?" options={PROFILE_OPTIONS} />
+  <div class="regform__details" data-profile-details hidden>
+    <div data-show-field="institution" hidden>
+      <TextField
+        id="reg-institution"
+        field="institution"
+        label="Instituição"
+        optional
+        autocomplete="organization"
+        maxlength={100}
+      />
+    </div>
+    <div data-show-field="course" hidden>
+      <TextField
+        id="reg-course"
+        field="course"
+        label="Curso"
+        hint="O que você faz agora ou, se já se formou, o curso em que se formou."
+        maxlength={80}
+        suggestions={COURSE_SUGGESTIONS}
+      />
+    </div>
+    <div class="regform__pair">
+      <div data-show-field="period" hidden>
+        <SelectField id="reg-period" field="period" label="Período" options={PERIOD_OPTIONS} />
+      </div>
+      <div data-show-field="studentId" hidden>
+        <TextField
+          id="reg-student-id"
+          field="studentId"
+          label="Matrícula na UniCatólica"
+          optional
+          autocapitalize="characters"
+          spellcheck={false}
+          maxlength={20}
+        />
+      </div>
+    </div>
+    <div data-show-field="area" hidden>
+      <SelectField
+        id="reg-area"
+        field="area"
+        label="Área em que você atua ou que mais te interessa"
+        options={AREA_OPTIONS}
+      />
+    </div>
+  </div>
+</FormStep>

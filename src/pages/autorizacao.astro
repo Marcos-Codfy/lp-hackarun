@@ -1,0 +1,188 @@
+---
+// modelo de autorização do responsável (participante com menos de 18 anos, item 2.5 do regulamento): página
+// leve, fora do menu, do sitemap e dos buscadores. Na tela, as instruções e o termo como uma folha; na
+// impressão, só o termo, preto no branco (AuthorizationTerm). O botão "Imprimir" só aparece com JS
+// (PrintButtons, no LightApp: a CSP não deixa script inline); sem JS vale o Ctrl+P da dica ao lado
+import PageLayout from '@presentation/layouts/PageLayout.astro';
+import SiteHeader from '@presentation/components/layout/SiteHeader.astro';
+import SiteFooter from '@presentation/components/layout/SiteFooter.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import AuthorizationTerm from '@presentation/components/authorization/AuthorizationTerm.astro';
+import { AUTHORIZATION_PATH } from '@presentation/components/layout/navLinks';
+import { REGULATION_PDF } from '@presentation/components/layout/documents';
+import { TEAM_DRAW } from '@presentation/formatters/TeamDrawCopy';
+import { serverContainer } from '@composition/server';
+import { buildAppConfig } from '@presentation/app/AppConfig';
+import '@presentation/sections/sections.css';
+
+const data = await serverContainer().getLandingPage.execute();
+const { event } = data;
+
+const seo = {
+  title: 'Autorização do responsável · HackaRun 2026',
+  description:
+    'Modelo de autorização do responsável para participante com menos de 18 anos no HackaRun 2026: imprima, preencha à mão e entregue no credenciamento de 12/11.',
+  path: AUTHORIZATION_PATH,
+  noindex: true,
+};
+---
+
+<PageLayout seo={seo} appConfig={buildAppConfig(event)}>
+  <SiteHeader registration={event.registration} page="authorization" />
+  <main id="conteudo" class="auth-page">
+    <section class="section tone-cyan auth" aria-labelledby="autorizacao-title">
+      <div class="container container--narrow auth__frame">
+        <div class="auth__intro">
+          <p class="hud-label">
+            <span aria-hidden="true">// </span>Menores de 18 anos · item 2.5 do regulamento
+          </p>
+          <h1 id="autorizacao-title" class="auth__title">
+            Autorização do <em>responsável</em>
+          </h1>
+          <p class="auth__lead">
+            Quem tem menos de 18 anos participa do HackaRun 2026 com a autorização do responsável legal,
+            entregue em papel e assinada no credenciamento de {TEAM_DRAW.date}, na {TEAM_DRAW.place}, antes do
+            sorteio das equipes.
+          </p>
+          <ol class="auth__steps" role="list">
+            <li>
+              <span aria-hidden="true">01</span> Imprima o termo abaixo.
+            </li>
+            <li>
+              <span aria-hidden="true">02</span> Preencha à mão, com letra legível.
+            </li>
+            <li>
+              <span aria-hidden="true">03</span> O responsável legal assina.
+            </li>
+            <li>
+              <span aria-hidden="true">04</span> Entregue no credenciamento, em {TEAM_DRAW.date}.
+            </li>
+          </ol>
+          <div class="auth__actions">
+            <button type="button" class="auth__print" data-print hidden>
+              <Icon name="save" size={18} />
+              Imprimir
+            </button>
+            <p class="auth__hint">
+              Para imprimir, use <kbd>Ctrl</kbd> + <kbd>P</kbd> (no Mac, <kbd>⌘</kbd> + <kbd>P</kbd>). No
+              celular, use a opção Imprimir do navegador.
+            </p>
+          </div>
+        </div>
+
+        <AuthorizationTerm />
+
+        <p class="section-note auth__note">
+          <Icon name="book" />
+          <span>
+            <strong>Dúvidas sobre as regras?</strong> Leia o regulamento oficial:{' '}
+            <a href={REGULATION_PDF.href} download={REGULATION_PDF.fileName} type="application/pdf">
+              {REGULATION_PDF.label}, {REGULATION_PDF.size}
+            </a>
+            .
+          </span>
+        </p>
+      </div>
+    </section>
+  </main>
+  <SiteFooter data={data} page="authorization" />
+</PageLayout>
+
+<style>
+  .auth__frame {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .auth__intro {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .auth__title {
+    font-size: var(--fs-3xl);
+  }
+
+  .auth__title em {
+    font-style: normal;
+    background: var(--grad-energy);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .auth__lead {
+    color: var(--text-muted);
+    font-size: var(--fs-lg);
+  }
+
+  .auth__steps {
+    display: grid;
+    gap: var(--space-2);
+    color: var(--text-muted);
+  }
+
+  .auth__steps span {
+    margin-right: var(--space-2);
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+  }
+
+  .auth__actions {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+  }
+
+  .auth__print {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 48px;
+    padding-inline: var(--space-5);
+    border: 1px solid rgb(0 229 255 / 0.65);
+    border-radius: 3px;
+    background: linear-gradient(100deg, rgb(0 229 255 / 0.2), rgb(18 100 255 / 0.25));
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: box-shadow var(--dur) var(--ease-out);
+  }
+
+  .auth__print[hidden] {
+    display: none;
+  }
+
+  .auth__print:hover {
+    box-shadow: 0 0 18px rgb(0 229 255 / 0.35);
+  }
+
+  .auth__print:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  .auth__hint {
+    color: var(--text-dim);
+    font-size: var(--fs-sm);
+  }
+
+  .auth__hint kbd {
+    padding: 0 0.35em;
+    border: 1px solid var(--surface-line);
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  .auth__note a {
+    color: var(--ink-cyan);
+    text-underline-offset: 3px;
+  }
+</style>

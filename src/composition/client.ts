@@ -1,5 +1,5 @@
 // composition root do browser: casos de uso + adapters do lado do cliente (three/gsap ficam de fora).
-// A inscrição (envio + foto) mora em registration.ts e só baixa quando o formulário chega perto da tela
+// A inscrição (envio e contagem de vagas) mora em registration.ts e só baixa quando o formulário chega perto da tela
 import teamsData from '@infrastructure/content/teams.json';
 import type { RawTeam } from '@infrastructure/content/schema';
 // direto do arquivo (sem o barrel @application/index): o barrel puxaria a inscrição pro chunk comum
@@ -10,10 +10,8 @@ import type { PreferenceStore } from '@application/ports/PreferenceStore';
 import type { AppConfig } from '@presentation/app/AppConfig';
 import { SystemClock } from '@infrastructure/clock/SystemClock';
 import { AppsScriptClient } from '@infrastructure/registration/AppsScriptClient';
-import { SimulatedTeamStore } from '@infrastructure/registration/SimulatedTeamStore';
 import { AppsScriptTeamRepository } from '@infrastructure/repositories/AppsScriptTeamRepository';
 import { FallbackTeamRepository } from '@infrastructure/repositories/FallbackTeamRepository';
-import { SimulatedTeamRepository } from '@infrastructure/repositories/SimulatedTeamRepository';
 import { StaticTeamRepository } from '@infrastructure/repositories/StaticContentRepositories';
 import { LocalPreferenceStore } from '@infrastructure/storage/LocalPreferenceStore';
 import { registrationMode, SIMULATION_ENABLED } from '@shared/config/registrationMode';
@@ -24,7 +22,7 @@ export type { RegistrationServices } from './registration';
 export interface ClientContainer {
   clock: Clock;
   getCountdown: GetCountdown;
-  // envio e foto da inscrição: chunk à parte (registration.ts), baixado uma vez na 1ª chamada
+  // envio da inscrição e contagem de vagas: chunk à parte (registration.ts), baixado uma vez na 1ª chamada
   loadRegistration(): Promise<RegistrationServices>;
   // null = sem planilha configurada, fica só a lista do build
   listTeams: ListTeams | null;
@@ -54,7 +52,7 @@ function createClock(): Clock {
 function registrationLoader(
   config: AppConfig,
   clock: Clock,
-  simulated: SimulatedTeamStore | null,
+  simulated: boolean,
 ): () => Promise<RegistrationServices> {
   let loading: Promise<RegistrationServices> | null = null;
   return () => {
@@ -68,10 +66,9 @@ function registrationLoader(
   };
 }
 
-function createListTeams(endpoint: string | null, simulated: SimulatedTeamStore | null): ListTeams | null {
-  if (!endpoint) {
-    return SIMULATION_ENABLED && simulated ? new ListTeams(new SimulatedTeamRepository(simulated)) : null;
-  }
+// lista de equipes do sorteio (aba Equipes da planilha); sem planilha fica só a lista do build
+function createListTeams(endpoint: string | null): ListTeams | null {
+  if (!endpoint) return null;
   const live = new AppsScriptTeamRepository(new AppsScriptClient(endpoint));
   const bundled = new StaticTeamRepository(teamsData as RawTeam[]);
   return new ListTeams(new FallbackTeamRepository(live, bundled));
@@ -80,17 +77,15 @@ function createListTeams(endpoint: string | null, simulated: SimulatedTeamStore 
 // simulation: o build liberou a simulação (SIMULATION_ENABLED); os testes passam false pra ficar sem ela
 export function createClientContainer(config: AppConfig, options: { simulation: boolean }): ClientContainer {
   const clock = createClock();
-  // dev ou prévia sem planilha: inscrição e lista de equipes simuladas, ligadas entre si (a foto aparece em
-  // /equipes). Build sem a flag: SIMULATION_ENABLED vira false e a simulação nem entra no bundle
+  // dev ou prévia sem planilha: inscrição simulada (nada é gravado). Build sem a flag: SIMULATION_ENABLED vira
+  // false e a simulação nem entra no bundle
   const simulated =
-    SIMULATION_ENABLED && registrationMode(config.registration.endpoint, options.simulation) === 'simulated'
-      ? new SimulatedTeamStore()
-      : null;
+    SIMULATION_ENABLED && registrationMode(config.registration.endpoint, options.simulation) === 'simulated';
   return {
     clock,
     getCountdown: new GetCountdown(clock, config.milestones),
     loadRegistration: registrationLoader(config, clock, simulated),
-    listTeams: createListTeams(config.teamsEndpoint, simulated),
+    listTeams: createListTeams(config.teamsEndpoint),
     preferences: new LocalPreferenceStore(),
   };
 }

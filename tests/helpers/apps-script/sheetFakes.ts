@@ -1,7 +1,7 @@
 // dublês da planilha (SpreadsheetApp): abas, intervalos, fórmulas e o que a formatação pediu.
 // Formatação (cor, largura, alinhamento...) só fica registrada em `calls`: o teste confere o pedido, não o visual
 
-import { FakeBanding, FakeFilter, insertColumn } from './layoutFakes';
+import { FakeBanding, FakeFilter } from './layoutFakes';
 import { protection, type FakeProtection } from './recorders';
 
 export type Cell = string | number | Date;
@@ -118,8 +118,6 @@ export class FakeSheet {
   readonly protections: FakeProtection[] = [];
   readonly rowHeights = new Map<number, number>();
   readonly columnWidths = new Map<number, number>();
-  // cada insertColumnAfter pedido (a posição depois da qual entrou a coluna)
-  readonly insertedAfter: number[] = [];
   conditionalRules: unknown[] = [];
   filter: FakeFilter | null = null;
   frozen = { rows: 0, columns: 0 };
@@ -139,7 +137,6 @@ export class FakeSheet {
   setFrozenColumns = (n: number) => ((this.frozen.columns = n), this);
   setTabColor = (color: string) => ((this.tabColor = color), this);
   setColumnWidth = (col: number, width: number) => (this.columnWidths.set(col, width), this);
-  insertColumnAfter = (after: number) => (insertColumn(this, after), this);
   setRowHeight = (row: number, height: number) => (this.rowHeights.set(row, height), this);
   setRowHeights = (start: number, count: number, height: number) => {
     for (let r = start; r < start + count; r++) this.rowHeights.set(r, height);

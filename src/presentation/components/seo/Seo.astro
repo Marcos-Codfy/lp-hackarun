@@ -9,9 +9,18 @@ export interface SeoProps {
   path?: string;
   image?: string;
   jsonLd?: Record<string, unknown>;
+  // página fora dos buscadores mesmo em produção (ex.: /equipes antes do sorteio, /autorizacao)
+  noindex?: boolean;
 }
 
-const { title, description, path = '/', image = '/og-image.jpg', jsonLd } = Astro.props as SeoProps;
+const {
+  title,
+  description,
+  path = '/',
+  image = '/og-image.jpg',
+  jsonLd,
+  noindex = false,
+} = Astro.props as SeoProps;
 const site = Astro.site ?? new URL(DEFAULT_SITE_URL);
 const canonical = new URL(path, site).href;
 const imageUrl = new URL(image, site).href;
@@ -27,7 +36,7 @@ const indexable = isIndexable({
 
 <title>{title}</title>
 <meta name="description" content={description} />
-{!indexable && <meta name="robots" content="noindex" />}
+{(!indexable || noindex) && <meta name="robots" content="noindex" />}
 <link rel="canonical" href={canonical} />
 <link rel="sitemap" href="/sitemap-index.xml" />
 

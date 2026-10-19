@@ -1,20 +1,12 @@
 import { vi } from 'vitest';
-import { ok, type Result } from '@domain/index';
-import {
-  SubmitRegistration,
-  type ImageFile,
-  type PreparedTeamImageDTO,
-  type RegistrationWindowSnapshot,
-} from '@application/index';
+import { SubmitRegistration, type RegistrationWindowSnapshot } from '@application/index';
+import type { FieldPath } from '@presentation/view-models/registration/RegistrationFields';
 import { RegistrationFormViewModel } from '@presentation/view-models/registration/RegistrationFormViewModel';
 import { FakeGateway, ManualClock, TEAM_SIZE } from '../../helpers/fixtures';
-import { preparedImage } from '../../helpers/images';
 
 export interface FormSetupOptions {
   isOpen?: boolean;
   window?: RegistrationWindowSnapshot;
-  // o que o "preparar imagem" responde (padrão: imagem pronta na hora)
-  prepare?: (file: ImageFile) => Promise<Result<PreparedTeamImageDTO, string>>;
 }
 
 // VM de verdade em cima do caso de uso de verdade; só o gateway, o relógio e a chave são falsos
@@ -32,16 +24,8 @@ export function setupForm(options: FormSetupOptions = {}) {
   });
   let keys = 0;
   const newKey = vi.fn(() => `chave-${String(++keys).padStart(4, '0')}`);
-  const prepareImage = { execute: vi.fn(options.prepare ?? (async () => ok(preparedImage()))) };
-  const vm = new RegistrationFormViewModel({
-    submit,
-    prepareImage,
-    teamSize: TEAM_SIZE,
-    isOpen: options.isOpen ?? true,
-    clock,
-    newKey,
-  });
-  return { vm, gateway, clock, sleep, newKey, prepareImage };
+  const vm = new RegistrationFormViewModel({ submit, isOpen: options.isOpen ?? true, clock, newKey });
+  return { vm, gateway, clock, sleep, newKey };
 }
 
 export const windowClosingAt = (closesAt: string): RegistrationWindowSnapshot => ({
@@ -50,30 +34,19 @@ export const windowClosingAt = (closesAt: string): RegistrationWindowSnapshot =>
   slots: { capacity: null, taken: 0, remaining: null, level: 'unknown' },
 });
 
-export const VALID_MEMBERS = [
-  { name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' },
-  { name: 'Bruno Lima', studentId: '2024100456', email: 'bruno@exemplo.com' },
-  { name: 'Carla Dias', studentId: '2024100789', email: 'carla@exemplo.com' },
-  { name: 'Davi Rocha', studentId: '2024100999', email: 'davi@exemplo.com' },
-  { name: 'Elisa Prado', studentId: '2024101000', email: 'elisa@exemplo.com' },
-];
+// aluna da UniCatólica com tudo preenchido (menos o aceite, que cada teste decide)
+export const VALID_FIELDS: Partial<Record<FieldPath, string>> = {
+  name: 'Ana Souza',
+  email: 'ana@exemplo.com',
+  whatsapp: '(63) 99999-1234',
+  adult: 'yes',
+  profile: 'unicatolica',
+  course: 'Engenharia de Software',
+  period: '3',
+  studentId: '2024100123',
+};
 
-export function fillMember(
-  vm: RegistrationFormViewModel,
-  index: number,
-  member = VALID_MEMBERS[index],
-): void {
-  if (!member) throw new Error(`Sem integrante de exemplo na posição ${index}`);
-  vm.setText(`members.${index}.name`, member.name);
-  vm.setText(`members.${index}.studentId`, member.studentId);
-  vm.setText(`members.${index}.email`, member.email);
-}
-
-// equipe mínima válida (2 integrantes), com foto e aceite
-export function fillValidTeam(vm: RegistrationFormViewModel): void {
-  vm.setText('teamName', 'Bug Busters');
-  fillMember(vm, 0);
-  fillMember(vm, 1);
-  vm.setTeamImage(preparedImage());
+export function fillValid(vm: RegistrationFormViewModel, fields = VALID_FIELDS): void {
+  for (const [path, value] of Object.entries(fields)) vm.setValue(path as FieldPath, value);
   vm.setAcceptedTerms(true);
 }

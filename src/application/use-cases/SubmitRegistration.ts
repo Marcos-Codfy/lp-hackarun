@@ -1,5 +1,5 @@
-import { RegistrationPolicy, RegistrationWindow, Slots, TeamRegistration } from '@domain/index';
-import type { RegistrationErrors, RegistrationInput, RegistrationStatus, TeamSizeRule } from '@domain/index';
+import { ParticipantRegistration, RegistrationPolicy, RegistrationWindow, Slots } from '@domain/index';
+import type { ParticipantInput, RegistrationErrors, RegistrationStatus, TeamSizeRule } from '@domain/index';
 import { wait, type Sleep } from '@shared/utils/async';
 import type { RegistrationDTO } from '../dto';
 import type { Clock } from '../ports/Clock';
@@ -19,7 +19,7 @@ const DEFAULT_META: SubmissionMeta = { honeypot: '', elapsedMs: 0 };
 
 // versão do aviso de privacidade (/privacidade) que o checkbox aceita; mudou o texto, suba a versão
 // mantenha igual ao CONSENT_VERSION do apps-script/Validation.gs (um teste confere)
-export const CONSENT_VERSION = '2026-10-v3';
+export const CONSENT_VERSION = '2026-10-v4';
 
 // mantenha igual ao MIN_ELAPSED_MS do apps-script/Validation.gs (um teste confere)
 export const MIN_FILL_MS = 3000;
@@ -27,7 +27,7 @@ export const MIN_FILL_MS = 3000;
 // prazo e vagas que o build manda pro navegador (o RegistrationDTO serve)
 export type RegistrationWindowSnapshot = Pick<RegistrationDTO, 'endpoint' | 'closesAt' | 'slots'>;
 
-// conflict = nome, e-mail ou matrícula já inscritos em outra equipe: o erro vai no campo
+// conflict = e-mail, WhatsApp ou matrícula que já têm inscrição: o erro vai no campo
 export type SubmitRegistrationResult =
   | { status: 'invalid'; errors: RegistrationErrors }
   | { status: 'conflict'; reason: ConflictFailure; errors: RegistrationErrors; message: string }
@@ -37,6 +37,7 @@ export type SubmitRegistrationResult =
 export interface SubmitRegistrationDeps {
   gateway: RegistrationGateway;
   clock: Clock;
+  // só pra janela de inscrição (o sorteio forma as equipes)
   teamSize: TeamSizeRule;
   consentVersion?: string;
   // sem janela o caso de uso não opina sobre prazo e vagas (vale o status do build)
@@ -65,12 +66,12 @@ export class SubmitRegistration {
   }
 
   // validação isolada pra feedback em tempo real no formulário
-  validate(input: RegistrationInput): RegistrationErrors {
-    const result = TeamRegistration.create(input, this.teamSize);
+  validate(input: ParticipantInput): RegistrationErrors {
+    const result = ParticipantRegistration.create(input);
     return result.ok ? {} : result.error;
   }
 
-  // status agora pela regra do domínio; liveTaken = confirmadas na lista ao vivo (só soma, nunca libera vaga)
+  // status agora pela regra do domínio; liveTaken = inscritos contados pela planilha (só soma, nunca libera vaga)
   currentStatus(liveTaken = 0): RegistrationStatus | null {
     if (!this.window) return null;
     const { capacity, taken } = this.window.slots;
@@ -79,10 +80,10 @@ export class SubmitRegistration {
   }
 
   async execute(
-    input: RegistrationInput,
+    input: ParticipantInput,
     meta: SubmissionMeta = DEFAULT_META,
   ): Promise<SubmitRegistrationResult> {
-    const result = TeamRegistration.create(input, this.teamSize);
+    const result = ParticipantRegistration.create(input);
     if (!result.ok) return { status: 'invalid', errors: result.error };
     // o prazo venceu com a página aberta: nem chama o servidor
     if (this.currentStatus() === 'closed') return SubmitRegistration.failure('closed');
@@ -99,15 +100,14 @@ export class SubmitRegistration {
       return { status: 'success', protocol: receipt.protocol };
     } catch (error) {
       if (!(error instanceof RegistrationGatewayError)) return SubmitRegistration.failure('network');
-      return SubmitRegistration.rejection(error, input.members.length);
+      return SubmitRegistration.rejection(error);
     }
   }
 
-  // conflito com campo conhecido vira erro no formulário; o resto vira a caixa de falha
-  private static rejection(error: RegistrationGatewayError, memberCount: number): SubmitRegistrationResult {
+  // conflito vira erro no campo; o resto vira a caixa de falha
+  private static rejection(error: RegistrationGatewayError): SubmitRegistrationResult {
     if (!isConflict(error.kind)) return SubmitRegistration.failure(error.kind);
-    const errors = conflictErrors(error.kind, error.memberIndexes, memberCount);
-    if (Object.keys(errors).length === 0) return SubmitRegistration.failure(error.kind);
+    const errors = conflictErrors(error.kind);
     return { status: 'conflict', reason: error.kind, errors, message: FAILURE_MESSAGES[error.kind] };
   }
 
@@ -136,12 +136,10 @@ export class SubmitRegistration {
   }
 
   // só chega aqui com acceptedTerms = true (o domínio barra o resto), então o envio é o aceite
-  private toPayload(registration: TeamRegistration, meta: SubmissionMeta): RegistrationPayload {
+  private toPayload(registration: ParticipantRegistration, meta: SubmissionMeta): RegistrationPayload {
     const now = this.clock.now().toISOString();
     return {
-      teamName: registration.teamName,
-      members: registration.members.map((m) => m.toJSON()),
-      teamImage: { mimeType: registration.teamImage.mimeType, base64: registration.teamImage.base64 },
+      participant: { ...registration.data },
       submittedAt: now,
       source: meta.source ?? 'landing-page',
       consentVersion: this.consentVersion,

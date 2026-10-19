@@ -1,6 +1,6 @@
 ---
-// conteúdo da página /inscricao: título e status (com o contador), o que ter em mãos, as etapas e o
-// formulário. Desktop: formulário à esquerda e o painel (lista + etapas) fixo à direita. Celular e tablet: tudo
+// conteúdo da página /inscricao (inscrição individual): título e status (com o contador), o que ter em mãos,
+// as etapas e o formulário. Desktop: formulário à esquerda e o painel (lista + etapas) fixo à direita. Celular e tablet: tudo
 // numa coluna e enxuto (status numa linha, lista recolhida, etapas em linha) pro formulário começar cedo
 import type { LandingPageDTO } from '@application/index';
 import PageHalo from '@presentation/components/layout/PageHalo.astro';
@@ -8,6 +8,7 @@ import FormProgress from '@presentation/components/registration/FormProgress.ast
 import RegistrationForm from '@presentation/components/registration/RegistrationForm.astro';
 import RegistrationStatus from '@presentation/components/registration/RegistrationStatus.astro';
 import { formStatus } from '@presentation/components/registration/formStatus';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import SectionHeader from './shared/SectionHeader.astro';
 import RegistrationBrief from './registration/RegistrationBrief.astro';
 import RegistrationBriefToggle from './registration/RegistrationBriefToggle.astro';
@@ -19,8 +20,11 @@ interface Props {
 
 const { event, schedule } = Astro.props.data;
 const { registration } = event;
-const { min, max } = registration.teamSize;
 const { status, isOpen } = formStatus(registration);
+// o sorteio das equipes acontece na apresentação das equipes e mentores, na abertura
+const lookup = new ScheduleLookup(schedule);
+const draw = lookup.activity('teams-and-mentors');
+const drawAt = draw ? `${lookup.shortDate(draw.day)}, às ${lookup.startOf(draw)}` : null;
 ---
 
 <section class="section signup tone-cyan" id="cadastro" aria-labelledby="cadastro-title">
@@ -32,23 +36,27 @@ const { status, isOpen } = formStatus(registration);
         level="h1"
         size="lg"
         code="IN"
-        eyebrow="Inscrição de equipe"
-        title="Inscreva sua <em>equipe</em>"
-        lead={`Exclusivo para alunos da UniCatólica, em equipes de ${min} a ${max} pessoas. Três etapas, um envio só, e a confirmação chega por e-mail.`}
+        eyebrow="Inscrição individual"
+        title="Garanta sua <em>vaga</em>"
+        lead="Aberta a estudantes de qualquer instituição, profissionais e entusiastas de tecnologia. Você se inscreve sozinho e as equipes são formadas no sorteio."
       />
-      <RegistrationStatus status={status} teamSize={registration.teamSize} milestones={event.milestones} />
+      <RegistrationStatus
+        status={status}
+        capacity={registration.slots.capacity}
+        milestones={event.milestones}
+      />
     </div>
 
     <div class="signup__layout">
       {/* data-reg-aside: some com a inscrição enviada (a lista e as etapas já não servem) */}
       <aside class="signup__aside" aria-label="Antes de começar" data-reg-aside>
-        <RegistrationBrief teamSize={registration.teamSize} schedule={schedule} />
-        <RegistrationBriefToggle teamSize={registration.teamSize} />
+        <RegistrationBrief teamSize={registration.teamSize} drawAt={drawAt} />
+        <RegistrationBriefToggle teamSize={registration.teamSize} drawAt={drawAt} />
         {isOpen && <FormProgress />}
       </aside>
       <div class="signup__panel sx-glass sx-corners" id="formulario">
         <span class="signup__topline" aria-hidden="true"></span>
-        <RegistrationForm registration={registration} />
+        <RegistrationForm registration={registration} drawAt={drawAt} />
       </div>
     </div>
   </div>

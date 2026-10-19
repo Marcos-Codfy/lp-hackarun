@@ -40,40 +40,44 @@ describe('textos do card de equipe', () => {
   });
 });
 
-describe('navegação entre a LP e /equipes', () => {
-  it('"Equipes" é uma página; o resto são âncoras da LP', () => {
-    expect(NAV_LINKS.find((l) => l.label === 'Equipes')?.href).toBe('/equipes');
-    expect(NAV_LINKS.filter((l) => l.href.startsWith('#'))).toHaveLength(NAV_LINKS.length - 1);
+describe('/equipes escondida até o sorteio', () => {
+  it('o menu não tem "Equipes" nem link de página: só âncoras da LP', () => {
+    expect(NAV_LINKS.find((l) => l.label === 'Equipes')).toBeUndefined();
+    expect(NAV_LINKS.every((l) => l.href.startsWith('#'))).toBe(true);
   });
 
-  it('na LP nada é página atual e as âncoras continuam #secao', () => {
+  it('na LP nada é página atual, as âncoras continuam #secao e nenhum link usa o nav spy', () => {
     const links = navLinksFor('home');
     expect(links.every((l) => l.ariaCurrent === undefined)).toBe(true);
     expect(links.find((l) => l.label === 'Sobre')?.href).toBe('#sobre');
     expect(topHref('home')).toBe('#inicio');
-    // o nav spy acende "Equipes" enquanto a seção #equipes da LP passa
-    expect(links.filter((l) => l.spy).map((l) => [l.label, l.spy])).toEqual([['Equipes', 'equipes']]);
+    expect(links.filter((l) => l.spy)).toEqual([]);
   });
 
-  it('em /equipes as âncoras voltam pra LP e "Equipes" fica aria-current="page"', () => {
+  it('a página continua no ar: em /equipes as âncoras voltam pra LP e nada fica aria-current', () => {
     const links = navLinksFor('teams');
     expect(links.find((l) => l.label === 'Sobre')?.href).toBe('/#sobre');
-    expect(links.filter((l) => l.ariaCurrent === 'page').map((l) => l.label)).toEqual(['Equipes']);
+    expect(links.filter((l) => l.ariaCurrent === 'page')).toEqual([]);
     expect(pageHref('#inscricao', 'teams')).toBe('/#inscricao');
     expect(pageHref('/equipes', 'teams')).toBe('/equipes');
     expect(topHref('teams')).toBe('#conteudo');
-    expect(links.every((l) => l.spy === undefined)).toBe(true);
   });
 
-  it('inscrição encerrada: o CTA leva pra página de equipes', () => {
+  it('inscrição encerrada: o CTA não leva pra página de equipes', () => {
     expect(new RegistrationCopy().cta('closed', 'teams')).toMatchObject({
-      href: '/equipes',
+      href: '/inscricao',
       isRegistration: false,
     });
   });
 });
 
 describe('SEO da página /equipes', () => {
+  it('fica fora dos buscadores (noindex) e não fala mais em "exclusivo" nem em foto', () => {
+    expect(TEAMS_PAGE.noindex).toBe(true);
+    expect(TEAMS_PAGE.description).not.toMatch(/exclusiv|foto/i);
+    expect(TEAMS_PAGE.description).toContain('sorteio');
+  });
+
   it('título e descrição no tamanho que a busca mostra inteiro', () => {
     expect(TEAMS_PAGE.path).toBe('/equipes');
     expect(TEAMS_PAGE.title.length).toBeLessThanOrEqual(60);

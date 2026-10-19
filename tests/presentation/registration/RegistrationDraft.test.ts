@@ -1,39 +1,44 @@
-// rascunho da inscrição na aba (sessionStorage): salva textos e a foto preparada, nunca o aceite; foto grande
-// demais ou armazenamento cheio/bloqueado não quebram nada (a gravação leve e a chave: RegistrationDraftWrites)
+// rascunho da inscrição na aba (sessionStorage): salva os campos, nunca o aceite nem o honeypot; armazenamento
+// cheio ou bloqueado não quebra nada
 import { describe, expect, it } from 'vitest';
 import {
   DRAFT_KEY,
-  MAX_DRAFT_IMAGE_CHARS,
   RegistrationDraft,
   type DraftStorage,
 } from '@presentation/view-models/registration/RegistrationDraft';
 import { emptyFields } from '@presentation/view-models/registration/RegistrationFields';
-import { preparedImage } from '../../helpers/images';
-import { filled, IMAGE_KEY, MemoryStorage } from './draftStorage';
+import { filled, MemoryStorage } from './draftStorage';
+
+const KEY = '3f0c9a52-6d1e-4b7a-9c3e-2a5b8d7e1f40';
 
 describe('RegistrationDraft · salvar e voltar', () => {
-  it('volta nome, integrantes (sem a chave da linha) e a foto preparada; nunca o aceite nem o honeypot', () => {
+  it('volta os campos preenchidos, a origem e a chave do envio; nunca o aceite nem o honeypot', () => {
     const storage = new MemoryStorage();
     const draft = new RegistrationDraft(storage);
-    expect(draft.save(filled(), 'hero')).toBe('saved');
+    expect(draft.save(filled(), 'hero', KEY)).toBe('saved');
     const raw = storage.getItem(DRAFT_KEY) ?? '';
     expect(raw).not.toContain('acceptedTerms');
     expect(raw).not.toContain('robô');
-    const back = draft.load();
-    expect(back).toMatchObject({ teamName: 'Bug Busters', source: 'hero', imageDropped: false });
-    expect(back?.members).toEqual([
-      { name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' },
-      { name: 'Bruno', studentId: '', email: '' },
-      { name: 'Carla Dias', studentId: '', email: '' },
-    ]);
-    expect(back?.teamImage).toEqual(preparedImage());
+    expect(draft.load()).toEqual({
+      fields: {
+        name: 'Ana Souza',
+        email: 'ana@exemplo.com',
+        whatsapp: '(63) 9999',
+        adult: 'no',
+        profile: 'other-institution',
+        institution: 'Faculdade Exemplo',
+        course: 'Direito',
+      },
+      source: 'hero',
+      sessionKey: KEY,
+    });
   });
 
   it('formulário vazio apaga o rascunho em vez de salvar um vazio', () => {
     const storage = new MemoryStorage();
     const draft = new RegistrationDraft(storage);
     draft.save(filled(), null);
-    expect(draft.save(emptyFields(2), null)).toBe('empty');
+    expect(draft.save(emptyFields(), null)).toBe('empty');
     expect(storage.getItem(DRAFT_KEY)).toBeNull();
     expect(draft.load()).toBeNull();
   });
@@ -46,31 +51,7 @@ describe('RegistrationDraft · salvar e voltar', () => {
   });
 });
 
-describe('RegistrationDraft · foto que não cabe e armazenamento com problema', () => {
-  it('foto acima do teto do rascunho: salva os textos e avisa pra escolher de novo', () => {
-    const storage = new MemoryStorage();
-    const draft = new RegistrationDraft(storage);
-    const big = preparedImage({ base64: 'A'.repeat(MAX_DRAFT_IMAGE_CHARS + 4) });
-    expect(draft.save(filled({ teamImage: big }), null)).toBe('saved-without-image');
-    expect(draft.load()).toMatchObject({ teamName: 'Bug Busters', teamImage: null, imageDropped: true });
-  });
-
-  it('aba sem espaço pra foto (cota): tenta só os textos', () => {
-    const image = preparedImage({ base64: 'A'.repeat(4000) });
-    const draft = new RegistrationDraft(new MemoryStorage(2000));
-    expect(draft.save(filled({ teamImage: image }), null)).toBe('saved-without-image');
-    expect(draft.load()).toMatchObject({ teamImage: null, imageDropped: true });
-  });
-
-  it('a foto coube mas os textos não (cota total): solta a foto e grava os textos', () => {
-    const image = preparedImage({ base64: 'A'.repeat(4000) });
-    const storage = new MemoryStorage(null, 4300);
-    const draft = new RegistrationDraft(storage);
-    expect(draft.save(filled({ teamImage: image }), null)).toBe('saved-without-image');
-    expect(storage.getItem(IMAGE_KEY)).toBeNull();
-    expect(draft.load()).toMatchObject({ teamName: 'Bug Busters', teamImage: null, imageDropped: true });
-  });
-
+describe('RegistrationDraft · armazenamento com problema', () => {
   it('armazenamento recusando tudo: "failed", sem exceção', () => {
     const draft = new RegistrationDraft(new MemoryStorage(10));
     expect(draft.save(filled(), null)).toBe('failed');
@@ -104,43 +85,32 @@ describe('RegistrationDraft · rascunho estranho no armazenamento', () => {
     return new RegistrationDraft(storage).load();
   };
 
-  it('JSON quebrado, outra versão ou tipos errados: ignora', () => {
+  it('JSON quebrado, outra versão (o da equipe era v2) ou sem conteúdo: ignora', () => {
     expect(loadRaw('{nao é json')).toBeNull();
-    expect(loadRaw(JSON.stringify({ v: 1, teamName: 'X', members: [] }))).toBeNull();
-    expect(loadRaw(JSON.stringify({ v: 2, teamName: 42, members: 'x' }))).toBeNull();
+    expect(loadRaw(JSON.stringify({ v: 2, teamName: 'X', members: [] }))).toBeNull();
+    expect(loadRaw(JSON.stringify({ v: 3, fields: 'x' }))).toBeNull();
+    expect(loadRaw(JSON.stringify({ v: 3, fields: { name: '   ' } }))).toBeNull();
   });
 
-  it('corta textos no tamanho dos campos e descarta foto adulterada', () => {
-    const storage = new MemoryStorage();
-    storage.setItem(
-      DRAFT_KEY,
+  it('corta textos longos, ignora tipos errados, campos desconhecidos e o honeypot', () => {
+    const back = loadRaw(
       JSON.stringify({
-        v: 2,
-        teamName: 'N'.repeat(300),
-        members: [{ name: 'A'.repeat(200), studentId: 7, email: 'a@b.co' }],
-        image: true,
+        v: 3,
+        fields: { name: 'A'.repeat(500), email: 7, honeypot: 'robô', teamName: 'Bug Busters' },
       }),
     );
-    storage.setItem(
-      IMAGE_KEY,
-      JSON.stringify({ mimeType: 'image/gif', base64: 'AAAA', width: 1, height: 1, bytes: 3 }),
-    );
-    const back = new RegistrationDraft(storage).load();
-    expect(back?.teamName).toHaveLength(40);
-    expect(back?.members[0]).toEqual({ name: 'A'.repeat(80), studentId: '', email: 'a@b.co' });
-    expect(back).toMatchObject({ teamImage: null, imageDropped: true });
+    expect(back?.fields).toEqual({ name: 'A'.repeat(120) });
   });
 
   it('origem fora da lista (rascunho mexido na aba) não chega na coluna Origem; chave inválida também não', () => {
     const back = loadRaw(
       JSON.stringify({
-        v: 2,
-        teamName: 'Bug Busters',
-        members: [],
+        v: 3,
+        fields: { name: 'Ana Souza' },
         source: '=HYPERLINK("x")',
         sessionKey: 'chave com espaço',
       }),
     );
-    expect(back).toMatchObject({ teamName: 'Bug Busters', source: null, sessionKey: null });
+    expect(back).toMatchObject({ source: null, sessionKey: null });
   });
 });

@@ -7,7 +7,8 @@ import {
 export interface NavLink {
   href: `#${string}` | `/${string}`;
   label: string;
-  // link de página que também tem seção na LP: o nav spy acende ele quando a seção passa (ex.: /equipes)
+  // link de página que também tem seção na LP: o nav spy acende ele quando a seção passa (ex.: /equipes,
+  // quando a página das equipes voltar pro menu)
   spy?: string;
 }
 
@@ -16,17 +17,20 @@ export const NAV_LINKS: readonly NavLink[] = [
   // { href: '#missoes', label: 'Missões' },
   { href: '#programacao', label: 'Programação' },
   { href: '#final', label: 'Final' },
-  { href: '/equipes', label: 'Equipes', spy: 'equipes' },
+  // /equipes fica fora do menu até o sorteio (12/11): a página existe, mas sem link nem indexação
   { href: '#faq', label: 'FAQ' },
 ];
 
 // em que página o header/rodapé está: na LP as âncoras rolam; fora dela voltam pra LP (/#secao)
-export type SitePage = 'home' | 'teams' | 'registration';
+export type SitePage = 'home' | 'teams' | 'registration' | 'authorization';
+
+export const AUTHORIZATION_PATH = '/autorizacao';
 
 const PAGE_PATHS: Record<SitePage, string> = {
   home: '/',
   teams: '/equipes',
   registration: REGISTRATION_PATH,
+  authorization: AUTHORIZATION_PATH,
 };
 
 export interface ResolvedNavLink {
@@ -74,7 +78,7 @@ export function footerLinksFor(page: SitePage): ResolvedNavLink[] {
   return [...navLinksFor(page), registration];
 }
 
-// CTA do header e do menu (/inscricao com a origem, ou /equipes com as inscrições encerradas): na página de
+// CTA do header e do menu (/inscricao com a origem; encerrada, /inscricao limpa com o aviso): na página de
 // destino ele vira o item atual, com aria-current e o endereço limpo
 export function headerCtaLink(
   cta: { href: string; isRegistration: boolean },
@@ -102,7 +106,8 @@ export function headerCtaAttrs(
   };
 }
 
-// barra de baixo do header em /inscricao e /equipes: as duas páginas leves trocam entre si por aqui
+// barra de baixo do header em /inscricao e /equipes. Enquanto /equipes está escondida (até o sorteio), a
+// barra só tem a inscrição: nenhuma das duas páginas leva pra ela
 export type SubNavPage = Extract<SitePage, 'registration' | 'teams'>;
 
 export interface SubNavLink {
@@ -123,12 +128,6 @@ export function subNavLinksFor(page: SubNavPage): SubNavLink[] {
       label: 'Inscrição',
       short: 'Inscrição',
       ariaCurrent: page === 'registration' ? 'page' : undefined,
-    },
-    {
-      href: PAGE_PATHS.teams,
-      label: 'Equipes inscritas',
-      short: 'Equipes',
-      ariaCurrent: page === 'teams' ? 'page' : undefined,
     },
   ];
 }

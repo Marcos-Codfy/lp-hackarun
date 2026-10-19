@@ -12,7 +12,6 @@ import type {
   SlotsLevel,
   SpeakerRole,
   StationKind,
-  TeamImageType,
   TeamStatus,
   VenueRole,
 } from '@domain/index';
@@ -155,15 +154,6 @@ export interface TeamDTO {
   status: TeamStatus;
   // url pública da foto/logo (Drive) ou null: a página mostra as iniciais
   imageUrl: string | null;
-}
-
-// foto/logo já redimensionada no navegador, pronta pra ir no envio
-export interface PreparedTeamImageDTO {
-  mimeType: TeamImageType;
-  base64: string;
-  width: number;
-  height: number;
-  bytes: number;
 }
 
 export interface SpeakerDTO {

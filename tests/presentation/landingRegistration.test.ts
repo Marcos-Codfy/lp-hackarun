@@ -1,5 +1,6 @@
-// a LP não tem mais formulário (ele mora em /inscricao): o boot da LP não baixa o envio nem a foto, a vitrine
-// de equipes continua sob demanda e o clímax ainda acende o CTA, que é só um link pra página de inscrição
+// a LP não tem mais formulário (ele mora em /inscricao): o boot da LP não baixa o envio, a vitrine de equipes
+// (fora da LP até o sorteio) só carrega sob demanda quando existe e o clímax ainda acende o CTA, que é só um
+// link pra página de inscrição
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventBus } from '@shared/core/EventBus';
 import { Observable } from '@shared/core/Observable';
@@ -21,7 +22,7 @@ const CONFIG: AppConfig = {
     endpoint: null,
     closesAt: null,
     slots: SLOTS,
-    teamSize: { min: 2, max: 5 },
+    teamSize: { min: 4, max: 5 },
   },
   teamsEndpoint: null,
 };
@@ -100,7 +101,7 @@ afterEach(() => {
 });
 
 describe('LP sem formulário', () => {
-  it('o boot e a seção final chegando perto não baixam o envio nem a foto', async () => {
+  it('o boot e a seção final chegando perto não baixam o envio', async () => {
     await boot();
     const section = document.getElementById('inscricao') as HTMLElement;
     expect(lazyObserverOf(section)).toBeUndefined();
@@ -127,7 +128,16 @@ describe('LP sem formulário', () => {
     expect(section.classList.contains('is-charged')).toBe(true);
   });
 
-  it('a vitrine de equipes continua sob demanda, uma vez só', async () => {
+  it('LP de agora (seção do sorteio, sem [data-teams]): nenhum chunk de equipes nem observador', async () => {
+    document.getElementById('equipes')?.replaceChildren();
+    await boot();
+    const section = document.getElementById('equipes') as HTMLElement;
+    expect(lazyObserverOf(section)).toBeUndefined();
+    await flush();
+    expect(mocks.mountTeams).not.toHaveBeenCalled();
+  });
+
+  it('quando a vitrine de equipes voltar ([data-teams]), ela carrega sob demanda, uma vez só', async () => {
     await boot();
     const section = document.getElementById('equipes') as HTMLElement;
     expect(mocks.mountTeams).not.toHaveBeenCalled();
@@ -138,7 +148,7 @@ describe('LP sem formulário', () => {
 });
 
 describe('createClientContainer: inscrição em chunk à parte', () => {
-  it('loadRegistration entrega envio e foto, e reaproveita o mesmo carregamento', async () => {
+  it('loadRegistration entrega o envio e reaproveita o mesmo carregamento', async () => {
     const container = createClientContainer(CONFIG, { simulation: false });
 
     const first = container.loadRegistration();
@@ -146,6 +156,7 @@ describe('createClientContainer: inscrição em chunk à parte', () => {
 
     expect(container.loadRegistration()).toBe(first);
     expect(typeof services.submitRegistration.execute).toBe('function');
-    expect(typeof services.prepareTeamImage.execute).toBe('function');
+    // sem planilha e sem simulação, ninguém conta as vagas
+    expect(services.counter).toBeNull();
   });
 });

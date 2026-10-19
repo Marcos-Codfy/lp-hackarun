@@ -13,6 +13,10 @@
   Cross-Origin-Opener-Policy: same-origin
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://lh3.googleusercontent.com; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
+# regulamento oficial: sempre baixa, nunca abre dentro do site (o link do rodapé e do FAQ também tem download)
+/regulamento-hackarun-2026.pdf
+  Content-Disposition: attachment; filename="regulamento-hackarun-2026.pdf"
+
 # arquivos com hash no nome nunca mudam
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable

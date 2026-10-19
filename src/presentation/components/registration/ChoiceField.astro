@@ -1,0 +1,206 @@
+---
+// pergunta de uma resposta só (perfil, idade): fieldset com legend e opções em cartão, cada uma com o radio
+// nativo num alvo grande. O fieldset leva o [data-field-group] (erro e aria-invalid) e cada radio o data-field
+import FieldError from './FieldError.astro';
+
+interface Props {
+  id: string;
+  legend: string;
+  field: string;
+  options: readonly { value: string; label: string; detail?: string }[];
+  hint?: string;
+  // duas colunas a partir do tablet (opções curtas, como Sim/Não)
+  columns?: 1 | 2;
+}
+
+const { id, legend, field, options, hint, columns = 1 } = Astro.props;
+const hintId = hint ? `${id}-hint` : undefined;
+---
+
+<fieldset
+  class="choice"
+  id={id}
+  role="radiogroup"
+  data-field-group={field}
+  data-describedby-base={hintId}
+  aria-describedby={hintId}
+  aria-required="true"
+>
+  <legend class="choice__legend">{legend}</legend>
+  {hint && (
+    <p class="choice__hint" id={hintId}>
+      {hint}
+    </p>
+  )}
+  <div class:list={['choice__options', { 'choice__options--two': columns === 2 }]}>
+    {options.map((option) => (
+      <label class="choice__option" for={`${id}-${option.value}`}>
+        <input
+          class="choice__input"
+          type="radio"
+          id={`${id}-${option.value}`}
+          name={field}
+          value={option.value}
+          data-field={field}
+        />
+        <span class="choice__mark" aria-hidden="true"></span>
+        <span class="choice__text">
+          <span class="choice__label">{option.label}</span>
+          {option.detail && <span class="choice__detail">{option.detail}</span>}
+        </span>
+      </label>
+    ))}
+  </div>
+  <FieldError id={`${id}-error`} field={field} />
+</fieldset>
+
+<style>
+  .choice {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  /* legend com float: é o jeito estável de pôr um legend dentro do grid */
+  .choice__legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .choice__hint {
+    clear: both;
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+  }
+
+  .choice__options {
+    clear: both;
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .choice__option {
+    position: relative;
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-3);
+    min-height: 52px;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--control-line);
+    border-radius: 3px;
+    background: var(--control-bg);
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  .choice__option:hover {
+    border-color: color-mix(in srgb, var(--c-cyan) 45%, transparent);
+  }
+
+  /* o radio nativo fica por cima da bolinha: teclado, leitor de tela e toque continuam do navegador */
+  .choice__input {
+    position: absolute;
+    top: calc(var(--space-3) + 1px);
+    left: var(--space-4);
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .choice__mark {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+    border: 1.5px solid color-mix(in srgb, var(--c-cyan) 60%, transparent);
+    border-radius: 50%;
+    background: var(--surface-solid);
+  }
+
+  .choice__mark::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: var(--c-cyan);
+    box-shadow: 0 0 12px var(--c-cyan);
+    opacity: 0;
+    transform: scale(0.4);
+    transition:
+      opacity var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+
+  .choice__option:has(.choice__input:checked) {
+    border-color: var(--c-cyan);
+    background: color-mix(in srgb, var(--c-cyan) 8%, var(--control-bg));
+    box-shadow: 0 0 24px color-mix(in srgb, var(--c-cyan) 14%, transparent);
+  }
+
+  .choice__input:checked + .choice__mark::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .choice__input:focus-visible + .choice__mark {
+    outline: 2px solid var(--c-cyan);
+    outline-offset: 3px;
+  }
+
+  .choice[aria-invalid='true'] .choice__option {
+    border-color: color-mix(in srgb, var(--c-danger) 70%, transparent);
+  }
+
+  .choice__text {
+    display: grid;
+    gap: 2px;
+  }
+
+  .choice__label {
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .choice__detail {
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+    line-height: 1.45;
+  }
+
+  @media (min-width: 40rem) {
+    .choice__options--two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (forced-colors: active) {
+    .choice__mark,
+    .choice__option {
+      border-color: CanvasText;
+    }
+
+    .choice__mark::after {
+      background: Highlight;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .choice__mark::after {
+      transition: none;
+    }
+  }
+</style>

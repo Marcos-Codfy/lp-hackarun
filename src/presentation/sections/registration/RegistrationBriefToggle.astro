@@ -6,9 +6,10 @@ import { prepChecklist } from '@presentation/components/registration/checklist';
 
 interface Props {
   teamSize: { min: number; max: number };
+  drawAt: string | null;
 }
 
-const { teamSize } = Astro.props;
+const { teamSize, drawAt } = Astro.props;
 const count = prepChecklist(teamSize).length;
 ---
 
@@ -20,7 +21,13 @@ const count = prepChecklist(teamSize).length;
     <span class="brief-toggle__icon" aria-hidden="true"></span>
   </summary>
   <div class="brief-toggle__body">
-    <PrepChecklist teamSize={teamSize} variant="panel" id="reg-brief-toggle-title" hideTitle />
+    <PrepChecklist
+      teamSize={teamSize}
+      drawAt={drawAt}
+      variant="panel"
+      id="reg-brief-toggle-title"
+      hideTitle
+    />
   </div>
 </details>
 

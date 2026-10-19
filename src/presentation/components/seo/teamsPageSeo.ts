@@ -1,9 +1,11 @@
-// SEO da página /equipes: título e descrição no tamanho que a busca mostra inteiro (≤ 60 e ≤ 160)
+// SEO da página /equipes: título e descrição no tamanho que a busca mostra inteiro (≤ 60 e ≤ 160).
+// Escondida até o sorteio (12/11): noindex e fora do sitemap (astro.config.mjs), sem link no site
 export const TEAMS_PAGE = {
-  title: 'Equipes inscritas · HackaRun 2026',
+  title: 'Equipes · HackaRun 2026',
   description:
-    'Veja as equipes confirmadas no HackaRun 2026, o hackathon exclusivo para alunos da UniCatólica, em Palmas, com a foto ou a logo de cada time. Inscreva a sua.',
+    'As equipes do hackathon do HackaRun 2026, em Palmas, formadas por sorteio entre os inscritos presentes no credenciamento, com o nome e a insígnia de cada uma.',
   path: '/equipes',
+  noindex: true,
 } as const;
 
 // trilha (Início > Equipes) + página de coleção: o Google entende onde a página fica no site

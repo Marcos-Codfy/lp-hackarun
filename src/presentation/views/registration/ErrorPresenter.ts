@@ -1,7 +1,6 @@
 import type { RegistrationErrors } from '@domain/index';
 import { qs, qsa } from '@shared/utils/dom';
 import type { FieldError } from '@presentation/view-models/registration/RegistrationFormViewModel';
-import { groupErrors, joinParts, type ErrorGroup } from './errorGroups';
 import { controlFor, labelFor, pathOf } from './fieldLookup';
 
 const setAttr = (el: Element, name: string, value: string | null) => {
@@ -12,7 +11,8 @@ const setAttr = (el: Element, name: string, value: string | null) => {
   }
 };
 
-// reconcilia aria-invalid/aria-describedby/texto com o estado; só escreve o que mudou
+// reconcilia aria-invalid/aria-describedby/texto com o estado; só escreve o que mudou.
+// Cada campo (ou grupo de opções) tem o erro em #<id>-error
 export class ErrorPresenter {
   private readonly root: HTMLElement;
 
@@ -21,7 +21,7 @@ export class ErrorPresenter {
   }
 
   render(errors: RegistrationErrors): void {
-    for (const control of qsa('[data-field], [data-member-field]', this.root)) {
+    for (const control of qsa('[data-field]:not([type="radio"]), [data-field-group]', this.root)) {
       const error = control.id ? document.getElementById(`${control.id}-error`) : null;
       if (!error) continue;
       const path = pathOf(control);
@@ -31,8 +31,6 @@ export class ErrorPresenter {
       const ids = [control.dataset['describedbyBase'], message ? error.id : null].filter(Boolean).join(' ');
       setAttr(control, 'aria-describedby', ids || null);
     }
-    const group = qs('[data-error-for="members"]', this.root);
-    if (group) this.paint(group, errors['members'] ?? null);
   }
 
   renderSummary(visible: boolean, errors: readonly FieldError[]): void {
@@ -43,23 +41,18 @@ export class ErrorPresenter {
     if (summary.hidden) return;
     const title = qs('[data-error-summary-title]', this.root);
     if (title) title.textContent = this.summaryTitle(errors.length);
-    list.replaceChildren(...groupErrors(errors).map((group) => this.item(group)));
+    list.replaceChildren(...errors.map((error) => this.item(error)));
   }
 
-  // um item por bloco, com link pro 1º campo dele. Bloco com um erro só (o e-mail já inscrito, por exemplo)
-  // mantém a frase exata; com vários, só os nomes dos campos ("Integrante 2: nome, matrícula e e-mail")
-  private item(group: ErrorGroup): HTMLLIElement {
-    const [first] = group.errors;
+  // um item por campo, com link pra ele: "WhatsApp: Confira o número..."
+  private item(error: FieldError): HTMLLIElement {
     const item = document.createElement('li');
-    if (!first) return item;
     const link = document.createElement('a');
-    const control = controlFor(this.root, first.path);
+    const control = controlFor(this.root, error.path);
     link.href = control?.id ? `#${control.id}` : '#';
-    link.dataset['focusPath'] = first.path;
-    link.textContent =
-      group.errors.length > 1 && group.title
-        ? `${group.title}: ${joinParts(group.parts)}`
-        : `${labelFor(this.root, first.path)}: ${first.message}`;
+    link.dataset['focusPath'] = error.path;
+    const label = labelFor(this.root, error.path);
+    link.textContent = label ? `${label}: ${error.message}` : error.message;
     item.append(link);
     return item;
   }

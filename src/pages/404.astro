@@ -12,7 +12,7 @@ import '@presentation/sections/sections.css';
 const { event } = await serverContainer().getLandingPage.execute();
 
 const appConfig = buildAppConfig(event);
-// segundo caminho: a inscrição (ou as equipes, com as inscrições encerradas)
+// segundo caminho: a inscrição (encerrada, o aviso de encerramento na mesma página)
 const copy = new RegistrationCopy();
 const cta = copy.cta(event.registration.status, '404');
 const secondary = copy.actionLabel(event.registration.status);

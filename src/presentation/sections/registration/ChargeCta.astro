@@ -9,7 +9,7 @@ import ChargeStatus from './ChargeStatus.astro';
 // e por fim is-charged; sem JS nenhuma classe entra e o CTA fica simplesmente visível. A barra de energia é
 // um fio logo embaixo do botão principal, que enche no tempo do globo.
 // O principal leva pra página de inscrição (o rótulo segue o status: "Quero participar" antes de abrir); o
-// secundário, pras equipes. Encerrada, sobra só "Ver as equipes"
+// secundário sobe pra seção que explica o sorteio das equipes. Encerrada, sobra só o aviso de encerramento
 interface Props {
   registration: RegistrationDTO;
 }
@@ -24,24 +24,17 @@ const open = cta.isRegistration;
   <div class="charge__actions">
     <div class="charge__button">
       <span class="charge__ring" aria-hidden="true"></span>
-      {open ? (
-        <Button size="lg" href={cta.href} registrationCta="final">
-          {copy.actionLabel(registration.status)}
-          <Icon slot="icon" name="arrow-right" />
-        </Button>
-      ) : (
-        <Button size="lg" href="/equipes">
-          Ver as equipes
-          <Icon slot="icon" name="arrow-right" />
-        </Button>
-      )}
+      <Button size="lg" href={cta.href} registrationCta={open ? 'final' : undefined}>
+        {copy.actionLabel(registration.status)}
+        <Icon slot="icon" name="arrow-right" />
+      </Button>
       <span class="charge__meter" aria-hidden="true">
         <span class="charge__fill"></span>
       </span>
     </div>
     {open && (
-      <Button size="lg" variant="ghost" href="/equipes" class="charge__secondary">
-        Ver as equipes
+      <Button size="lg" variant="ghost" href="#equipes" class="charge__secondary">
+        Como as equipes são formadas
       </Button>
     )}
   </div>
@@ -96,7 +89,7 @@ const open = cta.isRegistration;
     --btn-h: 46px;
   }
 
-  /* 360px: "Inscrever minha equipe →" numa linha só dentro do paralelogramo */
+  /* 360px: "Fazer minha inscrição →" numa linha só dentro do paralelogramo */
   .charge__actions :global(.btn--lg) {
     --btn-px: 1.1rem;
     --btn-fs: 0.8125rem;

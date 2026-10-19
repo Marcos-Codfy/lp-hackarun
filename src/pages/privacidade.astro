@@ -22,7 +22,7 @@ const appConfig: AppConfig = {
 const seo = {
   title: 'Aviso de privacidade · HackaRun 2026',
   description:
-    'Como o HackaRun 2026 trata os dados da inscrição das equipes: o que coleta, para que usa, por quanto tempo e como pedir a remoção.',
+    'Como o HackaRun 2026 trata os dados da inscrição individual: o que coleta, para que usa, com quem compartilha, por quanto tempo e como pedir a remoção.',
   path: '/privacidade',
 };
 ---
@@ -43,22 +43,22 @@ const seo = {
     >
       <div class="container container--narrow privacy__frame">
         <p class="hud-label">
-          <span aria-hidden="true">// </span>LGPD · versão {CONSENT_VERSION}
+          <span aria-hidden="true">// </span>LGPD · versão {CONSENT_VERSION} · outubro de 2026
         </p>
         <h1 id="privacidade-title" class="privacy__title">
           Aviso de <em>privacidade</em>
         </h1>
         <p class="privacy__lead">
-          O que acontece com os dados da inscrição das equipes no HackaRun 2026. Curto e direto, sem
+          O que acontece com os dados da inscrição individual no HackaRun 2026. Curto e direto, sem
           juridiquês.
         </p>
 
         <PrivacyNotice />
 
         <p class="privacy__draft">
-          Enquanto você preenche a inscrição, o rascunho (nome da equipe, integrantes e a foto já preparada)
-          fica guardado só nesta aba do navegador, para nada se perder se você sair e voltar, e some quando a
-          aba é fechada, quando a inscrição é enviada ou quando você toca em “Limpar rascunho”.
+          Enquanto você preenche a inscrição, o rascunho (os campos já preenchidos) fica guardado só nesta aba
+          do navegador, para nada se perder se você sair e voltar, e some quando a aba é fechada, quando a
+          inscrição é enviada ou quando você toca em “Limpar rascunho”.
         </p>
 
         <Button size="lg" href={registrationHref('privacidade')} class="privacy__cta">

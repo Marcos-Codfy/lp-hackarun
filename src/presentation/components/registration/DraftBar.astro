@@ -9,7 +9,6 @@ import Icon from '@presentation/components/ui/Icon.astro';
   </span>
   <p class="draft__text">
     <span data-draft-text>Rascunho salvo nesta aba</span>
-    <span class="draft__note" data-draft-note hidden></span>
   </p>
   <button type="button" class="draft__clear" data-draft-clear>
     <Icon name="trash" size={16} />
@@ -37,10 +36,6 @@ import Icon from '@presentation/components/ui/Icon.astro';
   .draft__text {
     display: grid;
     gap: 0.15rem;
-  }
-
-  .draft__note {
-    color: var(--ink-orange);
   }
 
   .draft__clear {

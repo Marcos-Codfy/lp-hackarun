@@ -1,41 +1,43 @@
 import { describe, expect, it } from 'vitest';
-import { RegistrationGatewayError } from '@application/index';
-import { fillMember, fillValidTeam, setupForm as setup } from './formSetup';
+import {
+  emptyFields,
+  withValue,
+  type FieldPath,
+} from '@presentation/view-models/registration/RegistrationFields';
+import { ServerConflicts } from '@presentation/view-models/registration/ServerConflicts';
 
-describe('RegistrationFormViewModel · já inscrito em outra equipe', () => {
-  it('nome repetido: o erro fica no campo até a pessoa trocar o nome', async () => {
-    const { vm, gateway } = setup();
-    fillValidTeam(vm);
-    gateway.willThrow(new RegistrationGatewayError('duplicate-team-name', 'x'));
-    await vm.submit();
-    expect(vm.state.value).toMatchObject({ status: 'idle', failure: null, focus: { path: 'teamName' } });
-    expect(vm.state.value.errors['teamName']).toBe('Esse nome já é de outra equipe inscrita. Escolha outro.');
-    vm.setText('members.1.name', 'Bruno Lima Duarte');
-    expect(vm.state.value.errors['teamName']).toBeDefined();
-    vm.setText('teamName', 'Bug Busters 2');
-    expect(vm.state.value.errors['teamName']).toBeUndefined();
-    vm.setText('teamName', '  bug   BUSTERS ');
-    expect(vm.state.value.errors['teamName']).toBeDefined();
+const fields = (patch: Partial<Record<FieldPath, string>>) =>
+  Object.entries(patch).reduce((f, [path, value]) => withValue(f, path as FieldPath, value), emptyFields());
+
+describe('ServerConflicts', () => {
+  it('o erro vale enquanto o valor for o recusado (sem caixa nem espaço sobrando)', () => {
+    const conflicts = new ServerConflicts();
+    conflicts.record({ email: 'Esse e-mail já tem uma inscrição.' }, fields({ email: 'ana@exemplo.com' }));
+    expect(conflicts.active(fields({ email: ' ANA@exemplo.com ' }))).toEqual({
+      email: 'Esse e-mail já tem uma inscrição.',
+    });
+    expect(conflicts.active(fields({ email: 'outra@exemplo.com' }))).toEqual({});
   });
 
-  it('e-mail e matrícula repetidos marcam o integrante certo, mesmo depois de remover outro card', async () => {
-    const { vm, gateway } = setup();
-    fillValidTeam(vm);
-    vm.addMember();
-    fillMember(vm, 2);
-    gateway
-      .willThrow(new RegistrationGatewayError('duplicate-email', 'x', [2]))
-      .willThrow(new RegistrationGatewayError('duplicate-student-id', 'x', [0]));
-    await vm.submit();
-    expect(vm.state.value.errors['members.2.email']).toBe('Esse e-mail já está em outra equipe inscrita.');
-    expect(vm.state.value.focus?.path).toBe('members.2.email');
-    vm.setText('members.2.email', 'carla.dias@exemplo.com');
-    await vm.submit();
-    expect(vm.state.value.errors).toEqual({
-      'members.0.studentId': 'Essa matrícula já está em outra equipe inscrita.',
-    });
-    vm.setText('members.2.email', 'carla@exemplo.com');
-    vm.removeMember(1);
-    expect(Object.keys(vm.state.value.errors).sort()).toEqual(['members.0.studentId', 'members.1.email']);
+  it('WhatsApp compara só os dígitos (com ou sem o 55)', () => {
+    const conflicts = new ServerConflicts();
+    conflicts.record({ whatsapp: 'repetido' }, fields({ whatsapp: '(63) 99999-1234' }));
+    expect(conflicts.active(fields({ whatsapp: '+55 63 999991234' }))).toEqual({ whatsapp: 'repetido' });
+    expect(conflicts.active(fields({ whatsapp: '(63) 99999-0000' }))).toEqual({});
+  });
+
+  it('soma os conflitos de respostas diferentes e o mais novo do mesmo campo ganha', () => {
+    const conflicts = new ServerConflicts();
+    const current = fields({ email: 'ana@exemplo.com', studentId: '2024100123' });
+    conflicts.record({ email: 'antigo' }, current);
+    conflicts.record({ studentId: 'matrícula' }, current);
+    conflicts.record({ email: 'novo' }, current);
+    expect(conflicts.active(current)).toEqual({ email: 'novo', studentId: 'matrícula' });
+  });
+
+  it('caminho que não é campo do formulário é ignorado', () => {
+    const conflicts = new ServerConflicts();
+    conflicts.record({ 'members.0.email': 'x' }, emptyFields());
+    expect(conflicts.active(emptyFields())).toEqual({});
   });
 });

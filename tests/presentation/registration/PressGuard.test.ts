@@ -59,49 +59,27 @@ describe('PressGuard', () => {
   });
 });
 
-// com o markup de verdade (o "Remover" vem antes dos campos no card): a validação segurada pelo PressGuard
-// acha a linha na hora de rodar, não na hora do blur, então "Remover" não marca a linha errada
-describe('PressGuard + Remover do integrante', () => {
-  const press = (target: Element) => target.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-
-  function mountForm() {
+// com o markup de verdade: digitou o e-mail torto e foi direto no "Confirmar": a validação do blur espera o
+// clique, então o envio acontece (e mostra o resumo) em vez de o botão "fugir" do dedo
+describe('PressGuard + Confirmar inscrição', () => {
+  it('blur segurado pelo botão roda depois do clique', async () => {
     document.body.innerHTML = formMarkup();
     const { vm } = setupForm();
     const root = document.querySelector<HTMLElement>('[data-registration-form]') as HTMLElement;
     new RegistrationFormView(root, vm, new EventBus<AppEvents>(), vi.fn()).mount();
-    const rows = () => Array.from(root.querySelectorAll<HTMLElement>('[data-member-row]'));
-    return { vm, rows };
-  }
-
-  it('digitou no integrante 3 e tocou no "Remover" dele: o card novo que entra depois vem limpo', () => {
-    const { vm, rows } = mountForm();
-    vm.addMember();
-    const third = rows()[2] as HTMLElement;
-    const name = third.querySelector<HTMLInputElement>('[data-member-field="name"]') as HTMLInputElement;
-    name.value = 'Ca';
-    name.dispatchEvent(new Event('input', { bubbles: true }));
-    const remove = third.querySelector<HTMLButtonElement>('[data-member-remove]') as HTMLButtonElement;
-    press(remove);
-    name.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
-    remove.click();
+    const email = root.querySelector<HTMLInputElement>('#reg-email') as HTMLInputElement;
+    email.value = 'ana@';
+    email.dispatchEvent(new Event('input', { bubbles: true }));
+    const submit = root.querySelector<HTMLButtonElement>('[data-reg-submit]') as HTMLButtonElement;
+    press(submit);
+    email.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    expect(vm.state.value.errors['email']).toBeUndefined();
+    // clique no botão (o PressGuard escuta) e o envio do formulário, como o navegador faz
+    submit.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    root.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     vi.runAllTimers();
-    expect(rows()).toHaveLength(2);
-    vm.addMember();
-    expect(vm.state.value.errors).toEqual({});
-  });
-
-  it('removeu outro card: o blur segurado vale pra linha que subiu', () => {
-    const { vm, rows } = mountForm();
-    vm.addMember();
-    vm.addMember();
-    const fourth = rows()[3] as HTMLElement;
-    const name = fourth.querySelector<HTMLInputElement>('[data-member-field="name"]') as HTMLInputElement;
-    const remove = (rows()[2] as HTMLElement).querySelector('[data-member-remove]') as HTMLButtonElement;
-    press(remove);
-    name.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
-    remove.click();
-    vi.runAllTimers();
-    // o integrante 4 virou o 3: é ele que fica "visitado" (nome vazio acusa)
-    expect(Object.keys(vm.state.value.errors)).toEqual(['members.2.name']);
+    await Promise.resolve();
+    expect(vm.state.value.attempted).toBe(true);
+    expect(vm.state.value.errors['email']).toBe('Confira o e-mail: algo como nome@exemplo.com.');
   });
 });

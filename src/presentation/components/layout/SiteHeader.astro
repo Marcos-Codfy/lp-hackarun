@@ -10,8 +10,8 @@ import MobileMenu from './header/MobileMenu.astro';
 import { headerCtaAttrs, type SitePage } from './navLinks';
 
 // barra de vidro flutuante: transparente no topo, vidro depois de rolar (HeaderScrollController).
-// Fora da LP (page) os links de seção voltam pra LP (/#secao). O CTA leva pra /inscricao (ou /equipes com as
-// inscrições encerradas) e, na própria página dele, vira o item atual (contorno em vez de cheio)
+// Fora da LP (page) os links de seção voltam pra LP (/#secao). O CTA leva pra /inscricao (encerrada, pro aviso
+// de encerramento na mesma página) e, na própria página dele, vira o item atual (contorno em vez de cheio)
 interface Props {
   registration: RegistrationDTO;
   page?: SitePage;

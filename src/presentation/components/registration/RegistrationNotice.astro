@@ -30,13 +30,17 @@ const Heading = level;
     </Heading>
     {status === 'soon' ? (
       <p class="notice__text">
-        Enquanto isso, confere a <a href="/#programacao">programação</a> e já chama a sua equipe.
+        Enquanto isso, confira a <a href="/#programacao">programação</a> e o{' '}
+        <a href="/regulamento-hackarun-2026.pdf" download>
+          regulamento (PDF)
+        </a>
+        .
       </p>
     ) : (
       <>
-        <p class="notice__text">Valeu pelo interesse! Acompanhe quem vai correr.</p>
-        <Button href="/equipes" variant="ghost">
-          Ver equipes confirmadas
+        <p class="notice__text">O prazo terminou ou as vagas acabaram. Obrigado pelo interesse!</p>
+        <Button href="/#programacao" variant="ghost">
+          Ver a programação
         </Button>
       </>
     )}

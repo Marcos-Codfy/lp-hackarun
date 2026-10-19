@@ -51,60 +51,6 @@
   }
 }
 
-/* barra de status do esquadrão, estilo lobby de jogo. No celular sai (o "Integrantes 2/5" do bloco 02 já conta
-   o esquadrão): o primeiro campo sobe pra perto do topo da tela */
-.regform__squad {
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--c-cyan) 20%, transparent);
-  border-radius: 3px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--c-cyan) 10%, transparent), var(--surface-well));
-  color: var(--ink-cyan);
-  font-family: var(--font-mono);
-  font-size: var(--fs-hud);
-  /* no celular de 360px a faixa precisa caber numa linha só */
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.regform__squad-live {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.regform__squad-live::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--c-success);
-  box-shadow: 0 0 10px var(--c-success);
-}
-
-/* "· formação" só cabe a partir de 480px */
-.regform__squad-extra {
-  display: none;
-}
-
-@media (min-width: 480px) {
-  .regform__squad {
-    letter-spacing: var(--tracking-hud);
-  }
-
-  .regform__squad-extra {
-    display: inline;
-  }
-}
-
-.regform__squad [data-reg-squad] {
-  color: var(--text);
-  font-weight: 600;
-}
-
 .regform__noscript {
   color: var(--c-orange);
 }
@@ -161,22 +107,64 @@
     justify-items: start;
     gap: var(--space-4);
   }
+}
 
-  .regform__squad {
-    display: flex;
+/* dois campos lado a lado a partir do tablet (e-mail + WhatsApp, período + matrícula) */
+.regform__pair,
+.regform__details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+/* bloco escondido pelo perfil não ocupa a grade */
+.regform__pair > [hidden],
+.regform__details [hidden] {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .regform__pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
   }
 }
 
-/* card de integrante que acabou de entrar (MemberRow) */
-@keyframes regform-member-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
+/* avisos dentro do formulário (sorteio, menor de idade) */
+.regform__notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--surface-line);
+  border-left: 2px solid var(--c-cyan);
+  border-radius: 3px;
+  background: var(--surface-well);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .regform .member {
-    animation: none;
-  }
+.regform__notice[hidden] {
+  display: none;
+}
+
+.regform__notice > svg {
+  margin-top: 2px;
+  color: var(--ink-cyan);
+}
+
+.regform__notice--warn {
+  border-color: color-mix(in srgb, var(--c-gold) 45%, transparent);
+  border-left-color: var(--c-gold);
+  background: color-mix(in srgb, var(--c-gold) 8%, transparent);
+  color: var(--text);
+}
+
+.regform__notice--warn > svg {
+  color: var(--c-gold);
+}
+
+.regform__notice a {
+  color: var(--ink-cyan);
 }

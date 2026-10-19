@@ -1,12 +1,18 @@
 ---
-// tela de sucesso: emblema + protocolo "decodificando" + onde a equipe aparece + canal oficial (e-mail) +
-// próximos passos. A View preenche o protocolo e o e-mail do contato e foca o título. O slot fica logo abaixo
-// do título: é onde entra o aviso da prévia simulada (PreviewBanner)
+// tela de sucesso: emblema + protocolo "decodificando" + canal oficial (e-mail) + lembrete da autorização (só
+// pra menor de idade) + próximos passos. A View preenche o protocolo e o e-mail e foca o título. O slot fica logo
+// abaixo do título: é onde entra o aviso da prévia simulada (PreviewBanner)
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { EVENT_RETURN_HREF } from '@presentation/components/layout/navLinks';
 import MailNotice from './MailNotice.astro';
 import SuccessSteps from './SuccessSteps.astro';
+
+interface Props {
+  drawAt: string | null;
+}
+
+const { drawAt } = Astro.props;
 ---
 
 <div class="success" data-reg-success hidden>
@@ -20,30 +26,34 @@ import SuccessSteps from './SuccessSteps.astro';
     // inscrição recebida · checkpoint liberado
   </p>
   <h2 class="success__title" tabindex="-1" data-reg-success-title>
-    Tá dentro! Agora é com a organização.
+    Inscrição recebida! Nos vemos no sorteio.
   </h2>
   <slot />
   <div class="success__ticket">
-    <p class="success__label">Protocolo da equipe</p>
+    <p class="success__label">Protocolo da inscrição</p>
     <p class="success__protocol">
       <span class="sr-only" data-reg-protocol></span>
       <span aria-hidden="true" data-reg-protocol-typed></span>
     </p>
   </div>
-  <p class="success__teams">
-    Sua equipe aparece em <a href="/equipes">Equipes</a> depois da confirmação.
-  </p>
   <MailNotice compact>
-    A confirmação e todos os avisos do HackaRun chegam por e-mail em{' '}
+    Os avisos do HackaRun chegam por e-mail em{' '}
     <strong class="success__mail" data-reg-contact-email>
-      o e-mail do contato
-    </strong>
-    {'. '}Não usamos WhatsApp: fique de olho na caixa de entrada (e no spam).
+      o seu e-mail
+    </strong>{' '}
+    e, se for preciso, pelo WhatsApp informado. Confira também a caixa de spam.
   </MailNotice>
-  <SuccessSteps />
+  <p class="success__guardian" data-reg-guardian hidden>
+    <Icon name="shield" size={18} />
+    <span>
+      Como você tem menos de 18 anos, leve a autorização assinada pelo responsável no credenciamento
+      {drawAt ? `, em ${drawAt}` : ''}. <a href="/autorizacao">Abrir o modelo de autorização</a>.
+    </span>
+  </p>
+  <SuccessSteps drawAt={drawAt} />
   <div class="success__actions">
-    <Button href="/equipes" variant="ghost">
-      Ver equipes
+    <Button href="/#programacao" variant="ghost">
+      Ver a programação
     </Button>
   </div>
   <a class="success__back" href={EVENT_RETURN_HREF} data-back-to-event>
@@ -135,12 +145,26 @@ import SuccessSteps from './SuccessSteps.astro';
     user-select: all;
   }
 
-  .success__teams {
+  /* lembrete da autorização do responsável: só pra menor de idade */
+  .success__guardian {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--c-gold) 45%, transparent);
+    border-left: 2px solid var(--c-gold);
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--c-gold) 8%, transparent);
     color: var(--text);
-    font-weight: 600;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
   }
 
-  .success__teams a,
+  .success__guardian[hidden] {
+    display: none;
+  }
+
+  .success__guardian a,
   .success__back {
     color: var(--ink-cyan);
   }

@@ -8,7 +8,7 @@ interface SlotsProps {
   taken: number;
 }
 
-// vagas de equipes; capacidade null = organização ainda não definiu
+// vagas de inscritos (pessoas); capacidade null = organização ainda não definiu
 export class Slots extends ValueObject<SlotsProps> {
   static create(capacity: number | null, taken: number): Slots {
     if (taken < 0) throw new DomainError('Taken slots cannot be negative');

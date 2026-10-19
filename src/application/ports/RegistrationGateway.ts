@@ -1,11 +1,8 @@
-import type { MemberInput, TeamImageType } from '@domain/index';
+import type { ParticipantData } from '@domain/index';
 
 export interface RegistrationPayload {
-  teamName: string;
-  // members[0] = contato da equipe; nome completo, matrícula e e-mail de cada um
-  members: MemberInput[];
-  // foto/logo da equipe em base64 (vai no mesmo POST text/plain, sem preflight)
-  teamImage: { mimeType: TeamImageType; base64: string };
+  // uma pessoa por envio (as equipes saem do sorteio); campos que não valem pro perfil vão vazios
+  participant: ParticipantData;
   submittedAt: string;
   source: string;
   // prova do consentimento (LGPD): versão do aviso aceito e quando; vira a coluna Consentimento
@@ -30,8 +27,8 @@ export interface RegistrationReceipt {
   protocol: string;
 }
 
-// já inscrito em outra equipe: nome da equipe, e-mail ou matrícula (o servidor diz qual integrante)
-export type ConflictFailure = 'duplicate-team-name' | 'duplicate-email' | 'duplicate-student-id';
+// já tem inscrição com esse e-mail, WhatsApp ou matrícula
+export type ConflictFailure = 'duplicate-email' | 'duplicate-whatsapp' | 'duplicate-student-id';
 
 // server = o Apps Script quebrou no meio (planilha, cota): passageiro, diferente de "recusada"
 export type GatewayFailure =
@@ -39,14 +36,11 @@ export type GatewayFailure =
 
 export class RegistrationGatewayError extends Error {
   readonly kind: GatewayFailure;
-  // posição (base 0) de cada integrante em conflito, na ordem do envio
-  readonly memberIndexes: readonly number[];
 
-  constructor(kind: GatewayFailure, message: string, memberIndexes: readonly number[] = []) {
+  constructor(kind: GatewayFailure, message: string) {
     super(message);
     this.name = 'RegistrationGatewayError';
     this.kind = kind;
-    this.memberIndexes = memberIndexes;
   }
 }
 

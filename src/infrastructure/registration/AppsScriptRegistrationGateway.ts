@@ -7,14 +7,14 @@ import {
 } from '@application/index';
 import { AppsScriptHttpError, type AppsScriptClient } from './AppsScriptClient';
 
-// a foto da equipe sobe junto (até ~550 KB em base64): rede lenta de celular precisa de folga
-const TIMEOUT_MS = 30_000;
+// sem foto, o envio é pequeno; a folga é pra rede lenta de celular e pro Apps Script acordar
+const TIMEOUT_MS = 20_000;
 
 // erros que o Code.gs devolve -> falhas que a aplicação entende
 const SERVER_ERRORS = new Map<string, GatewayFailure>([
   ['duplicate', 'duplicate'],
-  ['duplicate_team_name', 'duplicate-team-name'],
   ['duplicate_email', 'duplicate-email'],
+  ['duplicate_whatsapp', 'duplicate-whatsapp'],
   ['duplicate_student_id', 'duplicate-student-id'],
   ['closed', 'closed'],
   ['invalid', 'rejected'],
@@ -22,15 +22,10 @@ const SERVER_ERRORS = new Map<string, GatewayFailure>([
   ['server', 'server'],
 ]);
 
-// nunca passa do máximo de integrantes; o que vier torto é ignorado
-const MAX_INDEXES = 20;
-
 interface ServerResponse {
   ok?: unknown;
   protocol?: unknown;
   error?: unknown;
-  // posição dos integrantes já inscritos em outra equipe (duplicate_email / duplicate_student_id)
-  members?: unknown;
 }
 
 // adapter: porta RegistrationGateway -> Web App do Apps Script que grava na planilha
@@ -67,15 +62,7 @@ export class AppsScriptRegistrationGateway implements RegistrationGateway {
       return { protocol: body.protocol };
     }
     const code = typeof body.error === 'string' ? body.error : '';
-    const kind = SERVER_ERRORS.get(code) ?? 'rejected';
-    throw new RegistrationGatewayError(kind, code || 'Rejected', AppsScriptRegistrationGateway.indexes(body));
-  }
-
-  private static indexes(body: ServerResponse): number[] {
-    if (!Array.isArray(body.members)) return [];
-    return body.members
-      .filter((i): i is number => Number.isInteger(i) && i >= 0 && i < MAX_INDEXES)
-      .slice(0, MAX_INDEXES);
+    throw new RegistrationGatewayError(SERVER_ERRORS.get(code) ?? 'rejected', code || 'Rejected');
   }
 
   private static describe(error: unknown): string {

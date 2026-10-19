@@ -1,5 +1,5 @@
 ---
-// aceite do regulamento + LGPD, em nome da equipe; checkbox nativo com caixa custom de 24px num alvo de 44px.
+// aceite do regulamento + LGPD da própria pessoa; checkbox nativo com caixa custom de 24px num alvo de 44px.
 // O aviso abre na mesma aba: o rascunho (sessionStorage) é desta aba e volta inteiro pelo "voltar" do navegador
 // ou pelo "Ir para a inscrição" do aviso (numa aba nova o formulário apareceria vazio). Mudou o texto, suba o
 // CONSENT_VERSION (src/application/use-cases/SubmitRegistration.ts e apps-script/Validation.gs)
@@ -17,15 +17,16 @@
     />
     <span class="consent__box" aria-hidden="true"></span>
     <span class="consent__text">
-      Estou ciente de que o regulamento do HackaRun é apresentado na abertura, em 12/11, às 19h35, e a equipe
-      se compromete a segui-lo. Em nome da equipe, autorizo a organização do HackaRun a usar os dados
-      informados (nomes, matrículas e e-mails) só para organizar a competição e falar com a equipe por e-mail,
-      conforme o{' '}
+      Li e aceito o{' '}
+      <a class="consent__link" href="/regulamento-hackarun-2026.pdf" download>
+        regulamento do HackaRun 2026 (PDF)
+      </a>
+      . Autorizo a organização a usar os dados informados só para organizar a competição, o credenciamento e o
+      sorteio das equipes e para falar comigo por e-mail e WhatsApp, conforme o{' '}
       <a class="consent__link" href="/privacidade">
         aviso de privacidade
       </a>{' '}
-      (LGPD). Autorizo também publicar o nome da equipe, a foto ou logo e o número de integrantes na página de
-      equipes, e declaro que todos os integrantes, e quem aparece na imagem, concordaram.
+      (LGPD).
     </span>
   </label>
   <p class="consent__error" id="reg-terms-error" data-error-for="acceptedTerms" hidden></p>

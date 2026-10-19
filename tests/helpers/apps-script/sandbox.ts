@@ -3,8 +3,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { FakeCache, FakeLock, signedSha256 } from './fakes';
 import { FakeBook, FakeSheet, recorder, type Cell } from './sheetFakes';
-import { FakeDrive, signedBytes, type FakeBlob } from './driveFakes';
-import { fakeImageBase64 } from '../images';
+import { FakeDrive } from './driveFakes';
 
 const SCRIPT_DIR = new URL('../../../apps-script/', import.meta.url);
 // cada arquivo roda como script separado no mesmo contexto, igual ao editor do Apps Script
@@ -24,7 +23,8 @@ export interface ScriptResponse {
   error?: string;
   protocol?: string;
   open?: boolean;
-  members?: number[];
+  capacity?: number | null;
+  taken?: number;
   teams?: Record<string, unknown>[];
 }
 
@@ -33,7 +33,7 @@ interface TextOutput {
 }
 
 type Handler = (event: unknown) => TextOutput;
-type Row = Record<string, Cell>;
+export type Row = Record<string, Cell>;
 
 // roda os .gs de verdade dentro de um vm do Node, com relógio e serviços do Google falsos
 export class AppsScriptSandbox {
@@ -79,12 +79,23 @@ export class AppsScriptSandbox {
     return sheet;
   }
 
+  get registrations(): FakeSheet {
+    return this.tab('Inscritos');
+  }
+
   get teams(): FakeSheet {
     return this.tab('Equipes');
   }
 
-  get members(): FakeSheet {
-    return this.tab('Integrantes');
+  get summary(): FakeSheet {
+    return this.tab('Resumo');
+  }
+
+  // coluna (base 1) pelo título
+  column(sheet: FakeSheet, title: string): number {
+    const col = (sheet.rows[0] ?? []).map(String).indexOf(title) + 1;
+    if (col === 0) throw new Error(`A aba ${sheet.name} não tem a coluna ${title}`);
+    return col;
   }
 
   // linha de dados (base 0) lida pelo título da coluna
@@ -94,8 +105,20 @@ export class AppsScriptSandbox {
     return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? '']));
   }
 
-  // planilha já configurada com equipes e integrantes montados pelo nome da coluna
-  seed(teams: Row[], members: Row[] = []): { teams: FakeSheet; members: FakeSheet } {
+  // muda uma célula como a organização faria (sem disparar o onEdit)
+  edit(sheet: FakeSheet, index: number, title: string, value: Cell): void {
+    sheet.write(index + 2, this.column(sheet, title), value);
+  }
+
+  // o gatilho simples, como se a pessoa tivesse editado a coluna `title`
+  onEdit(sheet: FakeSheet, title: string): void {
+    const col = this.column(sheet, title);
+    const range = { getSheet: () => sheet, getColumn: () => col, getLastColumn: () => col };
+    this.evaluate<(e: unknown) => void>('onEdit')({ range });
+  }
+
+  // planilha já configurada (layout atual), com linhas montadas pelo nome da coluna
+  seed(registrations: Row[], teams: Row[] = []): { registrations: FakeSheet; teams: FakeSheet } {
     const fill = (name: string, headersExpr: string, rows: Row[]) => {
       const headers = this.evaluate<string[]>(headersExpr);
       const sheet = this.book.add(new FakeSheet(name));
@@ -105,8 +128,8 @@ export class AppsScriptSandbox {
     };
     this.properties['PLANILHA_VERSAO'] = this.evaluate<string>('SETUP_VERSION');
     return {
+      registrations: fill('Inscritos', 'REGISTRATION_HEADERS', registrations),
       teams: fill('Equipes', 'TEAM_HEADERS', teams),
-      members: fill('Integrantes', 'MEMBER_HEADERS', members),
     };
   }
 
@@ -171,43 +194,9 @@ export class AppsScriptSandbox {
         Charset: { UTF_8: 'UTF_8' },
         computeDigest: (_algorithm: string, text: string) => signedSha256(text),
         getUuid: () => randomUUID(),
-        base64Decode: (text: string) => signedBytes(text),
-        newBlob: (bytes: number[], contentType: string, name: string): FakeBlob => ({
-          bytes,
-          contentType,
-          name,
-        }),
       },
     };
   }
 }
 
-export const MEMBER_A = { name: 'Ana Souza', studentId: '2024100123', email: 'ana@exemplo.com' };
-export const MEMBER_B = { name: 'Bruno Lima', studentId: '2024100456', email: 'bruno@exemplo.com' };
-
-// corpo que o site manda (AppsScriptRegistrationGateway), já passando em todas as regras
-export function registrationBody(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
-    action: 'register',
-    teamName: 'Bug Busters',
-    members: [MEMBER_A, MEMBER_B],
-    teamImage: { mimeType: 'image/png', base64: fakeImageBase64('image/png') },
-    submittedAt: '2026-10-20T15:00:00.000Z',
-    source: 'landing-page',
-    consentVersion: '2026-10-v3',
-    consentAt: '2026-10-20T15:00:00.000Z',
-    honeypot: '',
-    elapsedMs: 8000,
-    ...overrides,
-  };
-}
-
-// outra equipe inteira, com nome, e-mails e matrículas que não batem com a do registrationBody
-export function otherTeam(i: number, overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  const member = (n: number) => ({
-    name: n === 1 ? 'Alice Moreira' : 'Bento Carvalho',
-    studentId: `RA${String(i).padStart(4, '0')}-${n}`,
-    email: `p${n}.equipe${i}@exemplo.com`,
-  });
-  return registrationBody({ teamName: `Equipe ${i}`, members: [member(1), member(2)], ...overrides });
-}
+export * from './bodies';
