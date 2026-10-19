@@ -6,6 +6,7 @@ import type { LandingPageDTO } from '@application/index';
 import PageHalo from '@presentation/components/layout/PageHalo.astro';
 import FormProgress from '@presentation/components/registration/FormProgress.astro';
 import RegistrationForm from '@presentation/components/registration/RegistrationForm.astro';
+import RegulationLink from '@presentation/components/registration/RegulationLink.astro';
 import RegistrationStatus from '@presentation/components/registration/RegistrationStatus.astro';
 import { formStatus } from '@presentation/components/registration/formStatus';
 import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
@@ -31,15 +32,18 @@ const drawAt = draw ? `${lookup.shortDate(draw.day)}, às ${lookup.startOf(draw)
   <PageHalo />
   <div class="container signup__wrap">
     <div class="signup__head">
-      <SectionHeader
-        id="cadastro-title"
-        level="h1"
-        size="lg"
-        code="IN"
-        eyebrow="Inscrição individual"
-        title="Garanta sua <em>vaga</em>"
-        lead="Aberta a estudantes de qualquer instituição, profissionais e entusiastas de tecnologia. Você se inscreve sozinho e as equipes são formadas no sorteio."
-      />
+      <div class="signup__intro">
+        <SectionHeader
+          id="cadastro-title"
+          level="h1"
+          size="lg"
+          code="IN"
+          eyebrow="Inscrição individual"
+          title="Garanta sua <em>vaga</em>"
+          lead="Aberta a estudantes de qualquer instituição, profissionais e entusiastas de tecnologia. Você se inscreve sozinho e as equipes são formadas no sorteio."
+        />
+        <RegulationLink />
+      </div>
       <RegistrationStatus
         status={status}
         capacity={registration.slots.capacity}
@@ -78,6 +82,12 @@ const drawAt = draw ? `${lookup.shortDate(draw.day)}, às ${lookup.startOf(draw)
     display: grid;
     gap: var(--space-5);
     animation: signup-in 0.8s var(--ease-out) both;
+  }
+
+  .signup__intro {
+    display: grid;
+    gap: var(--space-5);
+    justify-items: start;
   }
 
   .signup__layout {

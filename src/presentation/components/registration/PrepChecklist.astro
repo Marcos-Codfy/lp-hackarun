@@ -1,5 +1,5 @@
 ---
-// "o que você precisa ter em mãos": compacta no fim da LP (só os títulos, em grade) e completa no painel
+// "antes de se inscrever": compacta no fim da LP (só os títulos, em grade) e completa no painel
 // da página de inscrição (título + complemento). A lista sai do checklist.ts
 import Icon from '@presentation/components/ui/Icon.astro';
 import { prepChecklist } from './checklist';
@@ -22,7 +22,7 @@ const Title = variant === 'panel' ? 'h2' : 'p';
 
 <div class:list={['prep', `prep--${variant}`]}>
   <Title class:list={['prep__title', hideTitle && 'sr-only']} id={id}>
-    {variant === 'panel' ? 'O que você precisa ter em mãos' : 'Tenha em mãos'}
+    Antes de se inscrever
   </Title>
   <ul class="prep__list" role="list" aria-labelledby={id}>
     {items.map((item) => (

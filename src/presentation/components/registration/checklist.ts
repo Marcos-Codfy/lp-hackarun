@@ -1,4 +1,4 @@
-// "o que você precisa ter em mãos": a mesma lista no fim da LP (compacta) e no painel da página de inscrição
+// "antes de se inscrever": a mesma lista no fim da LP (compacta) e no painel da página de inscrição
 import type { IconName } from '@presentation/components/ui/icons';
 
 export interface ChecklistItem {

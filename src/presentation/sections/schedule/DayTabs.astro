@@ -185,6 +185,30 @@ const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1
     .day-tab:hover:not([aria-selected='true']) {
       color: var(--text);
     }
+
+    /* rótulo comprido ("Desenvolvimento") não pode passar da borda inclinada: a quebra é só de segurança */
+    .day-tab__label {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  /* coluna estreita (de 1024 a 1279 px, a aba tem ~240 px): data, espaço e letras um pouco menores pro
+     rótulo caber numa linha. A partir de 1280 px vale o desenho de cima */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .day-tab {
+      column-gap: var(--space-3);
+      padding-right: var(--space-5);
+    }
+
+    .day-tab__date {
+      font-size: 1.5rem;
+    }
+
+    .day-tab__label {
+      font-size: 0.625rem;
+      letter-spacing: 0.06em;
+    }
   }
 
   @media (forced-colors: active) {

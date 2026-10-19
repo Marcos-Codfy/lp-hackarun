@@ -43,8 +43,8 @@ describe('LP sem formulário', () => {
 
     // o secundário (#equipes) saiu junto com a seção das equipes; /equipes segue escondida
     expect(cta).not.toContain('#equipes');
-    // o secundário leva ao FAQ, que explica o sorteio; /equipes está escondida e a LP não tem seção de equipes
-    expect(cta).toContain('href="#faq"');
+    // o secundário leva à pergunta do FAQ que explica o sorteio (o AnchorNavigator abre a resposta)
+    expect(cta).toContain('href="#faq-teams"');
     expect(cta).not.toContain('/equipes');
   });
 

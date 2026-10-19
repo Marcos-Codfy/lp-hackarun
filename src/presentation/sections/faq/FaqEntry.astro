@@ -14,7 +14,7 @@ interface Props {
 const { item, number, withToken = false, link = null } = Astro.props;
 ---
 
-<details class="faq-entry">
+<details class="faq-entry" id={`faq-${item.id}`}>
   <summary class="faq-entry__summary">
     <span class="faq-entry__code" aria-hidden="true">
       Q.{String(number).padStart(2, '0')}

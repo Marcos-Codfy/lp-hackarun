@@ -10,6 +10,7 @@ describe('mountControllers', () => {
       'header',
       'day tabs',
       'missions rail',
+      'faq hash',
       'nav spy',
       'aurora',
       'hud rail',
@@ -20,6 +21,6 @@ describe('mountControllers', () => {
     const boot = { add: vi.fn() };
     mountControllers({} as AppContext, boot);
     mountControllers({} as AppContext, boot);
-    expect(boot.add).toHaveBeenCalledTimes(6);
+    expect(boot.add).toHaveBeenCalledTimes(7);
   });
 });

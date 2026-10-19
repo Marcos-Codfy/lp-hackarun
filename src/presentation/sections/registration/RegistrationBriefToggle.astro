@@ -1,5 +1,5 @@
 ---
-// celular e tablet: "o que ter em mãos" recolhido numa linha (a LP acabou de mostrar a lista), pra o formulário
+// celular e tablet: "antes de se inscrever" recolhido numa linha (a LP acabou de mostrar a lista), pra o formulário
 // começar mais perto do topo. Aberto, mostra a mesma lista do painel do desktop
 import PrepChecklist from '@presentation/components/registration/PrepChecklist.astro';
 import { prepChecklist } from '@presentation/components/registration/checklist';
@@ -16,7 +16,7 @@ const count = prepChecklist(teamSize).length;
 <details class="brief-toggle sx-glass">
   <summary class="brief-toggle__summary">
     <span class="brief-toggle__title">
-      O que ter em mãos <span class="brief-toggle__count">({count})</span>
+      Antes de se inscrever <span class="brief-toggle__count">({count})</span>
     </span>
     <span class="brief-toggle__icon" aria-hidden="true"></span>
   </summary>
