@@ -22,6 +22,10 @@ export class DayTabsController {
   private tabs: HTMLButtonElement[] = [];
   private panels: HTMLElement[] = [];
   private tablist: HTMLElement | null = null;
+  // vão que segura a altura da seção entre uma troca de dia e outra (ver holdSpace)
+  private stage: HTMLElement | null = null;
+  private holding = false;
+  private lastWidth = 0;
 
   constructor(root: HTMLElement, options: { today?: string | null } = {}) {
     this.root = root;
@@ -47,6 +51,8 @@ export class DayTabsController {
       panel.setAttribute('aria-labelledby', tab.id);
       panel.tabIndex = 0;
     });
+    this.stage = qs('[data-day-stage]', this.root);
+    this.lastWidth = window.innerWidth;
     this.watchOrientation();
     this.select(this.initialIndex());
     this.tablist.hidden = false;
@@ -55,6 +61,7 @@ export class DayTabsController {
     this.tablist.addEventListener('click', this.onClick);
     this.tablist.addEventListener('keydown', this.onKeydown);
     window.addEventListener('hashchange', this.onHashChange);
+    window.addEventListener('resize', this.onResize);
   }
 
   get selectedIndex(): number {
@@ -62,6 +69,7 @@ export class DayTabsController {
   }
 
   select(index: number, focus = false): void {
+    if (this.selectedIndex >= 0 && this.selectedIndex !== index) this.holdSpace();
     this.tabs.forEach((tab, i) => {
       const selected = i === index;
       tab.setAttribute('aria-selected', String(selected));
@@ -70,6 +78,41 @@ export class DayTabsController {
     });
     if (focus) this.tabs[index]?.focus();
   }
+
+  // os dias têm alturas bem diferentes: sem segurar a altura, trocar pra um dia mais curto encolhe a seção, a de
+  // baixo sobe pra dentro da tela (parece que a página pulou pra ela) e a lista de abas, grudada no desktop, sobe
+  // junto. O painel muda de tamanho no lugar e a altura de antes fica de vão embaixo dele
+  private holdSpace(): void {
+    const stage = this.stage;
+    if (!stage) return;
+    stage.style.minHeight = `${Math.ceil(stage.getBoundingClientRect().height)}px`;
+    if (this.holding) return;
+    this.holding = true;
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+  }
+
+  // o vão só é solto com a seção toda abaixo da tela, onde nada do que se vê muda. Por cima, soltar empurraria o
+  // que a pessoa está lendo; fica até ela voltar. Mede a <section> (e não o miolo): fora da tela o navegador pula
+  // o conteúdo dela (content-visibility) e ele perde a medida. Escuta a rolagem em vez de usar um observador de
+  // interseção, que não avisa quando a página salta de cima pra baixo sem passar pela seção (tecla Home, "topo")
+  private readonly onScroll = (): void => {
+    const section = this.root.closest('section') ?? this.root;
+    if (section.getBoundingClientRect().top > window.innerHeight) this.release();
+  };
+
+  private release(): void {
+    this.stage?.style.removeProperty('min-height');
+    if (!this.holding) return;
+    this.holding = false;
+    window.removeEventListener('scroll', this.onScroll);
+  }
+
+  // só a largura conta: no celular a barra do navegador muda a altura da janela a cada rolada
+  private readonly onResize = (): void => {
+    if (window.innerWidth === this.lastWidth) return;
+    this.lastWidth = window.innerWidth;
+    this.release();
+  };
 
   // link pra um dia (/#dia-14) abre a aba dele; senão o dia em curso; senão o 1º
   private initialIndex(): number {

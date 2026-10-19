@@ -33,10 +33,12 @@ const panelId = (date: string) => `dia-${date.slice(8, 10)}`;
 
     <div class="days" data-day-tabs>
       <DayTabs days={schedule} panelId={panelId} />
-      <div class="days__panels sx-corners">
-        {schedule.map((day) => (
-          <DayPanel day={day} id={panelId(day.date)} />
-        ))}
+      <div class="days__stage" data-day-stage>
+        <div class="days__panels sx-corners">
+          {schedule.map((day) => (
+            <DayPanel day={day} id={panelId(day.date)} />
+          ))}
+        </div>
       </div>
     </div>
   </div>
@@ -47,6 +49,11 @@ const panelId = (date: string) => `dia-${date.slice(8, 10)}`;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
+  }
+
+  /* palco dos painéis: o DayTabsController segura a altura dele ao trocar de dia (o vão fica embaixo do painel) */
+  .days__stage {
+    min-width: 0;
   }
 
   /* sem JS: os quatro dias empilhados, com respiro de linha do tempo entre eles */
