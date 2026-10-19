@@ -77,7 +77,7 @@ describe('programação oficial (event.json)', () => {
   it('14/11: desenvolvimento só de equipes e mentores, depois a HackaRun Experience no shopping', () => {
     const [dev, experience] = day('2026-11-14')?.sessions ?? [];
     expect([dev?.slot.start, dev?.slot.end, dev?.venueId, dev?.audience]).toEqual([
-      '08:00',
+      '10:00',
       '13:00',
       'unicatolica',
       'teams',
@@ -121,7 +121,7 @@ describe('FAQ e grafia', () => {
     const answer = (id: string) => faq.find((f) => f.id === id)?.answer ?? '';
     expect(answer('rulebook')).toContain('19h35');
     expect(answer('ai')).toContain('regulamento');
-    expect(answer('delivery')).toContain('8h às 13h');
+    expect(answer('delivery')).toContain('10h às 13h');
     expect(answer('delivery')).toContain('regulamento');
   });
 
