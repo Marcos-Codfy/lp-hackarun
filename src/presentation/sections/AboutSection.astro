@@ -19,15 +19,17 @@ const { event } = Astro.props.data;
 // const cta = new RegistrationCopy().cta(event.registration.status, 'about');
 // const ctaAttrs = cta.isRegistration ? { registrationCta: 'about' } : {};
 
+// o local da final é revelado só na seção 06; aqui a fita apenas anuncia que existe uma grande final.
+// Sem palestras nem exposições: saíram da programação
 const ticker = [
   'Oficinas',
-  'Palestras',
-  'Exposições',
+  'Missões',
+  'Mentoria',
   'Hackathon',
   `Jogos`,
   'NPCs',
   new DayLabelFormatter().range(event.firstDate, event.lastDate),
-  'Final no Capim Dourado Shopping',
+  'Grande final',
   'UNICATÓLICA',
 ];
 
@@ -55,7 +57,7 @@ const ticker = [
         code="01"
         eyebrow="O evento"
         title="Da sala de aula ao <em>palco</em>."
-        lead="O HackaRun 2026 é uma competição de tecnologia, inovação e empreendedorismo no formato de corrida por objetivos, na qual as equipes cumprem missões sequenciais e desenvolvem uma solução tecnológica a partir de um desafio divulgado pela organização.O evento termina com a apresentação dos projetos e a premiação no Capim Dourado Shopping."
+        lead="O HackaRun 2026 é uma competição de tecnologia, inovação e empreendedorismo no formato de corrida por objetivos, na qual as equipes cumprem missões sequenciais e desenvolvem uma solução tecnológica a partir de um desafio divulgado pela organização. O evento termina com a apresentação dos projetos e a premiação."
       />
 
       <ul class="about__tracks" role="list" data-reveal-group>
