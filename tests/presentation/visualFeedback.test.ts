@@ -67,3 +67,24 @@ describe('programação', () => {
     expect(more).toMatch(/\.more__summary \{[^}]*background:/);
   });
 });
+
+describe('regulamento e missões', () => {
+  it('o painel do regulamento mostra só a pontuação: nada de bônus de missão-surpresa nem de finalistas', () => {
+    const panel = read('presentation/sections/missions/RulebookPanel.astro');
+    expect(panel).toContain(
+      'funcionalidade 30%, qualidade técnica 20%, inovação e IA 20%, missões e evidências 20% e pitch 10%',
+    );
+    expect(panel).not.toMatch(/\+\s?1 ponto|surpresa|Finalistas/i);
+  });
+
+  it('o desempate final termina no pitch presencial, como no item 9.11 do regulamento', () => {
+    const panel = read('presentation/sections/missions/RulebookPanel.astro');
+    expect(panel).toContain('missões e evidências e pitch presencial');
+  });
+
+  it('o "Descrição" das missões tem a mesma cara de botão do "Detalhes"', () => {
+    const more = read('presentation/sections/npc/QuestMore.astro');
+    expect(more).toMatch(/\.more__summary \{[^}]*border: 1px solid/);
+    expect(more).toMatch(/\.more__summary \{[^}]*background:/);
+  });
+});
