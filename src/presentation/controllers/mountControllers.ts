@@ -3,6 +3,7 @@ import type { BootSteps } from '@presentation/app/BootQueue';
 import { LazyMount } from '@presentation/app/LazyMount';
 import { qs, qsa } from '@shared/utils/dom';
 import { DayTabsController } from './DayTabsController';
+import { FaqHashController } from './FaqHashController';
 import { HeaderScrollController } from './HeaderScrollController';
 import { HudRailController } from './HudRailController';
 import { MobileMenuController } from './MobileMenuController';
@@ -47,6 +48,8 @@ export function mountControllers(ctx: AppContext, boot: BootSteps): void {
       new MissionsRailController(missions).mount();
     }).watch();
   });
+
+  boot.add('faq hash', () => new FaqHashController().mount());
 
   boot.add('nav spy', () => new NavSpyController(ctx.bus).mount());
 

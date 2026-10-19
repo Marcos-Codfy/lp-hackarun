@@ -1,0 +1,96 @@
+---
+// o regulamento em destaque na página de inscrição: um cartão que baixa o PDF (só download, nunca abre dentro
+// do site). Fica logo abaixo do título, antes do formulário, em qualquer largura
+import Icon from '@presentation/components/ui/Icon.astro';
+import { REGULATION_PDF } from '@presentation/components/layout/documents';
+---
+
+<a class="regdoc" href={REGULATION_PDF.href} download={REGULATION_PDF.fileName}>
+  <span class="regdoc__icon" aria-hidden="true">
+    <Icon name="book" size={22} />
+  </span>
+  <span class="regdoc__text">
+    <strong class="regdoc__title">Leia o regulamento antes de se inscrever</strong>
+    <span class="regdoc__meta">Baixar o regulamento (PDF), {REGULATION_PDF.size}</span>
+  </span>
+  <span class="regdoc__arrow" aria-hidden="true">
+    <Icon name="arrow-down" size={18} />
+  </span>
+</a>
+
+<style>
+  .regdoc {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: 34rem;
+    min-height: 56px;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--c-cyan) 55%, transparent);
+    border-left-width: 3px;
+    border-radius: 3px;
+    background: linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--c-cyan) 14%, transparent),
+      var(--surface-well)
+    );
+    box-shadow: 0 0 28px color-mix(in srgb, var(--c-cyan) 14%, transparent);
+    color: var(--text);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out),
+      translate var(--dur) var(--ease-out);
+  }
+
+  .regdoc:hover {
+    border-color: var(--c-cyan);
+    box-shadow: 0 0 36px color-mix(in srgb, var(--c-cyan) 30%, transparent);
+    translate: 0 -2px;
+  }
+
+  .regdoc:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  .regdoc__icon,
+  .regdoc__arrow {
+    display: grid;
+    place-items: center;
+    color: var(--ink-cyan);
+  }
+
+  .regdoc__text {
+    display: grid;
+    gap: 2px;
+  }
+
+  .regdoc__title {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .regdoc__meta {
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  @media (forced-colors: active) {
+    .regdoc {
+      border-color: CanvasText;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .regdoc {
+      transition: none;
+    }
+
+    .regdoc:hover {
+      translate: none;
+    }
+  }
+</style>

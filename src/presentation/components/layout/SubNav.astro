@@ -101,10 +101,14 @@ const links = subNavLinksFor(page);
     box-shadow: 0 0 18px rgb(0 229 255 / 0.4);
   }
 
-  /* trilho do seletor: abas inclinadas lado a lado, a atual acesa */
+  /* trilho do seletor: abas inclinadas lado a lado, a atual acesa. Com uma aba só não tem trilho: o retângulo
+     em volta de uma aba inclinada aparecia como um quadrado fantasma */
   .subnav__switch {
     display: flex;
     flex: none;
+  }
+
+  .subnav__switch:has(li + li) {
     padding: 3px;
     border-radius: 3px;
     background: var(--surface-well);

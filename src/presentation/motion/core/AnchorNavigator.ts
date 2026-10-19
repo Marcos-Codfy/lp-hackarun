@@ -3,6 +3,7 @@ import type { ScrollDriver } from './ScrollDriver';
 const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
 
 // links "#secao" da própria página: rola com o driver, atualiza o hash sem pulo e leva o foco junto
+// (se o alvo é uma pergunta do FAQ, abre a resposta)
 export class AnchorNavigator {
   constructor(private readonly driver: ScrollDriver) {
     document.addEventListener('click', this.onClick);
@@ -27,6 +28,8 @@ export class AnchorNavigator {
     if (!section) return;
 
     event.preventDefault();
+    // alvo que é um <details> (uma pergunta do FAQ): abre antes de rolar, pra pessoa chegar na resposta
+    if (section instanceof HTMLDetailsElement) section.open = true;
     this.driver.scrollTo(section, { onComplete: () => focusSection(section) });
     history.replaceState(history.state, '', `#${encodeURIComponent(id)}`);
   };
