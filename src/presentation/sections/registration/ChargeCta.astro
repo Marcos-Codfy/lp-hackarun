@@ -9,7 +9,7 @@ import ChargeStatus from './ChargeStatus.astro';
 // e por fim is-charged; sem JS nenhuma classe entra e o CTA fica simplesmente visível. A barra de energia é
 // um fio logo embaixo do botão principal, que enche no tempo do globo.
 // O principal leva pra página de inscrição (o rótulo segue o status: "Quero participar" antes de abrir); o
-// secundário sobe pra seção que explica o sorteio das equipes. Encerrada, sobra só o aviso de encerramento
+// secundário leva ao FAQ, que explica o sorteio das equipes. Encerrada, sobra só o aviso de encerramento
 interface Props {
   registration: RegistrationDTO;
 }
@@ -33,7 +33,7 @@ const open = cta.isRegistration;
       </span>
     </div>
     {open && (
-      <Button size="lg" variant="ghost" href="#equipes" class="charge__secondary">
+      <Button size="lg" variant="ghost" href="#faq" class="charge__secondary">
         Como as equipes são formadas
       </Button>
     )}
