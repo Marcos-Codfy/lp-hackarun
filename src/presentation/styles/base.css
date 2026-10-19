@@ -4,6 +4,7 @@
 /* o Vite junta no mesmo arquivo no build (não vira request extra) */
 @import './deferred-sections.css';
 @import './motion-pause.css';
+@import './offscreen-motion.css';
 
 @layer reset {
   *,

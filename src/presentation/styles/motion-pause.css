@@ -12,6 +12,7 @@
       .locked__beam,
       .locked__status i,
       .btn__sheen,
+      .sponsor__sweep,
       .scroll-cue__comet,
       .countdown__pulse,
       .notice-badge__dot,
@@ -22,6 +23,7 @@
       .terminal__caret
     ),
   .is-motion-paused .countdown__unit::before,
+  .is-motion-paused .countdown__pulse::after,
   .is-motion-paused .prize__redacted::after {
     animation-play-state: paused !important;
   }
