@@ -40,8 +40,11 @@ describe('LP sem formulário', () => {
     const cta = read('presentation/sections/registration/ChargeCta.astro');
     expect(cta).toContain("copy.cta(registration.status, 'final')");
     expect(cta).toContain('copy.actionLabel(registration.status)');
+
     // o secundário (#equipes) saiu junto com a seção das equipes; /equipes segue escondida
     expect(cta).not.toContain('#equipes');
+    // o secundário leva ao FAQ, que explica o sorteio; /equipes está escondida e a LP não tem seção de equipes
+    expect(cta).toContain('href="#faq"');
     expect(cta).not.toContain('/equipes');
   });
 
