@@ -1,8 +1,14 @@
 ---
-// o regulamento em destaque na página de inscrição: um cartão que baixa o PDF (só download, nunca abre dentro
-// do site). Fica logo abaixo do título, antes do formulário, em qualquer largura
+// o regulamento em destaque: um cartão que baixa o PDF (só download, nunca abre dentro do site). Na página de
+// inscrição fica logo abaixo do título, antes do formulário; na LP, no painel do regulamento (só muda o título)
 import Icon from '@presentation/components/ui/Icon.astro';
 import { REGULATION_PDF } from '@presentation/components/layout/documents';
+
+interface Props {
+  title?: string;
+}
+
+const { title = 'Leia o regulamento antes de se inscrever' } = Astro.props;
 ---
 
 <a class="regdoc" href={REGULATION_PDF.href} download={REGULATION_PDF.fileName}>
@@ -10,7 +16,7 @@ import { REGULATION_PDF } from '@presentation/components/layout/documents';
     <Icon name="book" size={22} />
   </span>
   <span class="regdoc__text">
-    <strong class="regdoc__title">Leia o regulamento antes de se inscrever</strong>
+    <strong class="regdoc__title">{title}</strong>
     <span class="regdoc__meta">Baixar o regulamento (PDF), {REGULATION_PDF.size}</span>
   </span>
   <span class="regdoc__arrow" aria-hidden="true">

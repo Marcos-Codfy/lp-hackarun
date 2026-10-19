@@ -1,9 +1,12 @@
 ---
 import Icon from '@presentation/components/ui/Icon.astro';
-import { REGULATION_PDF } from '@presentation/components/layout/documents';
+import RegulationLink from '@presentation/components/registration/RegulationLink.astro';
+import ScoreMeter from './ScoreMeter.astro';
+import { SCORING_WEIGHTS } from './scoringWeights';
 
 // enquanto o regulamento não sai: o que ele vai trazer e quando, no lugar do painel de pontuação.
-// Os medidores ficam vazios de propósito (a pontuação "carrega" na abertura)
+// O tópico da pontuação mostra o peso de cada critério em medidores (um bloco a cada 5%); os outros só levam
+// um fio divisor. O PDF completo vira um cartão de download, o mesmo da página de inscrição
 interface Props {
   // "12.11", "19h35", "12 de novembro" e o horário do lançamento do desafio ("19h55")
   date: string;
@@ -15,14 +18,22 @@ interface Props {
 
 const { date, hour, dateLong } = Astro.props;
 // resumo de cada tópico do regulamento (o texto completo é apresentado na abertura)
-const topics = [
+interface Topic {
+  title: string;
+  text: string;
+  // mostra os pesos dos critérios em medidores logo abaixo do texto
+  weights?: boolean;
+}
+
+const topics: Topic[] = [
   {
     title: 'Regras da competição',
     text: 'Cumprir as missões e os prazos, respeitar a autoria dos materiais e garantir que a solução funcione. Fraude ou plágio podem custar pontos ou a desclassificação.',
   },
   {
     title: 'Critérios de pontuação',
-    text: 'Banca com notas de 0 a 10: funcionalidade 30%, qualidade técnica 20%, inovação e IA 20%, missões e evidências 20% e pitch 10%.',
+    text: 'Banca com notas de 0 a 10, com estes pesos na nota final:',
+    weights: true,
   },
   {
     title: 'Prazos',
@@ -59,11 +70,9 @@ const topics = [
         </span>
       </p>
       {/* o regulamento só baixa (download + Content-Disposition no public/_headers), como no rodapé e no FAQ */}
-      <a class="rulebook__doc" href={REGULATION_PDF.href} download={REGULATION_PDF.fileName}>
-        <span>Confira o regulamento completo</span>
-        <Icon name="arrow-right" size={16} />
-        <span class="rulebook__doc-size">PDF · {REGULATION_PDF.size}</span>
-      </a>
+      <div class="rulebook__download">
+        <RegulationLink title="Confira o regulamento completo" />
+      </div>
     </div>
 
     <ul class="rulebook__list" role="list" aria-label="O que o regulamento traz">
@@ -77,7 +86,15 @@ const topics = [
             </span>
           </div>
           <p class="rule__text">{topic.text}</p>
-          <span class="rule__track" aria-hidden="true"></span>
+          {topic.weights && (
+            <ul class="rule__weights" role="list" aria-label="Peso de cada critério na nota final" data-bars>
+              {SCORING_WEIGHTS.map((criterion) => (
+                <ScoreMeter label={criterion.label} share={criterion.weight / 100} compact>
+                  <b>{criterion.weight}%</b>
+                </ScoreMeter>
+              ))}
+            </ul>
+          )}
         </li>
       ))}
     </ul>
@@ -136,55 +153,9 @@ const topics = [
     color: var(--sx-ink);
   }
 
-  /* link do PDF: texto com sublinhado em degradê que cresce no hover e a seta que anda */
-  .rulebook__doc {
-    justify-self: start;
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
-    margin-top: var(--space-2);
-    padding-block: var(--space-2);
-    color: var(--sx-ink);
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-decoration: none;
-    text-transform: uppercase;
-  }
-
-  .rulebook__doc > span:first-child {
-    background: linear-gradient(90deg, var(--sx-accent), transparent) left bottom / 40% 1px no-repeat;
-    padding-bottom: 0.25em;
-    transition: background-size var(--dur) var(--ease-out);
-  }
-
-  .rulebook__doc :global(.icon) {
-    transition: transform var(--dur) var(--ease-out);
-  }
-
-  .rulebook__doc:hover {
-    color: var(--text);
-  }
-
-  .rulebook__doc:hover > span:first-child {
-    background-size: 100% 1px;
-  }
-
-  .rulebook__doc:hover :global(.icon) {
-    transform: translateX(4px);
-  }
-
-  .rulebook__doc:focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 4px;
-  }
-
-  .rulebook__doc-size {
-    color: var(--text-dim);
-    font-weight: 500;
-    letter-spacing: 0.12em;
+  /* o cartão do PDF respira do selo de cima e fica na largura da coluna */
+  .rulebook__download {
+    margin-top: var(--space-3);
   }
 
   .rulebook__title {
@@ -242,13 +213,16 @@ const topics = [
     color: var(--sx-ink);
   }
 
-  /* trilho segmentado vazio (o mesmo medidor da pontuação, ainda sem carga) */
-  .rule__track {
-    display: block;
-    height: 10px;
-    background: linear-gradient(90deg, rgb(143 243 255 / 0.22), rgb(143 243 255 / 0.06));
-    -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
-    mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
+  /* um fio entre os tópicos separa o que o regulamento traz sem precisar de medidor em cada um */
+  .rule + .rule {
+    padding-top: var(--space-4);
+    border-top: 1px solid color-mix(in srgb, var(--sx-accent) 20%, transparent);
+  }
+
+  .rule__weights {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
   }
 
   @media (min-width: 640px) {

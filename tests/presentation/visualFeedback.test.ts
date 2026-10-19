@@ -1,6 +1,6 @@
-// ajustes de revisão visual: o seletor da inscrição sem trilho quadrado, o regulamento em destaque, o título
-// do painel sem a expressão antiga, o botão do sorteio levando à pergunta aberta, as abas e o "Detalhes" com
-// cara de clicável
+// ajustes de revisão visual: o seletor da inscrição sem trilho quadrado, o regulamento em destaque (na inscrição
+// e no painel da LP), o título do painel sem a expressão antiga, o botão do sorteio levando à pergunta aberta, as
+// abas e o "Detalhes" com cara de clicável
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -71,10 +71,21 @@ describe('programação', () => {
 describe('regulamento e missões', () => {
   it('o painel do regulamento mostra só a pontuação: nada de bônus de missão-surpresa nem de finalistas', () => {
     const panel = read('presentation/sections/missions/RulebookPanel.astro');
-    expect(panel).toContain(
-      'funcionalidade 30%, qualidade técnica 20%, inovação e IA 20%, missões e evidências 20% e pitch 10%',
-    );
+    expect(panel).toContain('SCORING_WEIGHTS.map');
     expect(panel).not.toMatch(/\+\s?1 ponto|surpresa|Finalistas/i);
+  });
+
+  it('o PDF do regulamento é o cartão de download da inscrição, não um link de texto solto', () => {
+    const panel = read('presentation/sections/missions/RulebookPanel.astro');
+    expect(panel).toContain('<RegulationLink title="Confira o regulamento completo" />');
+    expect(panel).not.toContain('rulebook__doc');
+  });
+
+  it('só o tópico da pontuação tem medidor; os outros ganham um fio divisor, sem trilho vazio', () => {
+    const panel = read('presentation/sections/missions/RulebookPanel.astro');
+    expect(panel).not.toContain('rule__track');
+    expect(panel.match(/weights: true/g)).toHaveLength(1);
+    expect(panel).toMatch(/\.rule \+ \.rule \{[^}]*border-top: 1px solid/);
   });
 
   it('o desempate final termina no pitch presencial, como no item 9.11 do regulamento', () => {
