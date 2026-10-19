@@ -3,13 +3,13 @@ import type { RegistrationDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { RegistrationCopy } from '@presentation/formatters/RegistrationCopy';
-import ChargeStatus from './ChargeStatus.astro';
+// import ChargeStatus from './ChargeStatus.astro';
 
 // CTA que "carrega" junto com o globo: a seção recebe is-awaiting-charge, is-charging (com --charge-ms)
 // e por fim is-charged; sem JS nenhuma classe entra e o CTA fica simplesmente visível. A barra de energia é
 // um fio logo embaixo do botão principal, que enche no tempo do globo.
-// O principal leva pra página de inscrição (o rótulo segue o status: "Quero participar" antes de abrir); o
-// secundário sobe pra seção que explica o sorteio das equipes. Encerrada, sobra só o aviso de encerramento
+// Leva pra página de inscrição (o rótulo segue o status: "Quero participar" antes de abrir). O botão
+// secundário (que subia pra seção das equipes, hoje fora da LP) saiu, e a faixa de status fica comentada
 interface Props {
   registration: RegistrationDTO;
 }
@@ -32,13 +32,8 @@ const open = cta.isRegistration;
         <span class="charge__fill"></span>
       </span>
     </div>
-    {open && (
-      <Button size="lg" variant="ghost" href="#equipes" class="charge__secondary">
-        Como as equipes são formadas
-      </Button>
-    )}
   </div>
-  <ChargeStatus registration={registration} />
+  {/* <ChargeStatus registration={registration} /> */}
 </div>
 
 <style>
