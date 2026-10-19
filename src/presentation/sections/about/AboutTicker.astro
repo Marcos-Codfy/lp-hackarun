@@ -5,7 +5,8 @@ interface Props {
 }
 
 const { items } = Astro.props;
-const loop = [...items, ...items];
+// 4 voltas (a fita anda 2 por ciclo): com só 2, a metade visível não cobria telas largas quando o texto era curto
+const loop = Array.from({ length: 4 }, () => items).flat();
 ---
 
 <div class="tapes" aria-hidden="true">
@@ -65,12 +66,14 @@ const loop = [...items, ...items];
   .tape__track {
     display: flex;
     width: max-content;
-    animation: tape-run 46s linear infinite;
+    /* o ciclo agora percorre duas voltas do texto novo (mais curto): durações ajustadas pra fita andar na
+       mesma velocidade de antes (~50 px/s a frente e ~36 px/s a de trás, em 1920 px) */
+    animation: tape-run 72s linear infinite;
   }
 
   .tape__track--reverse {
     animation-direction: reverse;
-    animation-duration: 60s;
+    animation-duration: 106s;
   }
 
   .tape__item {
