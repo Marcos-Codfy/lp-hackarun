@@ -1,6 +1,7 @@
 ---
 import type { ScoringDTO } from '@application/index';
 import Icon from '@presentation/components/ui/Icon.astro';
+import ScoreMeter from './ScoreMeter.astro';
 
 interface Props {
   scoring: ScoringDTO;
@@ -27,17 +28,13 @@ const { scoring } = Astro.props;
 
     <ul class="scoring__bars" role="list" data-bars>
       {scoring.criteria.map((criterion) => (
-        <li class:list={['meter', criterion.key === 'time' && 'meter--time']}>
-          <div class="meter__head">
-            <span class="meter__label">{criterion.label}</span>
-            <span class="meter__pts">
-              <b>{criterion.points}</b> pts
-            </span>
-          </div>
-          <span class="meter__track" aria-hidden="true">
-            <span class="meter__fill" data-bar-fill style={`--share: ${criterion.share}`}></span>
-          </span>
-        </li>
+        <ScoreMeter
+          label={criterion.label}
+          share={criterion.share}
+          tone={criterion.key === 'time' ? 'time' : 'default'}
+        >
+          <b>{criterion.points}</b> pts
+        </ScoreMeter>
       ))}
     </ul>
   </div>
@@ -76,57 +73,6 @@ const { scoring } = Astro.props;
   .scoring__bars {
     display: grid;
     gap: var(--space-5);
-  }
-
-  .meter__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-3);
-    margin-bottom: var(--space-2);
-    font-size: var(--fs-sm);
-  }
-
-  .meter__label {
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  .meter__pts {
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-  }
-
-  .meter__pts b {
-    color: var(--sx-ink);
-    font-weight: 700;
-  }
-
-  /* medidor segmentado: a máscara fica no trilho, então o preenchimento cresce sem distorcer os blocos */
-  .meter__track {
-    position: relative;
-    display: block;
-    height: 10px;
-    background: rgb(143 243 255 / 0.1);
-    -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
-    mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
-  }
-
-  .meter__fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: calc(var(--share) * 100%);
-    background: var(--grad-blue);
-    transform-origin: left center;
-  }
-
-  .meter--time .meter__pts b {
-    color: var(--ink-orange);
-  }
-
-  .meter--time .meter__fill {
-    background: linear-gradient(90deg, var(--c-gold), var(--c-orange));
   }
 
   @media (min-width: 640px) {

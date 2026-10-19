@@ -1,0 +1,89 @@
+---
+// medidor segmentado de um critério: rótulo, valor (o slot) e o trilho que enche até a fração. Cada bloco do
+// trilho vale 5% do total. A animação de crescer vem do BarGrowAnimator: a lista que o contém leva data-bars
+interface Props {
+  label: string;
+  // fração do trilho preenchida, de 0 a 1
+  share: number;
+  // "time" pinta o medidor de laranja (o critério de tempo do painel por estação)
+  tone?: 'default' | 'time';
+  // versão menor, para caber dentro de um tópico de texto
+  compact?: boolean;
+}
+
+const { label, share, tone = 'default', compact = false } = Astro.props;
+---
+
+<li class:list={['meter', tone === 'time' && 'meter--time', compact && 'meter--compact']}>
+  <div class="meter__head">
+    <span class="meter__label">{label}</span>
+    <span class="meter__value">
+      <slot />
+    </span>
+  </div>
+  <span class="meter__track" aria-hidden="true">
+    <span class="meter__fill" data-bar-fill style={`--share: ${share}`}></span>
+  </span>
+</li>
+
+<style>
+  .meter__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+    font-size: var(--fs-sm);
+  }
+
+  .meter__label {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .meter__value {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+  }
+
+  .meter__value :global(b) {
+    color: var(--sx-ink);
+    font-weight: 700;
+  }
+
+  /* medidor segmentado: a máscara fica no trilho, então o preenchimento cresce sem distorcer os blocos */
+  .meter__track {
+    position: relative;
+    display: block;
+    height: 10px;
+    background: rgb(143 243 255 / 0.1);
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
+    mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
+  }
+
+  .meter__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(var(--share) * 100%);
+    background: var(--grad-blue);
+    transform-origin: left center;
+  }
+
+  .meter--compact .meter__head {
+    margin-bottom: var(--space-1);
+    font-size: var(--fs-xs);
+  }
+
+  .meter--compact .meter__track {
+    height: 8px;
+  }
+
+  .meter--time .meter__value :global(b) {
+    color: var(--ink-orange);
+  }
+
+  .meter--time .meter__fill {
+    background: linear-gradient(90deg, var(--c-gold), var(--c-orange));
+  }
+</style>
