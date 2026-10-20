@@ -31,11 +31,12 @@ describe('FAQ com as regras do regulamento', () => {
     }
   });
 
-  it('inscrição individual, de 19/10 a 08/11, com o limite de vagas e sem garantia de equipe', () => {
+  it('inscrição individual, de 19/10 a 08/11, sem número de vagas e sem garantia de equipe', () => {
     const signup = answer('signup');
     expect(signup).toContain('individual');
     expect(signup).toContain('19/10 a 08/11');
-    expect(signup).toContain('75 vagas');
+    // sem limite por enquanto: o site não anuncia número de vagas
+    expect(signup).not.toMatch(/\d+\s+vagas/);
     expect(signup).toContain('não garante vaga');
     expect(signup).toContain('WhatsApp');
   });
