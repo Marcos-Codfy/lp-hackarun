@@ -19,7 +19,7 @@ const DEFAULT_META: SubmissionMeta = { honeypot: '', elapsedMs: 0 };
 
 // versão do aviso de privacidade (/privacidade) que o checkbox aceita; mudou o texto, suba a versão
 // mantenha igual ao CONSENT_VERSION do apps-script/Validation.gs (um teste confere)
-export const CONSENT_VERSION = '2026-10-v4';
+export const CONSENT_VERSION = '2026-10-v5';
 
 // mantenha igual ao MIN_ELAPSED_MS do apps-script/Validation.gs (um teste confere)
 export const MIN_FILL_MS = 3000;

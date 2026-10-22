@@ -38,7 +38,7 @@ describe('Apps Script · validação do envio (uma pessoa por inscrição)', () 
       Status: 'inscrito',
       Equipe: '',
       Origem: 'landing-page',
-      Consentimento: '2026-10-v4 · 2026-10-20T15:00:00.000Z',
+      Consentimento: '2026-10-v5 · 2026-10-20T15:00:00.000Z',
     });
     expect(row['Data/hora']).toBeInstanceOf(Date);
     expect(script.lock.held).toBe(false);

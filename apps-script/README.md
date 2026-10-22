@@ -178,7 +178,7 @@ Ordem recomendada: crie `INSCRICOES_FECHADAS=sim`, cole os arquivos, publique a 
    versão** > **Implantar**. A URL continua a mesma.
 3. **Não** use "Nova implantação" para atualizar: ela gera outra URL e o site deixa de enviar.
 4. Mudou `CONSENT_VERSION`, colunas ou regras? Publique o script **junto com o deploy do site**. Hoje a versão do
-   aviso é `2026-10-v4` (`Validation.gs` e `src/application/use-cases/SubmitRegistration.ts`; um teste confere).
+   aviso é `2026-10-v5` (o script também aceita a `2026-10-v4` durante a troca; `Validation.gs` e `src/application/use-cases/SubmitRegistration.ts`; um teste confere).
 
 ## 7. Rotina da organização
 

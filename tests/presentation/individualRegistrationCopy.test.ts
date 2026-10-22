@@ -133,7 +133,7 @@ describe('aviso de privacidade v4 (inscrição individual)', () => {
   const page = read('src/pages/privacidade.astro');
 
   it('versão v4, outubro de 2026', () => {
-    expect(CONSENT_VERSION).toBe('2026-10-v4');
+    expect(CONSENT_VERSION).toBe('2026-10-v5');
     expect(page).toContain('LGPD · versão {CONSENT_VERSION} · outubro de 2026');
   });
 
