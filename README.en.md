@@ -20,7 +20,7 @@ saved to a Google Sheet. In the background, a WebGL 3D scene changes shape at ea
 ![TypeScript](https://img.shields.io/badge/TypeScript-strictest-3178C6?logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-049EF4?logo=threedotjs&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
-[![Lighthouse mobile: performance 87, accessibility 96, best practices 93 and SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-87%20%C2%B7%2096%20%C2%B7%2093%20%C2%B7%20100-FFA400?logo=lighthouse&logoColor=white)](#performance)
+[![Lighthouse mobile: performance 98, accessibility 100, best practices 93 and SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%2093%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
 **[See the site → hackarun.com.br](https://hackarun.com.br)**
 
@@ -51,7 +51,7 @@ saved to a Google Sheet. In the background, a WebGL 3D scene changes shape at ea
 - **3D scene:** seven objects generated in code appear on the page (globe, stopwatch, question mark, terrain, stage,
   trophy and galaxy), with 9,000 to 42,000 particles. There are no 3D models or videos. Post-processing (bloom,
   vignette and chromatic aberration) exists in the code but is switched off to keep the particles sharp.
-- **Performance:** Lighthouse mobile scores 87 for Performance, 96 for Accessibility, 93 for Best Practices and 100
+- **Performance:** Lighthouse mobile scores 98 for Performance, 100 for Accessibility, 93 for Best Practices and 100
   for SEO (measured on 10/22/2026, detailed in [Performance](#performance)).
 - **Accessibility:** the content works without JavaScript or WebGL, the page respects `prefers-reduced-motion`, and a
   button pauses the animations.
@@ -219,11 +219,11 @@ Lighthouse mobile on the production site, median of 3 runs, with the [`scripts/q
 
 | Metric                   | Before optimizing | 10/12/2026 | 10/22/2026 |
 | ------------------------ | ----------------- | ---------- | ---------- |
-| Performance              | 66                | 98         | 87         |
-| Total Blocking Time      | 1,600 ms          | 98 ms      | 357 ms     |
-| Largest Contentful Paint | 2.9 s             | 2.2 s      | 2.2 s      |
+| Performance              | 66                | 98         | 98         |
+| Total Blocking Time      | 1,600 ms          | 98 ms      | 53 ms      |
+| Largest Contentful Paint | 2.9 s             | 2.2 s      | 2.1 s      |
 | Cumulative Layout Shift  | –                 | 0.001      | 0.001      |
-| Accessibility            | 100               | 100        | 96         |
+| Accessibility            | 100               | 100        | 100        |
 | Best Practices           | 100               | 100        | 93         |
 | SEO                      | 100               | 100        | 100        |
 
@@ -435,7 +435,9 @@ The full workflow is in [CONTRIBUTING.md](CONTRIBUTING.md) (pt-BR). In short:
 ## Deploy
 
 The site runs on **Cloudflare Pages**, on the free plan, at **[hackarun.com.br](https://hackarun.com.br)**. The domain's
-DNS is on Cloudflare, `www.hackarun.com.br` redirects to the main address, and `hackarun.pages.dev` keeps answering.
+DNS is on Cloudflare and `www.hackarun.com.br` redirects to the main address. `hackarun.pages.dev` stays up with the same
+content and no redirect, because that link was widely shared; the canonical address of both versions points to
+`hackarun.com.br`, so search engines index only the custom domain.
 
 - Each merge to `main` publishes a new version in 1 to 2 minutes.
 - Each PR gets a preview address, posted by Cloudflare on the PR itself. In the preview, registration is simulated and
@@ -460,7 +462,7 @@ Git**, choose the repository and use `npm run build` as the build command with `
 - [x] Privacy notice (LGPD) and guardian authorization form
 - [x] Registration open (October 19), with no cap on spots for now
 - [x] Custom domain, `hackarun.com.br`
-- [ ] Accessibility and best practices back to 100 on Lighthouse
+- [ ] Best practices back to 100 on Lighthouse (93 today, because of the analytics script Cloudflare injects and the CSP blocks)
 - [ ] Team draw (November 12) and the `/equipes` page live
 - [ ] Prizes, mentors and judges, announced by the organizers
 - [ ] The event, November 11 to 14

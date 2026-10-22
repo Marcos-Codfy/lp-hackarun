@@ -20,7 +20,7 @@ evento, o regulamento, a programação, os mentores e os prêmios, e recebe a in
 ![TypeScript](https://img.shields.io/badge/TypeScript-strictest-3178C6?logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-049EF4?logo=threedotjs&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
-[![Lighthouse mobile: performance 87, acessibilidade 96, boas práticas 93 e SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-87%20%C2%B7%2096%20%C2%B7%2093%20%C2%B7%20100-FFA400?logo=lighthouse&logoColor=white)](#performance)
+[![Lighthouse mobile: performance 98, acessibilidade 100, boas práticas 93 e SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%2093%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
 **[Ver o site → hackarun.com.br](https://hackarun.com.br)**
 
@@ -51,7 +51,7 @@ evento, o regulamento, a programação, os mentores e os prêmios, e recebe a in
 - **Cena 3D:** sete objetos gerados por código aparecem na página (globo, cronômetro, ponto de interrogação, terreno,
   palco, troféu e galáxia), com 9 mil a 42 mil partículas. Não há modelos 3D nem vídeos. O pós-processamento (bloom,
   vinheta e aberração cromática) existe no código, mas está desligado para manter as partículas nítidas.
-- **Desempenho:** Lighthouse mobile com 87 em Performance, 96 em Acessibilidade, 93 em Boas práticas e 100 em SEO
+- **Desempenho:** Lighthouse mobile com 98 em Performance, 100 em Acessibilidade, 93 em Boas práticas e 100 em SEO
   (medição de 22/10/2026, detalhada em [Performance](#performance)).
 - **Acessibilidade:** o conteúdo funciona sem JavaScript e sem WebGL, a página respeita `prefers-reduced-motion` e há
   um botão para pausar as animações.
@@ -217,11 +217,11 @@ Lighthouse mobile no site de produção, mediana de 3 execuções, com o script 
 
 | Métrica                  | Antes das otimizações | 12/10/2026 | 22/10/2026 |
 | ------------------------ | --------------------- | ---------- | ---------- |
-| Performance              | 66                    | 98         | 87         |
-| Total Blocking Time      | 1.600 ms              | 98 ms      | 357 ms     |
-| Largest Contentful Paint | 2,9 s                 | 2,2 s      | 2,2 s      |
+| Performance              | 66                    | 98         | 98         |
+| Total Blocking Time      | 1.600 ms              | 98 ms      | 53 ms      |
+| Largest Contentful Paint | 2,9 s                 | 2,2 s      | 2,1 s      |
 | Cumulative Layout Shift  | –                     | 0,001      | 0,001      |
-| Acessibilidade           | 100                   | 100        | 96         |
+| Acessibilidade           | 100                   | 100        | 100        |
 | Boas práticas            | 100                   | 100        | 93         |
 | SEO                      | 100                   | 100        | 100        |
 
@@ -432,8 +432,9 @@ O fluxo completo está no [CONTRIBUTING.md](CONTRIBUTING.md). Em resumo:
 ## Deploy
 
 O site está na **Cloudflare Pages**, no plano gratuito, em **[hackarun.com.br](https://hackarun.com.br)**. O DNS do
-domínio fica na Cloudflare, o `www.hackarun.com.br` redireciona para o endereço principal e o `hackarun.pages.dev`
-continua respondendo.
+domínio fica na Cloudflare e o `www.hackarun.com.br` redireciona para o endereço principal. O `hackarun.pages.dev`
+continua no ar, com o mesmo conteúdo e sem redirecionar, porque esse link já foi muito compartilhado; o endereço
+canônico das duas versões aponta para `hackarun.com.br`, então os buscadores indexam só o domínio próprio.
 
 - Cada merge na `main` publica uma nova versão em 1 a 2 minutos.
 - Cada PR ganha um endereço de prévia, comentado pela Cloudflare no próprio PR. Na prévia, a inscrição é simulada e
@@ -458,7 +459,7 @@ Connect to Git**, escolha o repositório e use o comando de build `npm run build
 - [x] Aviso de privacidade (LGPD) e modelo de autorização do responsável
 - [x] Inscrições abertas (19/10), sem limite de vagas por enquanto
 - [x] Domínio próprio, `hackarun.com.br`
-- [ ] Acessibilidade e boas práticas de volta a 100 no Lighthouse
+- [ ] Boas práticas de volta a 100 no Lighthouse (hoje 93, por causa do script de analytics que a Cloudflare injeta e a CSP bloqueia)
 - [ ] Sorteio das equipes (12/11) e página `/equipes` no ar
 - [ ] Prêmios, mentores e banca, divulgados pela organização
 - [ ] Evento, de 11 a 14 de novembro
