@@ -2,6 +2,7 @@
 import type { LandingPageDTO } from '@application/index';
 import Icon from '@presentation/components/ui/Icon.astro';
 import PartnersBand from '@presentation/components/partners/PartnersBand.astro';
+import FollowLaes from '@presentation/components/social/FollowLaes.astro';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
 import FooterBrand from './footer/FooterBrand.astro';
 import FooterNav from './footer/FooterNav.astro';
@@ -21,7 +22,10 @@ const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
   <PartnersBand partners={partners} />
 
   <div class="container site-footer__main">
-    <FooterBrand meta={`${dates} · ${event.city} · ${event.tagline}`} home={page === 'home'} />
+    <div class="site-footer__brand">
+      <FooterBrand meta={`${dates} · ${event.city} · ${event.tagline}`} home={page === 'home'} />
+      <FollowLaes />
+    </div>
     <FooterNav page={page} />
   </div>
 
@@ -60,6 +64,13 @@ const dates = new DayLabelFormatter().range(event.firstDate, event.lastDate);
     display: grid;
     gap: var(--space-8);
     padding-block: clamp(4rem, 3rem + 4vw, 6.5rem);
+  }
+
+  .site-footer__brand {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-7);
+    align-content: start;
   }
 
   .site-footer__bottom {
