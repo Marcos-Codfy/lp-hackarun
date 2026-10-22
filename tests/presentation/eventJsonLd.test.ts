@@ -23,7 +23,7 @@ describe('buildEventJsonLd', () => {
       description: 'Descrição da página',
       startDate: '2026-11-11T19:00:00-03:00',
       endDate: '2026-11-14',
-      image: 'https://hackarun.pages.dev/og-image.jpg',
+      image: 'https://hackarun.pages.dev/og-hackarun.jpg',
       inLanguage: 'pt-BR',
     });
     expect(event?.['organizer']).toEqual([
