@@ -2,9 +2,9 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// endereço oficial (Cloudflare Pages, projeto "hackarun"); o PUBLIC_SITE_URL troca (fork, domínio próprio). Vazio
+// endereço oficial (domínio próprio, servido pela Cloudflare Pages, projeto "hackarun"); o PUBLIC_SITE_URL troca (fork). Vazio
 // conta como não definido. Igual ao DEFAULT_SITE_URL de src/shared/config/deploy.ts (um teste confere)
-const site = process.env.PUBLIC_SITE_URL || 'https://hackarun.pages.dev';
+const site = process.env.PUBLIC_SITE_URL || 'https://hackarun.com.br';
 
 // páginas fora do sitemap (também têm noindex no Seo.astro): /equipes fica escondida até o sorteio e
 // /autorizacao é só o modelo para imprimir
