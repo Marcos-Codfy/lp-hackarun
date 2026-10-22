@@ -20,7 +20,7 @@ saved to a Google Sheet. In the background, a WebGL 3D scene changes shape at ea
 ![TypeScript](https://img.shields.io/badge/TypeScript-strictest-3178C6?logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-049EF4?logo=threedotjs&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
-[![Lighthouse mobile: performance 98, accessibility 100, best practices 93 and SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%2093%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
+[![Lighthouse mobile: performance 95, accessibility 100, best practices 100 and SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-95%20%C2%B7%20100%20%C2%B7%20100%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
 **[See the site → hackarun.com.br](https://hackarun.com.br)**
 
@@ -51,8 +51,8 @@ saved to a Google Sheet. In the background, a WebGL 3D scene changes shape at ea
 - **3D scene:** seven objects generated in code appear on the page (globe, stopwatch, question mark, terrain, stage,
   trophy and galaxy), with 9,000 to 42,000 particles. There are no 3D models or videos. Post-processing (bloom,
   vignette and chromatic aberration) exists in the code but is switched off to keep the particles sharp.
-- **Performance:** Lighthouse mobile scores 98 for Performance, 100 for Accessibility, 93 for Best Practices and 100
-  for SEO (measured on 10/22/2026, detailed in [Performance](#performance)).
+- **Performance:** Lighthouse mobile scores 95 for Performance and 100 for Accessibility, Best Practices and
+  SEO (measured on 10/22/2026, detailed in [Performance](#performance)).
 - **Accessibility:** the content works without JavaScript or WebGL, the page respects `prefers-reduced-motion`, and a
   button pauses the animations.
 - **Registration without a server of its own:** the form sends the data to a Google Apps Script, which saves each
@@ -214,17 +214,17 @@ The `/inscricao`, `/equipes`, `/privacidade` and `/autorizacao` pages use a sepa
 
 ## Performance
 
-Lighthouse mobile on the production site, median of 3 runs, with the [`scripts/qa/`](scripts/qa/README.md) script
+Lighthouse mobile on the production site, median of 5 runs, with the [`scripts/qa/`](scripts/qa/README.md) script
 (Chrome with GPU, 4x slower CPU and simulated mobile network):
 
 | Metric                   | Before optimizing | 10/12/2026 | 10/22/2026 |
 | ------------------------ | ----------------- | ---------- | ---------- |
-| Performance              | 66                | 98         | 98         |
-| Total Blocking Time      | 1,600 ms          | 98 ms      | 53 ms      |
-| Largest Contentful Paint | 2.9 s             | 2.2 s      | 2.1 s      |
+| Performance              | 66                | 98         | 95         |
+| Total Blocking Time      | 1,600 ms          | 98 ms      | 169 ms     |
+| Largest Contentful Paint | 2.9 s             | 2.2 s      | 2.3 s      |
 | Cumulative Layout Shift  | –                 | 0.001      | 0.001      |
 | Accessibility            | 100               | 100        | 100        |
-| Best Practices           | 100               | 100        | 93         |
+| Best Practices           | 100               | 100        | 100        |
 | SEO                      | 100               | 100        | 100        |
 
 The main measures:
