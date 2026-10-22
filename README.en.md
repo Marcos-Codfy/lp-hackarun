@@ -4,7 +4,7 @@
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/hackarun-unicatolica/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
-  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun page scroll: at each section the 3D particles form a different object (globe, stopwatch, question mark, mission map, terrain, stage, trophy and galaxy) and, at the end, they form the globe again behind the registration call to action." />
+  <img src="docs/media/scroll-preview.webp" width="960" alt="Animation of the HackaRun page scroll: at each section the 3D particles form a different object (globe, stopwatch, question mark, terrain, stage, trophy and galaxy) and, at the end, they form the globe again behind the registration call to action." />
 </picture>
 
 # HackaRun
@@ -63,22 +63,22 @@ saved to a Google Sheet. In the background, a WebGL 3D scene changes shape at ea
 The site is in Portuguese.
 
 <p align="center">
-  <img src="docs/media/sections-desktop.jpg" width="960" alt="Nine sections of the page on desktop: the hero with the UniCatólica logo, the courses and the HackaRun logo; the event, with the stopwatch; the NPCs, with the question mark; the missions, with the map; the schedule, with the day tabs; the final at Capim Dourado Shopping; the prizes, with the trophy; the teams, with the galaxy; and the closing registration call to action, with the globe." />
+  <img src="docs/media/sections-desktop.jpg" width="960" alt="Nine sections of the page on desktop: the hero, with the HackaRun logo and the countdown; the event, with the stopwatch; the NPCs, with the question mark; the rules, with the competition rules and the scoring weights; the schedule, with the day tabs; the mentors; the final at Capim Dourado Shopping; the prizes, with the trophy; and the closing registration call to action, with the globe." />
   <br /><sub>Nine sections of the page on desktop.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/mobile.jpg" width="960" alt="Five screens of the mobile version: the hero with the countdown, the NPCs, the missions, the prizes and the closing registration call to action." />
+  <img src="docs/media/mobile.jpg" width="960" alt="Five screens of the mobile version: the hero with the countdown, the NPCs, the rules, the schedule with the tabs for the four days and the closing registration call to action." />
   <br /><sub>The same page on a phone (390 px).</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/teams-page.jpg" width="720" alt="The teams page on desktop: the menu with Back to the event, Registration and Registered teams, the confirmed-team counter, the search by name and six cards with each team's logo or photo." />
-  <br /><sub>The <code>/equipes</code> page. The teams and images in this screenshot are fictional.</sub>
+  <img src="docs/media/teams-page.jpg" width="720" alt="The teams page on desktop: the menu with Back to the event and Registration, the counter of six confirmed teams, the search by name and six cards, each with the team's logo and number of members." />
+  <br /><sub>The <code>/equipes</code> page, hidden until the draw. The teams and images in this screenshot are fictional.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/registration.jpg" width="960" alt="The registration page on desktop and on a phone: the form with the team name, the logo preview and the members, each with full name, student ID and e-mail, and beside it the list of what to have at hand and the registration steps." />
+  <img src="docs/media/registration.jpg" width="960" alt="The registration page on desktop and on a phone: the individual form, with full name, e-mail, WhatsApp, age and profile, and beside it the registration status, what to have at hand and the steps." />
   <br /><sub>The <code>/inscricao</code> page, with fictional data and simulated submission.</sub>
 </p>
 

@@ -4,7 +4,7 @@
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/hackarun-unicatolica/lp-hackarun/main/docs/media/scroll-preview-poster.jpg" />
-  <img src="docs/media/scroll-preview.webp" width="960" alt="Animação da rolagem da página do HackaRun: a cada seção, as partículas em 3D formam um objeto diferente (globo, cronômetro, ponto de interrogação, mapa das missões, terreno, palco, troféu e galáxia) e, no fim, voltam a formar o globo atrás da chamada para a inscrição." />
+  <img src="docs/media/scroll-preview.webp" width="960" alt="Animação da rolagem da página do HackaRun: a cada seção, as partículas em 3D formam um objeto diferente (globo, cronômetro, ponto de interrogação, terreno, palco, troféu e galáxia) e, no fim, voltam a formar o globo atrás da chamada para a inscrição." />
 </picture>
 
 # HackaRun
@@ -61,22 +61,22 @@ evento, o regulamento, a programação, os mentores e os prêmios, e recebe a in
 ## Telas
 
 <p align="center">
-  <img src="docs/media/sections-desktop.jpg" width="960" alt="Nove seções da página no desktop: o início com o logo da UniCatólica, os cursos e o logo do HackaRun; o evento, com o cronômetro; os NPCs, com o ponto de interrogação; as missões, com o mapa; a programação, com as abas por dia; a final no Capim Dourado Shopping; os prêmios, com o troféu; as equipes, com a galáxia; e a chamada final para a inscrição, com o globo." />
+  <img src="docs/media/sections-desktop.jpg" width="960" alt="Nove seções da página no desktop: o início, com o logo do HackaRun e a contagem regressiva; o evento, com o cronômetro; os NPCs, com o ponto de interrogação; o regulamento, com as regras da competição e os pesos da pontuação; a programação, com as abas por dia; os mentores; a final no Capim Dourado Shopping; os prêmios, com o troféu; e a chamada final para a inscrição, com o globo." />
   <br /><sub>Nove seções da página no desktop.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/mobile.jpg" width="960" alt="Cinco telas da versão para celular: o início com a contagem regressiva, os NPCs, as missões, os prêmios e a chamada final para a inscrição." />
+  <img src="docs/media/mobile.jpg" width="960" alt="Cinco telas da versão para celular: o início com a contagem regressiva, os NPCs, o regulamento, a programação com as abas dos quatro dias e a chamada final para a inscrição." />
   <br /><sub>A mesma página no celular (390 px).</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/teams-page.jpg" width="720" alt="A página de equipes no desktop: o menu com Voltar ao evento, Inscrição e Equipes inscritas, o contador de equipes confirmadas, a busca por nome e seis cards com a logo ou a foto de cada equipe." />
-  <br /><sub>Página <code>/equipes</code>. As equipes e as imagens desta captura são fictícias.</sub>
+  <img src="docs/media/teams-page.jpg" width="720" alt="A página de equipes no desktop: o menu com Voltar ao evento e Inscrição, o contador de seis equipes confirmadas, a busca por nome e seis cards, cada um com a logo e a quantidade de integrantes da equipe." />
+  <br /><sub>Página <code>/equipes</code>, escondida até o sorteio. As equipes e as imagens desta captura são fictícias.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/media/registration.jpg" width="960" alt="A página de inscrição no desktop e no celular: o formulário com o nome da equipe, a prévia da logo e os integrantes, cada um com nome completo, matrícula e e-mail, e ao lado a lista do que é preciso ter em mãos e as etapas da inscrição." />
+  <img src="docs/media/registration.jpg" width="960" alt="A página de inscrição no desktop e no celular: o formulário individual, com nome completo, e-mail, WhatsApp, idade e perfil, e ao lado o status das inscrições, o que é preciso ter em mãos e as etapas." />
   <br /><sub>Página <code>/inscricao</code>, com dados fictícios e o envio simulado.</sub>
 </p>
 
