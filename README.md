@@ -11,18 +11,18 @@
 
 **Desvende. Programe. Conquiste.**
 
-Landing page do 1º HackaRun, evento de tecnologia, inovação e empreendedorismo da UniCatólica. O site apresenta a
-programação, as missões e as equipes, e recebe a inscrição das equipes, que é gravada numa planilha do Google. Ao fundo,
-uma cena 3D em WebGL muda de forma a cada seção, acompanhando o scroll.
+Landing page do 1º HackaRun, evento de tecnologia, inovação e empreendedorismo da UniCatólica. O site apresenta o
+evento, o regulamento, a programação, os mentores e os prêmios, e recebe a inscrição individual dos participantes, que
+é gravada numa planilha do Google. Ao fundo, uma cena 3D em WebGL muda de forma a cada seção, acompanhando o scroll.
 
 [![CI](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml/badge.svg)](https://github.com/hackarun-unicatolica/lp-hackarun/actions/workflows/ci.yml)
 ![Astro](https://img.shields.io/badge/Astro-7-FF5D01?logo=astro&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strictest-3178C6?logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-049EF4?logo=threedotjs&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
-[![Lighthouse mobile: performance 98, acessibilidade 100, boas práticas 100 e SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%20100%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
+[![Lighthouse mobile: performance 98, acessibilidade 100, boas práticas 93 e SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%2093%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
-**[Ver o site → hackarun.pages.dev](https://hackarun.pages.dev)**
+**[Ver o site → hackarun.com.br](https://hackarun.com.br)**
 
 [Como contribuir](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
@@ -39,18 +39,24 @@ uma cena 3D em WebGL muda de forma a cada seção, acompanhando o scroll.
 
 - **O evento:** 1ª edição do HackaRun, de 11 a 14 de novembro de 2026, em Palmas-TO. A realização é da UniCatólica, a
   organização é da LAES (Liga Acadêmica de Engenharia de Software e Inteligência Artificial) e o Capim Dourado
-  Shopping é o parceiro da premiação. O evento tem duas frentes: uma programação aberta ao público, com oficinas,
-  palestras e estandes, e um hackathon para alunos da UniCatólica, disputado em equipes, com a final no shopping.
-- **O site:** programação em abas por dia, missões, mentores, prêmios, perguntas frequentes, uma página de inscrição e
-  uma página com as equipes confirmadas, com a foto ou a logo de cada uma.
-- **Cena 3D:** oito objetos gerados por código (globo, cronômetro, ponto de interrogação, mapa, terreno, palco, troféu
-  e galáxia), com 9 mil a 42 mil partículas e pós-processamento (bloom, vinheta e aberração cromática). Não há modelos
-  3D nem vídeos.
-- **Desempenho:** Lighthouse mobile com 98 em Performance e 100 em Acessibilidade, Boas práticas e SEO.
+  Shopping é o parceiro da premiação e o palco da final. São quatro dias: oficinas, abertura oficial, desenvolvimento
+  e a grande final. O hackathon é aberto a estudantes da UniCatólica e de outras instituições, profissionais e
+  entusiastas de tecnologia.
+- **A inscrição:** é **individual**, de 19/10 a 08/11, e por enquanto não tem limite de vagas. As equipes (de 4
+  pessoas, no máximo 5) são formadas num sorteio presencial, em 12/11.
+- **O site:** página inicial com o evento, o regulamento (com o PDF para baixar), a programação em abas por dia, os
+  mentores, a grande final, os prêmios, os patrocinadores e as perguntas frequentes; a página de inscrição
+  (`/inscricao`); o aviso de privacidade (`/privacidade`); o modelo de autorização do responsável para menores de 18
+  anos (`/autorizacao`); e a página das equipes (`/equipes`), que fica escondida até o sorteio.
+- **Cena 3D:** sete objetos gerados por código aparecem na página (globo, cronômetro, ponto de interrogação, terreno,
+  palco, troféu e galáxia), com 9 mil a 42 mil partículas. Não há modelos 3D nem vídeos. O pós-processamento (bloom,
+  vinheta e aberração cromática) existe no código, mas está desligado para manter as partículas nítidas.
+- **Desempenho:** Lighthouse mobile com 98 em Performance, 100 em Acessibilidade, 93 em Boas práticas e 100 em SEO
+  (medição de 22/10/2026, detalhada em [Performance](#performance)).
 - **Acessibilidade:** o conteúdo funciona sem JavaScript e sem WebGL, a página respeita `prefers-reduced-motion` e há
   um botão para pausar as animações.
-- **Inscrições sem servidor próprio:** o formulário envia os dados para um Google Apps Script, que grava a inscrição no
-  Google Sheets e a foto da equipe no Google Drive.
+- **Inscrições sem servidor próprio:** o formulário envia os dados para um Google Apps Script, que grava cada
+  inscrição no Google Sheets (abas Inscritos, Equipes e Resumo).
 
 ## Telas
 
@@ -86,30 +92,33 @@ contínua.
 | Início (`#inicio`)       | `core`    | Globo formado por faixas de partículas                      |
 | O evento (`#sobre`)      | `orbit`   | Cronômetro com mostrador, ponteiro e anéis                  |
 | NPCs (`#npcs`)           | `enigma`  | Ponto de interrogação em 3D                                 |
-| Missões (`#missoes`)     | `map`     | Mapa com plataforma, rota em espiral e oito marcadores      |
+| Regulamento              | `dust`    | Galáxia em espiral, como fundo para a leitura               |
 | Programação e mentores   | `terrain` | Terreno em grade, com montanhas e sol                       |
 | Grande final (`#final`)  | `stage`   | Palco com telão, estrutura e canhões de luz                 |
 | Prêmios (`#premios`)     | `trophy`  | Troféu                                                      |
-| Equipes e FAQ            | `dust`    | Galáxia em espiral, como fundo para a leitura               |
+| Patrocinadores e FAQ     | `dust`    | Galáxia em espiral, como fundo para a leitura               |
 | Inscrição (`#inscricao`) | `core`    | O globo de volta, girando devagar, com um pulso leve de luz |
+
+A cena `map` (mapa das missões, com plataforma, rota em espiral e oito marcadores) continua no código e volta junto com
+a seção de missões, que está escondida por enquanto.
 
 A fonte Orbitron, usada nos títulos, teve o til redesenhado com fontTools: no arquivo original, "NÃO" parecia "NÀO" em
 tamanhos grandes.
 
 ## Tecnologias
 
-| Camada     | Tecnologias                                                                                                                          |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Base       | [Astro 7](https://astro.build) (site estático), TypeScript 6 (strictest), Vite                                                       |
-| 3D         | [Three.js](https://threejs.org) r186, shaders GLSL próprios, EffectComposer, UnrealBloomPass e um passe de pós-processamento próprio |
-| Animação   | [GSAP](https://gsap.com) 3.15 (ScrollTrigger) e [Lenis](https://lenis.darkroom.engineering) 1.3                                      |
-| Estilo     | CSS (custom properties, cascade layers, `clamp()`, `content-visibility`) e design tokens                                             |
-| Fontes     | Orbitron, Montserrat e JetBrains Mono, hospedadas no próprio site, só com os caracteres latinos                                      |
-| Imagens    | Redução das fotos no navegador (`createImageBitmap` e canvas) e CDN de imagens do Google para as equipes                             |
-| Backend    | Google Apps Script, Google Sheets (abas Equipes, Integrantes e Resumo) e Google Drive                                                |
-| Qualidade  | Vitest, ESLint, Prettier, Astro Check, Playwright e Lighthouse                                                                       |
-| Fluxo      | Husky, lint-staged, commitlint (Conventional Commits) e GitHub Actions                                                               |
-| Hospedagem | Cloudflare Pages                                                                                                                     |
+| Camada     | Tecnologias                                                                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Base       | [Astro 7](https://astro.build) (site estático), TypeScript 6 (strictest), Vite                                                                               |
+| 3D         | [Three.js](https://threejs.org) r186, shaders GLSL próprios, EffectComposer, UnrealBloomPass e um passe de pós-processamento próprio (desligados por padrão) |
+| Animação   | [GSAP](https://gsap.com) 3.15 (ScrollTrigger) e [Lenis](https://lenis.darkroom.engineering) 1.3                                                              |
+| Estilo     | CSS (custom properties, cascade layers, `clamp()`, `content-visibility`) e design tokens                                                                     |
+| Fontes     | Orbitron, Montserrat e JetBrains Mono, hospedadas no próprio site, só com os caracteres latinos                                                              |
+| Imagens    | Otimização do Astro (`astro:assets`) para as logos e a imagem de compartilhamento, e CDN de imagens do Google para as insígnias das equipes                  |
+| Backend    | Google Apps Script, Google Sheets (abas Inscritos, Equipes e Resumo) e Google Drive (insígnias das equipes)                                                  |
+| Qualidade  | Vitest, ESLint, Prettier, Astro Check, Playwright e Lighthouse                                                                                               |
+| Fluxo      | Husky, lint-staged, commitlint (Conventional Commits) e GitHub Actions                                                                                       |
+| Hospedagem | Cloudflare Pages, com o domínio `hackarun.com.br` e o DNS na Cloudflare                                                                                      |
 
 ## Arquitetura
 
@@ -135,7 +144,7 @@ flowchart TB
   subgraph INFRA["Infrastructure"]
     JSON["Repositórios JSON"]
     GAS["Gateway Apps Script"]
-    ADP["Imagem, storage e relógio"]
+    ADP["Storage e relógio"]
   end
   COMP(["Composition roots"])
 
@@ -153,9 +162,9 @@ flowchart TB
   `src/composition`.
 - **Shared** (`EventBus`, `Observable`, `Ticker`): usado pelas outras camadas e não importa nenhuma delas.
 
-O domínio tem dois aggregates (`HackathonEvent` e `TeamRegistration`), value objects como `TeamName`, `FullName`,
-`StudentId`, `Email` e `TimeSlot`, e o serviço `RegistrationPolicy`, que define se as inscrições estão em breve,
-abertas ou encerradas. Na interface, os ViewModels guardam o estado em `Observable` e não acessam o DOM; as Views só
+O domínio tem dois aggregates (`HackathonEvent` e `ParticipantRegistration`, a inscrição individual), value objects
+como `FullName`, `StudentId`, `Email`, `Phone`, `ParticipantProfile`, `Slots` e `TimeSlot`, e o serviço
+`RegistrationPolicy`, que define se as inscrições estão em breve, abertas, encerrando ou encerradas. Na interface, os ViewModels guardam o estado em `Observable` e não acessam o DOM; as Views só
 fazem a ligação com a página. Os módulos se comunicam por um `EventBus` tipado
 ([`AppEvents.ts`](src/presentation/app/AppEvents.ts)).
 
@@ -164,7 +173,7 @@ O carregamento no navegador segue esta ordem, sem atrasar o primeiro conteúdo n
 ```mermaid
 flowchart TB
   P["Primeiro conteúdo na tela (PaintGate)"] --> B["BootQueue: animações, views e controladores"]
-  B --> Z["Seção perto da tela (LazyMount): equipes e trilho das missões"]
+  B --> Z["Seção perto da tela (LazyMount): equipes e trilho das missões, quando visíveis"]
   B --> L(["load + navegador ocioso"])
   L --> X["Chunk do three.js"]
   L --> W["Formas no Web Worker"]
@@ -175,46 +184,48 @@ flowchart TB
   S --> R
 ```
 
-As páginas `/inscricao` e `/equipes` usam um carregamento à parte ([`LightApp`](src/presentation/app/LightApp.ts)),
-sem 3D, GSAP e Lenis.
+As páginas `/inscricao`, `/equipes`, `/privacidade` e `/autorizacao` usam um carregamento à parte
+([`LightApp`](src/presentation/app/LightApp.ts)), sem 3D, GSAP e Lenis.
 
 <details>
 <summary><b>Padrões de projeto e onde estão</b></summary>
 
-| Padrão                  | Onde                                                                                                                                                                                                                                            |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Strategy                | [`ShapeStrategy`](src/presentation/experience/shapes/ShapeStrategy.ts) (8 objetos), [`RenderPipeline`](src/presentation/experience/post/RenderPipeline.ts), `QualityProfile`, `ScrollDriver`                                                    |
-| Factory + registry      | [`ShapeFactory`](src/presentation/experience/shapes/ShapeFactory.ts), [`BoltFactory`](src/presentation/motion/animators/hero/lightning/BoltFactory.ts)                                                                                          |
-| Registry                | [`AnimatorRegistry`](src/presentation/motion/animators/AnimatorRegistry.ts)                                                                                                                                                                     |
-| Template Method         | [`SectionAnimator`](src/presentation/motion/animators/SectionAnimator.ts)                                                                                                                                                                       |
-| Adapter                 | [`SmoothScroll`](src/presentation/motion/core/SmoothScroll.ts) (Lenis), [`AppsScriptRegistrationGateway`](src/infrastructure/registration/AppsScriptRegistrationGateway.ts), [`CanvasImageCodec`](src/infrastructure/image/CanvasImageCodec.ts) |
-| Decorator               | [`RetryingRegistrationGateway`](src/infrastructure/registration/RetryingRegistrationGateway.ts): 3 tentativas, com espera crescente entre elas                                                                                                  |
-| Proxy com fallback      | [`FallbackTeamRepository`](src/infrastructure/repositories/FallbackTeamRepository.ts): lista ao vivo da planilha, com a lista do build como reserva                                                                                             |
-| Null Object             | [`UnavailableRegistrationGateway`](src/infrastructure/registration/UnavailableRegistrationGateway.ts): sem endpoint, todo envio responde "encerrada"                                                                                            |
-| Observer                | [`Observable`](src/shared/core/Observable.ts), [`EventBus`](src/shared/core/EventBus.ts)                                                                                                                                                        |
-| Singleton               | [`Ticker.shared`](src/shared/core/Ticker.ts) (um único `requestAnimationFrame` no site), [`serverContainer()`](src/composition/server.ts)                                                                                                       |
-| Facade                  | [`GetLandingPage`](src/application/use-cases/GetLandingPage.ts), [`ExperienceStage`](src/presentation/experience/ExperienceStage.ts)                                                                                                            |
-| Composite               | [`strokes.ts`](src/presentation/experience/shapes/strokes.ts): uma forma é uma lista de traços                                                                                                                                                  |
-| Builder                 | [`PointBrush`](src/presentation/experience/shapes/PointBrush.ts), [`BoltBuilder`](src/presentation/motion/animators/hero/lightning/BoltBuilder.ts), [`StageBuilder`](src/presentation/experience/StageBuilder.ts)                               |
-| Repository + Mapper     | [`StaticListRepository`](src/infrastructure/repositories/StaticListRepository.ts), [`EventMapper`](src/infrastructure/mappers/EventMapper.ts)                                                                                                   |
-| Inversão de dependência | [`BootSteps`](src/presentation/app/BootQueue.ts), a interface que o carregamento enxerga                                                                                                                                                        |
+| Padrão                  | Onde                                                                                                                                                                                                              |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Strategy                | [`ShapeStrategy`](src/presentation/experience/shapes/ShapeStrategy.ts) (8 objetos no código), [`RenderPipeline`](src/presentation/experience/post/RenderPipeline.ts), `QualityProfile`, `ScrollDriver`            |
+| Factory + registry      | [`ShapeFactory`](src/presentation/experience/shapes/ShapeFactory.ts), [`BoltFactory`](src/presentation/motion/animators/hero/lightning/BoltFactory.ts)                                                            |
+| Registry                | [`AnimatorRegistry`](src/presentation/motion/animators/AnimatorRegistry.ts)                                                                                                                                       |
+| Template Method         | [`SectionAnimator`](src/presentation/motion/animators/SectionAnimator.ts)                                                                                                                                         |
+| Adapter                 | [`SmoothScroll`](src/presentation/motion/core/SmoothScroll.ts) (Lenis), [`AppsScriptRegistrationGateway`](src/infrastructure/registration/AppsScriptRegistrationGateway.ts)                                       |
+| Decorator               | [`RetryingRegistrationGateway`](src/infrastructure/registration/RetryingRegistrationGateway.ts): 3 tentativas, com espera crescente entre elas                                                                    |
+| Proxy com fallback      | [`FallbackTeamRepository`](src/infrastructure/repositories/FallbackTeamRepository.ts): lista ao vivo da planilha, com a lista do build como reserva                                                               |
+| Null Object             | [`UnavailableRegistrationGateway`](src/infrastructure/registration/UnavailableRegistrationGateway.ts): sem endpoint, todo envio responde "encerrada"                                                              |
+| Observer                | [`Observable`](src/shared/core/Observable.ts), [`EventBus`](src/shared/core/EventBus.ts)                                                                                                                          |
+| Singleton               | [`Ticker.shared`](src/shared/core/Ticker.ts) (um único `requestAnimationFrame` no site), [`serverContainer()`](src/composition/server.ts)                                                                         |
+| Facade                  | [`GetLandingPage`](src/application/use-cases/GetLandingPage.ts), [`ExperienceStage`](src/presentation/experience/ExperienceStage.ts)                                                                              |
+| Composite               | [`strokes.ts`](src/presentation/experience/shapes/strokes.ts): uma forma é uma lista de traços                                                                                                                    |
+| Builder                 | [`PointBrush`](src/presentation/experience/shapes/PointBrush.ts), [`BoltBuilder`](src/presentation/motion/animators/hero/lightning/BoltBuilder.ts), [`StageBuilder`](src/presentation/experience/StageBuilder.ts) |
+| Repository + Mapper     | [`StaticListRepository`](src/infrastructure/repositories/StaticListRepository.ts), [`EventMapper`](src/infrastructure/mappers/EventMapper.ts)                                                                     |
+| Inversão de dependência | [`BootSteps`](src/presentation/app/BootQueue.ts), a interface que o carregamento enxerga                                                                                                                          |
 
 </details>
 
 ## Performance
 
-Lighthouse mobile no build de produção, mediana de 3 execuções (12/10/2026):
+Lighthouse mobile no site de produção, mediana de 3 execuções, com o script de [`scripts/qa/`](scripts/qa/README.md)
+(Chrome com GPU, CPU 4x mais lenta e rede simulada de celular):
 
-| Métrica                             | Antes    | Agora   |
-| ----------------------------------- | -------- | ------- |
-| Performance                         | 66       | 98      |
-| Total Blocking Time                 | 1.600 ms | 98 ms   |
-| Largest Contentful Paint            | 2,9 s    | 2,2 s   |
-| Cumulative Layout Shift             | –        | 0,001   |
-| Acessibilidade, Boas práticas e SEO | 100      | 100     |
-| JavaScript inicial (gzip)           | –        | 68,2 KB |
+| Métrica                  | Antes das otimizações | 12/10/2026 | 22/10/2026 |
+| ------------------------ | --------------------- | ---------- | ---------- |
+| Performance              | 66                    | 98         | 98         |
+| Total Blocking Time      | 1.600 ms              | 98 ms      | 53 ms      |
+| Largest Contentful Paint | 2,9 s                 | 2,2 s      | 2,1 s      |
+| Cumulative Layout Shift  | –                     | 0,001      | 0,001      |
+| Acessibilidade           | 100                   | 100        | 100        |
+| Boas práticas            | 100                   | 100        | 93         |
+| SEO                      | 100                   | 100        | 100        |
 
-As páginas `/inscricao` e `/equipes` ficam em 99 de Performance. As principais medidas:
+As principais medidas:
 
 - O HTML sai pronto do build, e o CSS crítico vai junto na página.
 - O JavaScript da página só carrega depois que o primeiro conteúdo aparece na tela
@@ -222,9 +233,12 @@ As páginas `/inscricao` e `/equipes` ficam em 99 de Performance. As principais 
   ([`BootQueue`](src/presentation/app/BootQueue.ts)).
 - O three.js fica num arquivo separado, carregado depois do `load`. As formas são geradas num Web Worker, e os shaders
   são compilados em paralelo.
-- A quantidade de partículas (9, 22 ou 42 mil) depende da placa de vídeo, e a qualidade cai sozinha se a taxa de
-  quadros ficar abaixo de 45.
+- A quantidade de partículas (9, 22 ou 42 mil) depende da placa de vídeo. Se a taxa de quadros ficar abaixo de 45 por
+  alguns segundos, a qualidade cai sozinha: primeiro os efeitos, depois a resolução e por fim o nível de partículas.
 - As seções longe do topo usam `content-visibility: auto`.
+- As animações em CSS que repetem para sempre só mexem em `transform` e `opacity` e ficam pausadas quando a seção
+  está longe da tela ([`OffscreenMotionController`](src/presentation/controllers/OffscreenMotionController.ts)), para
+  não repintar a página inteira a cada quadro no celular.
 - O 3D para quando a aba fica em segundo plano.
 
 ## Acessibilidade
@@ -235,30 +249,35 @@ A meta é a **WCAG 2.2 AA**.
 - Com `prefers-reduced-motion`, o scroll é nativo e as animações de entrada não acontecem.
 - Botão **Pausar animações** no cabeçalho e no menu do celular, que congela o 3D e as animações em CSS.
 - Programação em abas no padrão WAI-ARIA, navegável pelo teclado. Sem JavaScript, os quatro dias aparecem em sequência.
-- Formulário com um `fieldset` por integrante, resumo dos erros, `aria-invalid`, `aria-describedby` e avisos para
-  leitores de tela.
+- Formulário com campos rotulados, resumo dos erros, `aria-invalid`, `aria-describedby` e avisos para leitores de
+  tela.
 - Todo o conteúdo funciona sem JavaScript e sem WebGL.
 
 ## Segurança e LGPD
 
 - **Cabeçalhos de segurança** em [`public/_headers`](public/_headers): Content Security Policy sem script inline,
   `X-Frame-Options: DENY`, `nosniff` e Referrer-Policy.
-- **Só os dados necessários:** nome da equipe, foto ou logo e, de cada integrante, nome completo, matrícula e e-mail.
-- **Pouca informação pública:** a página de equipes mostra só o nome da equipe, a quantidade de integrantes e a foto,
-  e só depois que a organização confirma a inscrição.
-- **Sem duplicidade:** nome de equipe, e-mail ou matrícula já usados em outra equipe são recusados, e um reenvio não
-  gera uma linha nova na planilha.
-- **Foto conferida no servidor:** o arquivo é validado pelo formato real (JPEG, PNG ou WebP) e pelo tamanho, e
-  recebe um nome aleatório no Drive.
+- **Só os dados necessários:** nome completo, e-mail, WhatsApp, o perfil (curso, período, instituição, matrícula só
+  quando a pessoa informa, e a área de interesse) e se tem 18 anos ou mais. Não há CPF, documentos, fotos nem dado
+  sensível, e a data de nascimento não é pedida.
+- **Controlador dos dados:** a LAES. O aviso de privacidade fica em [`/privacidade`](src/pages/privacidade.astro) e
+  cada inscrição grava a versão do aviso aceita (hoje `2026-10-v5`) e a data do aceite. Quem tem menos de 18 anos
+  entrega, no credenciamento, a autorização do responsável (modelo em `/autorizacao`).
+- **Sem cookies de rastreamento nem analytics.**
+- **Uma inscrição por pessoa:** e-mail, WhatsApp e matrícula já usados são recusados, e um reenvio não gera uma linha
+  nova na planilha.
+- **Validação no servidor:** o Apps Script confere tudo de novo, com as mesmas regras do site (um teste compara os
+  dois lados), e grava textos que começam com `=`, `+`, `-` ou `@` como texto, para evitar fórmula injetada.
 - **Proteção contra spam:** campo isca, tempo mínimo de preenchimento e limite de envios.
-- **LGPD:** aviso de privacidade em [`/privacidade`](src/pages/privacidade.astro). Cada inscrição grava a versão do
-  aviso aceita e a data do aceite.
+- **Pouca informação pública:** a página de equipes, escondida até o sorteio, mostra só o nome da equipe, a quantidade
+  de integrantes e a insígnia, e só depois que a organização confirma. Nome de pessoa, e-mail e WhatsApp nunca
+  aparecem no site.
 
 ## Qualidade
 
 | Item           | Situação                                                                             |
 | -------------- | ------------------------------------------------------------------------------------ |
-| Testes         | Vitest, com testes por camada e testes do Apps Script rodando o código real          |
+| Testes         | Mais de mil testes (Vitest), por camada, com o código real do Apps Script rodando    |
 | Lint e tipos   | ESLint sem erros e TypeScript no modo mais rígido, com Astro Check                   |
 | Formatação     | Prettier em todo o repositório                                                       |
 | CI             | GitHub Actions em todo push na `main` e em todo PR: lint, formatação, testes e build |
@@ -314,8 +333,7 @@ npm run dev
 ```
 
 Abra `http://localhost:4321`. O formulário fica em `http://localhost:4321/inscricao`. No ambiente local, a inscrição
-roda em **modo simulado**: nada é enviado e nenhuma planilha é alterada. As equipes enviadas aparecem em `/equipes`
-enquanto a aba estiver aberta.
+roda em **modo simulado**: nada é enviado e nenhuma planilha é alterada.
 
 **5. Confira antes de abrir o PR**
 
@@ -378,25 +396,26 @@ src/
 ├── shared/          # EventBus, Observable, Ticker e utilitários
 ├── composition/     # onde as camadas são ligadas
 ├── assets/          # logos oficiais e a fonte Orbitron
-└── pages/           # inicio, inscricao, equipes, privacidade e 404
+└── pages/           # inicio, inscricao, equipes, privacidade, autorizacao e 404
 apps-script/         # código do Google Apps Script e o passo a passo de instalação
-public/              # imagem de compartilhamento, favicon e _headers
+public/              # imagem de compartilhamento, favicon, regulamento em PDF e _headers
 scripts/             # setup, ajuste da fonte e testes visuais (qa/)
 tests/               # testes por camada
-docs/media/          # imagens deste README
+docs/                # guia do projeto, decisões de arquitetura (ADR) e as imagens deste README (media/)
 ```
 
 </details>
 
 ### Conteúdo e inscrições
 
-- **Conteúdo** (programação, missões, perguntas frequentes, prêmios, mentores e parceiros) fica em
+- **Conteúdo** (evento e programação, perguntas frequentes, prêmios, mentores, estações dos NPCs e parceiros) fica em
   `src/infrastructure/content/*.json`. Um dado inválido interrompe o build.
-- **Inscrições** são só de equipe, de 2 a 5 alunos, com nome completo, matrícula e e-mail de cada integrante. O Apps
-  Script grava cada equipe na aba **Equipes** (com a foto na própria célula), cada pessoa na aba **Integrantes** e os
-  totais na aba **Resumo**.
-- **Equipes no site:** uma equipe aparece em `/equipes` quando a organização muda o Status para `confirmado` na
-  planilha. Os detalhes estão no [`apps-script/README.md`](apps-script/README.md).
+- **Inscrições** são **individuais**: cada pessoa informa nome completo, e-mail, WhatsApp, o perfil (curso, período,
+  instituição e matrícula, conforme o caso) e a área de interesse. O Apps Script grava uma linha por pessoa na aba
+  **Inscritos** e os totais na aba **Resumo**. Depois do sorteio de 12/11, a organização preenche a equipe de cada
+  pessoa na própria planilha.
+- **Equipes no site:** uma equipe aparece em `/equipes` quando a organização cria a equipe na aba **Equipes** e muda o
+  Status para `confirmado`. Os detalhes estão no [`apps-script/README.md`](apps-script/README.md).
 
 ## Contribuindo
 
@@ -412,13 +431,17 @@ O fluxo completo está no [CONTRIBUTING.md](CONTRIBUTING.md). Em resumo:
 
 ## Deploy
 
-O site está na **Cloudflare Pages**, no plano gratuito: **[hackarun.pages.dev](https://hackarun.pages.dev)**.
+O site está na **Cloudflare Pages**, no plano gratuito, em **[hackarun.com.br](https://hackarun.com.br)**. O DNS do
+domínio fica na Cloudflare e o `www.hackarun.com.br` redireciona para o endereço principal. O `hackarun.pages.dev`
+continua no ar, com o mesmo conteúdo e sem redirecionar, porque esse link já foi muito compartilhado; o endereço
+canônico das duas versões aponta para `hackarun.com.br`, então os buscadores indexam só o domínio próprio.
 
 - Cada merge na `main` publica uma nova versão em 1 a 2 minutos.
 - Cada PR ganha um endereço de prévia, comentado pela Cloudflare no próprio PR. Na prévia, a inscrição é simulada e
   nada é gravado na planilha.
-- Para ligar as inscrições no site oficial, basta configurar a variável `PUBLIC_REGISTRATION_ENDPOINT` no ambiente de
-  produção da Cloudflare e publicar de novo.
+- As inscrições do site oficial estão ligadas pela variável `PUBLIC_REGISTRATION_ENDPOINT` (a URL do Apps Script) no
+  ambiente de produção da Cloudflare. O endereço público do site vem de `PUBLIC_SITE_URL`; sem ela, vale o padrão do
+  código, `https://hackarun.com.br`.
 
 Para publicar um fork na sua própria conta: na Cloudflare, abra **Workers & Pages → Create application → Pages →
 Connect to Git**, escolha o repositório e use o comando de build `npm run build` com a pasta de saída `dist`.
@@ -428,15 +451,18 @@ Connect to Git**, escolha o repositório e use o comando de build `npm run build
 - [x] Arquitetura, domínio e conteúdo oficial
 - [x] Cena 3D guiada pelo scroll, com oito objetos
 - [x] Segunda versão do design, com a identidade oficial do evento
-- [x] Lighthouse mobile acima de 90 em Performance e 100 nas demais categorias
 - [x] Botão para pausar as animações
 - [x] Programação oficial, com as duas frentes e as abas por dia
-- [x] Inscrição só de equipe, em página própria, com a planilha organizada em três abas
-- [x] Página de equipes com a foto ou a logo de cada uma
 - [x] Publicação na Cloudflare Pages, com deploy automático e prévia em cada PR
-- [ ] Abertura das inscrições, quando a coordenação definir as vagas e o prazo
-- [ ] Regulamento e pontuação das missões, apresentados na abertura do evento
+- [x] Regulamento publicado, com o PDF para baixar
+- [x] Inscrição individual em página própria, com a planilha organizada em três abas
+- [x] Aviso de privacidade (LGPD) e modelo de autorização do responsável
+- [x] Inscrições abertas (19/10), sem limite de vagas por enquanto
+- [x] Domínio próprio, `hackarun.com.br`
+- [ ] Boas práticas de volta a 100 no Lighthouse (hoje 93, por causa do script de analytics que a Cloudflare injeta e a CSP bloqueia)
+- [ ] Sorteio das equipes (12/11) e página `/equipes` no ar
 - [ ] Prêmios, mentores e banca, divulgados pela organização
+- [ ] Evento, de 11 a 14 de novembro
 
 ## Créditos
 
