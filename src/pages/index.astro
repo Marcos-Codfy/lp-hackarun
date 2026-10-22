@@ -25,10 +25,9 @@ const { event } = data;
 
 const appConfig = buildAppConfig(event);
 
-const description =
-  'De 11 a 14 de novembro, em Palmas: oficinas e o hackathon HackaRun, aberto a estudantes, profissionais e entusiastas, com final no Capim Dourado Shopping.';
+const description = 'Oficinas e hackathon, aberto a estudantes, profissionais e entusiastas.';
 const seo = {
-  title: 'HackaRun 2026 · Oficinas e hackathon · UniCatólica',
+  title: 'HackaRun 2026',
   description,
   jsonLd: buildEventJsonLd(data, Astro.site?.href ?? '', description),
 };
