@@ -28,13 +28,13 @@ describe('ListPartners', () => {
     ]);
   });
 
-  it('conteúdo real: UniCatólica realiza, LAES organiza (sem site) e o Capim Dourado é parceiro', async () => {
+  it('conteúdo real: UniCatólica realiza, LAES organiza (com o Instagram) e o Capim Dourado é parceiro', async () => {
     const list = await new ListPartners(new StaticPartnerRepository(partnersData as RawPartner[])).execute();
     expect(list.map((p) => [p.name, p.role])).toEqual([
       ['UniCatólica', 'organizer'],
       ['LAES', 'coorganizer'],
       ['Capim Dourado Shopping', 'partner'],
     ]);
-    expect(list.find((p) => p.id === 'laes')?.url).toBeNull();
+    expect(list.find((p) => p.id === 'laes')?.url).toBe('https://www.instagram.com/laes.eng/');
   });
 });

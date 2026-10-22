@@ -1,6 +1,7 @@
 ---
 import type { EventDayDTO } from '@application/index';
 import { DayLabelFormatter } from '@presentation/formatters/DayLabelFormatter';
+import { softHyphenate } from '@presentation/formatters/SoftHyphens';
 
 // seletor de dias. Nasce escondido: o DayTabsController liga o padrão de abas (role, aria, teclado);
 // sem JS os dias aparecem empilhados e este bloco nem existe pra quem lê
@@ -34,7 +35,7 @@ const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1
           {label.day}/{day.date.slice(5, 7)}
         </span>
         <span class="sr-only">: </span>
-        <span class="day-tab__label">{day.label}</span>
+        <span class="day-tab__label">{softHyphenate(day.label)}</span>
       </button>
     );
   })}
@@ -117,13 +118,17 @@ const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1
     opacity: 1;
   }
 
+  /* celular: abas de 66 a 92 px; "Desenvolvimento" quebra em sílabas (softHyphenate) em vez de passar da borda */
   .day-tab__weekday,
   .day-tab__label {
+    max-width: 100%;
     font-family: var(--font-mono);
-    font-size: 0.625rem;
+    font-size: clamp(0.5625rem, 0.25rem + 1.6vw, 0.625rem);
     font-weight: 600;
     letter-spacing: 0.1em;
     line-height: 1.2;
+    overflow-wrap: break-word;
+    text-align: center;
     text-transform: uppercase;
   }
 

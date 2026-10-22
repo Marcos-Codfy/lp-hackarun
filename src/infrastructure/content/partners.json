@@ -3,7 +3,7 @@
     "id": "unicatolica",
     "name": "UniCatólica",
     "role": "organizer",
-    "url": "https://www.catolica-to.edu.br",
+    "url": "https://to.catolica.edu.br/portal/",
     "logo": null
   },
   {
@@ -11,7 +11,7 @@
     "name": "LAES",
     "fullName": "Liga Acadêmica de Engenharia de Software e Inteligência Artificial",
     "role": "coorganizer",
-    "url": null,
+    "url": "https://www.instagram.com/laes.eng/",
     "logo": null
   },
   { "id": "capim-dourado", "name": "Capim Dourado Shopping", "role": "partner", "url": null, "logo": null }

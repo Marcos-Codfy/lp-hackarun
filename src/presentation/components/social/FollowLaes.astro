@@ -1,0 +1,55 @@
+---
+import Button from '@presentation/components/ui/Button.astro';
+import InstagramGlyph from './InstagramGlyph.astro';
+
+// CTA do fim da página: seguir a LAES (liga acadêmica que organiza o HackaRun) no Instagram
+const LAES_INSTAGRAM = 'https://www.instagram.com/laes.eng/';
+---
+
+<div class="follow">
+  <p class="follow__label" aria-hidden="true">
+    // Acompanhe
+  </p>
+  <Button
+    href={LAES_INSTAGRAM}
+    variant="ghost"
+    size="md"
+    target="_blank"
+    rel="noopener noreferrer"
+    data-follow-laes
+  >
+    Seguir a LAES no Instagram
+    <span class="sr-only"> (abre em nova aba)</span>
+    <InstagramGlyph slot="icon" size={20} />
+  </Button>
+</div>
+
+<style>
+  .follow {
+    min-width: 0;
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+  }
+
+  /* celular: o botão (nowrap) é mais largo que a coluna; fonte menor e, se faltar, o texto quebra em 2 linhas */
+  @media (max-width: 479px) {
+    .follow :global(.btn) {
+      --btn-fs: 0.75rem;
+      --btn-px: 1.15rem;
+      max-width: 100%;
+      padding-block: 0.6rem;
+      line-height: 1.3;
+      text-align: center;
+      white-space: normal;
+    }
+  }
+
+  .follow__label {
+    color: #8ff3ff;
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+  }
+</style>

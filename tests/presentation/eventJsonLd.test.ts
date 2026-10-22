@@ -27,11 +27,12 @@ describe('buildEventJsonLd', () => {
       inLanguage: 'pt-BR',
     });
     expect(event?.['organizer']).toEqual([
-      { '@type': 'Organization', name: 'UniCatólica', url: 'https://www.catolica-to.edu.br' },
+      { '@type': 'Organization', name: 'UniCatólica', url: 'https://to.catolica.edu.br/portal/' },
       {
         '@type': 'Organization',
         name: 'Liga Acadêmica de Engenharia de Software e Inteligência Artificial',
         alternateName: 'LAES',
+        url: 'https://www.instagram.com/laes.eng/',
       },
     ]);
     expect(event?.['sponsor']).toEqual([{ '@type': 'Organization', name: 'Capim Dourado Shopping' }]);
