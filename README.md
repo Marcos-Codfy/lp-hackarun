@@ -20,7 +20,7 @@ evento, o regulamento, a programação, os mentores e os prêmios, e recebe a in
 ![TypeScript](https://img.shields.io/badge/TypeScript-strictest-3178C6?logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-049EF4?logo=threedotjs&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3.15-88CE02?logo=greensock&logoColor=white)
-[![Lighthouse mobile: performance 98, acessibilidade 100, boas práticas 93 e SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-98%20%C2%B7%20100%20%C2%B7%2093%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
+[![Lighthouse mobile: performance 95, acessibilidade 100, boas práticas 100 e SEO 100](https://img.shields.io/badge/Lighthouse%20mobile-95%20%C2%B7%20100%20%C2%B7%20100%20%C2%B7%20100-0CCE6B?logo=lighthouse&logoColor=white)](#performance)
 
 **[Ver o site → hackarun.com.br](https://hackarun.com.br)**
 
@@ -51,7 +51,7 @@ evento, o regulamento, a programação, os mentores e os prêmios, e recebe a in
 - **Cena 3D:** sete objetos gerados por código aparecem na página (globo, cronômetro, ponto de interrogação, terreno,
   palco, troféu e galáxia), com 9 mil a 42 mil partículas. Não há modelos 3D nem vídeos. O pós-processamento (bloom,
   vinheta e aberração cromática) existe no código, mas está desligado para manter as partículas nítidas.
-- **Desempenho:** Lighthouse mobile com 98 em Performance, 100 em Acessibilidade, 93 em Boas práticas e 100 em SEO
+- **Desempenho:** Lighthouse mobile com 95 em Performance e 100 em Acessibilidade, Boas práticas e SEO
   (medição de 22/10/2026, detalhada em [Performance](#performance)).
 - **Acessibilidade:** o conteúdo funciona sem JavaScript e sem WebGL, a página respeita `prefers-reduced-motion` e há
   um botão para pausar as animações.
@@ -212,17 +212,17 @@ As páginas `/inscricao`, `/equipes`, `/privacidade` e `/autorizacao` usam um ca
 
 ## Performance
 
-Lighthouse mobile no site de produção, mediana de 3 execuções, com o script de [`scripts/qa/`](scripts/qa/README.md)
+Lighthouse mobile no site de produção, mediana de 5 execuções, com o script de [`scripts/qa/`](scripts/qa/README.md)
 (Chrome com GPU, CPU 4x mais lenta e rede simulada de celular):
 
 | Métrica                  | Antes das otimizações | 12/10/2026 | 22/10/2026 |
 | ------------------------ | --------------------- | ---------- | ---------- |
-| Performance              | 66                    | 98         | 98         |
-| Total Blocking Time      | 1.600 ms              | 98 ms      | 53 ms      |
-| Largest Contentful Paint | 2,9 s                 | 2,2 s      | 2,1 s      |
+| Performance              | 66                    | 98         | 95         |
+| Total Blocking Time      | 1.600 ms              | 98 ms      | 169 ms     |
+| Largest Contentful Paint | 2,9 s                 | 2,2 s      | 2,3 s      |
 | Cumulative Layout Shift  | –                     | 0,001      | 0,001      |
 | Acessibilidade           | 100                   | 100        | 100        |
-| Boas práticas            | 100                   | 100        | 93         |
+| Boas práticas            | 100                   | 100        | 100        |
 | SEO                      | 100                   | 100        | 100        |
 
 As principais medidas:
