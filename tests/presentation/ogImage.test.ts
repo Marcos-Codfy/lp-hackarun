@@ -22,4 +22,13 @@ describe('imagem de compartilhamento', () => {
     expect({ width, height, format }).toEqual({ width: 1200, height: 630, format: 'jpeg' });
     expect(file.byteLength).toBeLessThan(300 * 1024);
   });
+
+  it('o título e a descrição do link da página inicial são enxutos', () => {
+    const index = readFileSync(`${ROOT}src/pages/index.astro`, 'utf8');
+    expect(index).toContain("title: 'HackaRun 2026',");
+    expect(index).not.toMatch(/Oficinas e hackathon ·/);
+    expect(index).toContain(
+      "const description = 'Oficinas e hackathon, aberto a estudantes, profissionais e entusiastas.';",
+    );
+  });
 });
