@@ -61,7 +61,7 @@ export function buildEventJsonLd(data: LandingPageDTO, siteUrl: string, descript
   const first = schedule[0]?.sessions[0];
   const last = schedule.at(-1)?.sessions.at(-1);
   const venues = event.venues.map((v) => place(v));
-  const image = siteUrl ? new URL('/og-image.jpg', siteUrl).href : undefined;
+  const image = siteUrl ? new URL('/og-hackarun.jpg', siteUrl).href : undefined;
 
   const eventNode: Node = {
     '@type': 'Event',
