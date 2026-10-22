@@ -263,7 +263,7 @@ A meta é a **WCAG 2.2 AA**.
 - **Controlador dos dados:** a LAES. O aviso de privacidade fica em [`/privacidade`](src/pages/privacidade.astro) e
   cada inscrição grava a versão do aviso aceita (hoje `2026-10-v5`) e a data do aceite. Quem tem menos de 18 anos
   entrega, no credenciamento, a autorização do responsável (modelo em `/autorizacao`).
-- **Sem cookies de rastreamento nem analytics.**
+- **Sem cookies de rastreamento.** A contagem de visitas é a Web Analytics da Cloudflare, que não usa cookies.
 - **Uma inscrição por pessoa:** e-mail, WhatsApp e matrícula já usados são recusados, e um reenvio não gera uma linha
   nova na planilha.
 - **Validação no servidor:** o Apps Script confere tudo de novo, com as mesmas regras do site (um teste compara os
@@ -459,7 +459,6 @@ Connect to Git**, escolha o repositório e use o comando de build `npm run build
 - [x] Aviso de privacidade (LGPD) e modelo de autorização do responsável
 - [x] Inscrições abertas (19/10), sem limite de vagas por enquanto
 - [x] Domínio próprio, `hackarun.com.br`
-- [ ] Boas práticas de volta a 100 no Lighthouse (hoje 93, por causa do script de analytics que a Cloudflare injeta e a CSP bloqueia)
 - [ ] Sorteio das equipes (12/11) e página `/equipes` no ar
 - [ ] Prêmios, mentores e banca, divulgados pela organização
 - [ ] Evento, de 11 a 14 de novembro

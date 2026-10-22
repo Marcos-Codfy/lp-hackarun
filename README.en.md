@@ -265,7 +265,7 @@ The target is **WCAG 2.2 AA**.
 - **Data controller:** LAES. The privacy notice is at [`/privacidade`](src/pages/privacidade.astro) and each
   registration stores the notice version accepted (currently `2026-10-v5`) and the date of acceptance. People under
   18 hand in a guardian authorization at check-in (template at `/autorizacao`).
-- **No tracking cookies and no analytics.**
+- **No tracking cookies.** Visits are counted by Cloudflare Web Analytics, which does not use cookies.
 - **One registration per person:** an e-mail, WhatsApp number or student ID already used is rejected, and a
   resubmission does not create a new row in the sheet.
 - **Server-side validation:** the Apps Script checks everything again with the same rules as the site (a test
@@ -462,7 +462,6 @@ Git**, choose the repository and use `npm run build` as the build command with `
 - [x] Privacy notice (LGPD) and guardian authorization form
 - [x] Registration open (October 19), with no cap on spots for now
 - [x] Custom domain, `hackarun.com.br`
-- [ ] Best practices back to 100 on Lighthouse (93 today, because of the analytics script Cloudflare injects and the CSP blocks)
 - [ ] Team draw (November 12) and the `/equipes` page live
 - [ ] Prizes, mentors and judges, announced by the organizers
 - [ ] The event, November 11 to 14

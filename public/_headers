@@ -2,7 +2,9 @@
 # CSP: nenhum script inline (o Astro empacota tudo em /_astro); os JSON de dados não executam.
 # Apps Script responde com 302 pro googleusercontent, por isso os dois hosts no connect-src.
 # Fotos das equipes (/equipes) vêm do CDN de imagens do Google: só lh3.googleusercontent.com, só no img-src.
-# Ligou Web Analytics ou Turnstile na Cloudflare? Libere o host deles aqui antes (Rocket Loader quebra com esta CSP).
+# Web Analytics da Cloudflare (a Cloudflare injeta o script no domínio próprio): o script vem de static.cloudflareinsights.com
+# e a medição vai pra cloudflareinsights.com; só esses dois hosts. Ligou Turnstile? Libere o host dele aqui antes
+# (Rocket Loader quebra com esta CSP).
 # Nenhum host do próprio site na CSP, só 'self': vale igual em hackarun.pages.dev e nas prévias dos PRs
 # (<hash>.hackarun.pages.dev e <branch>.hackarun.pages.dev). As prévias já saem com X-Robots-Tag: noindex da Cloudflare.
 /*
@@ -11,7 +13,7 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-Frame-Options: DENY
   Cross-Origin-Opener-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://lh3.googleusercontent.com; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://lh3.googleusercontent.com; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cloudflareinsights.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
 # regulamento oficial: sempre baixa, nunca abre dentro do site (o link do rodapé e do FAQ também tem download)
 /regulamento-hackarun-2026.pdf
