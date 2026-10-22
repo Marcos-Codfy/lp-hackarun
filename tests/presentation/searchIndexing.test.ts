@@ -16,8 +16,8 @@ async function robots(site?: string): Promise<{ text: string; type: string | nul
 
 describe('robots.txt', () => {
   it('aponta o sitemap do endereço oficial e libera tudo', async () => {
-    const { text, type } = await robots('https://hackarun.pages.dev');
-    expect(text).toBe('User-agent: *\nAllow: /\n\nSitemap: https://hackarun.pages.dev/sitemap-index.xml\n');
+    const { text, type } = await robots('https://hackarun.com.br');
+    expect(text).toBe('User-agent: *\nAllow: /\n\nSitemap: https://hackarun.com.br/sitemap-index.xml\n');
     expect(type).toBe('text/plain; charset=utf-8');
   });
 
@@ -28,7 +28,7 @@ describe('robots.txt', () => {
 
   it('sem site no config cai no endereço oficial', async () => {
     const { text } = await robots();
-    expect(text).toContain('Sitemap: https://hackarun.pages.dev/sitemap-index.xml');
+    expect(text).toContain('Sitemap: https://hackarun.com.br/sitemap-index.xml');
   });
 });
 
@@ -58,14 +58,14 @@ describe('páginas escondidas: fora do sitemap e com noindex', () => {
 
   it('o sitemap deixa de fora /equipes (até o sorteio) e /autorizacao, com ou sem barra no fim', () => {
     expect(UNLISTED_PATHS).toEqual(['/equipes', '/autorizacao']);
-    expect(isListedInSitemap('https://hackarun.pages.dev/equipes')).toBe(false);
-    expect(isListedInSitemap('https://hackarun.pages.dev/equipes/')).toBe(false);
-    expect(isListedInSitemap('https://hackarun.pages.dev/autorizacao')).toBe(false);
+    expect(isListedInSitemap('https://hackarun.com.br/equipes')).toBe(false);
+    expect(isListedInSitemap('https://hackarun.com.br/equipes/')).toBe(false);
+    expect(isListedInSitemap('https://hackarun.com.br/autorizacao')).toBe(false);
   });
 
   it('o resto continua no sitemap (inclusive nomes parecidos)', () => {
     for (const path of ['/', '/inscricao', '/privacidade', '/equipes-2027']) {
-      expect(isListedInSitemap(`https://hackarun.pages.dev${path}`)).toBe(true);
+      expect(isListedInSitemap(`https://hackarun.com.br${path}`)).toBe(true);
     }
   });
 

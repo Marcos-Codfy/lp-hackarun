@@ -2,8 +2,8 @@
 // faltam (build local, CI do GitHub)
 export const PRODUCTION_BRANCH = 'main';
 
-// endereço oficial; o PUBLIC_SITE_URL troca (fork, domínio próprio). Igual ao do astro.config.mjs (um teste confere)
-export const DEFAULT_SITE_URL = 'https://hackarun.pages.dev';
+// endereço oficial (domínio próprio); o PUBLIC_SITE_URL troca (fork). Igual ao do astro.config.mjs (um teste confere)
+export const DEFAULT_SITE_URL = 'https://hackarun.com.br';
 
 export interface BuildTarget {
   cfPages?: string | undefined;

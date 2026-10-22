@@ -59,9 +59,9 @@ describe('assertNoSimulationInProduction', () => {
 });
 
 describe('endereço oficial', () => {
-  it('é https://hackarun.pages.dev, igual ao padrão do astro.config.mjs (o PUBLIC_SITE_URL troca)', () => {
+  it('é https://hackarun.com.br, igual ao padrão do astro.config.mjs (o PUBLIC_SITE_URL troca)', () => {
     const config = readFileSync(fileURLToPath(new URL('../../astro.config.mjs', import.meta.url)), 'utf8');
-    expect(DEFAULT_SITE_URL).toBe('https://hackarun.pages.dev');
+    expect(DEFAULT_SITE_URL).toBe('https://hackarun.com.br');
     expect(config).toContain(`process.env.PUBLIC_SITE_URL || '${DEFAULT_SITE_URL}'`);
   });
 });

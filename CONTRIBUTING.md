@@ -8,7 +8,7 @@ Valeu por ajudar no HackaRun! Este guia resume o fluxo de quem vai mexer no cód
 ## Fluxo de trabalho da equipe
 
 O repositório fica na organização **`hackarun-unicatolica`** do GitHub:
-https://github.com/hackarun-unicatolica/lp-hackarun. O site oficial é **https://hackarun.pages.dev** (Cloudflare
+https://github.com/hackarun-unicatolica/lp-hackarun. O site oficial é **https://hackarun.com.br** (Cloudflare
 Pages). Ele se atualiza sozinho a cada merge na `main`, e todo Pull Request ganha uma prévia própria. Ninguém dá push
 direto na `main`: tudo entra por PR, com a CI verde e a aprovação de um dos **donos do código**
 ([`.github/CODEOWNERS`](.github/CODEOWNERS)):
@@ -72,7 +72,7 @@ a aprovação de outra pessoa. Mesmo assim, a mudança entra por PR.
 9. **Merge com "Squash and merge".** Cada PR vira um commit só na `main`, com o título do PR em Conventional Commits.
    O histórico fica limpo (sem os "ajuste" e "wip" do meio do caminho), cada linha do `CHANGELOG.md` aponta para um
    commit e desfazer um PR inteiro é reverter um commit. Por isso o repositório aceita só esse tipo de merge.
-10. **Pronto.** A produção publica sozinha em cerca de 1 a 2 minutos em https://hackarun.pages.dev. Apague a branch
+10. **Pronto.** A produção publica sozinha em cerca de 1 a 2 minutos em https://hackarun.com.br. Apague a branch
     pelo botão **Delete branch** do PR.
 
 A `main` andou enquanto o seu PR estava aberto? Use o botão **Update branch** do PR ou, no terminal,

@@ -12,6 +12,12 @@ do Git.
 
 ## [Unreleased]
 
+### Alterado
+
+- Endereço oficial passa a ser `https://hackarun.com.br` (o `www` redireciona para ele). O `hackarun.pages.dev`
+  continua servindo o mesmo site; canonical, sitemap e robots usam o domínio próprio.
+- Inscrições sem limite de vagas por enquanto: sem número no cartão da página de inscrição nem no FAQ.
+
 Publicação oficial na Cloudflare Pages, em `https://hackarun.pages.dev`, com as inscrições "em breve" e uma prévia de
 revisão em cada Pull Request.
 
