@@ -122,7 +122,7 @@ describe('Apps Script · contrato com o site', () => {
   it('MIN_ELAPSED_MS e CONSENT_VERSION do Validation.gs são iguais aos do SubmitRegistration', () => {
     expect(script.evaluate<number>('MIN_ELAPSED_MS')).toBe(MIN_FILL_MS);
     expect(script.evaluate<string>('CONSENT_VERSION')).toBe(CONSENT_VERSION);
-    expect(CONSENT_VERSION).toBe('2026-10-v4');
+    expect(CONSENT_VERSION).toBe('2026-10-v5');
   });
 
   it('limites e padrões são os mesmos dos value objects e do aggregate', () => {

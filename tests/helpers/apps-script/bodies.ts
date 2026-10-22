@@ -27,7 +27,7 @@ export function registrationBody(
     participant: { ...ANA, ...participant },
     submittedAt: '2026-10-20T15:00:00.000Z',
     source: 'landing-page',
-    consentVersion: '2026-10-v4',
+    consentVersion: '2026-10-v5',
     consentAt: '2026-10-20T15:00:00.000Z',
     honeypot: '',
     elapsedMs: 8000,

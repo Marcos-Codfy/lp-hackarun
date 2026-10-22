@@ -22,7 +22,10 @@ const PERIOD_RANGE = { min: 1, max: 10 };
 const UNICATOLICA = 'UniCatólica';
 // versão vigente do aviso de privacidade (/privacidade). Mantenha igual ao CONSENT_VERSION do
 // src/application/use-cases/SubmitRegistration.ts (um teste confere): aceite de aviso antigo não vale
-const CONSENT_VERSION = '2026-10-v4';
+const CONSENT_VERSION = '2026-10-v5';
+// versões do aviso que ainda valem: a vigente e a anterior. Quem abriu a página antes da troca ainda envia a v4,
+// e recusar essa pessoa derrubaria a inscrição. Tire a v4 daqui só depois de dias com o site já na v5
+const ACCEPTED_CONSENT_VERSIONS = [CONSENT_VERSION, '2026-10-v4'];
 // UUID do navegador; sem hífen na frente (vai pra planilha) e com teto de tamanho
 const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9-]{7,63}$/;
 
@@ -176,7 +179,7 @@ function cleanText_(raw, limits) {
 function parseConsent_(body) {
   const version = clean_(body.consentVersion, 32);
   const at = Date.parse(clean_(body.consentAt, 40));
-  if (version !== CONSENT_VERSION || Number.isNaN(at)) return '';
+  if (ACCEPTED_CONSENT_VERSIONS.indexOf(version) === -1 || Number.isNaN(at)) return '';
   return version + ' · ' + new Date(at).toISOString();
 }
 
