@@ -80,7 +80,11 @@
               "start": "21:00",
               "end": "21:50",
               "details": "Uso de inteligência artificial generativa no desenvolvimento de software, elaboração de prompts, geração e refinamento de código, prototipação de interfaces e validação de funcionalidades, considerando testes e segurança básica.",
-              "speaker": { "name": "Prof. Msc. Silvano Malfatti", "photo": null, "bio": null }
+              "speaker": {
+                "name": "Prof. Msc. Silvano Malfatti",
+                "photo": "/palestrantes/silvano-malfatti.jpg",
+                "bio": "Professor universitário, mestre em Computação e especialista em Inteligência Artificial. Atua também como desenvolvedor de software, com sólida experiência em desenvolvimento iOS, Swift e arquitetura de aplicações. Sua trajetória integra educação, tecnologia e inovação."
+              }
             }
           ]
         }
