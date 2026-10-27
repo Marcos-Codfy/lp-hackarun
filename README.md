@@ -416,8 +416,8 @@ docs/                # guia do projeto, decisões de arquitetura (ADR) e as imag
   pessoa na própria planilha.
 - **Equipes no site:** uma equipe aparece em `/equipes` quando a organização cria a equipe na aba **Equipes** e muda o
   Status para `confirmado`. Os detalhes estão no [`apps-script/README.md`](apps-script/README.md).
-- **Mentores:** egressos e profissionais se cadastram em `/seja-mentor` (nome, contato, área de atuação, experiência,
-  se é egresso, dias e como prefere atuar). O Apps Script grava na aba **Mentores** e nos totais da aba **Resumo
+- **Mentores:** egressos e profissionais se cadastram em `/seja-mentor` (nome, contato, área de atuação, se é egresso
+  e os dias do evento em que pode acompanhar as equipes, sempre presencial). O Apps Script grava na aba **Mentores** e nos totais da aba **Resumo
   Mentores**, separadas das inscrições. O cadastro tem o aviso de privacidade próprio (seção "Cadastro de mentores"
   de `/privacidade`).
 

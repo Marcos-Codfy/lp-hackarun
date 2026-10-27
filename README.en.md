@@ -419,8 +419,8 @@ docs/                # project guide, architecture decisions (ADR) and the image
   person's team in the sheet itself.
 - **Teams on the site:** a team appears at `/equipes` when the organizers create it in the **Equipes** tab and change
   its Status to `confirmado`. Details are in [`apps-script/README.md`](apps-script/README.md) (pt-BR).
-- **Mentors:** alumni and professionals sign up at `/seja-mentor` (name, contact, area of expertise, experience,
-  alumni or not, available days and preferred way to help). Apps Script writes to the **Mentores** tab and the totals
+- **Mentors:** alumni and professionals sign up at `/seja-mentor` (name, contact, area of expertise, alumni or
+  not, and the event days they can follow the teams on, always in person). Apps Script writes to the **Mentores** tab and the totals
   to the **Resumo Mentores** tab, separate from the registrations. The sign-up has its own privacy notice (the
   "Cadastro de mentores" section of `/privacidade`).
 

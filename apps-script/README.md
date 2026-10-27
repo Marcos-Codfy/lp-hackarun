@@ -220,9 +220,9 @@ cadastros). A única mudança fora do `Mentors.gs` é uma linha no `doPost` do `
 - **Instalar:** cole o `Mentors.gs` (novo arquivo, nome `Mentors`) e o `Code.gs` atualizado, salve e publique
   **uma nova versão** (seção 6). As abas **Mentores** (verde-âmbar) e **Resumo Mentores** nascem no primeiro
   cadastro; para criá-las antes, rode `configurarMentores()` no editor. Pode rodar de novo: não apaga cadastro.
-- **Aba Mentores:** uma linha por pessoa (protocolo `MT26-XXXXXX`), com nome, contato, área, especialidades, cargo,
-  empresa, experiência, perfil público, se é egresso (curso e ano), dias, formato, como prefere atuar, observações e
-  se pode divulgar o nome. A organização cuida das colunas **Status** (`novo`, `contatado`, `confirmado`, `recusado`,
+- **Aba Mentores:** uma linha por pessoa (protocolo `MT26-XXXXXX`), com nome, contato, área (e, para "Outra",
+  a área que a pessoa escreveu), especialidades, perfil público, se é egresso (curso e ano), os dias do evento em que
+  pode acompanhar as equipes (sempre presencial) e se pode divulgar o nome. A organização cuida das colunas **Status** (`novo`, `contatado`, `confirmado`, `recusado`,
   `cancelado`), **Equipe(s) atendida(s)** e **Anotações**. Cadastro `cancelado` libera o e-mail e o WhatsApp.
 - **Aba Resumo Mentores:** contadores ao vivo, listas prontas para copiar (e-mails e WhatsApps dos confirmados) e o
   passo a passo da organização, tudo lendo a aba Mentores.
