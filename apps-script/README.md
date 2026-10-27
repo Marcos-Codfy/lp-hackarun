@@ -112,6 +112,7 @@ das inscrições ativas, e-mails dos credenciados, WhatsApps das inscrições at
    | `Registry`   | E-mails, WhatsApps e matrículas já inscritos                                |
    | `Setup`      | `configurarPlanilha()`: cria e formata as abas                              |
    | `Summary`    | Aba Resumo                                                                  |
+   | `Mentors`    | Cadastro de mentores: abas Mentores e Resumo Mentores (seção 8)             |
 
 4. Em **Configurações do projeto** (engrenagem), marque **Mostrar arquivo de manifesto "appsscript.json" no
    editor**. Volte ao editor e substitua o conteúdo do `appsscript.json` pelo de [`appsscript.json`](./appsscript.json)
@@ -208,6 +209,29 @@ Ordem recomendada: crie `INSCRICOES_FECHADAS=sim`, cole os arquivos, publique a 
 5. O Resumo mostra quantos credenciados ainda estão sem equipe.
 
 Renomear uma equipe depois de publicada muda o identificador dela no site; corrigir maiúsculas ou acentos não muda.
+
+## 8. Cadastro de mentores (página `/seja-mentor`)
+
+O cadastro de mentores é **independente das inscrições**: tem as próprias abas e a própria versão de montagem, e
+não mexe em **Inscritos**, **Equipes** nem **Resumo** (um teste compara essas abas antes e depois de vários
+cadastros). A única mudança fora do `Mentors.gs` é uma linha no `doPost` do `Code.gs`
+(`if (body.action === 'register-mentor') return registerMentor_(body);`).
+
+- **Instalar:** cole o `Mentors.gs` (novo arquivo, nome `Mentors`) e o `Code.gs` atualizado, salve e publique
+  **uma nova versão** (seção 6). As abas **Mentores** (verde-âmbar) e **Resumo Mentores** nascem no primeiro
+  cadastro; para criá-las antes, rode `configurarMentores()` no editor. Pode rodar de novo: não apaga cadastro.
+- **Aba Mentores:** uma linha por pessoa (protocolo `MT26-XXXXXX`), com nome, contato, área, especialidades, cargo,
+  empresa, experiência, perfil público, se é egresso (curso e ano), dias, formato, como prefere atuar, observações e
+  se pode divulgar o nome. A organização cuida das colunas **Status** (`novo`, `contatado`, `confirmado`, `recusado`,
+  `cancelado`), **Equipe(s) atendida(s)** e **Anotações**. Cadastro `cancelado` libera o e-mail e o WhatsApp.
+- **Aba Resumo Mentores:** contadores ao vivo, listas prontas para copiar (e-mails e WhatsApps dos confirmados) e o
+  passo a passo da organização, tudo lendo a aba Mentores.
+- **Regras:** e-mail e WhatsApp não se repetem entre mentores ativos (a mesma pessoa pode ser participante e
+  mentora); reenvio com a mesma chave devolve o mesmo protocolo; mesmos limites de envio das inscrições.
+- **Consentimento:** versão `2026-10-m1` (seção "Cadastro de mentores" de `/privacidade`), gravada na coluna
+  **Consentimento**. Mudou o texto, suba a versão no `Mentors.gs` e no site.
+- **Fechar o cadastro:** crie a propriedade `MENTORES_FECHADOS` com o valor `sim` (apague para reabrir). Não afeta as
+  inscrições.
 
 ## Testes
 
