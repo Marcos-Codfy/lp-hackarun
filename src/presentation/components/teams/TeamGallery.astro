@@ -66,11 +66,12 @@ const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam
     <LineupSlots />
     <div class="gallery__empty-cta">
       <p class="gallery__empty-text">
-        Nenhuma equipe confirmada ainda. <strong>A sua pode abrir o grid de largada.</strong>
+        Nenhuma equipe confirmada ainda.{' '}
+        <strong>A sua pode abrir o grid de largada: é só se inscrever.</strong>
       </p>
       {registrationOpen && (
         <Button href={registrationHref('equipes')} registrationCta="equipes">
-          Inscrever minha equipe
+          Fazer minha inscrição
         </Button>
       )}
     </div>

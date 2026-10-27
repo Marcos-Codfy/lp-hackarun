@@ -146,6 +146,13 @@ const { page = 'home' } = Astro.props;
     outline-offset: 4px;
   }
 
+  /* 320 px: "04 Patrocinadores" não cabe ao lado de outra coluna; os links ficam numa coluna só */
+  @media (max-width: 359px) {
+    .fnav__list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
   @media (min-width: 640px) and (max-width: 1023px), (min-width: 1280px) {
     .fnav__list {
       grid-template-columns: repeat(3, minmax(0, auto));
