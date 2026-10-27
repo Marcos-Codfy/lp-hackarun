@@ -45,7 +45,7 @@ saved to a Google Sheet. In the background, a WebGL 3D scene changes shape at ea
 - **Registration:** it is **individual**, from October 19 to November 8, and has no cap on spots for now. Teams (4
   people, 5 at most) are formed in an in-person draw on November 12.
 - **The site:** a home page with the event, the rules (with the PDF to download), the schedule in tabs by day, the
-  mentors, the grand final, the prizes, the sponsors and the FAQ; the registration page (`/inscricao`); the privacy
+  mentors, the grand final, the prizes, the sponsors and the FAQ; the registration page (`/inscricao`); the mentor sign-up page (`/seja-mentor`); the privacy
   notice (`/privacidade`); the guardian authorization form for people under 18 (`/autorizacao`); and the teams page
   (`/equipes`), which stays hidden until the draw.
 - **3D scene:** seven objects generated in code appear on the page (globe, stopwatch, question mark, terrain, stage,
@@ -56,7 +56,7 @@ saved to a Google Sheet. In the background, a WebGL 3D scene changes shape at ea
 - **Accessibility:** the content works without JavaScript or WebGL, the page respects `prefers-reduced-motion`, and a
   button pauses the animations.
 - **Registration without a server of its own:** the form sends the data to a Google Apps Script, which saves each
-  registration to Google Sheets (Inscritos, Equipes and Resumo tabs).
+  registration to Google Sheets (Inscritos, Equipes, Resumo, Mentores and Resumo Mentores tabs).
 
 ## Screens
 
@@ -117,7 +117,7 @@ like "NÀO" at large sizes.
 | Styling   | CSS (custom properties, cascade layers, `clamp()`, `content-visibility`) and design tokens                                                    |
 | Fonts     | Orbitron, Montserrat and JetBrains Mono, self-hosted, with Latin characters only                                                              |
 | Images    | Astro's image optimization (`astro:assets`) for the logos and the share image, and Google's image CDN for the team badges                     |
-| Backend   | Google Apps Script, Google Sheets (Inscritos, Equipes and Resumo tabs) and Google Drive (team badges)                                         |
+| Backend   | Google Apps Script, Google Sheets (Inscritos, Equipes, Resumo, Mentores and Resumo Mentores tabs) and Google Drive (team badges)              |
 | Quality   | Vitest, ESLint, Prettier, Astro Check, Playwright and Lighthouse                                                                              |
 | Workflow  | Husky, lint-staged, commitlint (Conventional Commits) and GitHub Actions                                                                      |
 | Hosting   | Cloudflare Pages, with the `hackarun.com.br` domain and DNS on Cloudflare                                                                     |
@@ -186,7 +186,7 @@ flowchart TB
   S --> R
 ```
 
-The `/inscricao`, `/equipes`, `/privacidade` and `/autorizacao` pages use a separate entry point
+The `/inscricao`, `/seja-mentor`, `/equipes`, `/privacidade` and `/autorizacao` pages use a separate entry point
 ([`LightApp`](src/presentation/app/LightApp.ts)), without 3D, GSAP or Lenis.
 
 <details>
@@ -399,7 +399,7 @@ src/
 ├── shared/          # EventBus, Observable, Ticker and utilities
 ├── composition/     # where the layers are wired together
 ├── assets/          # official logos and the Orbitron font
-└── pages/           # inicio, inscricao, equipes, privacidade, autorizacao and 404
+└── pages/           # inicio, inscricao, seja-mentor, equipes, privacidade, autorizacao and 404
 apps-script/         # Google Apps Script code and setup steps
 public/              # share image, favicon, rules PDF and _headers
 scripts/             # setup, font patch and visual tests (qa/)
@@ -419,6 +419,10 @@ docs/                # project guide, architecture decisions (ADR) and the image
   person's team in the sheet itself.
 - **Teams on the site:** a team appears at `/equipes` when the organizers create it in the **Equipes** tab and change
   its Status to `confirmado`. Details are in [`apps-script/README.md`](apps-script/README.md) (pt-BR).
+- **Mentors:** alumni and professionals sign up at `/seja-mentor` (name, contact, area of expertise, experience,
+  alumni or not, available days and preferred way to help). Apps Script writes to the **Mentores** tab and the totals
+  to the **Resumo Mentores** tab, separate from the registrations. The sign-up has its own privacy notice (the
+  "Cadastro de mentores" section of `/privacidade`).
 
 ## Contributing
 
