@@ -1,6 +1,8 @@
 ---
 import type { LandingPageDTO } from '@application/index';
+import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
+import { mentorHref } from '@presentation/view-models/mentor/mentorOrigin';
 // import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 // import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
 import SectionHeader from './shared/SectionHeader.astro';
@@ -79,6 +81,21 @@ const { data: _data } = Astro.props;
         </li>
       </ul>
     </div>
+
+    {/* convite pra quem quer ajudar: leva ao cadastro de mentores (/seja-mentor) */}
+    <div class="crew__invite sx-glass" data-reveal="up">
+      <div class="crew__invite-text">
+        <p class="sx-hud">// Quer ser mentor?</p>
+        <h3 class="crew__invite-title">Egresso ou profissional de tecnologia?</h3>
+        <p>
+          Cadastre-se e ajude as equipes do HackaRun a tirar a ideia do papel. A organização confirma o seu
+          perfil por e-mail.
+        </p>
+      </div>
+      <Button href={mentorHref('crew')} variant="ghost">
+        Quero ser mentor
+      </Button>
+    </div>
   </div>
 </section>
 
@@ -118,7 +135,42 @@ const { data: _data } = Astro.props;
     font-weight: 600;
   }
 
+  .crew__invite {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+    padding: var(--space-5);
+  }
+
+  .crew__invite-text {
+    display: grid;
+    gap: var(--space-2);
+    color: var(--text-muted);
+  }
+
+  .crew__invite-title {
+    color: var(--text);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    line-height: var(--lh-snug);
+  }
+
+  /* celular: o botão ocupa a largura do cartão */
+  .crew__invite :global(.btn) {
+    justify-self: stretch;
+  }
+
   @media (min-width: 640px) {
+    .crew__invite {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-7);
+      padding: var(--space-6) var(--space-7);
+    }
+
+    .crew__invite :global(.btn) {
+      justify-self: start;
+    }
+
     .crew__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: var(--space-5) var(--space-4);
