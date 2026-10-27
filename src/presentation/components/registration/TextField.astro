@@ -1,6 +1,7 @@
 ---
 // campo do formulário: label + controle + dica + erro (aria-describedby é ligado pela View).
-// suggestions vira um datalist: sugere sem prender a pessoa à lista
+// suggestions vira um datalist: sugere sem prender a pessoa à lista. multiline troca o input por uma
+// textarea de 3 linhas (observação do mentor), com o mesmo visual
 import type { HTMLAttributes } from 'astro/types';
 import FieldError from './FieldError.astro';
 
@@ -20,6 +21,7 @@ interface Props {
   placeholder?: string;
   wide?: boolean;
   suggestions?: readonly string[];
+  multiline?: boolean;
 }
 
 const {
@@ -37,6 +39,7 @@ const {
   placeholder,
   wide = false,
   suggestions = [],
+  multiline = false,
 } = Astro.props;
 
 const hintId = hint ? `${id}-hint` : undefined;
@@ -54,23 +57,39 @@ const listId = suggestions.length ? `${id}-options` : undefined;
     </p>
   )}
   <div class="field__box">
-    <input
-      id={id}
-      class="field__control"
-      name={field}
-      data-field={field}
-      list={listId}
-      data-describedby-base={hintId}
-      aria-describedby={hintId}
-      aria-required={optional ? undefined : 'true'}
-      type={type}
-      autocomplete={autocomplete}
-      inputmode={inputmode}
-      autocapitalize={autocapitalize}
-      maxlength={maxlength}
-      placeholder={placeholder}
-      spellcheck={spellcheck === undefined ? undefined : spellcheck ? 'true' : 'false'}
-    />
+    {multiline ? (
+      <textarea
+        id={id}
+        class="field__control field__control--area"
+        name={field}
+        data-field={field}
+        data-describedby-base={hintId}
+        aria-describedby={hintId}
+        aria-required={optional ? undefined : 'true'}
+        rows={3}
+        autocapitalize={autocapitalize}
+        maxlength={maxlength}
+        placeholder={placeholder}
+      />
+    ) : (
+      <input
+        id={id}
+        class="field__control"
+        name={field}
+        data-field={field}
+        list={listId}
+        data-describedby-base={hintId}
+        aria-describedby={hintId}
+        aria-required={optional ? undefined : 'true'}
+        type={type}
+        autocomplete={autocomplete}
+        inputmode={inputmode}
+        autocapitalize={autocapitalize}
+        maxlength={maxlength}
+        placeholder={placeholder}
+        spellcheck={spellcheck === undefined ? undefined : spellcheck ? 'true' : 'false'}
+      />
+    )}
     {listId && (
       <datalist id={listId}>
         {suggestions.map((option) => (
@@ -124,6 +143,13 @@ const listId = suggestions.length ? `${id}-options` : undefined;
       border-color var(--dur-fast) var(--ease-out),
       box-shadow var(--dur-fast) var(--ease-out),
       background var(--dur-fast) var(--ease-out);
+  }
+
+  /* observação: cresce só na vertical e mantém o respiro do input */
+  .field__control--area {
+    min-height: 6.5rem;
+    line-height: 1.5;
+    resize: vertical;
   }
 
   .field__control::placeholder {

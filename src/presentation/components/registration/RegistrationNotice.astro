@@ -7,10 +7,13 @@ interface Props {
   status: RegistrationStatus;
   // nível do título no contexto: em /inscricao o aviso vem logo abaixo do h1 da página (h2)
   level?: 'h2' | 'h3';
+  // mentor: o cadastro de /seja-mentor usa o mesmo aviso, com os textos dele
+  audience?: 'participant' | 'mentor';
 }
 
-const { status, level = 'h2' } = Astro.props;
+const { status, level = 'h2', audience = 'participant' } = Astro.props;
 const Heading = level;
+const mentor = audience === 'mentor';
 ---
 
 {status === 'closing' && (
@@ -26,19 +29,37 @@ const Heading = level;
       // {status === 'soon' ? 'lobby em preparação' : 'lobby fechado'}
     </p>
     <Heading class="notice__title" tabindex="-1" data-reg-notice-title>
-      {status === 'soon' ? 'As inscrições abrem em breve' : 'Inscrições encerradas'}
+      {status === 'soon'
+        ? mentor
+          ? 'O cadastro de mentores abre em breve'
+          : 'As inscrições abrem em breve'
+        : mentor
+          ? 'Cadastro de mentores encerrado'
+          : 'Inscrições encerradas'}
     </Heading>
     {status === 'soon' ? (
       <p class="notice__text">
-        Enquanto isso, confira a <a href="/#programacao">programação</a> e o{' '}
-        <a href="/regulamento-hackarun-2026.pdf" download>
-          regulamento (PDF)
-        </a>
-        .
+        Enquanto isso, confira a <a href="/#programacao">programação</a>
+        {mentor ? (
+          '.'
+        ) : (
+          <>
+            {' '}
+            e o{' '}
+            <a href="/regulamento-hackarun-2026.pdf" download>
+              regulamento (PDF)
+            </a>
+            .
+          </>
+        )}
       </p>
     ) : (
       <>
-        <p class="notice__text">O prazo terminou ou as vagas acabaram. Obrigado pelo interesse!</p>
+        <p class="notice__text">
+          {mentor
+            ? 'O cadastro de mentores foi encerrado. Obrigado pelo interesse em ajudar as equipes!'
+            : 'O prazo terminou ou as vagas acabaram. Obrigado pelo interesse!'}
+        </p>
         <Button href="/#programacao" variant="ghost">
           Ver a programação
         </Button>

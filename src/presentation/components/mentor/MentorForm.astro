@@ -1,0 +1,136 @@
+---
+// formulário da página /seja-mentor (MentorFormView + MentorFormViewModel); grava na aba "Mentores" da planilha via
+// Apps Script. Um envio só: 01 Seus dados, 02 Atuação (curso e ano só para egresso), 03 Participação (dias,
+// formato e dinâmica), 04 Confirmação. A dinâmica final (uma equipe por mentor ou sob demanda) é da organização
+import Button from '@presentation/components/ui/Button.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import FormStep from '@presentation/components/registration/FormStep.astro';
+import ConsentField from '@presentation/components/registration/ConsentField.astro';
+import RegistrationNotice from '@presentation/components/registration/RegistrationNotice.astro';
+import RegistrationSuccess from '@presentation/components/registration/RegistrationSuccess.astro';
+import PreviewBanner from '@presentation/components/registration/PreviewBanner.astro';
+import MentorContactStep from './MentorContactStep.astro';
+import MentorProfileStep from './MentorProfileStep.astro';
+import MentorParticipationStep from './MentorParticipationStep.astro';
+import { mentorFormStatus } from './mentorFormStatus';
+// css global com prefixo .regform (o mesmo da inscrição: campos, avisos, resumo de erros)
+import '@presentation/components/registration/registration-form.css';
+import '@presentation/components/registration/registration-states.css';
+
+interface Props {
+  // endpoint do Apps Script (null = sem planilha); o status do formulário sai dele
+  endpoint: string | null;
+  // "12/11, às 19h15" (apresentação das equipes e mentores); null = horário ainda não publicado
+  presentationAt: string | null;
+}
+
+const { endpoint, presentationAt } = Astro.props;
+const { status, simulated, isOpen } = mentorFormStatus(endpoint);
+---
+
+<div
+  class="regform"
+  data-mentor-form
+  data-status={status}
+  data-simulated={simulated ? 'true' : undefined}
+  data-consent-label="Termos e LGPD"
+>
+  {simulated && <PreviewBanner />}
+  <RegistrationNotice status={status} audience="mentor" />
+  {isOpen && (
+    <div data-reg-closed hidden>
+      <RegistrationNotice status="closed" audience="mentor" />
+    </div>
+  )}
+  {isOpen && (
+    <div class="regform__panel" data-reg-panel>
+      <noscript>
+        <p class="regform__noscript">
+          O cadastro precisa de JavaScript. Ative no navegador e recarregue a página.
+        </p>
+        <style is:inline>
+          .regform [data-reg-form] {
+            display: none;
+          }
+        </style>
+      </noscript>
+      {/* post: se o JS falhar, nada pessoal vai parar na URL (o host estático só responde 405) */}
+      <form
+        class="regform__form"
+        data-reg-form
+        method="post"
+        action="/seja-mentor"
+        novalidate
+        aria-label="Cadastro de mentor no HackaRun"
+      >
+        <fieldset class="regform__fields">
+          {/* recebe o foco quando o envio volta com mais de um erro (os links levam a cada campo) */}
+          <div
+            class="regform__summary"
+            data-error-summary
+            role="group"
+            aria-labelledby="mentor-error-summary-title"
+            tabindex="-1"
+            hidden
+          >
+            <p class="regform__summary-title" id="mentor-error-summary-title" data-error-summary-title></p>
+            <ul class="regform__summary-list" data-error-summary-list></ul>
+          </div>
+
+          <MentorContactStep />
+          <MentorProfileStep />
+          <MentorParticipationStep />
+
+          <FormStep index="04" title="Confirmação">
+            <div class="regform__notice" role="note">
+              <Icon name="users" size={18} />
+              <p>
+                O cadastro não garante a vaga de mentor: a organização analisa o perfil e confirma por e-mail.
+                {presentationAt ? ` Os mentores são apresentados às equipes em ${presentationAt}.` : ''}
+              </p>
+            </div>
+            <ConsentField id="mentor-may-publish" field="mayPublish" required={false}>
+              Autorizo mostrar o meu nome, cargo e empresa no site e nas redes do HackaRun, como mentor
+              (opcional).
+            </ConsentField>
+            <ConsentField id="mentor-terms" field="acceptedTerms">
+              Autorizo a organização do HackaRun a usar os dados informados só para avaliar o meu cadastro,
+              organizar a mentoria e falar comigo por e-mail e WhatsApp, conforme o{' '}
+              <a class="consent__link" href="/privacidade#mentores">
+                aviso de privacidade
+              </a>{' '}
+              (LGPD).
+            </ConsentField>
+            <div class="regform__hp" aria-hidden="true">
+              <label for="mentor-website">Website</label>
+              <input
+                id="mentor-website"
+                name="website"
+                type="text"
+                tabindex="-1"
+                autocomplete="off"
+                data-field="honeypot"
+              />
+            </div>
+            <div class="regform__failure" data-reg-failure role="alert" hidden>
+              <p data-reg-failure-text></p>
+              <button type="button" class="regform__retry" data-reg-retry>
+                Tentar de novo
+              </button>
+            </div>
+            <div class="regform__actions">
+              <Button type="submit" size="lg" data-reg-submit>
+                Enviar cadastro
+              </Button>
+              <p class="regform__privacy">Os dados ficam só com a organização do HackaRun.</p>
+            </div>
+          </FormStep>
+        </fieldset>
+      </form>
+      <RegistrationSuccess drawAt={presentationAt} variant="mentor">
+        {simulated && <PreviewBanner compact />}
+      </RegistrationSuccess>
+      <p class="sr-only" aria-live="polite" data-reg-live></p>
+    </div>
+  )}
+</div>

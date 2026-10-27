@@ -172,10 +172,34 @@ describe('header, menu e rodapé', () => {
   });
 
   it('o rodapé ganha "Inscrição" (atual na própria página, com a origem nas outras)', () => {
-    expect(footerLinksFor('home').at(-1)).toMatchObject({
+    expect(footerLinksFor('home').at(-2)).toMatchObject({
       label: 'Inscrição',
       href: '/inscricao?origem=footer',
     });
-    expect(footerLinksFor('registration').at(-1)).toMatchObject({ href: '/inscricao', ariaCurrent: 'page' });
+    expect(footerLinksFor('registration').at(-2)).toMatchObject({ href: '/inscricao', ariaCurrent: 'page' });
+  });
+
+  it('o rodapé fecha com "Seja mentor" (atual na própria página, com a origem nas outras)', () => {
+    expect(footerLinksFor('home').at(-1)).toMatchObject({
+      label: 'Seja mentor',
+      href: '/seja-mentor?origem=footer',
+      ariaCurrent: undefined,
+    });
+    expect(footerLinksFor('mentor').at(-1)).toMatchObject({ href: '/seja-mentor', ariaCurrent: 'page' });
+    expect(footerLinksFor('mentor').at(-2)).toMatchObject({ label: 'Inscrição', ariaCurrent: undefined });
+  });
+
+  it('a barra de baixo de /seja-mentor tem a inscrição e o cadastro de mentor (este é o atual)', () => {
+    expect(subNavLinksFor('mentor').map((l) => [l.label, l.ariaCurrent])).toEqual([
+      ['Inscrição', undefined],
+      ['Mentor', 'page'],
+    ]);
+    // o SubNav divide o rótulo no rótulo curto: o completo tem que começar com ele
+    for (const page of ['registration', 'teams', 'mentor'] as const) {
+      for (const link of subNavLinksFor(page)) expect(link.label.startsWith(link.short)).toBe(true);
+    }
+    // nas outras páginas a barra segue só com a inscrição
+    expect(subNavLinksFor('registration')).toHaveLength(1);
+    expect(subNavLinksFor('teams')).toHaveLength(1);
   });
 });

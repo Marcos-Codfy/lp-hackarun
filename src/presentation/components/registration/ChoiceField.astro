@@ -1,6 +1,7 @@
 ---
 // pergunta de uma resposta só (perfil, idade): fieldset com legend e opções em cartão, cada uma com o radio
-// nativo num alvo grande. O fieldset leva o [data-field-group] (erro e aria-invalid) e cada radio o data-field
+// nativo num alvo grande. O fieldset leva o [data-field-group] (erro e aria-invalid) e cada radio o data-field.
+// multiple: várias respostas (dias do mentor); as opções viram caixas de marcar, com a mesma moldura
 import FieldError from './FieldError.astro';
 
 interface Props {
@@ -11,16 +12,17 @@ interface Props {
   hint?: string;
   // duas colunas a partir do tablet (opções curtas, como Sim/Não)
   columns?: 1 | 2;
+  multiple?: boolean;
 }
 
-const { id, legend, field, options, hint, columns = 1 } = Astro.props;
+const { id, legend, field, options, hint, columns = 1, multiple = false } = Astro.props;
 const hintId = hint ? `${id}-hint` : undefined;
 ---
 
 <fieldset
-  class="choice"
+  class:list={['choice', { 'choice--multiple': multiple }]}
   id={id}
-  role="radiogroup"
+  role={multiple ? 'group' : 'radiogroup'}
   data-field-group={field}
   data-describedby-base={hintId}
   aria-describedby={hintId}
@@ -37,7 +39,7 @@ const hintId = hint ? `${id}-hint` : undefined;
       <label class="choice__option" for={`${id}-${option.value}`}>
         <input
           class="choice__input"
-          type="radio"
+          type={multiple ? 'checkbox' : 'radio'}
           id={`${id}-${option.value}`}
           name={field}
           value={option.value}
@@ -148,6 +150,12 @@ const hintId = hint ? `${id}-hint` : undefined;
     border-color: var(--c-cyan);
     background: color-mix(in srgb, var(--c-cyan) 8%, var(--control-bg));
     box-shadow: 0 0 24px color-mix(in srgb, var(--c-cyan) 14%, transparent);
+  }
+
+  /* várias respostas: a marca vira um quadrado, o sinal de "pode marcar mais de uma" */
+  .choice--multiple .choice__mark,
+  .choice--multiple .choice__mark::after {
+    border-radius: 3px;
   }
 
   .choice__input:checked + .choice__mark::after {

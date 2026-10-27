@@ -10,9 +10,12 @@ import SuccessSteps from './SuccessSteps.astro';
 
 interface Props {
   drawAt: string | null;
+  // mentor: o cadastro de /seja-mentor usa a mesma tela, com os textos dele e sem o lembrete do responsável
+  variant?: 'participant' | 'mentor';
 }
 
-const { drawAt } = Astro.props;
+const { drawAt, variant = 'participant' } = Astro.props;
+const mentor = variant === 'mentor';
 ---
 
 <div class="success" data-reg-success hidden>
@@ -23,34 +26,38 @@ const { drawAt } = Astro.props;
     </svg>
   </div>
   <p class="success__code" aria-hidden="true">
-    // inscrição recebida · checkpoint liberado
+    {mentor ? '// cadastro recebido · mentoria liberada' : '// inscrição recebida · checkpoint liberado'}
   </p>
   <h2 class="success__title" tabindex="-1" data-reg-success-title>
-    Inscrição recebida! Nos vemos no sorteio.
+    {mentor
+      ? 'Cadastro recebido! Obrigado por ajudar as equipes.'
+      : 'Inscrição recebida! Nos vemos no sorteio.'}
   </h2>
   <slot />
   <div class="success__ticket">
-    <p class="success__label">Protocolo da inscrição</p>
+    <p class="success__label">{mentor ? 'Protocolo do cadastro' : 'Protocolo da inscrição'}</p>
     <p class="success__protocol">
       <span class="sr-only" data-reg-protocol></span>
       <span aria-hidden="true" data-reg-protocol-typed></span>
     </p>
   </div>
   <MailNotice compact>
-    Os avisos do HackaRun chegam por e-mail em{' '}
+    {mentor ? 'A organização fala com você por e-mail em' : 'Os avisos do HackaRun chegam por e-mail em'}{' '}
     <strong class="success__mail" data-reg-contact-email>
       o seu e-mail
     </strong>{' '}
     e, se for preciso, pelo WhatsApp informado. Confira também a caixa de spam.
   </MailNotice>
-  <p class="success__guardian" data-reg-guardian hidden>
-    <Icon name="shield" size={18} />
-    <span>
-      Como você tem menos de 18 anos, leve a autorização assinada pelo responsável no credenciamento
-      {drawAt ? `, em ${drawAt}` : ''}. <a href="/autorizacao">Abrir o modelo de autorização</a>.
-    </span>
-  </p>
-  <SuccessSteps drawAt={drawAt} />
+  {!mentor && (
+    <p class="success__guardian" data-reg-guardian hidden>
+      <Icon name="shield" size={18} />
+      <span>
+        Como você tem menos de 18 anos, leve a autorização assinada pelo responsável no credenciamento
+        {drawAt ? `, em ${drawAt}` : ''}. <a href="/autorizacao">Abrir o modelo de autorização</a>.
+      </span>
+    </p>
+  )}
+  <SuccessSteps drawAt={drawAt} variant={variant} />
   <div class="success__actions">
     <Button href="/#programacao" variant="ghost">
       Ver a programação

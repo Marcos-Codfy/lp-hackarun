@@ -1,0 +1,27 @@
+---
+// página de cadastro de mentores: leve (sem 3D, GSAP ou Lenis), com a SubNav e o mesmo header/rodapé da LP.
+// Grava na aba "Mentores" da planilha do HackaRun. A origem do CTA chega em ?origem= (coluna "Origem")
+import PageLayout from '@presentation/layouts/PageLayout.astro';
+import SiteHeader from '@presentation/components/layout/SiteHeader.astro';
+import SiteFooter from '@presentation/components/layout/SiteFooter.astro';
+import SubNav from '@presentation/components/layout/SubNav.astro';
+import MentorPageSection from '@presentation/sections/MentorPageSection.astro';
+import { serverContainer } from '@composition/server';
+import { buildAppConfig } from '@presentation/app/AppConfig';
+import { mentorPageJsonLd, mentorPageSeo } from '@presentation/components/seo/mentorPageSeo';
+
+const data = await serverContainer().getLandingPage.execute();
+const { event } = data;
+
+const page = mentorPageSeo();
+const seo = { ...page, jsonLd: mentorPageJsonLd(Astro.site?.href ?? '', page.title, page.description) };
+---
+
+<PageLayout seo={seo} appConfig={buildAppConfig(event)}>
+  <SiteHeader registration={event.registration} page="mentor" />
+  <main id="conteudo">
+    <SubNav page="mentor" />
+    <MentorPageSection data={data} />
+  </main>
+  <SiteFooter data={data} page="mentor" />
+</PageLayout>

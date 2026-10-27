@@ -3,15 +3,23 @@
 interface Props {
   // "12/11, às 19h15"; null = horário ainda não publicado
   drawAt: string | null;
+  variant?: 'participant' | 'mentor';
 }
 
-const { drawAt } = Astro.props;
-const steps = [
+const { drawAt, variant = 'participant' } = Astro.props;
+const mentorSteps = [
+  'Guarde o protocolo: é ele que identifica o seu cadastro.',
+  'A organização analisa o cadastro e confirma a sua participação por e-mail.',
+  'Os dias e a forma da mentoria (acompanhar uma equipe ou atender sob demanda) são combinados com você pela organização.',
+  `A apresentação das equipes e dos mentores acontece${drawAt ? `, em ${drawAt}` : ''}, na UniCatólica.`,
+];
+const participantSteps = [
   'Guarde o protocolo: é ele que identifica a sua inscrição.',
   `Vá ao sorteio das equipes${drawAt ? `, em ${drawAt}` : ''}, na UniCatólica, Bloco II. Só participa quem estiver presente e credenciado.`,
   'No sorteio, as equipes são formadas com 4 pessoas (até 5) e cada uma escolhe um representante.',
   'Confira a programação no site para não perder nenhuma etapa.',
 ];
+const steps = variant === 'mentor' ? mentorSteps : participantSteps;
 ---
 
 <ol class="success__steps" role="list">

@@ -67,7 +67,18 @@ async function mountRegistration(
   mountRegistrationPage({ root, config, bus, services, container: c, reducedMotion: prefersReducedMotion() });
 }
 
-// boot das páginas leves (/equipes, /inscricao, /autorizacao): header, navegação, "Pausar animações",
+// cadastro de mentor (só em /seja-mentor): mesmo esquema, chunk à parte. Sem planilha (em breve) o HTML do build basta
+async function mountMentor(c: ClientContainer): Promise<void> {
+  const root = qs('[data-mentor-form]');
+  if (!root || root.dataset['status'] !== 'open') return;
+  const [{ mountMentorPage }, services] = await Promise.all([
+    import('@presentation/views/mentor/mountMentorPage'),
+    c.loadMentors(),
+  ]);
+  mountMentorPage({ root, services, container: c, reducedMotion: prefersReducedMotion() });
+}
+
+// boot das páginas leves (/equipes, /inscricao, /seja-mentor, /autorizacao): header, navegação, "Pausar animações",
 // contador, equipes ao vivo, o formulário e o botão de imprimir. Nada de GSAP, Lenis ou three.js: o HTML já
 // chega pronto e o JS só liga o interativo
 export class LightApp {
@@ -120,6 +131,12 @@ export class LightApp {
         mountRegistration(c, config, bus).catch((error: unknown) =>
           console.error('[light-app] registration failed', error),
         );
+      }),
+    );
+    boot.add(
+      'mentor',
+      withContainer((c) => {
+        mountMentor(c).catch((error: unknown) => console.error('[light-app] mentor failed', error));
       }),
     );
     await boot.run();
