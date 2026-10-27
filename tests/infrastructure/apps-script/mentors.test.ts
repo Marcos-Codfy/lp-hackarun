@@ -27,18 +27,13 @@ describe('Apps Script · cadastro de mentores', () => {
       'E-mail': 'ana.mentora@exemplo.com',
       WhatsApp: '(63) 99999-0101',
       'Área de atuação': 'Cibersegurança',
+      'Qual área (outra)': '',
       Especialidades: 'Pentest, AWS',
-      Cargo: 'Analista de segurança',
-      Empresa: 'Empresa Exemplo',
-      Experiência: 'De 5 a 10 anos',
       'Egresso da UniCatólica': 'Sim',
       Curso: 'Engenharia de Software',
       'Ano de formatura': '2019',
       'LinkedIn ou site': 'https://www.linkedin.com/in/ana-souza',
       'Dias disponíveis': '13/11 (sex), 14/11 (sáb)',
-      Formato: 'Presencial',
-      'Como prefere atuar': 'Qualquer um dos dois',
-      Observações: 'Prefiro atender à noite.',
       'Pode divulgar no site': 'Sim',
       Status: 'novo',
       Origem: 'mentor-page',
@@ -63,25 +58,30 @@ describe('Apps Script · cadastro de mentores', () => {
         graduate: false,
         course: 'qualquer coisa',
         graduationYear: 2001,
-        company: '',
         specialties: '',
         linkedin: '',
-        notes: '',
         mayPublish: false,
-        days: ['tbd'],
+        days: ['12'],
       }),
     );
     expect(rowsOf(script)[0]).toMatchObject({
       'Egresso da UniCatólica': 'Não',
       Curso: '',
       'Ano de formatura': '',
-      Empresa: '',
       Especialidades: '',
       'LinkedIn ou site': '',
-      Observações: '',
       'Pode divulgar no site': 'Não',
-      'Dias disponíveis': 'A combinar',
+      'Dias disponíveis': '12/11 (qui)',
     });
+  });
+
+  it('área "outra" grava o texto que a pessoa escreveu; nas demais áreas o campo sai vazio', () => {
+    const script = new AppsScriptSandbox();
+    script.post(mentorBody({ area: 'other', areaOther: 'Computação quântica' }));
+    script.post(otherMentor(2, { area: 'design', areaOther: 'sobrou no campo escondido' }));
+    const [outra, design] = rowsOf(script);
+    expect(outra).toMatchObject({ 'Área de atuação': 'Outra', 'Qual área (outra)': 'Computação quântica' });
+    expect(design).toMatchObject({ 'Área de atuação': 'Design e UX', 'Qual área (outra)': '' });
   });
 
   it('endereço sem https vira https e os dias saem na ordem do evento, sem repetir', () => {
@@ -104,11 +104,10 @@ describe('Apps Script · cadastro de mentores', () => {
 
   it('texto que começa com + ou - vira texto puro na planilha (sem fórmula injetada)', () => {
     const script = new AppsScriptSandbox();
-    script.post(mentorBody({ role: '-cargo', company: '+Empresa', notes: '@observação' }));
+    script.post(mentorBody({ area: 'other', areaOther: '-área', specialties: '+React' }));
     expect(rowsOf(script)[0]).toMatchObject({
-      Cargo: "'-cargo",
-      Empresa: "'+Empresa",
-      Observações: "'@observação",
+      'Qual área (outra)': "'-área",
+      Especialidades: "'+React",
     });
   });
 });

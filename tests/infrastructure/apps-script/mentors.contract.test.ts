@@ -6,14 +6,9 @@ import { MENTOR_CONSENT_VERSION, MIN_FILL_MS, SubmitMentorRegistration } from '@
 import {
   GRADUATION_YEAR_RANGE,
   MENTOR_AREAS,
-  MENTOR_COMPANY_RULE,
+  MENTOR_AREA_OTHER_RULE,
   MENTOR_COURSE_RULE,
   MENTOR_DAYS,
-  MENTOR_EXPERIENCE,
-  MENTOR_FORMATS,
-  MENTOR_MODES,
-  MENTOR_NOTES_RULE,
-  MENTOR_ROLE_RULE,
   MENTOR_SPECIALTIES_RULE,
   MentorRegistration,
   ProfileLink,
@@ -27,28 +22,21 @@ const script = new AppsScriptSandbox();
 const value = <T>(name: string) => script.evaluate<T>(name);
 
 describe('Apps Script · contrato do cadastro de mentor com o site', () => {
-  it('as listas de opções são as mesmas (áreas, experiência, formato, modo e dias)', () => {
+  it('as listas de opções são as mesmas (áreas e dias)', () => {
     expect(value<string[]>('MENTOR_AREAS')).toEqual([...MENTOR_AREAS]);
-    expect(value<string[]>('MENTOR_EXPERIENCE')).toEqual([...MENTOR_EXPERIENCE]);
-    expect(value<string[]>('MENTOR_FORMATS')).toEqual([...MENTOR_FORMATS]);
-    expect(value<string[]>('MENTOR_MODES')).toEqual([...MENTOR_MODES]);
     expect(value<string[]>('MENTOR_DAYS')).toEqual([...MENTOR_DAYS]);
   });
 
   it('todo rótulo da planilha existe para toda opção (nenhuma opção cai sem tradução)', () => {
     const labels = (name: string) => Object.keys(value<Record<string, string>>(name)).sort();
     expect(labels('MENTOR_AREA_LABELS')).toEqual([...MENTOR_AREAS].sort());
-    expect(labels('MENTOR_EXPERIENCE_LABELS')).toEqual([...MENTOR_EXPERIENCE].sort());
-    expect(labels('MENTOR_FORMAT_LABELS')).toEqual([...MENTOR_FORMATS].sort());
-    expect(labels('MENTOR_MODE_LABELS')).toEqual([...MENTOR_MODES].sort());
     expect(labels('MENTOR_DAY_LABELS')).toEqual([...MENTOR_DAYS].sort());
   });
 
   it('limites de texto, intervalo do ano e tamanho do endereço são os mesmos', () => {
-    expect(value('MENTOR_ROLE_LIMITS')).toEqual({ min: MENTOR_ROLE_RULE.min, max: MENTOR_ROLE_RULE.max });
-    expect(value('MENTOR_COMPANY_LIMITS')).toEqual({
-      min: MENTOR_COMPANY_RULE.min,
-      max: MENTOR_COMPANY_RULE.max,
+    expect(value('MENTOR_AREA_OTHER_LIMITS')).toEqual({
+      min: MENTOR_AREA_OTHER_RULE.min,
+      max: MENTOR_AREA_OTHER_RULE.max,
     });
     expect(value('MENTOR_SPECIALTIES_LIMITS')).toEqual({
       min: MENTOR_SPECIALTIES_RULE.min,
@@ -58,7 +46,6 @@ describe('Apps Script · contrato do cadastro de mentor com o site', () => {
       min: MENTOR_COURSE_RULE.min,
       max: MENTOR_COURSE_RULE.max,
     });
-    expect(value('MENTOR_NOTES_LIMITS')).toEqual({ min: MENTOR_NOTES_RULE.min, max: MENTOR_NOTES_RULE.max });
     expect(value('GRADUATION_YEARS')).toEqual({ ...GRADUATION_YEAR_RANGE });
     expect(value<number>('PROFILE_LINK_MAX')).toBe(ProfileLink.MAX);
     expect(value<RegExp>('PROFILE_LINK_PATTERN').source).toBe(ProfileLink.PATTERN.source);
@@ -81,7 +68,7 @@ describe('Apps Script · contrato do cadastro de mentor com o site', () => {
     ['completo', {}],
     ['não egresso', { graduate: 'no', course: '', graduationYear: '' }],
     ['não egresso com lixo nos campos de egresso', { graduate: 'no', course: '<b>', graduationYear: 'x' }],
-    ['sem opcionais', { specialties: '', company: '', linkedin: '', notes: '', mayPublish: false }],
+    ['sem opcionais', { specialties: '', linkedin: '', mayPublish: false }],
     ['nome sem sobrenome', { name: 'Ana' }],
     ['nome com número', { name: 'Ana Souza 2' }],
     ['e-mail torto', { email: 'ana@exemplo' }],
@@ -89,26 +76,17 @@ describe('Apps Script · contrato do cadastro de mentor com o site', () => {
     ['WhatsApp com +55', { whatsapp: '+55 63 99999-1234' }],
     ['WhatsApp fixo', { whatsapp: '(63) 3214-5678' }],
     ['WhatsApp torto', { whatsapp: '1234' }],
-    ['área outra', { area: 'other' }],
+    ['área outra sem dizer qual', { area: 'other', areaOther: '' }],
+    ['área outra com texto', { area: 'other', areaOther: 'Computação quântica' }],
+    ['área outra com texto de 60', { area: 'other', areaOther: 'x'.repeat(60) }],
+    ['área outra com texto de 61', { area: 'other', areaOther: 'x'.repeat(61) }],
+    ['área outra com texto de 1 letra', { area: 'other', areaOther: 'X' }],
+    ['área outra com símbolo', { area: 'other', areaOther: 'Dev {x}' }],
+    ['área comum com lixo no "qual área"', { area: 'design', areaOther: '<b>' }],
     ['área tech lead', { area: 'tech-lead' }],
     ['sem área', { area: '' }],
-    ['cargo curto', { role: 'TI' }],
-    ['cargo de 1 letra', { role: 'T' }],
-    ['cargo de 80', { role: 'x'.repeat(80) }],
-    ['cargo de 81', { role: 'x'.repeat(81) }],
-    ['cargo com símbolo', { role: 'Dev {senior}' }],
-    ['cargo com C++', { role: 'Dev C++' }],
-    ['cargo com R$', { role: 'Pago R$' }],
-    ['empresa de 100', { company: 'x'.repeat(100) }],
-    ['empresa de 101', { company: 'x'.repeat(101) }],
-    ['empresa de 1 letra', { company: 'X' }],
     ['especialidades de 120', { specialties: 'x'.repeat(120) }],
     ['especialidades de 121', { specialties: 'x'.repeat(121) }],
-    ['observação de 300', { notes: 'x'.repeat(300) }],
-    ['observação de 301', { notes: 'x'.repeat(301) }],
-    ['observação com igual', { notes: 'a=b' }],
-    ['sem experiência', { experience: '' }],
-    ['experiência mais de 10', { experience: 'over-10' }],
     ['LinkedIn completo', { linkedin: 'https://www.linkedin.com/in/ana' }],
     ['LinkedIn sem https', { linkedin: 'linkedin.com/in/ana' }],
     ['LinkedIn com http', { linkedin: 'http://github.com/ana' }],
@@ -134,13 +112,9 @@ describe('Apps Script · contrato do cadastro de mentor com o site', () => {
     ['egresso com ano quebrado', { graduationYear: '2019.5' }],
     ['egresso sem ano', { graduationYear: '' }],
     ['dias fora de ordem e repetidos', { days: ['14', '11', '14'] }],
-    ['só a combinar', { days: ['tbd'] }],
+    ['só a combinar (não existe mais)', { days: ['tbd'] }],
     ['dias que não existem', { days: ['10', '15'] }],
     ['nenhum dia', { days: [] }],
-    ['sem formato', { format: '' }],
-    ['formato online', { format: 'online' }],
-    ['sem modo', { mode: '' }],
-    ['modo uma equipe', { mode: 'one-team' }],
   ];
 
   it.each(CASES)(
@@ -160,7 +134,7 @@ describe('Apps Script · contrato do cadastro de mentor com o site', () => {
       expect(row['E-mail']).toBe(domain.value.data.email);
       expect(row['WhatsApp']).toBe(domain.value.data.whatsapp);
       expect(row['Nome completo']).toBe(domain.value.data.name);
-      expect(row['Cargo']).toBe(domain.value.data.role);
+      expect(row['Qual área (outra)']).toBe(domain.value.data.areaOther);
       expect(row['LinkedIn ou site']).toBe(domain.value.data.linkedin);
     },
   );

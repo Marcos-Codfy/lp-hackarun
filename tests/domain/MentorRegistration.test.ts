@@ -26,18 +26,13 @@ describe('MentorRegistration', () => {
       email: 'ana.mentora@exemplo.com',
       whatsapp: '(63) 99999-0101',
       area: 'security',
+      areaOther: '',
       specialties: 'Pentest, AWS',
-      role: 'Analista de segurança',
-      company: 'Empresa Exemplo',
-      experience: '5-to-10',
       linkedin: 'https://www.linkedin.com/in/ana-souza',
       graduate: true,
       course: 'Engenharia de Software',
       graduationYear: 2019,
       days: ['13', '14'],
-      format: 'in-person',
-      mode: 'either',
-      notes: 'Prefiro atender à noite.',
       mayPublish: true,
     });
     expect(result.value.email).toBe('ana.mentora@exemplo.com');
@@ -57,15 +52,35 @@ describe('MentorRegistration', () => {
 
   it('campos opcionais vazios saem vazios', () => {
     const result = MentorRegistration.create(
-      mentorInput({ specialties: '', company: ' ', linkedin: '', notes: '', mayPublish: false }),
+      mentorInput({ specialties: ' ', linkedin: '', mayPublish: false }),
     );
     expect(result.ok && result.value.data).toMatchObject({
       specialties: '',
-      company: '',
       linkedin: '',
-      notes: '',
       mayPublish: false,
     });
+  });
+
+  it('área "outra" exige que a pessoa escreva qual é; o texto sai limpo', () => {
+    const ok = MentorRegistration.create(
+      mentorInput({ area: 'other', areaOther: '  Computação   quântica ' }),
+    );
+    expect(ok.ok && ok.value.data).toMatchObject({ area: 'other', areaOther: 'Computação quântica' });
+    expect(errorsOf(mentorInput({ area: 'other', areaOther: '  ' }))['areaOther']).toBe(
+      'Escreva qual é a sua área de atuação.',
+    );
+    expect(Object.keys(errorsOf(mentorInput({ area: 'other', areaOther: 'X' })))).toEqual(['areaOther']);
+    expect(Object.keys(errorsOf(mentorInput({ area: 'other', areaOther: 'x'.repeat(61) })))).toEqual([
+      'areaOther',
+    ]);
+    expect(Object.keys(errorsOf(mentorInput({ area: 'other', areaOther: 'dev <script>' })))).toEqual([
+      'areaOther',
+    ]);
+  });
+
+  it('nas outras áreas o "qual área" não conta: o que sobrou no campo escondido sai vazio', () => {
+    const result = MentorRegistration.create(mentorInput({ area: 'design', areaOther: '<b>' }));
+    expect(result.ok && result.value.data).toMatchObject({ area: 'design', areaOther: '' });
   });
 
   it.each([
@@ -73,13 +88,7 @@ describe('MentorRegistration', () => {
     ['e-mail torto', { email: 'ana@exemplo' }, 'email'],
     ['WhatsApp torto', { whatsapp: '1234' }, 'whatsapp'],
     ['sem área', { area: '' as const }, 'area'],
-    ['sem cargo', { role: ' ' }, 'role'],
-    ['cargo com símbolo de código', { role: 'dev <script>' }, 'role'],
-    ['sem experiência', { experience: '' as const }, 'experience'],
-    ['empresa curta demais', { company: 'X' }, 'company'],
     ['especialidades longas demais', { specialties: 'x'.repeat(121) }, 'specialties'],
-    ['observação longa demais', { notes: 'x'.repeat(301) }, 'notes'],
-    ['observação com símbolo de código', { notes: 'a=b' }, 'notes'],
     ['LinkedIn que não é endereço', { linkedin: 'meu perfil' }, 'linkedin'],
     ['sem resposta de egresso', { graduate: '' as const }, 'graduate'],
     ['egresso sem curso', { course: '' }, 'course'],
@@ -90,9 +99,7 @@ describe('MentorRegistration', () => {
     ['ano quebrado', { graduationYear: '2019.5' }, 'graduationYear'],
     ['nenhum dia', { days: [] }, 'days'],
     ['só dia que não existe', { days: ['10', 'sexta'] }, 'days'],
-    ['sem formato', { format: '' as const }, 'format'],
-    ['formato fora da lista', { format: 'hibrido' as never }, 'format'],
-    ['sem modo de atuação', { mode: '' as const }, 'mode'],
+    ['só "a combinar" (não existe mais)', { days: ['tbd'] }, 'days'],
     ['sem aceite', { acceptedTerms: false }, 'acceptedTerms'],
   ])('recusa: %s', (_case, overrides, field) => {
     const errors = errorsOf(mentorInput(overrides));
@@ -102,11 +109,6 @@ describe('MentorRegistration', () => {
   it('junta todos os erros de uma vez, na chave de cada campo', () => {
     const errors = errorsOf(mentorInput({ name: '', email: '', area: '', days: [], acceptedTerms: false }));
     expect(Object.keys(errors).sort()).toEqual(['acceptedTerms', 'area', 'days', 'email', 'name']);
-  });
-
-  it('"A combinar" sozinho já vale como disponibilidade', () => {
-    const result = MentorRegistration.create(mentorInput({ days: ['tbd'] }));
-    expect(result.ok && result.value.data.days).toEqual(['tbd']);
   });
 
   it('aceita endereço sem https e com http (vira https)', () => {
@@ -119,7 +121,7 @@ describe('MentorRegistration', () => {
 
 describe('cleanDays', () => {
   it('ordem do evento, sem repetir e sem opção inexistente', () => {
-    expect(cleanDays(['14', '11', '14', 'tbd', 'x', '13'])).toEqual(['11', '13', '14', 'tbd']);
+    expect(cleanDays(['14', '11', '14', 'tbd', 'x', '13'])).toEqual(['11', '13', '14']);
     expect(cleanDays([])).toEqual([]);
   });
 });

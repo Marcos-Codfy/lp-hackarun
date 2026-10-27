@@ -29,17 +29,12 @@ const MENTOR_AREAS = [
   'quality',
   'other',
 ];
-const MENTOR_EXPERIENCE = ['up-to-2', '2-to-5', '5-to-10', 'over-10'];
-const MENTOR_FORMATS = ['in-person', 'online', 'either'];
-const MENTOR_MODES = ['one-team', 'on-demand', 'either'];
-const MENTOR_DAYS = ['11', '12', '13', '14', 'tbd'];
+const MENTOR_DAYS = ['11', '12', '13', '14'];
 const GRADUATION_YEARS = { min: 1995, max: 2030 };
 // mesmos MENTOR_*_RULE do src/domain/entities/MentorRegistration.ts e PROFILE_LINK do ProfileLink.ts (um teste confere)
-const MENTOR_ROLE_LIMITS = { min: 2, max: 80 };
-const MENTOR_COMPANY_LIMITS = { min: 2, max: 100 };
+const MENTOR_AREA_OTHER_LIMITS = { min: 2, max: 60 };
 const MENTOR_SPECIALTIES_LIMITS = { min: 2, max: 120 };
 const MENTOR_COURSE_LIMITS = { min: 3, max: 80 };
-const MENTOR_NOTES_LIMITS = { min: 2, max: 300 };
 const PROFILE_LINK_MAX = 200;
 const PROFILE_LINK_PATTERN = /^https:\/\/[A-Za-z0-9][A-Za-z0-9.-]*\.[A-Za-z]{2,}(?:[/?#][^\s<>"'`\\]*)?$/;
 
@@ -55,24 +50,11 @@ const MENTOR_AREA_LABELS = {
   quality: 'Qualidade e testes',
   other: 'Outra',
 };
-const MENTOR_EXPERIENCE_LABELS = {
-  'up-to-2': 'Até 2 anos',
-  '2-to-5': 'De 2 a 5 anos',
-  '5-to-10': 'De 5 a 10 anos',
-  'over-10': 'Mais de 10 anos',
-};
-const MENTOR_FORMAT_LABELS = { 'in-person': 'Presencial', online: 'Online', either: 'Presencial ou online' };
-const MENTOR_MODE_LABELS = {
-  'one-team': 'Acompanhar uma equipe',
-  'on-demand': 'Atender sob demanda',
-  either: 'Qualquer um dos dois',
-};
 const MENTOR_DAY_LABELS = {
   11: '11/11 (qua)',
   12: '12/11 (qui)',
   13: '13/11 (sex)',
   14: '14/11 (sáb)',
-  tbd: 'A combinar',
 };
 const MENTOR_STATUS_OPTIONS = ['novo', 'contatado', 'confirmado', 'recusado', 'cancelado'];
 // [fundo, texto]: as mesmas cores do CHOICE_STYLES do Setup.gs (que não tem estes três status)
@@ -93,18 +75,13 @@ const MENTOR_COLUMNS = [
   { key: 'whatsapp', title: 'WhatsApp', width: 140, format: '@' },
   { key: 'chat', title: 'Conversar', width: 130, align: 'center' },
   { key: 'area', title: 'Área de atuação', width: 200, wrap: true },
+  { key: 'areaOther', title: 'Qual área (outra)', width: 200, format: '@', wrap: true },
   { key: 'specialties', title: 'Especialidades', width: 220, format: '@', wrap: true },
-  { key: 'role', title: 'Cargo', width: 190, format: '@', wrap: true },
-  { key: 'company', title: 'Empresa', width: 190, format: '@', wrap: true },
-  { key: 'experience', title: 'Experiência', width: 140, wrap: true },
   { key: 'graduate', title: 'Egresso da UniCatólica', width: 110, align: 'center', wrap: true },
   { key: 'course', title: 'Curso', width: 200, format: '@', wrap: true },
   { key: 'gradYear', title: 'Ano de formatura', width: 100, format: '@', align: 'center' },
   { key: 'linkedin', title: 'LinkedIn ou site', width: 240, format: '@' },
   { key: 'days', title: 'Dias disponíveis', width: 200, wrap: true },
-  { key: 'format', title: 'Formato', width: 160, wrap: true },
-  { key: 'mode', title: 'Como prefere atuar', width: 190, wrap: true },
-  { key: 'notes', title: 'Observações', width: 280, format: '@', wrap: true },
   { key: 'publish', title: 'Pode divulgar no site', width: 110, align: 'center', wrap: true },
   { key: 'status', title: 'Status', width: 120, align: 'center' },
   { key: 'team', title: 'Equipe(s) atendida(s)', width: 200, wrap: true },
@@ -223,15 +200,13 @@ function parseMentor_(raw) {
   const email = clean_(raw.email, EMAIL_MAX + 1).toLowerCase();
   const phone = normalizePhone_(raw.whatsapp);
   if (!isFullName_(name) || !isEmail_(email) || !phone) return null;
-  if (MENTOR_AREAS.indexOf(raw.area) === -1 || MENTOR_EXPERIENCE.indexOf(raw.experience) === -1) return null;
-  if (MENTOR_FORMATS.indexOf(raw.format) === -1 || MENTOR_MODES.indexOf(raw.mode) === -1) return null;
+  if (MENTOR_AREAS.indexOf(raw.area) === -1) return null;
   if (typeof raw.graduate !== 'boolean' || typeof raw.mayPublish !== 'boolean') return null;
-  const role = cleanText_(raw.role, MENTOR_ROLE_LIMITS);
-  const company = optionalText_(raw.company, MENTOR_COMPANY_LIMITS);
+  // "outra": a pessoa escreve qual é a área; nas demais, o que sobrou no campo escondido não conta
+  const areaOther = raw.area === 'other' ? cleanText_(raw.areaOther, MENTOR_AREA_OTHER_LIMITS) : '';
   const specialties = optionalText_(raw.specialties, MENTOR_SPECIALTIES_LIMITS);
-  const notes = optionalText_(raw.notes, MENTOR_NOTES_LIMITS);
   const linkedin = parseProfileLink_(raw.linkedin);
-  if (!role || company === null || specialties === null || notes === null || linkedin === null) return null;
+  if ((raw.area === 'other' && !areaOther) || specialties === null || linkedin === null) return null;
   let course = '';
   let graduationYear = 0;
   if (raw.graduate) {
@@ -247,18 +222,13 @@ function parseMentor_(raw) {
     whatsapp: phone.value,
     phoneDigits: phone.digits,
     area: raw.area,
+    areaOther: areaOther,
     specialties: specialties,
-    role: role,
-    company: company,
-    experience: raw.experience,
     linkedin: linkedin,
     graduate: raw.graduate,
     course: course,
     graduationYear: graduationYear,
     days: days,
-    format: raw.format,
-    mode: raw.mode,
-    notes: notes,
     mayPublish: raw.mayPublish,
   };
 }
@@ -347,18 +317,13 @@ function appendMentor_(sheet, protocol, data) {
   values[MCOL.email] = sheetSafe_(m.email);
   values[MCOL.whatsapp] = m.whatsapp;
   values[MCOL.area] = MENTOR_AREA_LABELS[m.area];
+  values[MCOL.areaOther] = sheetSafe_(m.areaOther);
   values[MCOL.specialties] = sheetSafe_(m.specialties);
-  values[MCOL.role] = sheetSafe_(m.role);
-  values[MCOL.company] = sheetSafe_(m.company);
-  values[MCOL.experience] = MENTOR_EXPERIENCE_LABELS[m.experience];
   values[MCOL.graduate] = m.graduate ? 'Sim' : 'Não';
   values[MCOL.course] = sheetSafe_(m.course);
   values[MCOL.gradYear] = m.graduationYear ? String(m.graduationYear) : '';
   values[MCOL.linkedin] = sheetSafe_(m.linkedin);
   values[MCOL.days] = m.days.map((day) => MENTOR_DAY_LABELS[day]).join(', ');
-  values[MCOL.format] = MENTOR_FORMAT_LABELS[m.format];
-  values[MCOL.mode] = MENTOR_MODE_LABELS[m.mode];
-  values[MCOL.notes] = sheetSafe_(m.notes);
   values[MCOL.publish] = m.mayPublish ? 'Sim' : 'Não';
   values[MCOL.status] = 'novo';
   values[MCOL.source] = sheetSafe_(data.source);
@@ -444,18 +409,6 @@ function mentorSummaryCounters_() {
     'Disponível em ' + MENTOR_DAY_LABELS[key],
     '=COUNTIFS(' + active + ',' + col('days') + ',"*' + MENTOR_DAY_LABELS[key] + '*")',
   ]);
-  const perFormat = MENTOR_FORMATS.map((key) => [
-    'Formato: ' + MENTOR_FORMAT_LABELS[key],
-    '=COUNTIFS(' + active + ',' + col('format') + ',"' + MENTOR_FORMAT_LABELS[key] + '")',
-  ]);
-  const perMode = MENTOR_MODES.map((key) => [
-    'Prefere: ' + MENTOR_MODE_LABELS[key],
-    '=COUNTIFS(' + active + ',' + col('mode') + ',"' + MENTOR_MODE_LABELS[key] + '")',
-  ]);
-  const perExperience = MENTOR_EXPERIENCE.map((key) => [
-    'Experiência: ' + MENTOR_EXPERIENCE_LABELS[key],
-    '=COUNTIFS(' + active + ',' + col('experience') + ',"' + MENTOR_EXPERIENCE_LABELS[key] + '")',
-  ]);
   return [
     ['Cadastros ativos', '=COUNTIFS(' + active + ')'],
     ['Novos (ainda sem contato)', countStatus('novo')],
@@ -465,7 +418,7 @@ function mentorSummaryCounters_() {
     ['Cancelados', countStatus('cancelado')],
     ['Egressos da UniCatólica (ativos)', '=COUNTIFS(' + active + ',' + col('graduate') + ',"Sim")'],
     ['Podem aparecer no site (ativos)', '=COUNTIFS(' + active + ',' + col('publish') + ',"Sim")'],
-  ].concat(perArea, perDay, perFormat, perMode, perExperience);
+  ].concat(perArea, perDay);
 }
 
 // uma célula com a lista inteira, pronta pra colar no campo Cco do e-mail ou numa lista de transmissão
@@ -494,7 +447,7 @@ function mentorCopyLists_() {
   ];
 }
 
-// contagem por valor de uma coluna (curso, empresa), da maior pra menor; vazios ficam fora
+// contagem por valor de uma coluna (curso, outra área), da maior pra menor; vazios ficam fora
 function mentorBreakdownFormula_(key) {
   const letter = colLetter_(MCOL[key]);
   const protocol = colLetter_(MCOL.protocol);
@@ -532,11 +485,11 @@ function mentorSummaryHowto_(listsRow) {
     ],
     [
       'Equipes',
-      'Quando a dinâmica da mentoria estiver definida, anote na coluna Equipe(s) atendida(s) quem o mentor acompanha (ou deixe em branco se o atendimento for sob demanda). A coluna Anotações da organização é livre.',
+      'Anote na coluna Equipe(s) atendida(s) a equipe que o mentor acompanha, quando houver. A coluna Anotações da organização é livre.',
     ],
     [
       'Divulgar no site',
-      'Só use nome e cargo de quem está com Sim na coluna Pode divulgar no site. Os mentores do site são cadastrados no código (arquivo de speakers); esta planilha não publica nada sozinha.',
+      'Só use o nome de quem está com Sim na coluna Pode divulgar no site. Os mentores do site são cadastrados no código (arquivo de speakers); esta planilha não publica nada sozinha.',
     ],
     [
       'Mandar mensagem',
@@ -572,9 +525,9 @@ function writeMentorSummary_(sheet) {
   writeRows_(sheet, howtoRow + 1, howto);
   // contagens à direita: o QUERY cresce pra baixo sem bater em nada
   sheet.getRange('D4:E4').setValues([['Por curso (egressos)', 'Mentores']]);
-  sheet.getRange('G4:H4').setValues([['Por empresa', 'Mentores']]);
+  sheet.getRange('G4:H4').setValues([['Outras áreas (texto escrito)', 'Mentores']]);
   setScriptFormula_(sheet.getRange('D5'), mentorBreakdownFormula_('course'));
-  setScriptFormula_(sheet.getRange('G5'), mentorBreakdownFormula_('company'));
+  setScriptFormula_(sheet.getRange('G5'), mentorBreakdownFormula_('areaOther'));
   ['A4:B4', 'D4:E4', 'G4:H4', 'A' + howtoRow + ':B' + howtoRow].forEach((a1) =>
     sheet.getRange(a1).setFontWeight('bold').setFontColor(BRAND.ice).setBackground(BRAND.night),
   );

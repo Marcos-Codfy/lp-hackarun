@@ -8,14 +8,8 @@ import {
   MENTOR_DAYS,
   isMentorArea,
   isMentorDay,
-  isMentorExperience,
-  isMentorFormat,
-  isMentorMode,
   type MentorArea,
   type MentorDay,
-  type MentorExperience,
-  type MentorFormat,
-  type MentorMode,
 } from '../value-objects/MentorProfile';
 import { fail, ok, type Result } from '../shared/Result';
 
@@ -27,12 +21,10 @@ export interface MentorInput {
   whatsapp: string;
   // '' = ainda não escolheu
   area: MentorArea | '';
+  // qual é a área, escrita pela pessoa: só vale quando a área é "outra"
+  areaOther: string;
   // tecnologias e temas que domina; opcional
   specialties: string;
-  // cargo ou função atual
-  role: string;
-  company: string;
-  experience: MentorExperience | '';
   // endereço do perfil (LinkedIn, GitHub, site); opcional
   linkedin: string;
   // é egresso da UniCatólica? '' = não respondeu
@@ -41,10 +33,7 @@ export interface MentorInput {
   course: string;
   graduationYear: string;
   days: readonly string[];
-  format: MentorFormat | '';
-  mode: MentorMode | '';
-  notes: string;
-  // autoriza mostrar nome e cargo na seção de mentores do site (opcional, separado do aceite dos dados)
+  // autoriza mostrar o nome na seção de mentores do site (opcional, separado do aceite dos dados)
   mayPublish: boolean;
   acceptedTerms: boolean;
 }
@@ -52,33 +41,27 @@ export interface MentorInput {
 // chave = campo do formulário ("whatsapp", "days"...)
 export type MentorErrors = Record<string, string>;
 
-// o que vai pra planilha: campos que não valem (curso e ano de quem não é egresso) saem vazios (ano 0)
+// o que vai pra planilha: campos que não valem (curso e ano de quem não é egresso, a área escrita de quem não
+// escolheu "outra") saem vazios (ano 0)
 export interface MentorData {
   name: string;
   email: string;
   whatsapp: string;
   area: MentorArea;
+  areaOther: string;
   specialties: string;
-  role: string;
-  company: string;
-  experience: MentorExperience;
   linkedin: string;
   graduate: boolean;
   course: string;
   graduationYear: number;
   days: MentorDay[];
-  format: MentorFormat;
-  mode: MentorMode;
-  notes: string;
   mayPublish: boolean;
 }
 
 // mantenha iguais aos *_LIMITS do apps-script/Mentors.gs (um teste confere)
-export const MENTOR_ROLE_RULE = { label: 'o cargo ou a função', min: 2, max: 80 } as const;
-export const MENTOR_COMPANY_RULE = { label: 'a empresa', min: 2, max: 100 } as const;
+export const MENTOR_AREA_OTHER_RULE = { label: 'a sua área', min: 2, max: 60 } as const;
 export const MENTOR_SPECIALTIES_RULE = { label: 'as especialidades', min: 2, max: 120 } as const;
 export const MENTOR_COURSE_RULE = { label: 'o curso', min: 3, max: 80 } as const;
-export const MENTOR_NOTES_RULE = { label: 'a observação', min: 2, max: 300 } as const;
 
 function parseYear(raw: string): number | null {
   const year = Number(raw.trim());
@@ -123,12 +106,17 @@ export class MentorRegistration {
     const whatsapp = take('whatsapp', Phone.create(input.whatsapp));
     const area = isMentorArea(input.area) ? input.area : null;
     if (!area) errors['area'] = 'Escolha a área em que você atua.';
-    const role = take('role', ShortText.create(input.role, MENTOR_ROLE_RULE))?.value ?? '';
-    const experience = isMentorExperience(input.experience) ? input.experience : null;
-    if (!experience) errors['experience'] = 'Escolha há quanto tempo você atua na área.';
-    const company = optional('company', input.company, MENTOR_COMPANY_RULE);
+    // "outra": a pessoa escreve qual é a área; para as demais, o que sobrou no campo escondido não conta
+    let areaOther = '';
+    if (area === 'other') {
+      const result = ShortText.create(input.areaOther, MENTOR_AREA_OTHER_RULE);
+      if (result.ok) areaOther = result.value.value;
+      else
+        errors['areaOther'] = ShortText.normalize(input.areaOther)
+          ? result.error
+          : 'Escreva qual é a sua área de atuação.';
+    }
     const specialties = optional('specialties', input.specialties, MENTOR_SPECIALTIES_RULE);
-    const notes = optional('notes', input.notes, MENTOR_NOTES_RULE);
     const linkedin = ProfileLink.normalize(input.linkedin)
       ? (take('linkedin', ProfileLink.create(input.linkedin))?.value ?? '')
       : '';
@@ -151,15 +139,11 @@ export class MentorRegistration {
     }
 
     const days = cleanDays(input.days);
-    if (days.length === 0) errors['days'] = 'Escolha pelo menos um dia (ou "A combinar").';
-    const format = isMentorFormat(input.format) ? input.format : null;
-    if (!format) errors['format'] = 'Escolha como você pode participar.';
-    const mode = isMentorMode(input.mode) ? input.mode : null;
-    if (!mode) errors['mode'] = 'Escolha como você prefere atuar.';
+    if (days.length === 0) errors['days'] = 'Escolha pelo menos um dia do evento.';
     if (!input.acceptedTerms) errors['acceptedTerms'] = 'É preciso concordar com o uso dos dados.';
 
     const invalid = Object.keys(errors).length > 0;
-    if (invalid || !name || !email || !whatsapp || !area || !experience || !format || !mode) {
+    if (invalid || !name || !email || !whatsapp || !area) {
       return fail(errors);
     }
     return ok(
@@ -168,18 +152,13 @@ export class MentorRegistration {
         email: email.value,
         whatsapp: whatsapp.value,
         area,
+        areaOther,
         specialties,
-        role,
-        company,
-        experience,
         linkedin,
         graduate: input.graduate === 'yes',
         course,
         graduationYear,
         days,
-        format,
-        mode,
-        notes,
         mayPublish: input.mayPublish,
       }),
     );

@@ -2,7 +2,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { AppsScriptSandbox, mentorBody } from '../../helpers/apps-script/sandbox';
-import { mentors, rowsOf, seeded, snapshot } from '../../helpers/apps-script/mentorSheet';
+import { MENTOR_TITLES, mentors, rowsOf, seeded, snapshot } from '../../helpers/apps-script/mentorSheet';
 
 describe('Apps Script · cadastro de mentores: fechar e a fila', () => {
   it('MENTORES_FECHADOS=sim responde "closed" sem gravar, e apagar a propriedade reabre', () => {
@@ -51,9 +51,11 @@ describe('Apps Script · configurarMentores', () => {
   });
 
   it('a aba tem menu de status com as cinco opções', () => {
+    // a letra da coluna Status sai dos títulos (A = 65)
+    const statusColumn = String.fromCharCode(65 + MENTOR_TITLES.indexOf('Status'));
     const script = new AppsScriptSandbox();
     script.evaluate('configurarMentores()');
-    const spec = mentors(script).validations.find((v) => v.a1.startsWith('U2'))?.rule as Record<
+    const spec = mentors(script).validations.find((v) => v.a1.startsWith(`${statusColumn}2`))?.rule as Record<
       string,
       unknown[]
     >;
