@@ -1,6 +1,15 @@
 ---
 // começo do <body> de toda página: link de pular pro conteúdo + aurora de fundo em CSS.
-// As cores da aurora mudam por cena na LP (--aurora-* via SceneThemeController); nas outras ficam no padrão
+// As cores da aurora mudam por cena na LP; nas outras páginas ficam no padrão (degradê do CSS, com as --aurora-*).
+// Na LP o SceneThemeController pinta cada cena em canvases pequenos (3 conjuntos de 3 manchas) e troca a opacidade
+// entre eles: a transição de cor roda no compositor, sem repintar as manchas gigantes a cada quadro
+// tamanho em pixels de cada canvas: pequeno de propósito (o degradê é macio e o navegador estica sem perda)
+const BLOBS = [
+  { key: 'a', width: 256, height: 200 },
+  { key: 'b', width: 192, height: 192 },
+  { key: 'c', width: 192, height: 192 },
+] as const;
+const SETS = [0, 1, 2] as const;
 ---
 
 <a class="skip-link" href="#conteudo">
@@ -8,9 +17,20 @@
 </a>
 
 <div class="aurora" data-aurora aria-hidden="true">
-  <span class="aurora__blob aurora__blob--a"></span>
-  <span class="aurora__blob aurora__blob--b"></span>
-  <span class="aurora__blob aurora__blob--c"></span>
+  {BLOBS.map((blob) => (
+    <span class={`aurora__blob aurora__blob--${blob.key}`}>
+      {SETS.map((set) => (
+        <canvas
+          class="aurora__tex"
+          width={blob.width}
+          height={blob.height}
+          data-aurora-tex
+          data-aurora-blob={blob.key}
+          data-aurora-set={set}
+        />
+      ))}
+    </span>
+  ))}
   <span class="aurora__vignette"></span>
   <span class="aurora__grain"></span>
 </div>
@@ -100,6 +120,33 @@
     animation: aurora-drift 40s ease-in-out infinite alternate;
   }
 
+  /* LP com o desenho em canvas (classe posta pelo SceneThemeController): o degradê do CSS sai e a troca de cena é
+     um fade de opacidade entre os conjuntos, tudo no compositor */
+  .aurora__tex {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    will-change: opacity;
+    transition: opacity 1.8s var(--ease-in-out);
+  }
+
+  .aurora--live .aurora__blob {
+    background: none;
+  }
+
+  .aurora--live .aurora__tex {
+    display: block;
+  }
+
+  .aurora[data-set='0'] .aurora__tex[data-aurora-set='0'],
+  .aurora[data-set='1'] .aurora__tex[data-aurora-set='1'],
+  .aurora[data-set='2'] .aurora__tex[data-aurora-set='2'] {
+    opacity: 1;
+  }
+
   /* vinheta: bordas mais escuras puxam o olho pro centro */
   .aurora__vignette {
     position: absolute;
@@ -110,7 +157,7 @@
   /* granulação de filme bem leve (svg inline, sem request); também quebra o banding dos degradês */
   .aurora__grain {
     position: absolute;
-    inset: -50%;
+    inset: 0;
     opacity: 0.07;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
