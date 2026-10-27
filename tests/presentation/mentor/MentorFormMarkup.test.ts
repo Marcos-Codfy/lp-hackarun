@@ -31,9 +31,16 @@ describe('MentorForm.astro · contrato com a View', () => {
     expect(used.filter((path) => !known.has(path))).toEqual([]);
   });
 
-  it('só os campos que a View esconde (curso e ano) têm [data-show-field]', () => {
+  it('só os campos que a View esconde ("qual área", curso e ano) têm [data-show-field]', () => {
     const shown = [...form.matchAll(/data-show-field="(\w+)"/g)].map((m) => m[1]);
-    expect(shown).toEqual(['course', 'graduationYear']);
+    expect(shown).toEqual(['areaOther', 'course', 'graduationYear']);
+  });
+
+  it('o formulário não pergunta mais cargo, empresa, experiência, formato, tipo de mentoria nem observação', () => {
+    for (const field of ['role', 'company', 'experience', 'format', 'mode', 'notes']) {
+      expect(form, field).not.toMatch(new RegExp(`field="${field}"`));
+    }
+    expect(form).not.toMatch(/A combinar|sob demanda|uma equipe/i);
   });
 
   it('tem os ganchos de envio, falha, resumo de erros, protocolo e aviso de encerrado', () => {

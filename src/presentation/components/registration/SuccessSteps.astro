@@ -9,8 +9,8 @@ interface Props {
 const { drawAt, variant = 'participant' } = Astro.props;
 const mentorSteps = [
   'Guarde o protocolo: é ele que identifica o seu cadastro.',
-  'A organização analisa o cadastro e confirma a sua participação por e-mail.',
-  'Os dias e a forma da mentoria (acompanhar uma equipe ou atender sob demanda) são combinados com você pela organização.',
+  'A organização confere o cadastro e fala com você por e-mail.',
+  'Nos dias que você marcou, a participação é presencial.',
   `A apresentação das equipes e dos mentores acontece${drawAt ? `, em ${drawAt}` : ''}, na UniCatólica.`,
 ];
 const participantSteps = [

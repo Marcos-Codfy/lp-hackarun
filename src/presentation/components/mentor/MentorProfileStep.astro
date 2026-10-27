@@ -1,23 +1,16 @@
 ---
-// etapa 02 do cadastro de mentor: área, tempo de experiência, cargo e se é egresso (curso e ano de formatura são
-// [data-show-field], que a MentorFormView mostra só para quem respondeu "sim")
+// etapa 02 do cadastro de mentor: área de atuação e se é egresso. Os campos que dependem de uma resposta são
+// [data-show-field], que a MentorFormView mostra e esconde: "qual área" para quem escolheu "Outra" e curso e ano
+// de formatura para quem respondeu "sim" na pergunta do egresso
 import TextField from '@presentation/components/registration/TextField.astro';
 import SelectField from '@presentation/components/registration/SelectField.astro';
 import ChoiceField from '@presentation/components/registration/ChoiceField.astro';
 import FormStep from '@presentation/components/registration/FormStep.astro';
 import { COURSE_SUGGESTIONS } from '@presentation/formatters/ParticipantLabels';
-import {
-  GRADUATE_OPTIONS,
-  MENTOR_AREA_OPTIONS,
-  MENTOR_EXPERIENCE_OPTIONS,
-} from '@presentation/formatters/MentorLabels';
+import { GRADUATE_OPTIONS, MENTOR_AREA_OPTIONS } from '@presentation/formatters/MentorLabels';
 ---
 
-<FormStep
-  index="02"
-  title="Atuação"
-  lead="Para a organização juntar cada mentor com as equipes que mais precisam dele."
->
+<FormStep index="02" title="Atuação" lead="Para a organização saber em que área você pode ajudar as equipes.">
   <SelectField
     id="mentor-area"
     field="area"
@@ -25,6 +18,9 @@ import {
     hint="A que mais combina com o seu dia a dia."
     options={MENTOR_AREA_OPTIONS}
   />
+  <div data-show-field="areaOther" hidden>
+    <TextField id="mentor-area-other" field="areaOther" label="Qual é a sua área?" maxlength={60} wide />
+  </div>
   <TextField
     id="mentor-specialties"
     field="specialties"
@@ -33,29 +29,6 @@ import {
     optional
     maxlength={120}
     wide
-  />
-  <div class="regform__pair">
-    <TextField
-      id="mentor-role"
-      field="role"
-      label="Cargo ou função"
-      autocomplete="organization-title"
-      maxlength={80}
-    />
-    <TextField
-      id="mentor-company"
-      field="company"
-      label="Empresa"
-      optional
-      autocomplete="organization"
-      maxlength={100}
-    />
-  </div>
-  <SelectField
-    id="mentor-experience"
-    field="experience"
-    label="Tempo de experiência na área"
-    options={MENTOR_EXPERIENCE_OPTIONS}
   />
   <ChoiceField
     id="mentor-graduate"

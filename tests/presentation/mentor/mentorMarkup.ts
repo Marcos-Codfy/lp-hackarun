@@ -34,16 +34,12 @@ export const mentorMarkup = (status = 'open'): string => `
         ${text('mentor-name', 'name', 'Nome completo')}
         ${text('mentor-email', 'email', 'E-mail', 'email')}
         ${text('mentor-whatsapp', 'whatsapp', 'WhatsApp', 'tel')}
-        ${select('mentor-area', 'area', 'Área de atuação', ['development', 'security'])}
-        ${text('mentor-role', 'role', 'Cargo ou função')}
-        ${text('mentor-company', 'company', 'Empresa')}
-        ${select('mentor-experience', 'experience', 'Tempo de experiência', ['2-to-5', '5-to-10'])}
+        ${select('mentor-area', 'area', 'Área de atuação', ['development', 'security', 'other'])}
+        <div data-show-field="areaOther" hidden>${text('mentor-area-other', 'areaOther', 'Qual é a sua área?')}</div>
         ${choice('mentor-graduate', 'graduate', 'Você é egresso(a) da UniCatólica?', ['yes', 'no'])}
         <div data-show-field="course" hidden>${text('mentor-course', 'course', 'Curso em que se formou')}</div>
         <div data-show-field="graduationYear" hidden>${text('mentor-graduation-year', 'graduationYear', 'Ano de formatura')}</div>
-        ${choice('mentor-days', 'days', 'Em quais dias você pode ajudar?', ['11', '12', '13', '14', 'tbd'], 'checkbox')}
-        ${choice('mentor-format', 'format', 'Como prefere participar?', ['in-person', 'online', 'either'])}
-        ${choice('mentor-mode', 'mode', 'Que tipo de mentoria prefere?', ['one-team', 'on-demand', 'either'])}
+        ${choice('mentor-days', 'days', 'Em quais dias do evento você pode acompanhar as equipes?', ['11', '12', '13', '14'], 'checkbox')}
         <label for="mentor-may-publish"><input id="mentor-may-publish" type="checkbox" data-field="mayPublish" />Divulgar</label>
         <label for="mentor-terms"><input id="mentor-terms" type="checkbox" data-field="acceptedTerms" />Aceito</label>
         <p id="mentor-terms-error" data-error-for="acceptedTerms" hidden></p>

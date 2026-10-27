@@ -120,7 +120,9 @@ export class MentorFormView {
       if (!prev || prev.open) this.lobby.show();
       return;
     }
-    if (!prev || prev.fields.graduate !== state.fields.graduate) this.renderSections(state);
+    if (!prev || prev.fields.graduate !== state.fields.graduate || prev.fields.area !== state.fields.area) {
+      this.renderSections(state);
+    }
     this.errors.render(state.errors);
     this.errors.renderSummary(state.attempted, state.orderedErrors);
     if (!prev || prev.status !== state.status) this.status.render(state);
@@ -130,7 +132,7 @@ export class MentorFormView {
     }
   }
 
-  // [data-show-field="course"]: o bloco do campo só aparece pra quem é egresso
+  // [data-show-field="course"]: o bloco do campo só aparece pra quem é egresso; o "qual área", só pra quem escolheu "Outra"
   private renderSections(state: MentorFormState): void {
     qsa('[data-show-field]', this.root).forEach((el) => {
       el.hidden = !isFieldVisible(state.fields, el.dataset['showField'] ?? '');

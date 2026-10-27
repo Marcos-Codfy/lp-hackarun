@@ -1,7 +1,7 @@
 ---
 // formulário da página /seja-mentor (MentorFormView + MentorFormViewModel); grava na aba "Mentores" da planilha via
-// Apps Script. Um envio só: 01 Seus dados, 02 Atuação (curso e ano só para egresso), 03 Participação (dias,
-// formato e dinâmica), 04 Confirmação. A dinâmica final (uma equipe por mentor ou sob demanda) é da organização
+// Apps Script. Um envio só: 01 Seus dados, 02 Atuação (área, "qual área" só para "Outra", curso e ano só para
+// egresso), 03 Participação (os dias do evento; sempre presencial), 04 Confirmação
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import FormStep from '@presentation/components/registration/FormStep.astro';
@@ -82,16 +82,14 @@ const { status, simulated, isOpen } = mentorFormStatus(endpoint);
           <MentorParticipationStep />
 
           <FormStep index="04" title="Confirmação">
-            <div class="regform__notice" role="note">
-              <Icon name="users" size={18} />
-              <p>
-                O cadastro não garante a vaga de mentor: a organização analisa o perfil e confirma por e-mail.
-                {presentationAt ? ` Os mentores são apresentados às equipes em ${presentationAt}.` : ''}
-              </p>
-            </div>
+            {presentationAt && (
+              <div class="regform__notice" role="note">
+                <Icon name="users" size={18} />
+                <p>Os mentores são apresentados às equipes em {presentationAt}, na abertura do evento.</p>
+              </div>
+            )}
             <ConsentField id="mentor-may-publish" field="mayPublish" required={false}>
-              Autorizo mostrar o meu nome, cargo e empresa no site e nas redes do HackaRun, como mentor
-              (opcional).
+              Autorizo mostrar o meu nome no site e nas redes do HackaRun, como mentor (opcional).
             </ConsentField>
             <ConsentField id="mentor-terms" field="acceptedTerms">
               Autorizo a organização do HackaRun a usar os dados informados só para avaliar o meu cadastro,

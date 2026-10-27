@@ -39,12 +39,8 @@ function mount(options: { status?: string; isOpen?: boolean; prefill?: () => voi
     type('mentor-email', 'ana.mentora@exemplo.com');
     type('mentor-whatsapp', '(63) 99999-0101');
     pick('mentor-area', 'security');
-    type('mentor-role', 'Analista de segurança');
-    pick('mentor-experience', '5-to-10');
     choose('mentor-graduate-no');
     toggle('mentor-days-13', true);
-    choose('mentor-format-online');
-    choose('mentor-mode-either');
     toggle('mentor-terms', true);
   };
   return { vm, gateway, root, el, type, choose, toggle, pick, fillAll, scrolled };
@@ -59,14 +55,14 @@ describe('MentorFormView · campos', () => {
     const { vm, type, pick, choose, toggle } = mount();
     type('mentor-name', 'Ana Souza');
     pick('mentor-area', 'security');
-    choose('mentor-format-online');
+    choose('mentor-graduate-no');
     toggle('mentor-days-14', true);
     toggle('mentor-days-12', true);
     toggle('mentor-may-publish', true);
     expect(vm.fields).toMatchObject({
       name: 'Ana Souza',
       area: 'security',
-      format: 'online',
+      graduate: 'no',
       days: ['12', '14'],
       mayPublish: true,
     });
@@ -82,6 +78,18 @@ describe('MentorFormView · campos', () => {
     expect(['course', 'graduationYear'].every(shown)).toBe(true);
     choose('mentor-graduate-no');
     expect(['course', 'graduationYear'].some(shown)).toBe(false);
+  });
+
+  it('"Qual é a sua área?" só aparece quando a área escolhida é "Outra"', () => {
+    const { vm, el, pick, type } = mount();
+    const field = () => el('[data-show-field="areaOther"]');
+    expect(field().hidden).toBe(true);
+    pick('mentor-area', 'other');
+    expect(field().hidden).toBe(false);
+    type('mentor-area-other', 'Computação quântica');
+    expect(vm.fields).toMatchObject({ area: 'other', areaOther: 'Computação quântica' });
+    pick('mentor-area', 'security');
+    expect(field().hidden).toBe(true);
   });
 
   it('o que já estava preenchido antes do JS (autofill, voltar no histórico) entra no VM', () => {
@@ -114,11 +122,11 @@ describe('MentorFormView · erros', () => {
   it('erro de grupo de opções vai no fieldset e some quando a pessoa escolhe', async () => {
     const { vm, el, choose } = mount();
     await vm.submit();
-    expect(el('#mentor-format').getAttribute('aria-invalid')).toBe('true');
-    expect(el('#mentor-format-error').hidden).toBe(false);
-    choose('mentor-format-online');
-    expect(el('#mentor-format').hasAttribute('aria-invalid')).toBe(false);
-    expect(el('#mentor-format-error').hidden).toBe(true);
+    expect(el('#mentor-graduate').getAttribute('aria-invalid')).toBe('true');
+    expect(el('#mentor-graduate-error').hidden).toBe(false);
+    choose('mentor-graduate-no');
+    expect(el('#mentor-graduate').hasAttribute('aria-invalid')).toBe(false);
+    expect(el('#mentor-graduate-error').hidden).toBe(true);
   });
 
   it('um erro só: o foco vai direto pro campo e o leitor de tela ouve o aviso', async () => {

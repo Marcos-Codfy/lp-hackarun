@@ -24,14 +24,9 @@ export const VALID_TEXT: Partial<Record<MentorTextPath, string>> = {
   email: 'ana.mentora@exemplo.com',
   whatsapp: '(63) 99999-0101',
   area: 'security',
-  role: 'Analista de segurança',
-  company: 'Empresa Exemplo',
-  experience: '5-to-10',
   graduate: 'yes',
   course: 'Engenharia de Software',
   graduationYear: '2019',
-  format: 'in-person',
-  mode: 'either',
 };
 
 export function fillValidMentor(vm: MentorFormViewModel, fields = VALID_TEXT): void {

@@ -23,12 +23,8 @@ describe('MentorFormViewModel · validação', () => {
       'email',
       'whatsapp',
       'area',
-      'role',
-      'experience',
       'graduate',
       'days',
-      'format',
-      'mode',
       'acceptedTerms',
     ]);
     expect(focus).toMatchObject({ path: 'name', reason: 'invalid' });
@@ -42,11 +38,6 @@ describe('MentorFormViewModel · validação', () => {
       email: 'ana@exemplo.com',
       whatsapp: '(63) 99999-0101',
       area: 'security',
-      role: 'Analista de segurança',
-      company: 'Empresa Exemplo',
-      experience: '5-to-10',
-      format: 'online',
-      mode: 'either',
       graduate: 'yes',
     });
     await vm.submit();
@@ -81,12 +72,28 @@ describe('MentorFormViewModel · validação', () => {
     expect(vm.state.value.errors['days']).toBeDefined();
   });
 
-  it('a empresa é opcional (autônomo ou entre empregos)', async () => {
+  it('"Outra" na área pede que a pessoa escreva qual; nas outras áreas o campo não é cobrado', async () => {
     const { vm, gateway } = setup();
-    fillValidMentor(vm, { ...VALID_TEXT, company: '' });
+    fillValidMentor(vm, { ...VALID_TEXT, area: 'other' });
+    await vm.submit();
+    expect(Object.keys(vm.state.value.errors)).toEqual(['areaOther']);
+    expect(vm.state.value.focus).toMatchObject({ path: 'areaOther', reason: 'invalid' });
+    vm.setValue('areaOther', 'Computação quântica');
+    expect(vm.state.value.errors).toEqual({});
+    // trocar de área esconde o campo: o texto que ficou lá não vale nem acusa erro
+    vm.setValue('areaOther', 'X');
+    vm.setValue('area', 'design');
+    expect(vm.state.value.errors).toEqual({});
     await vm.submit();
     expect(vm.state.value.status).toBe('success');
-    expect(gateway.calls[0]?.mentor.company).toBe('');
+    expect(gateway.calls[0]?.mentor).toMatchObject({ area: 'design', areaOther: '' });
+  });
+
+  it('o texto de "qual área" vai no envio quando a área é "Outra"', async () => {
+    const { vm, gateway } = setup();
+    fillValidMentor(vm, { ...VALID_TEXT, area: 'other', areaOther: 'Computação quântica' });
+    await vm.submit();
+    expect(gateway.calls[0]?.mentor).toMatchObject({ area: 'other', areaOther: 'Computação quântica' });
   });
 
   it('o aceite é obrigatório; a divulgação do nome é opcional', async () => {
@@ -158,7 +165,7 @@ describe('MentorFormViewModel · envio', () => {
     expect(Object.keys(errors)).toEqual(['email']);
     expect(focus).toMatchObject({ path: 'email', reason: 'invalid' });
     // mexer em outro campo não apaga o erro; trocar o e-mail, sim
-    vm.setValue('role', 'Pessoa engenheira de segurança');
+    vm.setValue('specialties', 'Pentest, AWS');
     expect(vm.state.value.errors['email']).toBeDefined();
     vm.setValue('email', 'outra.pessoa@exemplo.com');
     expect(vm.state.value.errors['email']).toBeUndefined();

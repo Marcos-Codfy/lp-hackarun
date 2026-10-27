@@ -28,14 +28,7 @@ export interface MentorFormDeps {
 }
 
 // escolher uma opção já é a resposta: valida na hora, sem esperar o blur
-const CHOICE_PATHS: ReadonlySet<string> = new Set([
-  'area',
-  'experience',
-  'graduate',
-  'days',
-  'format',
-  'mode',
-]);
+const CHOICE_PATHS: ReadonlySet<string> = new Set(['area', 'graduate', 'days']);
 
 // e-mail ou WhatsApp que o servidor já tem: o erro fica no campo até a pessoa trocar o valor
 class ServerConflicts {

@@ -1,48 +1,18 @@
 ---
-// etapa 03 do cadastro de mentor: dias, formato e dinâmica de mentoria preferidos, mais uma observação opcional
-import TextField from '@presentation/components/registration/TextField.astro';
+// etapa 03 do cadastro de mentor: os dias do evento em que a pessoa pode acompanhar as equipes (a participação é
+// sempre presencial)
 import ChoiceField from '@presentation/components/registration/ChoiceField.astro';
 import FormStep from '@presentation/components/registration/FormStep.astro';
-import {
-  MENTOR_DAY_OPTIONS,
-  MENTOR_FORMAT_OPTIONS,
-  MENTOR_MODE_OPTIONS,
-} from '@presentation/formatters/MentorLabels';
+import { MENTOR_DAY_OPTIONS } from '@presentation/formatters/MentorLabels';
 ---
 
-<FormStep
-  index="03"
-  title="Participação"
-  lead="Diga como e quando você pode ajudar. A organização confirma tudo com você depois."
->
+<FormStep index="03" title="Participação" lead="A participação é presencial.">
   <ChoiceField
     id="mentor-days"
     field="days"
-    legend="Em quais dias você pode ajudar?"
+    legend="Em quais dias do evento você pode acompanhar as equipes?"
     hint="Pode marcar mais de um."
     options={MENTOR_DAY_OPTIONS}
     multiple
-  />
-  <ChoiceField
-    id="mentor-format"
-    field="format"
-    legend="Como prefere participar?"
-    options={MENTOR_FORMAT_OPTIONS}
-  />
-  <ChoiceField
-    id="mentor-mode"
-    field="mode"
-    legend="Que tipo de mentoria prefere?"
-    hint="Ainda estamos definindo a dinâmica: a sua preferência ajuda a decidir."
-    options={MENTOR_MODE_OPTIONS}
-  />
-  <TextField
-    id="mentor-notes"
-    field="notes"
-    label="Algo mais que a organização deva saber?"
-    optional
-    multiline
-    maxlength={300}
-    wide
   />
 </FormStep>
