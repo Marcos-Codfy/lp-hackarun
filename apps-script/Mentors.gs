@@ -18,7 +18,17 @@ const MENTOR_SUMMARY_PROTECTION = 'HackaRun · resumo dos mentores (fórmulas au
 const MENTOR_SUMMARY_FIRST_ROW = 5;
 
 // as listas abaixo são o contrato com o formulário (src/domain/value-objects/MentorProfile.ts; um teste confere)
-const MENTOR_AREAS = ['development', 'data-ai', 'infra', 'security', 'tech-lead', 'design', 'product', 'quality', 'other'];
+const MENTOR_AREAS = [
+  'development',
+  'data-ai',
+  'infra',
+  'security',
+  'tech-lead',
+  'design',
+  'product',
+  'quality',
+  'other',
+];
 const MENTOR_EXPERIENCE = ['up-to-2', '2-to-5', '5-to-10', 'over-10'];
 const MENTOR_FORMATS = ['in-person', 'online', 'either'];
 const MENTOR_MODES = ['one-team', 'on-demand', 'either'];
@@ -58,10 +68,10 @@ const MENTOR_MODE_LABELS = {
   either: 'Qualquer um dos dois',
 };
 const MENTOR_DAY_LABELS = {
-  '11': '11/11 (qua)',
-  '12': '12/11 (qui)',
-  '13': '13/11 (sex)',
-  '14': '14/11 (sáb)',
+  11: '11/11 (qua)',
+  12: '12/11 (qui)',
+  13: '13/11 (sex)',
+  14: '14/11 (sáb)',
   tbd: 'A combinar',
 };
 const MENTOR_STATUS_OPTIONS = ['novo', 'contatado', 'confirmado', 'recusado', 'cancelado'];
@@ -142,7 +152,11 @@ function registerMentor_(body) {
 
 function mentorsClosed_() {
   const value = PropertiesService.getScriptProperties().getProperty(MENTORS_CLOSED_PROPERTY);
-  return String(value || '').trim().toLowerCase() === 'sim';
+  return (
+    String(value || '')
+      .trim()
+      .toLowerCase() === 'sim'
+  );
 }
 
 // a parte que precisa do lock: reenvio, limite, duplicados e a linha nova
@@ -389,14 +403,17 @@ function mentorsSheet_() {
   const book = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = book.getSheetByName(MENTORS_SHEET);
   const ready =
-    String(PropertiesService.getScriptProperties().getProperty(MENTOR_SETUP_PROPERTY) || '') === MENTOR_SETUP_VERSION;
+    String(PropertiesService.getScriptProperties().getProperty(MENTOR_SETUP_PROPERTY) || '') ===
+    MENTOR_SETUP_VERSION;
   if (sheet && ready && hasHeaders_(sheet, MENTOR_HEADERS)) return sheet;
   return setupMentors_(book);
 }
 
 function setupMentors_(book) {
   // o styleChoices_ (Setup.gs) lê as cores daqui; os status dos mentores ganham as suas
-  Object.keys(MENTOR_CHOICE_STYLES).forEach((status) => (CHOICE_STYLES[status] = MENTOR_CHOICE_STYLES[status]));
+  Object.keys(MENTOR_CHOICE_STYLES).forEach(
+    (status) => (CHOICE_STYLES[status] = MENTOR_CHOICE_STYLES[status]),
+  );
   const mentors = ensureTab_(book, MENTORS_SHEET, 3);
   const summary = ensureTab_(book, MENTORS_SUMMARY_SHEET, 4);
   styleTable_(mentors, MENTOR_COLUMNS, 3, MENTOR_TAB_COLOR);
@@ -470,7 +487,10 @@ function mentorCopyLists_() {
   return [
     ['E-mails dos mentores ativos', join('email', '; ', status + '<>"cancelado"', 'Nenhum cadastro ainda.')],
     ['E-mails dos confirmados', join('email', '; ', status + '="confirmado"', 'Ninguém confirmado ainda.')],
-    ['WhatsApps dos mentores ativos', join('whatsapp', ', ', status + '<>"cancelado"', 'Nenhum cadastro ainda.')],
+    [
+      'WhatsApps dos mentores ativos',
+      join('whatsapp', ', ', status + '<>"cancelado"', 'Nenhum cadastro ainda.'),
+    ],
   ];
 }
 
@@ -538,11 +558,7 @@ function mentorSummaryHowto_(listsRow) {
 
 function writeMentorSummary_(sheet) {
   sheet.clear();
-  sheet
-    .getRange('A1')
-    .setValue('HackaRun 2026 · Resumo dos mentores')
-    .setFontSize(15)
-    .setFontWeight('bold');
+  sheet.getRange('A1').setValue('HackaRun 2026 · Resumo dos mentores').setFontSize(15).setFontWeight('bold');
   sheet.getRange('A2').setValue('Atualiza sozinho com a aba Mentores. Não precisa editar nada aqui.');
   sheet.getRange('A4:B4').setValues([['Indicador', 'Valor']]);
   const counters = mentorSummaryCounters_();
