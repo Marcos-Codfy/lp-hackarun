@@ -1,0 +1,29 @@
+/* loops infinitos pausados enquanto a página rola (ScrollMotionController põe .is-scrolling na raiz).
+   Mesma lista do motion-pause.css, de propósito: loop novo entra nas três (o teste motionLists confere).
+   !important na layer: ganha do shorthand "animation" dos componentes (que zera o play-state) */
+@layer utilities {
+  .is-scrolling
+    :is(
+      .aurora__blob,
+      .tape__track,
+      .beams__beam,
+      .locked__q,
+      .locked__beam,
+      .locked__status i,
+      .btn__sheen,
+      .sponsor__sweep,
+      .scroll-cue__comet,
+      .countdown__pulse,
+      .notice-badge__dot,
+      .regstatus__dot,
+      .lineup__label i,
+      .lineup__scan,
+      .terminal__signal i,
+      .terminal__caret
+    ),
+  .is-scrolling .countdown__unit::before,
+  .is-scrolling .countdown__pulse::after,
+  .is-scrolling .prize__redacted::after {
+    animation-play-state: paused !important;
+  }
+}

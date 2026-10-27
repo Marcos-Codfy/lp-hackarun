@@ -1,4 +1,4 @@
-// os loops infinitos do CSS: as duas listas de pausa (WCAG e fora da tela) andam juntas, e nenhum loop anima
+// os loops infinitos do CSS: as três listas de pausa (WCAG, fora da tela e durante o scroll) andam juntas, e nenhum loop anima
 // propriedade que force repintura (box-shadow, width...): só o que o compositor faz sozinho
 // @vitest-environment node
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -33,6 +33,13 @@ describe('listas de pausa dos loops de CSS', () => {
     expect(offscreen).toEqual(wcag.filter((selector) => selector !== '.aurora__blob'));
     expect(wcag).toContain('.sponsor__sweep');
     expect(wcag).toContain('.countdown__pulse::after');
+  });
+
+  it('a do scroll tem exatamente os mesmos loops da de "Pausar animações" (a aurora também para ao rolar)', () => {
+    const wcag = pauseSelectors('motion-pause.css', '.is-motion-paused');
+    const scrolling = pauseSelectors('scroll-motion.css', '.is-scrolling');
+    expect(scrolling).toEqual(wcag);
+    expect(scrolling).toContain('.aurora__blob');
   });
 });
 

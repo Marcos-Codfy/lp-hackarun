@@ -5,6 +5,7 @@
 @import './deferred-sections.css';
 @import './motion-pause.css';
 @import './offscreen-motion.css';
+@import './scroll-motion.css';
 
 @layer reset {
   *,
