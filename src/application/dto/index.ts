@@ -163,6 +163,7 @@ export interface SpeakerDTO {
   headline: string;
   topic: string | null;
   avatarUrl: string | null;
+  bio: string[];
   revealed: boolean;
 }
 

@@ -4,7 +4,7 @@ const LABELS: Record<SpeakerDTO['role'], string> = {
   instructor: 'Instrutor',
   mentor: 'Mentor egresso',
   speaker: 'Palestra',
-  judge: 'Banca',
+  judge: 'Avaliador',
 };
 
 // papel do convidado em pt-BR (card do mentor, banca etc.)

@@ -4,22 +4,19 @@ import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { mentorHref } from '@presentation/view-models/mentor/mentorOrigin';
 // import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
-// import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
+import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
 import SectionHeader from './shared/SectionHeader.astro';
-// import CrewCard from './crew/CrewCard.astro';
-// import LockedMentorCard from './crew/LockedMentorCard.astro';
+import CrewCard from './crew/CrewCard.astro';
+import LockedMentorCard from './crew/LockedMentorCard.astro';
 import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-// cards dos mentores comentados por enquanto (voltam quando os nomes forem revelados)
-// a prop fica pelo contrato da página
-const { data: _data } = Astro.props;
-
-// const { speakers, schedule } = Astro.props.data;
-// const roles = new SpeakerRoleLabel();
+// cards dos convidados (speakers.json): revelado mostra foto, nome e o perfil; sem nome fica "???"
+const { speakers } = Astro.props.data;
+const roles = new SpeakerRoleLabel();
 // // quando equipes e mentores são apresentados (lido da programação)
 // const lookup = new ScheduleLookup(schedule);
 // const reveal = lookup.activity('teams-and-mentors');
@@ -44,7 +41,6 @@ const { data: _data } = Astro.props;
       lead="Vocês poderão contar com o apoio de mentores para esclarecer dúvidas e orientar o desenvolvimento do projeto. Todas as equipes poderão solicitar orientação."
     />
 
-    {/*
     <ul class="crew__grid" role="list" data-reveal-group>
       {speakers.map((speaker, index) =>
         speaker.revealed ? (
@@ -54,7 +50,6 @@ const { data: _data } = Astro.props;
         ),
       )}
     </ul>
-    */}
 
     <div class="crew__rules sx-glass sx-corners" data-reveal="up">
       <p class="sx-hud">// Regras da mentoria</p>

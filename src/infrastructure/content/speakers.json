@@ -41,10 +41,15 @@
   },
   {
     "id": "judge-1",
-    "name": null,
+    "name": "Darley Passarin",
     "role": "judge",
-    "headline": "Banca avaliadora",
+    "headline": "Engenheiro de software · Cysar",
     "topic": null,
-    "avatarUrl": null
+    "avatarUrl": "/convidados/darley-passarin.jpg",
+    "bio": [
+      "Engenheiro de software, empreendedor e líder de times, Darley Passarin participou da construção do Tonolucro desde a ideia, acompanhou sua expansão para dezenas de cidades e o processo que culminou na aquisição da empresa pela [Magazine Luiza](https://economia.uol.com.br/noticias/redacao/2021/03/31/magazine-luiza-compra-tonolucro-e-grandchefe-e-amplia-presenca-em-delivery.htm).",
+      "Depois dessa jornada, passou a atuar na criação, arquitetura e liderança de diferentes negócios, produtos e iniciativas tecnológicas, combinando visão de negócio, engenharia, gestão e Inteligência Artificial para transformar estratégia em execução.",
+      "Hoje, essa experiência é institucionalizada na Cysar: uma companhia de liderança em Software e IA criada para liderar negócios, tecnologia e pessoas — e fazer iniciativas importantes acontecerem."
+    ]
   }
 ]

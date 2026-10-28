@@ -1,5 +1,7 @@
 ---
 import type { SpeakerDTO } from '@application/index';
+import Icon from '@presentation/components/ui/Icon.astro';
+import SpeakerProfile from './SpeakerProfile.astro';
 
 // convidado já revelado; o bloqueado usa o LockedMentorCard
 interface Props {
@@ -15,6 +17,9 @@ const initials = name
   .slice(0, 2)
   .map((part) => part[0]?.toUpperCase() ?? '')
   .join('');
+// perfil completo (mini currículo) abre pelo "Ver perfil" no SpeakerProfile
+const profileId = `perfil-${speaker.id}`;
+const hasBio = speaker.bio.length > 0;
 ---
 
 <li class="crew-card sx-glass sx-glass--solid sx-corners sx-hover">
@@ -31,6 +36,15 @@ const initials = name
   <h3 class="crew-card__name">{name}</h3>
   <p class="crew-card__headline">{speaker.headline}</p>
   {speaker.topic && <p class="crew-card__topic">{speaker.topic}</p>}
+  {hasBio && (
+    <>
+      <button class="crew-card__more" type="button" popovertarget={profileId}>
+        Ver perfil
+        <Icon name="arrow-right" size={14} />
+      </button>
+      <SpeakerProfile id={profileId} speaker={speaker} name={name} role={role} />
+    </>
+  )}
 </li>
 
 <style>
@@ -76,5 +90,41 @@ const initials = name
 
   .crew-card__topic {
     color: var(--sx-ink);
+  }
+
+  /* "Ver perfil": mesmo jeito HUD dos links da LP, a seta anda no hover */
+  .crew-card__more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    justify-self: start;
+    margin-top: var(--space-1);
+    padding: var(--space-1) 0;
+    border: 0;
+    background: none;
+    color: var(--sx-ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .crew-card__more :global(.icon) {
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .crew-card__more:hover {
+    color: var(--text);
+  }
+
+  .crew-card__more:hover :global(.icon) {
+    transform: translateX(3px);
+  }
+
+  .crew-card__more:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
   }
 </style>
