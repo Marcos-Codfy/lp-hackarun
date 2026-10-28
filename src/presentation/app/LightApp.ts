@@ -5,6 +5,7 @@ import { SIMULATION_ENABLED } from '@shared/config/registrationMode';
 import { createClientContainer, type ClientContainer } from '@composition/client';
 import { HeaderScrollController } from '@presentation/controllers/HeaderScrollController';
 import { MobileMenuController } from '@presentation/controllers/MobileMenuController';
+import { ScrollMotionController } from '@presentation/controllers/ScrollMotionController';
 import { AnchorNavigator } from '@presentation/motion/core/AnchorNavigator';
 import { NativeScroll } from '@presentation/motion/core/NativeScroll';
 import { CountdownViewModel } from '@presentation/view-models/countdown/CountdownViewModel';
@@ -108,6 +109,8 @@ export class LightApp {
     boot.add('header', mountHeader);
     boot.add('navigation', () => mountNavigation(reducedMotion));
     boot.add('print', () => new PrintButtons().mount());
+    // loops decorativos (a aurora do fundo) param enquanto a página rola, como na LP
+    boot.add('scroll motion', () => new ScrollMotionController().mount());
     boot.add('views container', () => {
       container.current = createClientContainer(config, { simulation: SIMULATION_ENABLED });
     });

@@ -9,6 +9,7 @@ import { HudRailController } from './HudRailController';
 import { MobileMenuController } from './MobileMenuController';
 import { NavSpyController } from './NavSpyController';
 import { OffscreenMotionController } from './OffscreenMotionController';
+import { ScrollMotionController } from './ScrollMotionController';
 import { scheduleDates, todayForSchedule } from './scheduleToday';
 import { SceneThemeController } from './theme/SceneThemeController';
 
@@ -17,7 +18,7 @@ const mounted = new WeakSet<BootSteps>();
 const EVENT_TIME_ZONE = 'America/Araguaina';
 
 // controladores de DOM que não são MVVM (header, menu, abas da programação, trilho das missões no celular,
-// nav spy, HUD, aurora, loops de CSS fora da tela); sem GSAP.
+// nav spy, HUD, aurora, loops de CSS fora da tela e durante o scroll); sem GSAP.
 // Links internos ficam com o AnchorNavigator (motion/core). Header e menu primeiro: são o que a pessoa toca logo
 export function mountControllers(ctx: AppContext, boot: BootSteps): void {
   if (mounted.has(boot)) return;
@@ -66,4 +67,6 @@ export function mountControllers(ctx: AppContext, boot: BootSteps): void {
 
   // pausa os loops de CSS das seções longe da tela (ver o controlador)
   boot.add('offscreen motion', () => new OffscreenMotionController().mount());
+  // e todos eles, enquanto a página rola
+  boot.add('scroll motion', () => new ScrollMotionController().mount());
 }

@@ -15,6 +15,7 @@ describe('mountControllers', () => {
       'aurora',
       'hud rail',
       'offscreen motion',
+      'scroll motion',
     ]);
   });
 
@@ -22,6 +23,6 @@ describe('mountControllers', () => {
     const boot = { add: vi.fn() };
     mountControllers({} as AppContext, boot);
     mountControllers({} as AppContext, boot);
-    expect(boot.add).toHaveBeenCalledTimes(8);
+    expect(boot.add).toHaveBeenCalledTimes(9);
   });
 });
