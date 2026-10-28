@@ -96,11 +96,11 @@ describe('MentorFormView · campos', () => {
     const { vm } = mount({
       prefill: () => {
         (document.getElementById('mentor-email') as HTMLInputElement).value = 'ana@exemplo.com';
-        (document.getElementById('mentor-days-11') as HTMLInputElement).checked = true;
+        (document.getElementById('mentor-days-12') as HTMLInputElement).checked = true;
         (document.getElementById('mentor-terms') as HTMLInputElement).checked = true;
       },
     });
-    expect(vm.fields).toMatchObject({ email: 'ana@exemplo.com', days: ['11'], acceptedTerms: true });
+    expect(vm.fields).toMatchObject({ email: 'ana@exemplo.com', days: ['12'], acceptedTerms: true });
   });
 });
 

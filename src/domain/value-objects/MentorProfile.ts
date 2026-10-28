@@ -15,8 +15,9 @@ export const MENTOR_AREAS = [
 ] as const;
 export type MentorArea = (typeof MENTOR_AREAS)[number];
 
-// dias do evento (11 a 14/11)
-export const MENTOR_DAYS = ['11', '12', '13', '14'] as const;
+// dias do evento em que há mentoria (12 a 14/11: abertura e sorteio, desenvolvimento e entrega final); o dia 11/11 é
+// só de oficinas, antes de as equipes existirem
+export const MENTOR_DAYS = ['12', '13', '14'] as const;
 export type MentorDay = (typeof MENTOR_DAYS)[number];
 
 // ano de formatura de quem é egresso da UniCatólica

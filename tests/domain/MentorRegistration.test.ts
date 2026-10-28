@@ -121,7 +121,7 @@ describe('MentorRegistration', () => {
 
 describe('cleanDays', () => {
   it('ordem do evento, sem repetir e sem opção inexistente', () => {
-    expect(cleanDays(['14', '11', '14', 'tbd', 'x', '13'])).toEqual(['11', '13', '14']);
+    expect(cleanDays(['14', '12', '14', '11', 'tbd', 'x', '13'])).toEqual(['12', '13', '14']);
     expect(cleanDays([])).toEqual([]);
   });
 });

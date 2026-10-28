@@ -86,10 +86,10 @@ describe('Apps Script · cadastro de mentores', () => {
 
   it('endereço sem https vira https e os dias saem na ordem do evento, sem repetir', () => {
     const script = new AppsScriptSandbox();
-    script.post(mentorBody({ linkedin: 'linkedin.com/in/ana', days: ['14', '11', '14', '12'] }));
+    script.post(mentorBody({ linkedin: 'linkedin.com/in/ana', days: ['14', '12', '14', '13'] }));
     expect(rowsOf(script)[0]).toMatchObject({
       'LinkedIn ou site': 'https://linkedin.com/in/ana',
-      'Dias disponíveis': '11/11 (qua), 12/11 (qui), 14/11 (sáb)',
+      'Dias disponíveis': '12/11 (qui), 13/11 (sex), 14/11 (sáb)',
     });
   });
 

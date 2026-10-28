@@ -39,7 +39,7 @@ export const mentorMarkup = (status = 'open'): string => `
         ${choice('mentor-graduate', 'graduate', 'Você é egresso(a) da UniCatólica?', ['yes', 'no'])}
         <div data-show-field="course" hidden>${text('mentor-course', 'course', 'Curso em que se formou')}</div>
         <div data-show-field="graduationYear" hidden>${text('mentor-graduation-year', 'graduationYear', 'Ano de formatura')}</div>
-        ${choice('mentor-days', 'days', 'Em quais dias do evento você pode acompanhar as equipes?', ['11', '12', '13', '14'], 'checkbox')}
+        ${choice('mentor-days', 'days', 'Em quais dias do evento você pode acompanhar as equipes?', ['12', '13', '14'], 'checkbox')}
         <label for="mentor-may-publish"><input id="mentor-may-publish" type="checkbox" data-field="mayPublish" />Divulgar</label>
         <label for="mentor-terms"><input id="mentor-terms" type="checkbox" data-field="acceptedTerms" />Aceito</label>
         <p id="mentor-terms-error" data-error-for="acceptedTerms" hidden></p>

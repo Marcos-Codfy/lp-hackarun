@@ -20,7 +20,6 @@ export const MENTOR_AREA_OPTIONS: readonly Option<MentorArea>[] = [
 ];
 
 export const MENTOR_DAY_OPTIONS: readonly Option<MentorDay>[] = [
-  { value: '11', label: '11/11 · quarta' },
   { value: '12', label: '12/11 · quinta' },
   { value: '13', label: '13/11 · sexta' },
   { value: '14', label: '14/11 · sábado' },
