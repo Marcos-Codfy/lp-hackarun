@@ -116,6 +116,7 @@ export interface RawSpeaker {
   headline: string;
   topic?: string | null;
   avatarUrl?: string | null;
+  bio?: string[];
 }
 
 export interface RawPrize {

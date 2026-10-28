@@ -9,6 +9,8 @@ export interface SpeakerProps {
   headline: string;
   topic: string | null;
   avatarUrl: string | null;
+  // mini currículo em parágrafos; links no formato [texto](https://...)
+  bio?: readonly string[];
 }
 
 // sem nome = ainda não revelado (aparece como card bloqueado)
@@ -18,6 +20,7 @@ export class Speaker extends Entity {
   readonly headline: string;
   readonly topic: string | null;
   readonly avatarUrl: string | null;
+  readonly bio: readonly string[];
 
   private constructor(props: SpeakerProps) {
     super(props.id);
@@ -26,6 +29,7 @@ export class Speaker extends Entity {
     this.headline = props.headline;
     this.topic = props.topic;
     this.avatarUrl = props.avatarUrl;
+    this.bio = (props.bio ?? []).map((p) => p.trim()).filter(Boolean);
   }
 
   static create(props: SpeakerProps): Speaker {

@@ -1,0 +1,173 @@
+---
+import type { SpeakerDTO } from '@application/index';
+import { bioParts } from './bioText';
+
+// perfil completo do convidado num popover nativo (atributo popover): abre pelo "Ver perfil" do card e fecha
+// no ×, no Esc ou clicando fora, sem JavaScript. data-lenis-prevent deixa a rolagem do painel com o navegador
+interface Props {
+  id: string;
+  speaker: SpeakerDTO;
+  name: string;
+  role: string;
+}
+
+const { id, speaker, name, role } = Astro.props;
+---
+
+<div
+  class="profile sx-glass sx-corners"
+  id={id}
+  popover
+  role="dialog"
+  aria-labelledby={`${id}-name`}
+  data-lenis-prevent
+>
+  <button
+    class="profile__close"
+    type="button"
+    popovertarget={id}
+    popovertargetaction="hide"
+    aria-label="Fechar perfil"
+  >
+    <span aria-hidden="true">×</span>
+  </button>
+  <div class="profile__head">
+    {speaker.avatarUrl && (
+      <img class="profile__photo" src={speaker.avatarUrl} alt="" width="96" height="120" />
+    )}
+    <div>
+      <p class="sx-hud">{role}</p>
+      <p class="profile__name" id={`${id}-name`}>
+        {name}
+      </p>
+      <p class="profile__headline">{speaker.headline}</p>
+    </div>
+  </div>
+  <div class="profile__bio">
+    {speaker.bio.map((paragraph) => (
+      <p>
+        {bioParts(paragraph).map((part) =>
+          part.href ? (
+            <a href={part.href} target="_blank" rel="noopener noreferrer">
+              {part.text}
+              <span class="sr-only"> (abre em nova aba)</span>
+            </a>
+          ) : (
+            part.text
+          ),
+        )}
+      </p>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* painel do perfil: centralizado pelo próprio navegador (top layer), com véu escuro atrás */
+  .profile {
+    /* o .sx-glass põe position: relative; o popover precisa do fixed do navegador pra centralizar */
+    position: fixed;
+    inset: 0;
+    width: min(36rem, calc(100vw - 2rem));
+    height: fit-content;
+    max-height: min(80svh, 40rem);
+    margin: auto;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+    overflow-y: auto;
+    border: 0;
+    background: rgb(8 6 28 / 0.97);
+    color: var(--text);
+    overscroll-behavior: contain;
+  }
+
+  .profile::backdrop {
+    background: rgb(2 3 11 / 0.72);
+    backdrop-filter: blur(4px);
+  }
+
+  .profile__close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--sx-line);
+    border-radius: 2px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .profile__close:hover {
+    color: var(--text);
+    border-color: var(--sx-accent);
+  }
+
+  .profile__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: center;
+    margin-bottom: var(--space-5);
+    padding-right: var(--space-6);
+  }
+
+  .profile__photo {
+    width: 4.5rem;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 2px;
+    box-shadow: 0 0 24px rgb(148 27 255 / 0.35);
+  }
+
+  .profile__name {
+    margin-top: var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .profile__headline {
+    margin-top: var(--space-1);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .profile__bio {
+    display: grid;
+    gap: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+  }
+
+  .profile__bio a {
+    color: var(--sx-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .profile__bio a:hover {
+    color: var(--text);
+  }
+
+  @media (min-width: 640px) {
+    .profile {
+      padding: var(--space-7) var(--space-7) var(--space-6);
+    }
+
+    .profile__photo {
+      width: 6rem;
+    }
+  }
+
+  .profile__close:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+</style>
