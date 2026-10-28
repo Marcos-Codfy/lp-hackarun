@@ -93,6 +93,12 @@ describe('Apps Script · cadastro de mentores', () => {
     });
   });
 
+  it('o script aceita o dia 11/11 mesmo que o site não o ofereça (dá pra trocar os dias só no site)', () => {
+    const script = new AppsScriptSandbox();
+    expect(script.post(mentorBody({ days: ['13', '11'] })).ok).toBe(true);
+    expect(rowsOf(script)[0]).toMatchObject({ 'Dias disponíveis': '11/11 (qua), 13/11 (sex)' });
+  });
+
   it('e-mail em caixa alta e WhatsApp com +55 saem normalizados', () => {
     const script = new AppsScriptSandbox();
     script.post(mentorBody({ email: ' Ana.Mentora@Exemplo.COM ', whatsapp: '+55 63 99999-0101' }));

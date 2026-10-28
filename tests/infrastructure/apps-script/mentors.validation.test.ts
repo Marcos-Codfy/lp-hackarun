@@ -34,7 +34,6 @@ describe('Apps Script · cadastro de mentores recusa o que não vale', () => {
     ['nenhum dia', { days: [] }],
     ['dias que não existem', { days: ['10', '15'] }],
     ['só "a combinar" (não existe mais)', { days: ['tbd'] }],
-    ['só o dia das oficinas (11/11)', { days: ['11'] }],
     ['dias como texto', { days: '13' }],
     ['divulgar como texto', { mayPublish: 'sim' }],
     ['sem resposta de divulgar', { mayPublish: undefined }],

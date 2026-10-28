@@ -24,13 +24,15 @@ const value = <T>(name: string) => script.evaluate<T>(name);
 describe('Apps Script · contrato do cadastro de mentor com o site', () => {
   it('as listas de opções são as mesmas (áreas e dias)', () => {
     expect(value<string[]>('MENTOR_AREAS')).toEqual([...MENTOR_AREAS]);
-    expect(value<string[]>('MENTOR_DAYS')).toEqual([...MENTOR_DAYS]);
+    // o script aceita todos os dias do evento e o site oferece só os de hoje: mudar os dias do site não exige mexer na planilha
+    expect(value<string[]>('MENTOR_DAYS')).toEqual(['11', '12', '13', '14']);
+    expect(value<string[]>('MENTOR_DAYS')).toEqual(expect.arrayContaining([...MENTOR_DAYS]));
   });
 
   it('todo rótulo da planilha existe para toda opção (nenhuma opção cai sem tradução)', () => {
     const labels = (name: string) => Object.keys(value<Record<string, string>>(name)).sort();
     expect(labels('MENTOR_AREA_LABELS')).toEqual([...MENTOR_AREAS].sort());
-    expect(labels('MENTOR_DAY_LABELS')).toEqual([...MENTOR_DAYS].sort());
+    expect(labels('MENTOR_DAY_LABELS')).toEqual(value<string[]>('MENTOR_DAYS').sort());
   });
 
   it('limites de texto, intervalo do ano e tamanho do endereço são os mesmos', () => {
@@ -112,8 +114,6 @@ describe('Apps Script · contrato do cadastro de mentor com o site', () => {
     ['egresso com ano quebrado', { graduationYear: '2019.5' }],
     ['egresso sem ano', { graduationYear: '' }],
     ['dias fora de ordem e repetidos', { days: ['14', '12', '14'] }],
-    ['dia 11/11 (só oficinas, não existe mais)', { days: ['11'] }],
-    ['11/11 junto com um dia válido', { days: ['11', '13'] }],
     ['só a combinar (não existe mais)', { days: ['tbd'] }],
     ['dias que não existem', { days: ['10', '15'] }],
     ['nenhum dia', { days: [] }],

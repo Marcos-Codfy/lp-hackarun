@@ -226,6 +226,10 @@ cadastros). A única mudança fora do `Mentors.gs` é uma linha no `doPost` do `
   `cancelado`), **Equipe(s) atendida(s)** e **Anotações**. Cadastro `cancelado` libera o e-mail e o WhatsApp.
 - **Aba Resumo Mentores:** contadores ao vivo, listas prontas para copiar (e-mails e WhatsApps dos confirmados) e o
   passo a passo da organização, tudo lendo a aba Mentores.
+- **Dias:** o site oferece 12, 13 e 14/11 (o 11/11 é só de oficinas), mas o script aceita todos os dias do evento
+  (11 a 14/11). Se a coordenação pedir outro dia, mude só o site (`MENTOR_DAYS` em
+  `src/domain/value-objects/MentorProfile.ts` e a lista em `src/presentation/formatters/MentorLabels.ts`): a planilha
+  não precisa ser tocada nem republicada.
 - **Regras:** e-mail e WhatsApp não se repetem entre mentores ativos (a mesma pessoa pode ser participante e
   mentora); reenvio com a mesma chave devolve o mesmo protocolo; mesmos limites de envio das inscrições.
 - **Consentimento:** versão `2026-10-m1` (seção "Cadastro de mentores" de `/privacidade`), gravada na coluna

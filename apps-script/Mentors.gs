@@ -29,7 +29,9 @@ const MENTOR_AREAS = [
   'quality',
   'other',
 ];
-const MENTOR_DAYS = ['12', '13', '14'];
+// o script aceita TODOS os dias do evento (11 a 14/11) e o site oferece só os que valem hoje (12 a 14/11, ver MENTOR_DAYS em
+// src/domain/value-objects/MentorProfile.ts): se a coordenação pedir outro dia, basta mudar o site, sem tocar na planilha
+const MENTOR_DAYS = ['11', '12', '13', '14'];
 const GRADUATION_YEARS = { min: 1995, max: 2030 };
 // mesmos MENTOR_*_RULE do src/domain/entities/MentorRegistration.ts e PROFILE_LINK do ProfileLink.ts (um teste confere)
 const MENTOR_AREA_OTHER_LIMITS = { min: 2, max: 60 };
@@ -51,6 +53,7 @@ const MENTOR_AREA_LABELS = {
   other: 'Outra',
 };
 const MENTOR_DAY_LABELS = {
+  11: '11/11 (qua)',
   12: '12/11 (qui)',
   13: '13/11 (sex)',
   14: '14/11 (sáb)',
@@ -403,7 +406,7 @@ function mentorSummaryCounters_() {
     'Área: ' + MENTOR_AREA_LABELS[key],
     '=COUNTIFS(' + active + ',' + col('area') + ',"' + MENTOR_AREA_LABELS[key] + '")',
   ]);
-  // o texto da coluna Dias tem todos os dias da pessoa ("12/11 (qui), 14/11 (sáb)"): o curinga conta quem tem o dia
+  // o texto da coluna Dias tem todos os dias da pessoa ("11/11 (qua), 13/11 (sex)"): o curinga conta quem tem o dia
   const perDay = MENTOR_DAYS.map((key) => [
     'Disponível em ' + MENTOR_DAY_LABELS[key],
     '=COUNTIFS(' + active + ',' + col('days') + ',"*' + MENTOR_DAY_LABELS[key] + '*")',
