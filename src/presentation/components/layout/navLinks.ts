@@ -1,4 +1,5 @@
 // navegação do site (header, menu mobile e rodapé usam a mesma lista): âncora = seção da LP, caminho = página
+import { MENTOR_PATH, mentorHref } from '@presentation/view-models/mentor/mentorOrigin';
 import {
   REGISTRATION_PATH,
   registrationHref,
@@ -23,7 +24,7 @@ export const NAV_LINKS: readonly NavLink[] = [
 ];
 
 // em que página o header/rodapé está: na LP as âncoras rolam; fora dela voltam pra LP (/#secao)
-export type SitePage = 'home' | 'teams' | 'registration' | 'authorization';
+export type SitePage = 'home' | 'teams' | 'registration' | 'authorization' | 'mentor';
 
 export const AUTHORIZATION_PATH = '/autorizacao';
 
@@ -32,6 +33,7 @@ const PAGE_PATHS: Record<SitePage, string> = {
   teams: '/equipes',
   registration: REGISTRATION_PATH,
   authorization: AUTHORIZATION_PATH,
+  mentor: MENTOR_PATH,
 };
 
 export interface ResolvedNavLink {
@@ -68,7 +70,7 @@ export function navLinksFor(page: SitePage): ResolvedNavLink[] {
   return NAV_LINKS.map((link) => resolve(link, page));
 }
 
-// rodapé: a navegação do site + a página de inscrição (no header ela é o botão de destaque)
+// rodapé: a navegação do site + a página de inscrição (no header ela é o botão de destaque) + o cadastro de mentor
 export function footerLinksFor(page: SitePage): ResolvedNavLink[] {
   const registration: ResolvedNavLink = {
     href: page === 'registration' ? REGISTRATION_PATH : registrationHref('footer'),
@@ -76,7 +78,13 @@ export function footerLinksFor(page: SitePage): ResolvedNavLink[] {
     ariaCurrent: page === 'registration' ? 'page' : undefined,
     spy: undefined,
   };
-  return [...navLinksFor(page), registration];
+  const mentor: ResolvedNavLink = {
+    href: page === 'mentor' ? MENTOR_PATH : mentorHref('footer'),
+    label: 'Seja mentor',
+    ariaCurrent: page === 'mentor' ? 'page' : undefined,
+    spy: undefined,
+  };
+  return [...navLinksFor(page), registration, mentor];
 }
 
 // CTA do header e do menu (/inscricao com a origem; encerrada, /inscricao limpa com o aviso): na página de
@@ -107,9 +115,9 @@ export function headerCtaAttrs(
   };
 }
 
-// barra de baixo do header em /inscricao e /equipes. Enquanto /equipes está escondida (até o sorteio), a
-// barra só tem a inscrição: nenhuma das duas páginas leva pra ela
-export type SubNavPage = Extract<SitePage, 'registration' | 'teams'>;
+// barra de baixo do header em /inscricao, /equipes e /seja-mentor. Enquanto /equipes está escondida (até o
+// sorteio), a barra tem a inscrição e, em /seja-mentor, o cadastro de mentor ao lado dela
+export type SubNavPage = Extract<SitePage, 'registration' | 'teams' | 'mentor'>;
 
 export interface SubNavLink {
   href: string;
@@ -123,12 +131,12 @@ export interface SubNavLink {
 export const EVENT_RETURN_HREF = '/#inscricao';
 
 export function subNavLinksFor(page: SubNavPage): SubNavLink[] {
-  return [
-    {
-      href: page === 'registration' ? REGISTRATION_PATH : registrationHref('subnav'),
-      label: 'Inscrição',
-      short: 'Inscrição',
-      ariaCurrent: page === 'registration' ? 'page' : undefined,
-    },
-  ];
+  const registration: SubNavLink = {
+    href: page === 'registration' ? REGISTRATION_PATH : registrationHref('subnav'),
+    label: 'Inscrição',
+    short: 'Inscrição',
+    ariaCurrent: page === 'registration' ? 'page' : undefined,
+  };
+  if (page !== 'mentor') return [registration];
+  return [registration, { href: MENTOR_PATH, label: 'Mentor', short: 'Mentor', ariaCurrent: 'page' }];
 }

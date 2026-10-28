@@ -1,0 +1,218 @@
+---
+// conteúdo da página /seja-mentor: título, o que um mentor faz (painel ao lado) e o formulário. Desktop:
+// formulário à esquerda e o painel fixo à direita. Celular e tablet: tudo numa coluna, painel enxuto no topo
+import type { LandingPageDTO } from '@application/index';
+import PageHalo from '@presentation/components/layout/PageHalo.astro';
+import MentorForm from '@presentation/components/mentor/MentorForm.astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
+import SectionHeader from './shared/SectionHeader.astro';
+import './sections.css';
+
+interface Props {
+  data: LandingPageDTO;
+}
+
+const { event, schedule } = Astro.props.data;
+// os mentores são apresentados às equipes na abertura (lido da programação)
+const lookup = new ScheduleLookup(schedule);
+const presentation = lookup.activity('teams-and-mentors');
+const presentationAt = presentation
+  ? `${lookup.shortDate(presentation.day)}, às ${lookup.startOf(presentation)}`
+  : null;
+
+const duties = [
+  {
+    icon: 'chat',
+    title: 'Orienta, não escreve a solução',
+    text: 'Tira dúvidas e ajuda a equipe a encontrar o caminho. A entrega é da equipe.',
+  },
+  {
+    icon: 'route',
+    title: 'Do produto à apresentação',
+    text: 'Programação, arquitetura, testes, segurança, documentação e gestão do tempo, conforme a sua área.',
+  },
+  {
+    icon: 'clock',
+    title: 'Nos dias que você puder',
+    text: 'Você marca no formulário os dias do evento (12 a 14/11) em que pode acompanhar as equipes, presencialmente.',
+  },
+] as const;
+---
+
+<section class="section mentor tone-violet" id="cadastro" aria-labelledby="mentor-title">
+  <PageHalo />
+  <div class="container mentor__wrap">
+    <div class="mentor__head">
+      <SectionHeader
+        id="mentor-title"
+        level="h1"
+        size="lg"
+        code="MT"
+        eyebrow="Cadastro de mentores"
+        title="Seja <em>mentor</em>"
+        lead="Egresso da UniCatólica ou profissional de tecnologia? Ajude as equipes do HackaRun a tirar a ideia do papel, em Palmas."
+      />
+    </div>
+
+    <div class="mentor__layout">
+      <aside class="mentor__aside sx-glass" aria-label="Como funciona a mentoria" data-mentor-aside>
+        <p class="sx-hud">// O que faz um mentor</p>
+        <ul class="mentor__duties" role="list">
+          {duties.map((duty) => (
+            <li>
+              <span class="sx-icon">
+                <Icon name={duty.icon} size={20} />
+              </span>
+              <p>
+                <strong>{duty.title}</strong>
+                {duty.text}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <p class="mentor__note">
+          <Icon name="lock" size={16} />
+          <span>Os dados ficam só com a organização do HackaRun.</span>
+        </p>
+      </aside>
+      <div class="mentor__panel sx-glass sx-corners" id="formulario">
+        <span class="mentor__topline" aria-hidden="true"></span>
+        <MentorForm endpoint={event.registration.endpoint} presentationAt={presentationAt} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* primeira seção da página, logo abaixo da SubNav (o PageLayout já desconta o header fixo) */
+  .mentor {
+    padding-top: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    overflow: clip;
+  }
+
+  .mentor__wrap {
+    display: grid;
+    gap: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  }
+
+  .mentor__head {
+    animation: mentor-in 0.8s var(--ease-out) both;
+  }
+
+  .mentor__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .mentor__aside[hidden] {
+    display: none;
+  }
+
+  .mentor__aside {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+    padding: var(--space-5);
+  }
+
+  .mentor__duties {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .mentor__duties li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  .mentor__duties p {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+  }
+
+  .mentor__duties strong {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .mentor__note {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-2);
+    align-items: start;
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+  }
+
+  /* a moldura de vidro do formulário (a mesma da inscrição) */
+  .mentor__panel {
+    --sx-border: linear-gradient(
+      160deg,
+      var(--c-cyan) 0%,
+      rgb(18 100 255 / 0.35) 30%,
+      rgb(148 27 255 / 0.2) 70%,
+      var(--c-magenta) 100%
+    );
+    padding: var(--space-5) var(--space-4) var(--space-6);
+    box-shadow:
+      0 0 0 1px rgb(0 229 255 / 0.05),
+      0 0 90px -30px rgb(0 229 255 / 0.45),
+      0 50px 100px -50px rgb(0 0 0 / 0.95);
+  }
+
+  .mentor__topline {
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-cyan), var(--c-violet), transparent);
+    box-shadow: 0 0 18px var(--c-cyan);
+  }
+
+  @media (min-width: 40rem) {
+    .mentor__panel {
+      padding: var(--space-6) var(--space-7);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    /* formulário à esquerda; o painel acompanha a rolagem à direita */
+    .mentor__layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+      align-items: start;
+      gap: var(--space-7);
+    }
+
+    .mentor__panel {
+      grid-row: 1;
+      grid-column: 1;
+    }
+
+    .mentor__aside {
+      grid-column: 2;
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-4));
+    }
+  }
+
+  @keyframes mentor-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mentor__head {
+      animation: none;
+    }
+  }
+</style>

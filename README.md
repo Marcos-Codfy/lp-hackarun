@@ -46,7 +46,7 @@ evento, o regulamento, a programação, os mentores e os prêmios, e recebe a in
   pessoas, no máximo 5) são formadas num sorteio presencial, em 12/11.
 - **O site:** página inicial com o evento, o regulamento (com o PDF para baixar), a programação em abas por dia, os
   mentores, a grande final, os prêmios, os patrocinadores e as perguntas frequentes; a página de inscrição
-  (`/inscricao`); o aviso de privacidade (`/privacidade`); o modelo de autorização do responsável para menores de 18
+  (`/inscricao`); o cadastro de mentores (`/seja-mentor`); o aviso de privacidade (`/privacidade`); o modelo de autorização do responsável para menores de 18
   anos (`/autorizacao`); e a página das equipes (`/equipes`), que fica escondida até o sorteio.
 - **Cena 3D:** sete objetos gerados por código aparecem na página (globo, cronômetro, ponto de interrogação, terreno,
   palco, troféu e galáxia), com 9 mil a 42 mil partículas. Não há modelos 3D nem vídeos. O pós-processamento (bloom,
@@ -56,7 +56,7 @@ evento, o regulamento, a programação, os mentores e os prêmios, e recebe a in
 - **Acessibilidade:** o conteúdo funciona sem JavaScript e sem WebGL, a página respeita `prefers-reduced-motion` e há
   um botão para pausar as animações.
 - **Inscrições sem servidor próprio:** o formulário envia os dados para um Google Apps Script, que grava cada
-  inscrição no Google Sheets (abas Inscritos, Equipes e Resumo).
+  inscrição no Google Sheets (abas Inscritos, Equipes, Resumo, Mentores e Resumo Mentores).
 
 ## Telas
 
@@ -115,7 +115,7 @@ tamanhos grandes.
 | Estilo     | CSS (custom properties, cascade layers, `clamp()`, `content-visibility`) e design tokens                                                                     |
 | Fontes     | Orbitron, Montserrat e JetBrains Mono, hospedadas no próprio site, só com os caracteres latinos                                                              |
 | Imagens    | Otimização do Astro (`astro:assets`) para as logos e a imagem de compartilhamento, e CDN de imagens do Google para as insígnias das equipes                  |
-| Backend    | Google Apps Script, Google Sheets (abas Inscritos, Equipes e Resumo) e Google Drive (insígnias das equipes)                                                  |
+| Backend    | Google Apps Script, Google Sheets (abas Inscritos, Equipes, Resumo, Mentores e Resumo Mentores) e Google Drive (insígnias das equipes)                       |
 | Qualidade  | Vitest, ESLint, Prettier, Astro Check, Playwright e Lighthouse                                                                                               |
 | Fluxo      | Husky, lint-staged, commitlint (Conventional Commits) e GitHub Actions                                                                                       |
 | Hospedagem | Cloudflare Pages, com o domínio `hackarun.com.br` e o DNS na Cloudflare                                                                                      |
@@ -184,7 +184,7 @@ flowchart TB
   S --> R
 ```
 
-As páginas `/inscricao`, `/equipes`, `/privacidade` e `/autorizacao` usam um carregamento à parte
+As páginas `/inscricao`, `/seja-mentor`, `/equipes`, `/privacidade` e `/autorizacao` usam um carregamento à parte
 ([`LightApp`](src/presentation/app/LightApp.ts)), sem 3D, GSAP e Lenis.
 
 <details>
@@ -396,7 +396,7 @@ src/
 ├── shared/          # EventBus, Observable, Ticker e utilitários
 ├── composition/     # onde as camadas são ligadas
 ├── assets/          # logos oficiais e a fonte Orbitron
-└── pages/           # inicio, inscricao, equipes, privacidade, autorizacao e 404
+└── pages/           # inicio, inscricao, seja-mentor, equipes, privacidade, autorizacao e 404
 apps-script/         # código do Google Apps Script e o passo a passo de instalação
 public/              # imagem de compartilhamento, favicon, regulamento em PDF e _headers
 scripts/             # setup, ajuste da fonte e testes visuais (qa/)
@@ -416,6 +416,10 @@ docs/                # guia do projeto, decisões de arquitetura (ADR) e as imag
   pessoa na própria planilha.
 - **Equipes no site:** uma equipe aparece em `/equipes` quando a organização cria a equipe na aba **Equipes** e muda o
   Status para `confirmado`. Os detalhes estão no [`apps-script/README.md`](apps-script/README.md).
+- **Mentores:** egressos e profissionais se cadastram em `/seja-mentor` (nome, contato, área de atuação, se é egresso
+  e os dias do evento em que pode acompanhar as equipes, sempre presencial). O Apps Script grava na aba **Mentores** e nos totais da aba **Resumo
+  Mentores**, separadas das inscrições. O cadastro tem o aviso de privacidade próprio (seção "Cadastro de mentores"
+  de `/privacidade`).
 
 ## Contribuindo
 

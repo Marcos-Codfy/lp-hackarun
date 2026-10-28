@@ -16,6 +16,7 @@ export const SCRIPT_FILES = [
   'Registry.gs',
   'Setup.gs',
   'Summary.gs',
+  'Mentors.gs',
 ] as const;
 
 export interface ScriptResponse {
@@ -200,3 +201,4 @@ export class AppsScriptSandbox {
 }
 
 export * from './bodies';
+export * from './mentorBodies';

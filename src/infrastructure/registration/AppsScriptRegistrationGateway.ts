@@ -1,72 +1,13 @@
-import {
-  RegistrationGatewayError,
-  type GatewayFailure,
-  type RegistrationGateway,
-  type RegistrationPayload,
-  type RegistrationReceipt,
-} from '@application/index';
-import { AppsScriptHttpError, type AppsScriptClient } from './AppsScriptClient';
+import type { RegistrationGateway, RegistrationPayload } from '@application/index';
+import type { AppsScriptClient } from './AppsScriptClient';
+import { AppsScriptSubmitGateway } from './AppsScriptSubmitGateway';
 
-// sem foto, o envio é pequeno; a folga é pra rede lenta de celular e pro Apps Script acordar
-const TIMEOUT_MS = 20_000;
-
-// erros que o Code.gs devolve -> falhas que a aplicação entende
-const SERVER_ERRORS = new Map<string, GatewayFailure>([
-  ['duplicate', 'duplicate'],
-  ['duplicate_email', 'duplicate-email'],
-  ['duplicate_whatsapp', 'duplicate-whatsapp'],
-  ['duplicate_student_id', 'duplicate-student-id'],
-  ['closed', 'closed'],
-  ['invalid', 'rejected'],
-  ['rate-limited', 'rate-limited'],
-  ['server', 'server'],
-]);
-
-interface ServerResponse {
-  ok?: unknown;
-  protocol?: unknown;
-  error?: unknown;
-}
-
-// adapter: porta RegistrationGateway -> Web App do Apps Script que grava na planilha
-export class AppsScriptRegistrationGateway implements RegistrationGateway {
-  private readonly client: AppsScriptClient;
-
+// adapter: porta RegistrationGateway -> Web App do Apps Script que grava na planilha (aba Inscritos)
+export class AppsScriptRegistrationGateway
+  extends AppsScriptSubmitGateway<RegistrationPayload>
+  implements RegistrationGateway
+{
   constructor(client: AppsScriptClient) {
-    this.client = client;
-  }
-
-  async submit(payload: RegistrationPayload): Promise<RegistrationReceipt> {
-    let response: unknown;
-    try {
-      response = await this.client.post({ action: 'register', ...payload }, TIMEOUT_MS);
-    } catch (error) {
-      if (error instanceof AppsScriptHttpError && error.status === 429) {
-        throw new RegistrationGatewayError('rate-limited', 'Too many requests');
-      }
-      // 5xx = o Google respondeu, mas o script caiu (cota, exceção fora do try): a rede está ok
-      if (error instanceof AppsScriptHttpError && error.status >= 500) {
-        throw new RegistrationGatewayError('server', error.message);
-      }
-      throw new RegistrationGatewayError('network', AppsScriptRegistrationGateway.describe(error));
-    }
-    return AppsScriptRegistrationGateway.parse(response);
-  }
-
-  private static parse(response: unknown): RegistrationReceipt {
-    if (typeof response !== 'object' || response === null) {
-      throw new RegistrationGatewayError('network', 'Unexpected response');
-    }
-    const body = response as ServerResponse;
-    if (body.ok === true && typeof body.protocol === 'string' && body.protocol) {
-      return { protocol: body.protocol };
-    }
-    const code = typeof body.error === 'string' ? body.error : '';
-    throw new RegistrationGatewayError(SERVER_ERRORS.get(code) ?? 'rejected', code || 'Rejected');
-  }
-
-  private static describe(error: unknown): string {
-    if (error instanceof DOMException && error.name === 'AbortError') return 'Timeout';
-    return error instanceof Error ? error.message : 'Network error';
+    super(client, 'register');
   }
 }

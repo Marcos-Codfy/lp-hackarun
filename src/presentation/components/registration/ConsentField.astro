@@ -2,34 +2,45 @@
 // aceite do regulamento + LGPD da própria pessoa; checkbox nativo com caixa custom de 24px num alvo de 44px.
 // O aviso abre na mesma aba: o rascunho (sessionStorage) é desta aba e volta inteiro pelo "voltar" do navegador
 // ou pelo "Ir para a inscrição" do aviso (numa aba nova o formulário apareceria vazio). Mudou o texto, suba o
-// CONSENT_VERSION (src/application/use-cases/SubmitRegistration.ts e apps-script/Validation.gs)
+// CONSENT_VERSION (src/application/use-cases/SubmitRegistration.ts e apps-script/Validation.gs).
+// O cadastro de mentor usa a mesma caixa com outro texto (slot), id e campo; a caixa opcional (required=false)
+// é a autorização de divulgar o nome no site
+interface Props {
+  id?: string;
+  field?: string;
+  required?: boolean;
+}
+
+const { id = 'reg-terms', field = 'acceptedTerms', required = true } = Astro.props;
 ---
 
 <div class="consent">
-  <label class="consent__label" for="reg-terms">
+  <label class="consent__label" for={id}>
     <input
-      id="reg-terms"
+      id={id}
       class="consent__input"
       type="checkbox"
-      name="acceptedTerms"
-      data-field="acceptedTerms"
-      aria-required="true"
+      name={field}
+      data-field={field}
+      aria-required={required ? 'true' : undefined}
     />
     <span class="consent__box" aria-hidden="true"></span>
     <span class="consent__text">
-      Li e aceito o{' '}
-      <a class="consent__link" href="/regulamento-hackarun-2026.pdf" download>
-        regulamento do HackaRun 2026 (PDF)
-      </a>
-      . Autorizo a organização a usar os dados informados só para organizar a competição, o credenciamento e o
-      sorteio das equipes e para falar comigo por e-mail e WhatsApp, conforme o{' '}
-      <a class="consent__link" href="/privacidade">
-        aviso de privacidade
-      </a>{' '}
-      (LGPD).
+      <slot>
+        Li e aceito o{' '}
+        <a class="consent__link" href="/regulamento-hackarun-2026.pdf" download>
+          regulamento do HackaRun 2026 (PDF)
+        </a>
+        . Autorizo a organização a usar os dados informados só para organizar a competição, o credenciamento e
+        o sorteio das equipes e para falar comigo por e-mail e WhatsApp, conforme o{' '}
+        <a class="consent__link" href="/privacidade">
+          aviso de privacidade
+        </a>{' '}
+        (LGPD).
+      </slot>
     </span>
   </label>
-  <p class="consent__error" id="reg-terms-error" data-error-for="acceptedTerms" hidden></p>
+  <p class="consent__error" id={`${id}-error`} data-error-for={field} hidden></p>
 </div>
 
 <style>
@@ -116,18 +127,18 @@
     box-shadow: 0 0 16px color-mix(in srgb, var(--c-danger) 35%, transparent);
   }
 
-  .consent__link {
+  .consent :global(.consent__link) {
     color: var(--accent);
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .consent__link:hover {
+  .consent :global(.consent__link):hover {
     color: var(--text);
   }
 
-  .consent__link:focus-visible {
+  .consent :global(.consent__link):focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
   }

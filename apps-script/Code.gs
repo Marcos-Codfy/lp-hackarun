@@ -13,6 +13,8 @@ function doPost(e) {
   const body = parseBody_(e);
   // primeiro filtro, barato: honeypot preenchido ou formulário enviado rápido demais
   if (!body || isBot_(body)) return json_({ ok: false, error: 'invalid' });
+  // cadastro de mentor: outro fluxo e outra aba (Mentors.gs); não passa pelo prazo nem pelas vagas da inscrição
+  if (body.action === 'register-mentor') return registerMentor_(body);
   const config = readConfig_();
   if (closedByConfig_(config, Date.now())) return json_({ ok: false, error: 'closed' });
   const data = validateRegistration_(body);

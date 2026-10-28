@@ -12,9 +12,10 @@ export function controlFor(root: HTMLElement, path: string): HTMLElement | null 
   return qs(`[data-field="${path}"]`, root);
 }
 
-// "WhatsApp" ou "Você estuda atualmente?" pro resumo de erros
+// "WhatsApp" ou "Você estuda atualmente?" pro resumo de erros. O aceite se chama "Regulamento e LGPD" na
+// inscrição; o formulário de mentor troca o nome em data-consent-label (ele não tem regulamento)
 export function labelFor(root: HTMLElement, path: string): string {
-  if (path === 'acceptedTerms') return 'Regulamento e LGPD';
+  if (path === 'acceptedTerms') return root.dataset['consentLabel'] ?? 'Regulamento e LGPD';
   const group = qs(`[data-field-group="${path}"]`, root);
   const legend = group ? qs('legend', group) : null;
   const control = group ? null : controlFor(root, path);

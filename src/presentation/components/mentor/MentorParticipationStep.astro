@@ -1,0 +1,18 @@
+---
+// etapa 03 do cadastro de mentor: os dias do evento em que a pessoa pode acompanhar as equipes (a participação é
+// sempre presencial)
+import ChoiceField from '@presentation/components/registration/ChoiceField.astro';
+import FormStep from '@presentation/components/registration/FormStep.astro';
+import { MENTOR_DAY_OPTIONS } from '@presentation/formatters/MentorLabels';
+---
+
+<FormStep index="03" title="Participação" lead="A participação é presencial.">
+  <ChoiceField
+    id="mentor-days"
+    field="days"
+    legend="Em quais dias do evento você pode acompanhar as equipes?"
+    hint="Pode marcar mais de um."
+    options={MENTOR_DAY_OPTIONS}
+    multiple
+  />
+</FormStep>

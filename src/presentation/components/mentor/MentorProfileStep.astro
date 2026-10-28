@@ -1,0 +1,61 @@
+---
+// etapa 02 do cadastro de mentor: área de atuação e se é egresso. Os campos que dependem de uma resposta são
+// [data-show-field], que a MentorFormView mostra e esconde: "qual área" para quem escolheu "Outra" e curso e ano
+// de formatura para quem respondeu "sim" na pergunta do egresso
+import TextField from '@presentation/components/registration/TextField.astro';
+import SelectField from '@presentation/components/registration/SelectField.astro';
+import ChoiceField from '@presentation/components/registration/ChoiceField.astro';
+import FormStep from '@presentation/components/registration/FormStep.astro';
+import { COURSE_SUGGESTIONS } from '@presentation/formatters/ParticipantLabels';
+import { GRADUATE_OPTIONS, MENTOR_AREA_OPTIONS } from '@presentation/formatters/MentorLabels';
+---
+
+<FormStep index="02" title="Atuação" lead="Para a organização saber em que área você pode ajudar as equipes.">
+  <SelectField
+    id="mentor-area"
+    field="area"
+    label="Área de atuação"
+    hint="A que mais combina com o seu dia a dia."
+    options={MENTOR_AREA_OPTIONS}
+  />
+  <div data-show-field="areaOther" hidden>
+    <TextField id="mentor-area-other" field="areaOther" label="Qual é a sua área?" maxlength={60} wide />
+  </div>
+  <TextField
+    id="mentor-specialties"
+    field="specialties"
+    label="Tecnologias e temas que você domina"
+    hint="Ex.: React, Node.js, Docker, redes, pentest, Scrum."
+    optional
+    maxlength={120}
+    wide
+  />
+  <ChoiceField
+    id="mentor-graduate"
+    field="graduate"
+    legend="Você é egresso(a) da UniCatólica?"
+    options={GRADUATE_OPTIONS}
+    columns={2}
+  />
+  <div class="regform__pair">
+    <div data-show-field="course" hidden>
+      <TextField
+        id="mentor-course"
+        field="course"
+        label="Curso em que se formou"
+        maxlength={80}
+        suggestions={COURSE_SUGGESTIONS}
+      />
+    </div>
+    <div data-show-field="graduationYear" hidden>
+      <TextField
+        id="mentor-graduation-year"
+        field="graduationYear"
+        label="Ano de formatura"
+        inputmode="numeric"
+        placeholder="2022"
+        maxlength={4}
+      />
+    </div>
+  </div>
+</FormStep>

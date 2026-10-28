@@ -1,0 +1,52 @@
+---
+// etapa 01 do cadastro de mentor: nome, e-mail, WhatsApp e o perfil profissional (opcional)
+import TextField from '@presentation/components/registration/TextField.astro';
+import FormStep from '@presentation/components/registration/FormStep.astro';
+---
+
+<FormStep index="01" title="Seus dados" lead="É por eles que a organização fala com você.">
+  <TextField
+    id="mentor-name"
+    field="name"
+    label="Nome completo"
+    autocomplete="name"
+    autocapitalize="words"
+    maxlength={80}
+    wide
+  />
+  <div class="regform__pair">
+    <TextField
+      id="mentor-email"
+      field="email"
+      label="E-mail"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      autocapitalize="off"
+      maxlength={120}
+    />
+    <TextField
+      id="mentor-whatsapp"
+      field="whatsapp"
+      label="WhatsApp"
+      hint="Com DDD."
+      type="tel"
+      autocomplete="tel-national"
+      inputmode="tel"
+      placeholder="(63) 99999-9999"
+      maxlength={20}
+    />
+  </div>
+  <TextField
+    id="mentor-linkedin"
+    field="linkedin"
+    label="LinkedIn ou portfólio"
+    hint="Ajuda a organização a conhecer o seu trabalho."
+    optional
+    inputmode="url"
+    autocapitalize="off"
+    placeholder="linkedin.com/in/seu-perfil"
+    maxlength={200}
+    wide
+  />
+</FormStep>

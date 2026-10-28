@@ -15,8 +15,10 @@ import { FallbackTeamRepository } from '@infrastructure/repositories/FallbackTea
 import { StaticTeamRepository } from '@infrastructure/repositories/StaticContentRepositories';
 import { LocalPreferenceStore } from '@infrastructure/storage/LocalPreferenceStore';
 import { registrationMode, SIMULATION_ENABLED } from '@shared/config/registrationMode';
+import type { MentorServices } from './mentors';
 import type { RegistrationServices } from './registration';
 
+export type { MentorServices } from './mentors';
 export type { RegistrationServices } from './registration';
 
 export interface ClientContainer {
@@ -24,6 +26,8 @@ export interface ClientContainer {
   getCountdown: GetCountdown;
   // envio da inscrição e contagem de vagas: chunk à parte (registration.ts), baixado uma vez na 1ª chamada
   loadRegistration(): Promise<RegistrationServices>;
+  // cadastro de mentor (/seja-mentor): outro chunk (mentors.ts), baixado só nessa página
+  loadMentors(): Promise<MentorServices>;
   // null = sem planilha configurada, fica só a lista do build
   listTeams: ListTeams | null;
   preferences: PreferenceStore;
@@ -66,6 +70,20 @@ function registrationLoader(
   };
 }
 
+// idem pro cadastro de mentor
+function mentorLoader(config: AppConfig, clock: Clock, simulated: boolean): () => Promise<MentorServices> {
+  let loading: Promise<MentorServices> | null = null;
+  return () => {
+    loading ??= import('./mentors')
+      .then(({ createMentorServices }) => createMentorServices(config, clock, simulated))
+      .catch((error: unknown) => {
+        loading = null;
+        throw error;
+      });
+    return loading;
+  };
+}
+
 // lista de equipes do sorteio (aba Equipes da planilha); sem planilha fica só a lista do build
 function createListTeams(endpoint: string | null): ListTeams | null {
   if (!endpoint) return null;
@@ -85,6 +103,7 @@ export function createClientContainer(config: AppConfig, options: { simulation: 
     clock,
     getCountdown: new GetCountdown(clock, config.milestones),
     loadRegistration: registrationLoader(config, clock, simulated),
+    loadMentors: mentorLoader(config, clock, simulated),
     listTeams: createListTeams(config.teamsEndpoint),
     preferences: new LocalPreferenceStore(),
   };
