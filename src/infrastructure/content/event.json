@@ -75,7 +75,11 @@
               "start": "20:00",
               "end": "20:50",
               "details": "Fundamentos de Git e GitHub, criação de repositórios, controle de versões, commits, branches e colaboração no desenvolvimento de software.",
-              "speaker": { "name": null, "photo": null, "bio": null }
+              "speaker": {
+                "name": "Guilherme Taveira Berson",
+                "photo": "/palestrantes/guilherme-berson.jpg",
+                "bio": "Graduado em Sistemas de Informação pela Universidade Estadual do Tocantins (Unitins), com pós-graduações em Inteligência Artificial e Desenvolvimento de Aplicações para Dispositivos Móveis. Engenheiro de Software com mais de 9 anos de experiência, possui atuação no desenvolvimento de soluções digitais, especialmente no setor financeiro, com foco em aplicações móveis, arquitetura de software e boas práticas de desenvolvimento. É também professor do ensino superior na Unitins, atuando nas áreas de Engenharia de Software, Desenvolvimento de Sistemas e Projetos Extensionistas, integrando experiência de mercado e formação acadêmica."
+              }
             },
             {
               "id": "hacking-ideas-ai",
