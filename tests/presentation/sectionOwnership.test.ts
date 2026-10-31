@@ -1,5 +1,5 @@
-// cada assunto tem uma seção dona: o local da final nasce na seção 06 e nada que o visitante lê antes dela o
-// entrega (senão a revelação perde a graça e a 06 vira repetição). A numeração também segue a ordem da página
+// cada assunto tem uma seção dona: o local da final nasce na seção 07 e nada que o visitante lê antes dela o
+// entrega (senão a revelação perde a graça e a 07 vira repetição). A numeração também segue a ordem da página
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -36,7 +36,7 @@ function codeOf(section: string): string | null {
 describe('ordem das seções', () => {
   it('a numeração do título segue a ordem em que as seções aparecem, sem buraco', () => {
     const codes = ORDER.map(codeOf).filter((code): code is string => code !== null);
-    expect(codes).toEqual(['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']);
+    expect(codes).toEqual(['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']);
   });
 
   it('a grande final vem depois da programação e dos mentores, antes dos prêmios', () => {
@@ -47,10 +47,10 @@ describe('ordem das seções', () => {
   });
 });
 
-describe('o local da final pertence à seção 06', () => {
-  it('a 06 mantém o título que revela o Capim Dourado', () => {
+describe('o local da final pertence à seção 07', () => {
+  it('a 07 mantém o título que revela o Capim Dourado', () => {
     const final = visibleText(read('presentation/sections/GrandFinalSection.astro'));
-    expect(final).toContain('code="06"');
+    expect(final).toContain('code="07"');
     expect(final).toContain('title="A final é no <em>Capim Dourado Shopping</em>."');
   });
 
@@ -63,13 +63,14 @@ describe('o local da final pertence à seção 06', () => {
     'presentation/sections/missions/RulebookPanel.astro',
   ];
 
-  it('as seções antes da 06 existem na lista (o teste não passa por estar vazio)', () => {
+  it('as seções antes da 07 existem na lista (o teste não passa por estar vazio)', () => {
     expect(BEFORE_FINAL).toEqual([
       'AboutSection',
       'NpcSection',
       'RulebookSection',
       'ScheduleSection',
       'CrewSection',
+      'JudgesSection',
     ]);
   });
 

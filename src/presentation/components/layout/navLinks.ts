@@ -17,6 +17,7 @@ export const NAV_LINKS: readonly NavLink[] = [
   { href: '#sobre', label: 'Sobre' },
   // { href: '#missoes', label: 'Missões' },
   { href: '#programacao', label: 'Programação' },
+  { href: '#avaliadores', label: 'Avaliadores' },
   { href: '#final', label: 'Final' },
   { href: '#patrocinadores', label: 'Patrocinadores' },
   // /equipes fica fora do menu até o sorteio (12/11): a página existe, mas sem link nem indexação
