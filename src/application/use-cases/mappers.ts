@@ -137,6 +137,8 @@ export const toSpeakerDTO = (s: Speaker): SpeakerDTO => ({
   topic: s.topic,
   avatarUrl: s.avatarUrl,
   bio: [...s.bio],
+  roleLabel: s.roleLabel,
+  linkedin: s.linkedin,
   revealed: s.isRevealed,
 });
 

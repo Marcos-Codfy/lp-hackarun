@@ -1,45 +1,5 @@
 [
   {
-    "id": "instructor-1",
-    "name": null,
-    "role": "instructor",
-    "headline": "Instrutor · oficinas",
-    "topic": null,
-    "avatarUrl": null
-  },
-  {
-    "id": "instructor-2",
-    "name": null,
-    "role": "instructor",
-    "headline": "Instrutor · oficinas",
-    "topic": null,
-    "avatarUrl": null
-  },
-  {
-    "id": "mentor-1",
-    "name": null,
-    "role": "mentor",
-    "headline": "Mentor egresso",
-    "topic": null,
-    "avatarUrl": null
-  },
-  {
-    "id": "mentor-2",
-    "name": null,
-    "role": "mentor",
-    "headline": "Mentor egresso",
-    "topic": null,
-    "avatarUrl": null
-  },
-  {
-    "id": "speaker-1",
-    "name": null,
-    "role": "speaker",
-    "headline": "Palestra convidada",
-    "topic": null,
-    "avatarUrl": null
-  },
-  {
     "id": "judge-1",
     "name": "Darley Passarin",
     "role": "judge",
@@ -50,6 +10,46 @@
       "Engenheiro de software, empreendedor e líder de times, Darley Passarin participou da construção do Tonolucro desde a ideia, acompanhou sua expansão para dezenas de cidades e o processo que culminou na aquisição da empresa pela [Magazine Luiza](https://economia.uol.com.br/noticias/redacao/2021/03/31/magazine-luiza-compra-tonolucro-e-grandchefe-e-amplia-presenca-em-delivery.htm).",
       "Depois dessa jornada, passou a atuar na criação, arquitetura e liderança de diferentes negócios, produtos e iniciativas tecnológicas, combinando visão de negócio, engenharia, gestão e Inteligência Artificial para transformar estratégia em execução.",
       "Hoje, essa experiência é institucionalizada na Cysar: uma companhia de liderança em Software e IA criada para liderar negócios, tecnologia e pessoas — e fazer iniciativas importantes acontecerem."
+    ]
+  },
+  {
+    "id": "instructor-1",
+    "name": "Andrea C. A. Borim",
+    "role": "judge",
+    "headline": "Executiva sênior da educação",
+    "topic": null,
+    "avatarUrl": "/convidados/andrea-borim.jpg",
+    "roleLabel": "Avaliadora",
+    "bio": [
+      "Executiva sênior da educação, com foco em construir o ponto de convergência entre a sustentabilidade financeira e a excelência acadêmica. Atua na integração das áreas de Finanças, Acadêmico, Regulação (MEC) e Operações, promovendo uma gestão sistêmica e integrada dos processos de decisão.",
+      "Integra eficiência operacional, qualidade pedagógica e permanência do aluno, transformando diretrizes estratégicas em método, método em operação e operação em sustentabilidade previsível. Sua liderança combina o pensamento estruturado da engenharia com a escuta ativa, reconhecendo que os processos organizam caminhos, mas são as pessoas e um clima de excelência que os percorrem.",
+      "Possui experiência prática em ciclos de turnaround, gestão de organizações complexas, leitura humana e responsabilidade sobre as consequências das decisões."
+    ],
+    "linkedin": "https://www.linkedin.com/in/andreaborim?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+  },
+  {
+    "id": "instructor-2",
+    "name": "Marciley Ferreira da Silva",
+    "role": "judge",
+    "headline": "CEO do Grupo Maxdata",
+    "topic": null,
+    "avatarUrl": "/convidados/marciley-ferreira.jpg",
+    "roleLabel": "Avaliador",
+    "bio": [
+      "Natural de Paraíso do Tocantins, casado. Com formação em Tecnologia da Informação e Processos Gerenciais, fundou seu primeiro negócio aos 17 anos em Palmas-TO. Atualmente é CEO do Grupo Maxdata, Skytins e MaxFerreira Construtora, com atuação consolidada em todo o território nacional."
+    ],
+    "linkedin": "https://www.linkedin.com/in/marciley-ferreira-53040210a/"
+  },
+  {
+    "id": "mentor-1",
+    "name": "Georges Vinicius Ferreira da Silva",
+    "role": "judge",
+    "headline": "Diretor da Player Contabilidade",
+    "topic": null,
+    "avatarUrl": "/convidados/georges-silva.jpg",
+    "roleLabel": "Avaliador",
+    "bio": [
+      "Georges da Silva, pai da Maria e da Nina, casado com a Silvana, contador, administrador e especialista em planejamento tributário. Diretor da Player Contabilidade, escritório que se tornou referência no atendimento em mais de 1.600 farmácias em todo o Brasil, lidera um time de mais de 120 profissionais. Há mais de 8 anos atua ajudando empresários a reduzir custos com impostos, aumentar a lucratividade e tomar decisões estratégicas com segurança."
     ]
   }
 ]

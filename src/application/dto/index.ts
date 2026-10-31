@@ -164,6 +164,8 @@ export interface SpeakerDTO {
   topic: string | null;
   avatarUrl: string | null;
   bio: string[];
+  roleLabel: string | null;
+  linkedin: string | null;
   revealed: boolean;
 }
 

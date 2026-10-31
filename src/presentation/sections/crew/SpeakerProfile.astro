@@ -1,5 +1,6 @@
 ---
 import type { SpeakerDTO } from '@application/index';
+import Icon from '@presentation/components/ui/Icon.astro';
 import { bioParts } from './bioText';
 
 // perfil completo do convidado num popover nativo (atributo popover): abre pelo "Ver perfil" do card e fecha
@@ -41,6 +42,16 @@ const { id, speaker, name, role } = Astro.props;
         {name}
       </p>
       <p class="profile__headline">{speaker.headline}</p>
+      {speaker.linkedin && (
+        <a class="profile__link" href={speaker.linkedin} target="_blank" rel="noopener noreferrer">
+          <span class="profile__in" aria-hidden="true">
+            in
+          </span>
+          <span>Ver no LinkedIn</span>
+          <Icon name="external" size={14} />
+          <span class="sr-only"> (abre em nova aba)</span>
+        </a>
+      )}
     </div>
   </div>
   <div class="profile__bio">
@@ -166,6 +177,53 @@ const { id, speaker, name, role } = Astro.props;
     }
   }
 
+  /* LinkedIn: pílula HUD com o "in" num quadradinho e o endereço curto */
+  .profile__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 100%;
+    margin-top: var(--space-3);
+    padding: 0.3rem 0.7rem 0.3rem 0.3rem;
+    border: 1px solid var(--sx-line);
+    border-radius: 2px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition:
+      color var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out);
+  }
+
+  .profile__link > span:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .profile__in {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 2px;
+    background: #0a66c2;
+    color: #fff;
+    font-family: var(--font-body, inherit);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .profile__link:hover {
+    border-color: var(--sx-accent);
+    color: var(--text);
+  }
+
+  .profile__link:focus-visible,
   .profile__close:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 3px;

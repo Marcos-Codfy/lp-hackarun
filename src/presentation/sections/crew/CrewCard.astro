@@ -48,9 +48,10 @@ const hasBio = speaker.bio.length > 0;
 </li>
 
 <style>
+  /* coluna flexível: o "Ver perfil" desce pro pé do card e fica alinhado mesmo com nomes de 2 a 4 linhas */
   .crew-card {
-    display: grid;
-    align-content: start;
+    display: flex;
+    flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-3) var(--space-4);
   }
@@ -97,8 +98,9 @@ const hasBio = speaker.bio.length > 0;
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    justify-self: start;
-    margin-top: var(--space-1);
+    align-self: flex-start;
+    margin-top: auto;
+    white-space: nowrap;
     padding: var(--space-1) 0;
     border: 0;
     background: none;
@@ -126,5 +128,17 @@ const hasBio = speaker.bio.length > 0;
   .crew-card__more:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 3px;
+  }
+
+  /* desktop: card mais largo (4 por fileira), então mais respiro e o nome um pouco maior */
+  @media (min-width: 1024px) {
+    .crew-card {
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-4) var(--space-5);
+    }
+
+    .crew-card__name {
+      font-size: var(--fs-lg);
+    }
   }
 </style>
