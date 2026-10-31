@@ -1,4 +1,5 @@
 import type { ImageMetadata } from 'astro';
+import unicatolicaLogo from '../../../assets/brand/unicatolica-white.png';
 import capimLogo from '../../../assets/brand/capim-dourado-white.png';
 import prontoLogo from '../../../assets/brand/pronto-fibra-white.png';
 import toHostLogo from '../../../assets/brand/tohost-white.png';
@@ -8,8 +9,8 @@ import pontoAgilLogo from '../../../assets/brand/ponto-agil-white.png';
 import impostogramaLogo from '../../../assets/brand/impostograma.png';
 import brInfoLogo from '../../../assets/brand/br-info-white.png';
 
-// patrocinadores na ordem da faixa. Novo patrocinador: logo sem fundo (versão clara) em src/assets/brand e
-// mais um item aqui. height = altura da logo no desktop em rem (marca larga pede menos, quadrada pede mais);
+// patrocinadores na ordem da seção: os 3 em destaque (featured) primeiro, depois as placas médias.
+// Novo patrocinador: logo sem fundo (versão clara) em src/assets/brand e mais um item aqui. height = altura da logo no desktop em rem (marca larga pede menos, quadrada pede mais);
 // accent = cor da marca usada no brilho da placa e no painel "Sobre"
 export interface Sponsor {
   id: string;
@@ -20,12 +21,15 @@ export interface Sponsor {
   url: string;
   // texto do "Sobre", um item por parágrafo
   about: string[];
+  // destaque = placa grande na primeira fileira; o resto entra nas placas médias
+  featured?: boolean;
   caption?: string;
 }
 
 export const SPONSORS: readonly Sponsor[] = [
   {
     id: 'capim-dourado',
+    featured: true,
     name: 'Capim Dourado Shopping',
     logo: capimLogo,
     height: 5.5,
@@ -39,6 +43,7 @@ export const SPONSORS: readonly Sponsor[] = [
   },
   {
     id: 'pronto-fibra',
+    featured: true,
     name: 'Pronto Fibra',
     logo: prontoLogo,
     height: 4,
@@ -50,27 +55,16 @@ export const SPONSORS: readonly Sponsor[] = [
     ],
   },
   {
-    id: 'tohost',
-    name: 'TO Host',
-    logo: toHostLogo,
-    height: 3.6,
-    accent: '#5dbb63',
-    url: 'https://tohost.com.br/',
+    id: 'unicatolica',
+    featured: true,
+    name: 'UniCatólica',
+    logo: unicatolicaLogo,
+    height: 5.5,
+    accent: '#3b82f6',
+    url: 'https://to.catolica.edu.br/portal/',
     about: [
-      'O primeiro data center Rated 3 do Tocantins.',
-      'Somos o parceiro estratégico que assegura segurança, performance e escalabilidade para a infraestrutura digital de empresas e instituições do Norte do Brasil.',
-    ],
-  },
-  {
-    id: 'wpi',
-    name: 'WPI Soluções',
-    logo: wpiLogo,
-    height: 4.4,
-    accent: '#3fb058',
-    url: 'https://wpisolucoes.com.br/sobre',
-    about: [
-      'Empresa tocantinense, com atuação em todo o Brasil.',
-      'Transformamos desafios em oportunidades por meio da tecnologia, da infraestrutura de TIC a soluções personalizadas para a transformação digital.',
+      'Criada dia 25 de novembro de 1999, pela 56ª Assembleia Geral da União Brasileira de Educação Católica, a Católica do Tocantins, teve em Reunião Extraordinária da Diretoria da UBEC, em 04 de abril 2002, provisoriamente, nomeados, como Diretora Geral, a Prof.ª Débora Pinto Niquini, como Vice-Diretor Administrativo, o Prof. José Cardoso de Sousa, como Vice-Diretor de Planejamento e Desenvolvimento, o Prof. Bruno de Azevedo Costa e como Vice-Diretor de Ensino, Pesquisa e Extensão, o Prof. Pe. Duile de Assis Castro. Na 193ª Reunião da Diretoria da UBEC, do dia 16 e 17 de dezembro de 2002, foram nomeados, em definitivo, respectivamente, como Diretor Geral e Vice-Diretor administrativo, o Prof. Luiz Antônio Hunold de Oliveira Damas, e o Prof. Rocco Procida.',
+      'Em 2019 o Ministro da Educação, Abraham Weintraub, assinou no dia 31 de maio, o documento que credencia a Católica do Tocantins como Centro Universitário. Com a publicação da portaria no Diário Oficial da União a Católica do Tocantins passa a se chamar UniCatólica – Centro Universitário Católica do Tocantins.',
     ],
   },
   {
@@ -107,6 +101,30 @@ export const SPONSORS: readonly Sponsor[] = [
     ],
   },
   {
+    id: 'tohost',
+    name: 'TO Host',
+    logo: toHostLogo,
+    height: 3.6,
+    accent: '#5dbb63',
+    url: 'https://tohost.com.br/',
+    about: [
+      'O primeiro data center Rated 3 do Tocantins.',
+      'Somos o parceiro estratégico que assegura segurança, performance e escalabilidade para a infraestrutura digital de empresas e instituições do Norte do Brasil.',
+    ],
+  },
+  {
+    id: 'wpi',
+    name: 'WPI Soluções',
+    logo: wpiLogo,
+    height: 4.4,
+    accent: '#3fb058',
+    url: 'https://wpisolucoes.com.br/sobre',
+    about: [
+      'Empresa tocantinense, com atuação em todo o Brasil.',
+      'Transformamos desafios em oportunidades por meio da tecnologia, da infraestrutura de TIC a soluções personalizadas para a transformação digital.',
+    ],
+  },
+  {
     id: 'br-informatica',
     name: 'BR Informática',
     logo: brInfoLogo,
@@ -123,3 +141,6 @@ export const SPONSORS: readonly Sponsor[] = [
 // "https://www.lojabrinformatica.com.br/" -> "lojabrinformatica.com.br" (rótulo curto do botão do site)
 export const siteLabel = (url: string): string =>
   url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] ?? url;
+
+export const FEATURED_SPONSORS = SPONSORS.filter((sponsor) => sponsor.featured);
+export const OTHER_SPONSORS = SPONSORS.filter((sponsor) => !sponsor.featured);
