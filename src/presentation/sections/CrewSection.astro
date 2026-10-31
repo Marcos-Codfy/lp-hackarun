@@ -44,7 +44,7 @@ const roles = new SpeakerRoleLabel();
     <ul class="crew__grid" role="list" data-reveal-group>
       {speakers.map((speaker, index) =>
         speaker.revealed ? (
-          <CrewCard speaker={speaker} role={roles.of(speaker.role)} />
+          <CrewCard speaker={speaker} role={speaker.roleLabel ?? roles.of(speaker.role)} />
         ) : (
           <LockedMentorCard label={roles.of(speaker.role)} index={index} hint={speaker.topic} />
         ),
@@ -95,10 +95,19 @@ const roles = new SpeakerRoleLabel();
 </section>
 
 <style>
+  /* cards centralizados: com menos de uma fileira cheia (ex.: 4 no desktop) o grupo fica no meio da seção.
+     Um card a mais no speakers.json entra sozinho, na mesma largura */
   .crew__grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4) var(--space-3);
+    --gap-x: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-4) var(--gap-x);
+  }
+
+  .crew__grid > :global(*) {
+    flex: 0 0 calc((100% - var(--gap-x)) / 2);
+    min-width: 0;
   }
 
   .crew__rules {
@@ -167,8 +176,8 @@ const roles = new SpeakerRoleLabel();
     }
 
     .crew__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--space-5) var(--space-4);
+      --gap-x: var(--space-4);
+      row-gap: var(--space-5);
     }
 
     .crew__rules {
@@ -176,9 +185,22 @@ const roles = new SpeakerRoleLabel();
     }
   }
 
+  /* tablet: 4 por fileira (cabem os 4 avaliadores numa linha só) */
+  @media (min-width: 768px) {
+    .crew__grid > :global(*) {
+      flex-basis: calc((100% - 3 * var(--gap-x)) / 4);
+    }
+  }
+
   @media (min-width: 1024px) {
+    /* desktop: 4 por fileira ocupando a largura da seção, com mais respiro entre os cards */
     .crew__grid {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      --gap-x: var(--space-6);
+      row-gap: var(--space-6);
+    }
+
+    .crew__grid > :global(*) {
+      flex-basis: calc((100% - 3 * var(--gap-x)) / 4);
     }
 
     .crew__rules-list {

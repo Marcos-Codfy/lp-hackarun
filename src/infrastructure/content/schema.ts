@@ -117,6 +117,8 @@ export interface RawSpeaker {
   topic?: string | null;
   avatarUrl?: string | null;
   bio?: string[];
+  roleLabel?: string | null;
+  linkedin?: string | null;
 }
 
 export interface RawPrize {
