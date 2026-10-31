@@ -4,19 +4,16 @@ import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
 import { mentorHref } from '@presentation/view-models/mentor/mentorOrigin';
 // import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
-import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
 import SectionHeader from './shared/SectionHeader.astro';
-import CrewCard from './crew/CrewCard.astro';
-import LockedMentorCard from './crew/LockedMentorCard.astro';
 import './sections.css';
 
 interface Props {
   data: LandingPageDTO;
 }
 
-// cards dos convidados (speakers.json): revelado mostra foto, nome e o perfil; sem nome fica "???"
-const { speakers } = Astro.props.data;
-const roles = new SpeakerRoleLabel();
+// regras da mentoria e o convite pra ser mentor; os avaliadores (speakers.json) ganharam a seção deles
+// logo abaixo (JudgesSection). A prop fica pelo contrato da página
+const { data: _data } = Astro.props;
 // // quando equipes e mentores são apresentados (lido da programação)
 // const lookup = new ScheduleLookup(schedule);
 // const reveal = lookup.activity('teams-and-mentors');
@@ -40,16 +37,6 @@ const roles = new SpeakerRoleLabel();
       title="Quem vai estar <em>do seu lado</em>"
       lead="Vocês poderão contar com o apoio de mentores para esclarecer dúvidas e orientar o desenvolvimento do projeto. Todas as equipes poderão solicitar orientação."
     />
-
-    <ul class="crew__grid" role="list" data-reveal-group>
-      {speakers.map((speaker, index) =>
-        speaker.revealed ? (
-          <CrewCard speaker={speaker} role={speaker.roleLabel ?? roles.of(speaker.role)} />
-        ) : (
-          <LockedMentorCard label={roles.of(speaker.role)} index={index} hint={speaker.topic} />
-        ),
-      )}
-    </ul>
 
     <div class="crew__rules sx-glass sx-corners" data-reveal="up">
       <p class="sx-hud">// Regras da mentoria</p>
@@ -95,21 +82,6 @@ const roles = new SpeakerRoleLabel();
 </section>
 
 <style>
-  /* cards centralizados: com menos de uma fileira cheia (ex.: 4 no desktop) o grupo fica no meio da seção.
-     Um card a mais no speakers.json entra sozinho, na mesma largura */
-  .crew__grid {
-    --gap-x: var(--space-3);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-4) var(--gap-x);
-  }
-
-  .crew__grid > :global(*) {
-    flex: 0 0 calc((100% - var(--gap-x)) / 2);
-    min-width: 0;
-  }
-
   .crew__rules {
     display: grid;
     gap: var(--space-5);
@@ -175,34 +147,12 @@ const roles = new SpeakerRoleLabel();
       justify-self: start;
     }
 
-    .crew__grid {
-      --gap-x: var(--space-4);
-      row-gap: var(--space-5);
-    }
-
     .crew__rules {
       padding: var(--space-7);
     }
   }
 
-  /* tablet: 4 por fileira (cabem os 4 avaliadores numa linha só) */
-  @media (min-width: 768px) {
-    .crew__grid > :global(*) {
-      flex-basis: calc((100% - 3 * var(--gap-x)) / 4);
-    }
-  }
-
   @media (min-width: 1024px) {
-    /* desktop: 4 por fileira ocupando a largura da seção, com mais respiro entre os cards */
-    .crew__grid {
-      --gap-x: var(--space-6);
-      row-gap: var(--space-6);
-    }
-
-    .crew__grid > :global(*) {
-      flex-basis: calc((100% - 3 * var(--gap-x)) / 4);
-    }
-
     .crew__rules-list {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--space-7);

@@ -1,0 +1,85 @@
+---
+// avaliadores do HackaRun (speakers.json): foto, papel, nome e o "Ver perfil" com o mini currículo.
+// Seção própria logo depois dos mentores, com link no menu (#avaliadores)
+import type { LandingPageDTO } from '@application/index';
+import { SpeakerRoleLabel } from '@presentation/formatters/SpeakerRoleLabel';
+import SectionHeader from './shared/SectionHeader.astro';
+import CrewCard from './crew/CrewCard.astro';
+import LockedMentorCard from './crew/LockedMentorCard.astro';
+import './sections.css';
+
+interface Props {
+  data: LandingPageDTO;
+}
+
+// revelado mostra a foto e o perfil; sem nome fica "???" (card bloqueado)
+const { speakers } = Astro.props.data;
+const roles = new SpeakerRoleLabel();
+---
+
+<section
+  id="avaliadores"
+  class="section crew tone-violet"
+  data-scene="terrain"
+  data-checkpoint="Avaliadores"
+  aria-labelledby="avaliadores-title"
+>
+  <div class="container section-stack">
+    <SectionHeader
+      id="avaliadores-title"
+      code="06"
+      eyebrow="Avaliadores"
+      title="<em>Avaliadores</em>"
+      lead="Conheça os profissionais responsáveis por avaliar os projetos do HackaRun. Com experiência em tecnologia, inovação, negócios e desenvolvimento de soluções, nossos avaliadores terão a missão de analisar as entregas das equipes, considerando critérios como criatividade, viabilidade, qualidade técnica e impacto da solução proposta."
+    />
+
+    <ul class="crew__grid" role="list" data-reveal-group>
+      {speakers.map((speaker, index) =>
+        speaker.revealed ? (
+          <CrewCard speaker={speaker} role={speaker.roleLabel ?? roles.of(speaker.role)} />
+        ) : (
+          <LockedMentorCard label={roles.of(speaker.role)} index={index} hint={speaker.topic} />
+        ),
+      )}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* cards centralizados: com menos de uma fileira cheia (ex.: 4 no desktop) o grupo fica no meio da seção.
+     Um card a mais no speakers.json entra sozinho, na mesma largura */
+  .crew__grid {
+    --gap-x: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-4) var(--gap-x);
+  }
+
+  .crew__grid > :global(*) {
+    flex: 0 0 calc((100% - var(--gap-x)) / 2);
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .crew__grid {
+      --gap-x: var(--space-4);
+      row-gap: var(--space-5);
+    }
+  }
+
+  /* tablet: 4 por fileira (cabem os 4 avaliadores numa linha só) */
+  @media (min-width: 768px) {
+    .crew__grid > :global(*) {
+      flex-basis: calc((100% - 3 * var(--gap-x)) / 4);
+    }
+  }
+
+  /* desktop: 4 por fileira ocupando a largura da seção, com mais respiro entre os cards */
+  @media (min-width: 1024px) {
+    .crew__grid {
+      --gap-x: var(--space-6);
+      row-gap: var(--space-6);
+    }
+  }
+</style>
