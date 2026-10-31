@@ -3,7 +3,7 @@
 import type { LandingPageDTO } from '@application/index';
 import SectionHeader from './shared/SectionHeader.astro';
 import SponsorCard from './sponsors/SponsorCard.astro';
-import { SPONSORS } from './sponsors/sponsors';
+import { FEATURED_SPONSORS, OTHER_SPONSORS } from './sponsors/sponsors';
 import './sections.css';
 
 interface Props {
@@ -33,16 +33,22 @@ const { data: _data } = Astro.props;
       align="center"
     />
 
+    {/* top 3 em placas grandes; os demais em placas médias, 3 por fileira. A numeração segue nas duas */}
+    <ul class="sponsors__grid sponsors__grid--featured" role="list" data-reveal-group>
+      {FEATURED_SPONSORS.map((sponsor, index) => (
+        <SponsorCard index={index} sponsor={sponsor} size="lg" />
+      ))}
+    </ul>
     <ul class="sponsors__grid" role="list" data-reveal-group>
-      {SPONSORS.map((sponsor, index) => (
-        <SponsorCard index={index} sponsor={sponsor} />
+      {OTHER_SPONSORS.map((sponsor, index) => (
+        <SponsorCard index={FEATURED_SPONSORS.length + index} sponsor={sponsor} />
       ))}
     </ul>
   </div>
 </section>
 
 <style>
-  /* placas centralizadas: 1 por linha no celular, 2 no tablet e 4 no desktop (8 patrocinadores = 2 fileiras) */
+  /* celular: 1 por linha; tablet: 2; desktop: 3 por fileira nas duas grades (as de destaque são mais altas) */
   .sponsors__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -55,11 +61,31 @@ const { data: _data } = Astro.props;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--space-5);
     }
+
+    /* 3 destaques no tablet: o terceiro ocupa a linha toda em vez de ficar sozinho num canto */
+    .sponsors__grid--featured > :global(:last-child:nth-child(odd)) {
+      grid-column: 1 / -1;
+    }
   }
 
   @media (min-width: 1024px) {
+    /* placas médias: 3 por fileira numa faixa mais estreita, centralizada abaixo dos destaques */
     .sponsors__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      max-width: 60rem;
+      margin-inline: auto;
+    }
+
+    .sponsors__grid--featured {
+      max-width: none;
+    }
+
+    .sponsors__grid--featured {
+      gap: var(--space-6);
+    }
+
+    .sponsors__grid--featured > :global(:last-child:nth-child(odd)) {
+      grid-column: auto;
     }
   }
 </style>

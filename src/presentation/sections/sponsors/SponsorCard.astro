@@ -9,16 +9,23 @@ import type { Sponsor } from './sponsors';
 interface Props {
   index: number;
   sponsor: Sponsor;
+  // lg = placa de destaque (top 3), md = as demais
+  size?: 'lg' | 'md';
 }
 
-const { index, sponsor } = Astro.props;
+const { index, sponsor, size = 'md' } = Astro.props;
+// na placa grande a logo cresce junto (a altura do sponsors.ts é a da placa média)
+const scale = size === 'lg' ? 1.4 : 1;
 const { id, name, logo, height, accent, url, caption } = sponsor;
-const widthRem = (logo.width / logo.height) * height;
+const widthRem = (logo.width / logo.height) * height * scale;
 const widths = [1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 16 * d)));
 const aboutId = `sobre-${id}`;
 ---
 
-<li class="sponsor sx-glass sx-corners" style={`--accent: ${accent}; --delay: ${(index * 0.75).toFixed(2)}s`}>
+<li
+  class:list={['sponsor sx-glass sx-corners', `sponsor--${size}`]}
+  style={`--accent: ${accent}; --delay: ${(index * 0.75).toFixed(2)}s`}
+>
   <span class="sponsor__fx" aria-hidden="true">
     <span class="sponsor__sweep"></span>
   </span>
@@ -29,7 +36,7 @@ const aboutId = `sobre-${id}`;
       {String(index + 1).padStart(2, '0')}
     </span>
   </p>
-  <span class="sponsor__mark" style={`--h: ${height}rem`}>
+  <span class="sponsor__mark" style={`--h: ${height * scale}rem`}>
     <Image
       class="sponsor__img"
       src={logo}
@@ -216,10 +223,31 @@ const aboutId = `sobre-${id}`;
     }
   }
 
+  /* destaque (top 3): placa mais alta, mais respiro e o brilho da marca mais forte */
+  .sponsor--lg {
+    min-height: 18rem;
+    gap: var(--space-5);
+  }
+
+  .sponsor--lg .sponsor__fx {
+    background:
+      radial-gradient(70% 60% at 50% 0%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%),
+      radial-gradient(
+        60% 45% at 50% 100%,
+        color-mix(in srgb, var(--accent-2) 12%, transparent),
+        transparent 70%
+      );
+  }
+
   @media (min-width: 640px) {
     .sponsor {
-      min-height: 17rem;
+      min-height: 15rem;
       padding: var(--space-6) var(--space-5);
+    }
+
+    .sponsor--lg {
+      min-height: 24rem;
+      padding: var(--space-7) var(--space-6);
     }
 
     .sponsor__img {
