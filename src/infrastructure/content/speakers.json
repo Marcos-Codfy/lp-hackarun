@@ -51,5 +51,24 @@
     "bio": [
       "Georges da Silva, pai da Maria e da Nina, casado com a Silvana, contador, administrador e especialista em planejamento tributário. Diretor da Player Contabilidade, escritório que se tornou referência no atendimento em mais de 1.600 farmácias em todo o Brasil, lidera um time de mais de 120 profissionais. Há mais de 8 anos atua ajudando empresários a reduzir custos com impostos, aumentar a lucratividade e tomar decisões estratégicas com segurança."
     ]
+  },
+  {
+    "id": "judge-5",
+    "name": "Hélio Barreira de Oliveira",
+    "role": "judge",
+    "roleLabel": "Avaliador",
+    "headline": "Sócio-fundador da Quantum Sistemas",
+    "topic": null,
+    "avatarUrl": "/convidados/helio-barreira.jpg",
+    "bio": [
+      "Casado com Lene César e pai da Beatriz e Letícia.",
+      "Empreendedor e empresário do setor de tecnologia, é bacharel em Sistemas de Informação pelo CEULP/ULBRA, em Palmas-TO, com formação concluída em 2020.",
+      "É sócio-fundador da Quantum Sistemas, empresa fundada em 2020, onde atuou inicialmente nas áreas de desenvolvimento de software e comercial. Sob sua participação, a empresa expandiu sua atuação para 9 estados brasileiros, consolidando uma expressiva carteira de clientes ativos no segmento de soluções de gestão empresarial.",
+      "Também é sócio de uma startup de software house com foco exclusivo no desenvolvimento e comercialização de produtos SaaS (Software as a Service).",
+      "Atua no fortalecimento do ecossistema de tecnologia e empreendedorismo por meio do associativismo empresarial, sendo membro da diretoria da Assespro/TO e da ACIPA Palmas, para o período de 2027 a 2030.",
+      "Como empreendedor de tecnologia, tem interesse especial em inovação, desenvolvimento de software, modelos de negócios e soluções que gerem valor para o mercado.",
+      "Fora do ambiente empresarial, é corredor de rua amador, atividade que reforça sua identificação com disciplina, persistência e superação de desafios."
+    ],
+    "linkedin": "https://www.linkedin.com/in/heliobarreira/"
   }
 ]
