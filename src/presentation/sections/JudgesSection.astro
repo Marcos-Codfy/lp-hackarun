@@ -75,11 +75,15 @@ const roles = new SpeakerRoleLabel();
     }
   }
 
-  /* desktop: 4 por fileira ocupando a largura da seção, com mais respiro entre os cards */
+  /* desktop: os 5 avaliadores numa fileira só, ocupando a largura da seção */
   @media (min-width: 1024px) {
     .crew__grid {
-      --gap-x: var(--space-6);
+      --gap-x: var(--space-5);
       row-gap: var(--space-6);
+    }
+
+    .crew__grid > :global(*) {
+      flex-basis: calc((100% - 4 * var(--gap-x)) / 5);
     }
   }
 </style>
