@@ -1,24 +1,24 @@
 ---
 import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import Icon from '@presentation/components/ui/Icon.astro';
+import SponsorAbout from './SponsorAbout.astro';
+import type { Sponsor } from './sponsors';
 
-// um patrocinador: selo HUD em cima, logo oficial branca no centro e uma legenda curta embaixo
+// um patrocinador: selo HUD em cima, logo no centro (no brilho da cor da marca) e, embaixo, o "Sobre" (abre
+// o painel com o texto e o site) e o atalho direto pro site
 interface Props {
   index: number;
-  name: string;
-  logo: ImageMetadata;
-  // altura da logo no desktop, em rem (cada marca tem uma proporção, então o tamanho ótico muda)
-  height: number;
-  tone: 'gold' | 'sun';
-  caption?: string;
+  sponsor: Sponsor;
 }
 
-const { index, name, logo, height, tone, caption } = Astro.props;
+const { index, sponsor } = Astro.props;
+const { id, name, logo, height, accent, url, caption } = sponsor;
 const widthRem = (logo.width / logo.height) * height;
 const widths = [1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 16 * d)));
+const aboutId = `sobre-${id}`;
 ---
 
-<li class:list={['sponsor sx-glass sx-corners', `sponsor--${tone}`]}>
+<li class="sponsor sx-glass sx-corners" style={`--accent: ${accent}; --delay: ${(index * 0.75).toFixed(2)}s`}>
   <span class="sponsor__fx" aria-hidden="true">
     <span class="sponsor__sweep"></span>
   </span>
@@ -40,32 +40,37 @@ const widths = [1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 1
     />
   </span>
   {caption && <p class="sponsor__caption">{caption}</p>}
+  <div class="sponsor__actions">
+    <button class="sponsor__action" type="button" popovertarget={aboutId}>
+      Sobre
+      <span class="sr-only"> {name}</span>
+      <Icon name="arrow-right" size={14} />
+    </button>
+    <a class="sponsor__action" href={url} target="_blank" rel="noopener noreferrer">
+      Site
+      <span class="sr-only"> de {name} (abre em nova aba)</span>
+      <Icon name="external" size={14} />
+    </a>
+  </div>
+  <SponsorAbout id={aboutId} sponsor={sponsor} />
 </li>
 
 <style>
   .sponsor {
-    --accent: var(--c-gold);
-    --accent-2: var(--c-orange);
-    --ink: var(--ink-gold);
+    --accent-2: var(--c-electric);
+    --ink: color-mix(in srgb, var(--accent) 55%, white);
     position: relative;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
     justify-items: center;
     align-items: center;
-    gap: var(--space-5);
-    min-height: 17rem;
-    padding: var(--space-6) var(--space-5);
+    gap: var(--space-4);
+    min-height: 15rem;
+    padding: var(--space-5) var(--space-4);
     text-align: center;
     transition:
       transform var(--dur) var(--ease-out),
       box-shadow var(--dur) var(--ease-out);
-  }
-
-  /* Pronto Fibra: o amarelo da marca com um toque do azul dela */
-  .sponsor--sun {
-    --accent: #f5b82a;
-    --accent-2: #1264ff;
-    --ink: #ffe08a;
   }
 
   .sponsor > :not(.sponsor__fx) {
@@ -107,8 +112,9 @@ const widths = [1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 1
     animation: sponsor-sweep 6s var(--ease-in-out) infinite;
   }
 
-  .sponsor--sun .sponsor__sweep {
-    animation-delay: 3s;
+  /* cada placa com o feixe num tempo: não passam todas juntas */
+  .sponsor__sweep {
+    animation-delay: var(--delay, 0s);
   }
 
   .sponsor__tag {
@@ -157,6 +163,49 @@ const widths = [1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 1
     text-wrap: balance;
   }
 
+  /* pé da placa: "Sobre" e "Site" no mesmo jeito HUD dos links da LP */
+  .sponsor__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-5);
+    align-self: end;
+  }
+
+  .sponsor__action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .sponsor__action :global(.icon) {
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .sponsor__action:hover {
+    color: var(--text);
+  }
+
+  .sponsor__action:hover :global(.icon) {
+    transform: translateX(3px);
+  }
+
+  .sponsor__action:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
   @keyframes sponsor-sweep {
     0%,
     55% {
@@ -169,8 +218,8 @@ const widths = [1, 2, 3].map((d) => Math.min(logo.width, Math.round(widthRem * 1
 
   @media (min-width: 640px) {
     .sponsor {
-      min-height: 19rem;
-      padding: var(--space-7) var(--space-6);
+      min-height: 17rem;
+      padding: var(--space-6) var(--space-5);
     }
 
     .sponsor__img {

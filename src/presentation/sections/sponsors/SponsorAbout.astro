@@ -1,0 +1,175 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '@presentation/components/ui/Icon.astro';
+import { siteLabel, type Sponsor } from './sponsors';
+
+// "Sobre" do patrocinador num popover nativo (atributo popover), igual ao "Ver perfil" dos avaliadores:
+// abre pelo botão da placa e fecha no ×, no Esc ou clicando fora, sem JavaScript
+interface Props {
+  id: string;
+  sponsor: Sponsor;
+}
+
+const { id, sponsor } = Astro.props;
+const { name, logo, url, about, accent } = sponsor;
+---
+
+<div
+  class="about-sponsor sx-glass sx-corners"
+  id={id}
+  popover
+  role="dialog"
+  aria-labelledby={`${id}-name`}
+  style={`--accent: ${accent}`}
+  data-lenis-prevent
+>
+  <button
+    class="about-sponsor__close"
+    type="button"
+    popovertarget={id}
+    popovertargetaction="hide"
+    aria-label="Fechar"
+  >
+    <span aria-hidden="true">×</span>
+  </button>
+  <div class="about-sponsor__head">
+    <Image class="about-sponsor__logo" src={logo} alt="" width={320} loading="lazy" />
+    <p class="sx-hud about-sponsor__tag">Patrocinador</p>
+    <p class="about-sponsor__name" id={`${id}-name`}>
+      {name}
+    </p>
+  </div>
+  <div class="about-sponsor__text">
+    {about.map((paragraph) => (
+      <p>{paragraph}</p>
+    ))}
+  </div>
+  <a class="about-sponsor__site" href={url} target="_blank" rel="noopener noreferrer">
+    <span>Visitar {siteLabel(url)}</span>
+    <Icon name="external" size={14} />
+    <span class="sr-only"> (abre em nova aba)</span>
+  </a>
+</div>
+
+<style>
+  /* o .sx-glass põe position: relative; o popover precisa do fixed do navegador pra centralizar */
+  .about-sponsor {
+    position: fixed;
+    inset: 0;
+    width: min(36rem, calc(100vw - 2rem));
+    height: fit-content;
+    max-height: min(80svh, 40rem);
+    margin: auto;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+    overflow-y: auto;
+    border: 0;
+    background: rgb(8 6 28 / 0.97);
+    color: var(--text);
+    text-align: left;
+    overscroll-behavior: contain;
+  }
+
+  .about-sponsor::backdrop {
+    background: rgb(2 3 11 / 0.72);
+    backdrop-filter: blur(4px);
+  }
+
+  .about-sponsor__close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--sx-line);
+    border-radius: 2px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .about-sponsor__close:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .about-sponsor__head {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+    padding-right: var(--space-6);
+  }
+
+  /* logo com o brilho da cor da marca, como na placa */
+  .about-sponsor__logo {
+    width: auto;
+    max-width: min(11rem, 100%);
+    height: auto;
+    max-height: 4rem;
+    margin-bottom: var(--space-3);
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 35%, transparent));
+  }
+
+  .about-sponsor__tag {
+    color: color-mix(in srgb, var(--accent) 55%, white);
+  }
+
+  .about-sponsor__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .about-sponsor__text {
+    display: grid;
+    gap: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+  }
+
+  .about-sponsor__site {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 100%;
+    margin-top: var(--space-5);
+    padding: 0.55rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: background var(--dur) var(--ease-out);
+  }
+
+  .about-sponsor__site > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .about-sponsor__site:hover {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+
+  .about-sponsor__site:focus-visible,
+  .about-sponsor__close:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  @media (min-width: 640px) {
+    .about-sponsor {
+      padding: var(--space-7) var(--space-7) var(--space-6);
+    }
+  }
+</style>

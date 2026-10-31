@@ -1,10 +1,9 @@
 ---
 // patrocinadores no lugar da chamada de equipes (o TeamsSection fica comentado no index.astro)
 import type { LandingPageDTO } from '@application/index';
-import capimLogo from '../../assets/brand/capim-dourado-white.png';
-import prontoLogo from '../../assets/brand/pronto-fibra-white.png';
 import SectionHeader from './shared/SectionHeader.astro';
 import SponsorCard from './sponsors/SponsorCard.astro';
+import { SPONSORS } from './sponsors/sponsors';
 import './sections.css';
 
 interface Props {
@@ -14,17 +13,7 @@ interface Props {
 // a seção não depende de dados; a prop fica pelo contrato da página
 const { data: _data } = Astro.props;
 
-// novo patrocinador: logo branca (PNG sem fundo) em src/assets/brand e mais um item aqui
-const sponsors = [
-  {
-    name: 'Capim Dourado Shopping',
-    logo: capimLogo,
-    height: 7,
-    tone: 'gold' as const,
-    caption: 'Palco da grande final',
-  },
-  { name: 'Pronto Fibra', logo: prontoLogo, height: 5, tone: 'sun' as const },
-];
+// patrocinadores, logos e textos do "Sobre" ficam em ./sponsors/sponsors.ts
 ---
 
 <section
@@ -45,27 +34,32 @@ const sponsors = [
     />
 
     <ul class="sponsors__grid" role="list" data-reveal-group>
-      {sponsors.map((sponsor, index) => (
-        <SponsorCard index={index} {...sponsor} />
+      {SPONSORS.map((sponsor, index) => (
+        <SponsorCard index={index} sponsor={sponsor} />
       ))}
     </ul>
   </div>
 </section>
 
 <style>
-  /* placas centralizadas: uma embaixo da outra no celular, lado a lado do tablet pra cima */
+  /* placas centralizadas: 1 por linha no celular, 2 no tablet e 4 no desktop (8 patrocinadores = 2 fileiras) */
   .sponsors__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-5);
+    gap: var(--space-4);
     width: 100%;
-    max-width: 52rem;
-    margin-inline: auto;
   }
 
   @media (min-width: 640px) {
     .sponsors__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .sponsors__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
 </style>
