@@ -141,7 +141,7 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     const busy = state.status === 'loading' || state.status === 'drawing' || state.status === 'saving';
     const preview = state.preview;
     stats.replaceChildren(
-      stat('credenciados', state.sheet ? String(state.sheet.accredited) : '…'),
+      stat('credenciados', state.sheet ? String(state.sheet.accredited) : '–'),
       stat('equipes previstas', preview ? String(preview.result.report.teams) : '–'),
       stat(
         'sorteio salvo na planilha',
