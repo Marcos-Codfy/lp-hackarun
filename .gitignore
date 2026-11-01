@@ -36,3 +36,6 @@ scripts/qa/out/
 /docs/*
 !/docs/media/
 /scripts/docs/
+
+# sorteio das equipes: cópia local da planilha de teste (dados pessoais, nunca vai pro Git)
+.local/

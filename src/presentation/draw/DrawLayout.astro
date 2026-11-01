@@ -1,0 +1,53 @@
+---
+// layout das telas do sorteio das equipes: ferramenta da organização, fora do site público. Não tem o header do site,
+// o aurora nem o palco 3D (a tela vai pro projetor e precisa de pouca coisa); noindex por garantia, embora o build de
+// produção nem tenha estas páginas (só o `npm run sorteio` as liga)
+import displayFont from '../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
+import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
+import '@presentation/styles/tokens.css';
+import './draw.css';
+
+interface Props {
+  title: string;
+  step: 'teams' | 'names';
+}
+
+const { title, step } = Astro.props;
+const fontFaces = [
+  `@font-face{font-family:'Orbitron Variable';font-style:normal;font-display:swap;font-weight:400 900;src:url(${displayFont}) format('woff2')}`,
+  `@font-face{font-family:'Montserrat Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${bodyFont}) format('woff2')}`,
+].join('');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · HackaRun 2026</title>
+    <style set:html={fontFaces}></style>
+  </head>
+  <body class="draw">
+    <header class="top">
+      <div class="top__brand">
+        <p class="top__eyebrow">HackaRun 2026 · organização</p>
+        <h1>{title}</h1>
+      </div>
+      <nav class="top__steps" aria-label="Etapas do sorteio">
+        <a href="/sorteio" aria-current={step === 'teams' ? 'step' : undefined}>
+          <span>1</span> Equipes
+        </a>
+        <a href="/sorteio/nomes" aria-current={step === 'names' ? 'step' : undefined}>
+          <span>2</span> Nomes
+        </a>
+      </nav>
+      <p class="top__source" data-source data-mode="test">
+        Conectando…
+      </p>
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

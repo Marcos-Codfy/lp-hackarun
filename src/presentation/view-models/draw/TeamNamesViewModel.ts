@@ -1,0 +1,105 @@
+import { Observable } from '@shared/core/Observable';
+import { wait } from '@shared/utils/async';
+import type { SavedTeam } from '@application/draw/DrawGateway';
+import type { DrawTeamNames, GetDrawStatus, PokemonEntry } from '@application/draw/TeamDrawUseCases';
+
+export interface TeamNamesState {
+  loading: boolean;
+  teams: SavedTeam[];
+  // equipes sendo sorteadas agora (a tela mostra as imagens girando)
+  spinning: number[];
+  // Pokémon do catálogo que ainda estão livres
+  remaining: number;
+  error: string | null;
+}
+
+interface Deps {
+  status: Pick<GetDrawStatus, 'execute'>;
+  names: Pick<DrawTeamNames, 'drawOne' | 'drawAll'>;
+  catalog: readonly PokemonEntry[];
+  // suspense: as imagens ficam girando pelo menos isto, mesmo que a planilha responda antes (testes passam 0)
+  minSpinMs?: number;
+  sleep?: (ms: number) => Promise<void>;
+}
+
+const DEFAULT_MIN_SPIN_MS = 1800;
+
+const message = (error: unknown) => (error instanceof Error ? error.message : 'Algo deu errado.');
+
+// 2ª tela: sortear o Pokémon (e o nome) de cada equipe
+export class TeamNamesViewModel {
+  readonly state = new Observable<TeamNamesState>({
+    loading: true,
+    teams: [],
+    spinning: [],
+    remaining: 0,
+    error: null,
+  });
+
+  constructor(private readonly deps: Deps) {}
+
+  private patch(partial: Partial<TeamNamesState>): void {
+    this.state.update((s) => ({ ...s, ...partial }));
+  }
+
+  private async refresh(): Promise<void> {
+    const { saved } = await this.deps.status.execute();
+    const used = new Set(saved.map((t) => t.pokemonId).filter((id): id is number => id !== null));
+    this.patch({ teams: saved, remaining: this.deps.catalog.filter((p) => !used.has(p.id)).length });
+  }
+
+  async load(): Promise<void> {
+    this.patch({ loading: true, error: null });
+    try {
+      await this.refresh();
+    } catch (error) {
+      this.patch({ error: message(error) });
+    } finally {
+      this.patch({ loading: false });
+    }
+  }
+
+  get pending(): SavedTeam[] {
+    return this.state.value.teams.filter((t) => t.pokemonId === null);
+  }
+
+  // espera o que falta do tempo mínimo de suspense, contado desde que o sorteio começou
+  private async hold(startedAt: number): Promise<void> {
+    const wanted = this.deps.minSpinMs ?? DEFAULT_MIN_SPIN_MS;
+    const left = wanted - (Date.now() - startedAt);
+    if (left > 0) await (this.deps.sleep ?? wait)(left);
+  }
+
+  async drawOne(number: number): Promise<void> {
+    if (this.state.value.spinning.includes(number)) return;
+    const startedAt = Date.now();
+    this.patch({ spinning: [...this.state.value.spinning, number], error: null });
+    try {
+      const result = await this.deps.names.drawOne(number);
+      if (!result.ok) this.patch({ error: result.error });
+      await this.hold(startedAt);
+      await this.refresh();
+    } catch (error) {
+      this.patch({ error: message(error) });
+    } finally {
+      this.patch({ spinning: this.state.value.spinning.filter((n) => n !== number) });
+    }
+  }
+
+  async drawAll(): Promise<void> {
+    const pending = this.pending.map((t) => t.number);
+    if (pending.length === 0 || this.state.value.spinning.length > 0) return;
+    const startedAt = Date.now();
+    this.patch({ spinning: pending, error: null });
+    try {
+      const result = await this.deps.names.drawAll();
+      if (!result.ok) this.patch({ error: result.error });
+      await this.hold(startedAt);
+      await this.refresh();
+    } catch (error) {
+      this.patch({ error: message(error) });
+    } finally {
+      this.patch({ spinning: [] });
+    }
+  }
+}
