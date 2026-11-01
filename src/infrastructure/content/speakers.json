@@ -14,7 +14,7 @@
   },
   {
     "id": "instructor-1",
-    "name": "Andrea C. A. Borim",
+    "name": "Andrea Borim",
     "role": "judge",
     "headline": "Executiva sênior da educação",
     "topic": null,
@@ -29,7 +29,7 @@
   },
   {
     "id": "instructor-2",
-    "name": "Marciley Ferreira da Silva",
+    "name": "Marciley da Silva",
     "role": "judge",
     "headline": "CEO do Grupo Maxdata",
     "topic": null,
@@ -42,7 +42,7 @@
   },
   {
     "id": "mentor-1",
-    "name": "Georges Vinicius Ferreira da Silva",
+    "name": "Georges da Silva",
     "role": "judge",
     "headline": "Diretor da Player Contabilidade",
     "topic": null,
@@ -54,7 +54,7 @@
   },
   {
     "id": "judge-5",
-    "name": "Hélio Barreira de Oliveira",
+    "name": "Hélio de Oliveira",
     "role": "judge",
     "roleLabel": "Avaliador",
     "headline": "Sócio-fundador da Quantum Sistemas",
