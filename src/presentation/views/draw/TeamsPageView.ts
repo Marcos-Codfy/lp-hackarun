@@ -1,7 +1,13 @@
 import { levelLabel, type DrawnTeam, type DrawReport } from '@domain/index';
 import type { DrawServices } from '@composition/draw';
+import type { DrawPreview } from '@application/draw/TeamDrawUseCases';
 import { TeamDrawViewModel, type TeamDrawState } from '@presentation/view-models/draw/TeamDrawViewModel';
 import { h, mustFind } from './dom';
+import { confetti } from './fx/confetti';
+import { countdown, type Countdown } from './fx/countdown';
+import { setupStage } from './fx/stage';
+import { prefersReducedMotion } from './fx/timing';
+import { revealTeams, type TeamsReveal } from './TeamsReveal';
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
@@ -55,12 +61,13 @@ function reportBox(report: DrawReport, seed: string): HTMLElement {
   );
 }
 
-function teamCard(team: DrawnTeam, index: number): HTMLElement {
+// card montado "fechado": os nomes aparecem como ??? e a revelação gira e trava no nome certo (data-name)
+function teamCard(team: DrawnTeam): HTMLElement {
   const counts = new Map<string, number>();
   for (const m of team.members) counts.set(m.level, (counts.get(m.level) ?? 0) + 1);
   return h(
     'article',
-    { class: 'team', style: `--i:${Math.min(index, 40)}` },
+    { class: 'team team--waiting' },
     h(
       'header',
       { class: 'team__head' },
@@ -74,7 +81,7 @@ function teamCard(team: DrawnTeam, index: number): HTMLElement {
         h(
           'li',
           {},
-          h('span', { class: 'member__name' }, m.name),
+          h('span', { class: 'member__name', 'data-name': m.name }, '???'),
           h(
             'span',
             { class: 'chips' },
@@ -91,7 +98,7 @@ function teamCard(team: DrawnTeam, index: number): HTMLElement {
   );
 }
 
-// 1ª tela do sorteio: credenciados, sorteio das equipes, relatório de diversidade e salvar na planilha
+// 1ª tela do sorteio: credenciados, sorteio das equipes com revelação em cascata, relatório e salvar na planilha
 export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
   const vm = new TeamDrawViewModel({
     status: services.status,
@@ -102,9 +109,37 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
   const message = mustFind<HTMLElement>('[data-message]');
   const report = mustFind('[data-report]');
   const grid = mustFind('[data-grid]');
+  const progress = mustFind<HTMLElement>('[data-progress]');
+  const progressText = mustFind('[data-progress-text]', progress);
+  const progressBar = mustFind<HTMLElement>('[data-progress-bar]', progress);
   const drawButton = mustFind<HTMLButtonElement>('[data-draw]');
   const saveButton = mustFind<HTMLButtonElement>('[data-save]');
+  const skipButton = mustFind<HTMLButtonElement>('[data-skip]');
   const seedInput = mustFind<HTMLInputElement>('[data-seed]');
+  const reduced = prefersReducedMotion();
+
+  // o "show" em andamento (contagem e cascata); null = nada rodando
+  let show: { countdown: Countdown | null; reveal: TeamsReveal | null } | null = null;
+  let shownPreview: DrawPreview | null = null;
+
+  const skip = () => {
+    show?.countdown?.skip();
+    show?.reveal?.skip();
+  };
+
+  const stage = setupStage({
+    onPrimary: () => {
+      if (!drawButton.disabled) drawButton.click();
+    },
+    onSkip: skip,
+  });
+
+  const setProgress = (revealed: number, total: number) => {
+    progress.hidden = total === 0;
+    progressText.textContent =
+      revealed < total ? `Equipe ${revealed + 1} de ${total}` : `${total} equipes formadas`;
+    progressBar.style.setProperty('--value', String(total ? revealed / total : 0));
+  };
 
   const confirm = (teams: number, people: number, replacing: boolean): Promise<boolean> =>
     new Promise((resolve) => {
@@ -138,18 +173,19 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     });
 
   const render = (state: TeamDrawState) => {
-    const busy = state.status === 'loading' || state.status === 'drawing' || state.status === 'saving';
+    const busy =
+      state.status === 'loading' || state.status === 'drawing' || state.status === 'saving' || show !== null;
     const preview = state.preview;
     stats.replaceChildren(
       stat('credenciados', state.sheet ? String(state.sheet.accredited) : '–'),
-      stat('equipes previstas', preview ? String(preview.result.report.teams) : '–'),
+      stat('equipes', preview ? String(preview.result.report.teams) : '–'),
       stat(
-        'sorteio salvo na planilha',
+        'salvo na planilha',
         state.sheet
           ? state.sheet.saved.length > 0
             ? `${state.sheet.saved.length} equipes`
             : 'ainda não'
-          : '…',
+          : '–',
       ),
     );
 
@@ -159,6 +195,7 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     saveButton.disabled = busy || !preview || state.saved || preview.locked;
     saveButton.textContent =
       state.status === 'saving' ? 'Gravando…' : state.saved ? 'Gravado ✓' : 'Salvar na planilha';
+    skipButton.hidden = show === null;
 
     message.replaceChildren();
     message.dataset['kind'] = state.error ? 'error' : state.saved ? 'ok' : preview?.locked ? 'warn' : '';
@@ -170,21 +207,50 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
       );
     } else if (preview?.locked) {
       message.append('Alguma equipe já tem nome: o sorteio das equipes está travado.');
-    } else if (preview?.alreadySaved) {
+    } else if (preview?.alreadySaved && show === null) {
       message.append('Já existe um sorteio salvo na planilha. Se gravar este, ele substitui o anterior.');
     }
 
-    report.replaceChildren(...(preview ? [reportBox(preview.result.report, preview.result.seed)] : []));
-    grid.replaceChildren(...(preview ? preview.result.teams.map(teamCard) : []));
+    report.replaceChildren(
+      ...(preview && show === null ? [reportBox(preview.result.report, preview.result.seed)] : []),
+    );
+    if (preview && preview !== shownPreview) void startShow(preview);
   };
+
+  // o sorteio já foi feito (e nada foi gravado ainda): aqui é só a revelação na tela
+  async function startShow(preview: DrawPreview): Promise<void> {
+    shownPreview = preview;
+    const { teams } = preview.result;
+    show = { countdown: null, reveal: null };
+    grid.replaceChildren();
+    setProgress(0, teams.length);
+    render(vm.state.value);
+
+    const stopDrum = stage.sound.drumroll();
+    show.countdown = countdown(stage.sound, reduced);
+    await show.countdown.done;
+    stopDrum();
+
+    const cards = teams.map(teamCard);
+    grid.replaceChildren(...cards);
+    const names = teams.flatMap((t) => t.members.map((m) => m.name));
+    show.reveal = revealTeams(cards, { names, reduced, sound: stage.sound, onProgress: setProgress });
+    await show.reveal.done;
+
+    show = null;
+    stage.sound.fanfare();
+    confetti(reduced);
+    render(vm.state.value);
+  }
 
   vm.state.subscribe(render);
   drawButton.addEventListener('click', () => void vm.draw(seedInput.value));
+  skipButton.addEventListener('click', skip);
   saveButton.addEventListener('click', async () => {
     const preview = vm.state.value.preview;
     if (!preview) return;
-    const { report } = preview.result;
-    if (await confirm(report.teams, report.participants, preview.alreadySaved)) await vm.save();
+    const { report: r } = preview.result;
+    if (await confirm(r.teams, r.participants, preview.alreadySaved)) await vm.save();
   });
   void vm.load();
   return vm;

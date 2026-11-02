@@ -1,59 +1,96 @@
 import type { SavedTeam } from '@application/draw/DrawGateway';
+import type { PokemonEntry } from '@application/draw/TeamDrawUseCases';
 import type { DrawServices } from '@composition/draw';
 import { TeamNamesViewModel, type TeamNamesState } from '@presentation/view-models/draw/TeamNamesViewModel';
 import { h, mustFind, pokemonImage } from './dom';
+import { confetti } from './fx/confetti';
+import { countdown, type Countdown } from './fx/countdown';
+import { setupStage } from './fx/stage';
+import { cascadeDelays, NAME_REVEAL, prefersReducedMotion, typeColor, typeLabel } from './fx/timing';
 
-const SPIN_MS = 110;
+const SPIN_MS = 90;
 
-// 2ª tela do sorteio: um Pokémon (e o nome) para cada equipe, sem repetir
+// 2ª tela do sorteio: "Quem é esse Pokémon?". Enquanto a planilha grava, silhuetas passam rápido; depois a silhueta do
+// Pokémon sorteado fica um instante e a cor aparece com um flash, junto com o nome da equipe. "Sortear todas" revela em
+// cascata; "Revelar tudo" (S) pula para o fim
 export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
   const { catalog } = services;
-  const byId = new Map(catalog.map((p) => [p.id, p]));
+  const byId = new Map<number, PokemonEntry>(catalog.map((p) => [p.id, p]));
   const vm = new TeamNamesViewModel({ status: services.status, names: services.names, catalog });
   const stats = mustFind('[data-stats]');
   const message = mustFind<HTMLElement>('[data-message]');
   const grid = mustFind('[data-grid]');
   const drawAll = mustFind<HTMLButtonElement>('[data-draw-all]');
+  const skipButton = mustFind<HTMLButtonElement>('[data-skip]');
+  const reduced = prefersReducedMotion();
+
+  // equipe -> instante em que a revelação dela começa (performance.now); some quando a animação termina
+  const revealAt = new Map<number, number>();
+  const timers: number[] = [];
+  let named = new Set<number>();
   let spinTimer = 0;
+  let stopDrum: () => void = () => undefined;
+  let pendingCountdown: Countdown | null = null;
+  // um sorteio pedido nesta tela está em andamento (as equipes que ganharem nome agora são reveladas com animação)
+  let drawing = false;
 
-  const randomCatalogId = () => (catalog[Math.floor(Math.random() * catalog.length)] as { id: number }).id;
+  const stage = setupStage({
+    onPrimary: () => {
+      if (!drawAll.disabled) drawAll.click();
+    },
+    onSkip: () => skip(),
+  });
 
-  // imagens passando enquanto a planilha grava: o resultado de verdade vem do servidor
+  const randomId = () => (catalog[Math.floor(Math.random() * catalog.length)] as PokemonEntry).id;
+
+  // silhuetas passando nos cards que estão sendo sorteados
   const spin = (numbers: readonly number[]) => {
     window.clearInterval(spinTimer);
-    if (numbers.length === 0) return;
+    if (numbers.length === 0 || reduced) return;
     spinTimer = window.setInterval(() => {
       for (const number of numbers) {
         const img = grid.querySelector<HTMLImageElement>(`[data-logo="${number}"] img`);
-        if (img) img.src = pokemonImage(randomCatalogId());
+        if (img) img.src = pokemonImage(randomId());
       }
     }, SPIN_MS);
   };
 
+  const ball = () =>
+    h('span', { class: 'ball', 'aria-hidden': 'true' }, h('span', { class: 'ball__button' }));
+
   const card = (team: SavedTeam, spinning: boolean): HTMLElement => {
     const pokemon = team.pokemonId !== null ? byId.get(team.pokemonId) : undefined;
-    const named = team.pokemonId !== null;
+    const start = revealAt.get(team.number);
+    const revealing = pokemon !== undefined && start !== undefined;
+    const state = spinning ? 'spinning' : revealing ? 'reveal' : pokemon ? 'done' : 'pending';
+    const style = [
+      pokemon ? `--type:${typeColor(pokemon.types)}` : '',
+      revealing ? `--delay:${Math.round(start - performance.now())}ms` : '',
+    ]
+      .filter(Boolean)
+      .join(';');
     return h(
       'article',
-      { class: 'poke', 'data-state': spinning ? 'spinning' : named ? 'done' : 'pending' },
+      { class: 'poke', 'data-state': state, style: style || undefined },
       h('span', { class: 'poke__number' }, `Equipe ${team.number}`),
       h(
         'div',
         { class: 'poke__logo', 'data-logo': String(team.number) },
-        spinning || named
-          ? h('img', {
-              src: pokemonImage(named ? (team.pokemonId as number) : randomCatalogId()),
-              alt: pokemon ? pokemon.name : '',
-              width: '160',
-              height: '160',
-            })
-          : h('span', { class: 'poke__question', 'aria-hidden': 'true' }, '?'),
+        spinning
+          ? h('img', { src: pokemonImage(randomId()), alt: '', width: '160', height: '160' })
+          : pokemon
+            ? h('img', { src: pokemonImage(pokemon.id), alt: pokemon.name, width: '160', height: '160' })
+            : ball(),
       ),
-      h('h3', { class: 'poke__name' }, named ? team.name : spinning ? 'Sorteando…' : `Equipe ${team.number}`),
+      h(
+        'h3',
+        { class: 'poke__name' },
+        spinning ? 'Quem é esse Pokémon?' : pokemon ? team.name : `Equipe ${team.number}`,
+      ),
       h(
         'p',
         { class: 'poke__meta' },
-        pokemon ? pokemon.types.join(' · ') : `${team.members.length} integrantes`,
+        pokemon ? pokemon.types.map(typeLabel).join(' · ') : spinning ? '' : 'Aguardando o sorteio',
       ),
       h(
         'details',
@@ -67,43 +104,38 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
           class: 'btn btn--primary',
           type: 'button',
           'data-draw-one': String(team.number),
-          disabled: named || spinning || undefined,
+          disabled: pokemon !== undefined || spinning || undefined,
         },
-        named ? 'Já sorteada' : 'Sortear nome',
+        pokemon ? 'Já sorteada' : 'Sortear nome',
       ),
     );
   };
 
   const render = (state: TeamNamesState) => {
-    const named = state.teams.filter((t) => t.pokemonId !== null).length;
+    const namedCount = state.teams.filter((t) => t.pokemonId !== null).length;
     stats.replaceChildren(
-      h(
-        'div',
-        { class: 'stat' },
-        h('span', { class: 'stat__value' }, String(state.teams.length)),
-        h('span', { class: 'stat__label' }, 'equipes'),
-      ),
-      h(
-        'div',
-        { class: 'stat' },
-        h('span', { class: 'stat__value' }, String(named)),
-        h('span', { class: 'stat__label' }, 'já com nome'),
-      ),
-      h(
-        'div',
-        { class: 'stat' },
-        h('span', { class: 'stat__value' }, String(state.remaining)),
-        h('span', { class: 'stat__label' }, 'Pokémon restantes'),
+      ...[
+        [String(state.teams.length), 'equipes'],
+        [String(namedCount), 'já com nome'],
+        [String(state.remaining), 'Pokémon restantes'],
+      ].map(([value, label]) =>
+        h(
+          'div',
+          { class: 'stat' },
+          h('span', { class: 'stat__value' }, value as string),
+          h('span', { class: 'stat__label' }, label as string),
+        ),
       ),
     );
-    const pending = state.teams.length - named;
-    drawAll.disabled = state.loading || state.spinning.length > 0 || pending === 0;
-    drawAll.textContent =
-      state.spinning.length > 0
-        ? 'Sorteando…'
-        : pending === 0 && state.teams.length > 0
-          ? 'Todas sorteadas ✓'
-          : 'Sortear todas';
+    const pending = state.teams.length - namedCount;
+    const running = state.spinning.length > 0 || pendingCountdown !== null;
+    drawAll.disabled = state.loading || running || pending === 0;
+    drawAll.textContent = running
+      ? 'Sorteando…'
+      : pending === 0 && state.teams.length > 0
+        ? 'Todas sorteadas ✓'
+        : 'Sortear todas';
+    skipButton.hidden = !running && revealAt.size === 0;
 
     message.replaceChildren();
     message.dataset['kind'] = state.error ? 'error' : '';
@@ -118,12 +150,73 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
     spin(state.spinning);
   };
 
-  vm.state.subscribe(render);
-  drawAll.addEventListener('click', () => void vm.drawAll());
+  // equipes que acabaram de ganhar nome: agenda a revelação de cada uma (em cascata quando são várias)
+  const scheduleReveals = (state: TeamNamesState) => {
+    const now = new Set(state.teams.filter((t) => t.pokemonId !== null).map((t) => t.number));
+    const fresh = [...now].filter((n) => !named.has(n)).sort((a, b) => a - b);
+    const firstLoad = named.size === 0 && state.spinning.length === 0 && revealAt.size === 0 && !drawing;
+    named = now;
+    if (fresh.length === 0 || firstLoad || reduced) return;
+    stopDrum();
+    const base = performance.now();
+    const delays = cascadeDelays(fresh.length, NAME_REVEAL.staggerMs, NAME_REVEAL.maxTotalMs);
+    fresh.forEach((number, i) => {
+      const at = base + (delays[i] ?? 0);
+      revealAt.set(number, at);
+      // o "ding" no flash (metade da animação)
+      timers.push(window.setTimeout(() => stage.sound.ding(), (delays[i] ?? 0) + NAME_REVEAL.revealMs * 0.5));
+    });
+    const last = (delays.at(-1) ?? 0) + NAME_REVEAL.revealMs;
+    timers.push(
+      window.setTimeout(() => {
+        revealAt.clear();
+        if (fresh.length > 1) {
+          stage.sound.fanfare();
+          confetti(reduced);
+        }
+        render(vm.state.value);
+      }, last),
+    );
+  };
+
+  const skip = () => {
+    pendingCountdown?.skip();
+    if (revealAt.size === 0) return;
+    timers.splice(0).forEach((t) => window.clearTimeout(t));
+    revealAt.clear();
+    render(vm.state.value);
+  };
+
+  vm.state.subscribe((state) => {
+    scheduleReveals(state);
+    // terminou (ou deu erro): o tambor para
+    if (state.spinning.length === 0 && pendingCountdown === null && !drawing) stopDrum();
+    render(state);
+  });
+
+  drawAll.addEventListener('click', async () => {
+    if (drawAll.disabled) return;
+    drawing = true;
+    stopDrum = stage.sound.drumroll();
+    pendingCountdown = countdown(stage.sound, reduced);
+    render(vm.state.value);
+    await pendingCountdown.done;
+    pendingCountdown = null;
+    await vm.drawAll();
+    drawing = false;
+    stopDrum();
+  });
   grid.addEventListener('click', (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-draw-one]');
-    if (button) void vm.drawOne(Number(button.dataset['drawOne']));
+    if (!button || button.disabled) return;
+    drawing = true;
+    stopDrum = stage.sound.drumroll();
+    void vm.drawOne(Number(button.dataset['drawOne'])).finally(() => {
+      drawing = false;
+      stopDrum();
+    });
   });
+  skipButton.addEventListener('click', skip);
   void vm.load();
   return vm;
 }

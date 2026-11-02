@@ -502,3 +502,456 @@ summary:focus-visible {
     animation: none;
   }
 }
+
+/* ===================== show do sorteio (suspense sem demora) ===================== */
+
+body.draw {
+  position: relative;
+  isolation: isolate;
+}
+
+/* aurora do HackaRun, só CSS e bem leve: três manchas que derivam devagar */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-bg span {
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  animation: aurora-drift 26s ease-in-out infinite alternate;
+}
+
+.aurora-bg span:nth-child(1) {
+  top: -25vmax;
+  left: -15vmax;
+  background: radial-gradient(closest-side, #1264ff, transparent);
+}
+
+.aurora-bg span:nth-child(2) {
+  top: -10vmax;
+  right: -20vmax;
+  background: radial-gradient(closest-side, #941bff, transparent);
+  animation-duration: 32s;
+}
+
+.aurora-bg span:nth-child(3) {
+  bottom: -30vmax;
+  left: 20vmax;
+  background: radial-gradient(closest-side, #00e5ff, transparent);
+  opacity: 0.22;
+  animation-duration: 38s;
+}
+
+@keyframes aurora-drift {
+  to {
+    transform: translate3d(6vmax, 4vmax, 0) scale(1.12);
+  }
+}
+
+/* ---- ferramentas do topo ---- */
+.top__tools {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn--ghost {
+  background: rgb(5 8 26 / 0.6);
+  border-color: rgb(130 160 255 / 0.35);
+  font-weight: 600;
+}
+
+.btn--ghost[aria-pressed='true'] {
+  border-color: var(--c-gold, #ffc24a);
+  color: var(--ink-gold, #ffd88a);
+}
+
+.top__keys {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-dim, #b9c3ea);
+  font-size: 0.75rem;
+}
+
+.top__keys kbd {
+  padding: 0.05rem 0.4rem;
+  border: 1px solid rgb(130 160 255 / 0.4);
+  border-radius: 0.3rem;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: 0.7rem;
+}
+
+/* ---- progresso da revelação ---- */
+.progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem 1rem;
+}
+
+.progress[hidden] {
+  display: none;
+}
+
+.progress__text {
+  margin: 0;
+  font-family: 'Orbitron Variable', system-ui, sans-serif;
+  font-size: clamp(1.2rem, 2.4vw, 2rem);
+  font-weight: 800;
+  color: var(--c-cyan, #00e5ff);
+  text-shadow: 0 0 18px rgb(0 229 255 / 0.45);
+}
+
+.progress__bar {
+  grid-column: 1 / -1;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgb(130 160 255 / 0.18);
+  overflow: hidden;
+}
+
+.progress__bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--c-electric, #1264ff),
+    var(--c-cyan, #00e5ff),
+    var(--c-magenta, #ed28e8)
+  );
+  transform-origin: left;
+  transform: scaleX(var(--value, 0));
+  transition: transform 0.25s ease-out;
+}
+
+/* ---- contagem 3, 2, 1 ---- */
+.countdown {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at center, rgb(18 100 255 / 0.25), rgb(2 3 11 / 0.88) 60%);
+  backdrop-filter: blur(4px);
+}
+
+.countdown span {
+  font-family: 'Orbitron Variable', system-ui, sans-serif;
+  font-size: clamp(8rem, 30vw, 22rem);
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 0 40px rgb(0 229 255 / 0.8),
+    0 0 120px rgb(148 27 255 / 0.6);
+}
+
+.countdown__pop {
+  animation: count-pop 0.62s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes count-pop {
+  from {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---- equipes entrando em cascata ---- */
+.team {
+  animation: none;
+}
+
+.team--waiting {
+  opacity: 0;
+  transform: translateY(18px) scale(0.95);
+}
+
+.team--in {
+  animation: team-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+
+@keyframes team-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.95);
+    box-shadow: 0 0 0 rgb(0 229 255 / 0);
+  }
+
+  60% {
+    box-shadow: 0 0 40px rgb(0 229 255 / 0.55);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    box-shadow: 0 0 0 rgb(0 229 255 / 0);
+  }
+}
+
+.team__members li .chips {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.team__members li.locked .chips {
+  opacity: 1;
+}
+
+.team--in li:not(.locked) .member__name {
+  color: var(--ink-cyan, #8ff3ff);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+}
+
+/* ---- pokébola (equipe ainda sem nome) ---- */
+.ball {
+  position: relative;
+  width: 62%;
+  height: 62%;
+  border: 4px solid #0b0e1c;
+  border-radius: 50%;
+  background: linear-gradient(#e3350d 0 46%, #0b0e1c 46% 54%, #f2f2f2 54%);
+  box-shadow: inset -6px -8px 0 rgb(0 0 0 / 0.18);
+}
+
+.ball__button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28%;
+  height: 28%;
+  border: 4px solid #0b0e1c;
+  border-radius: 50%;
+  background: #f2f2f2;
+  transform: translate(-50%, -50%);
+}
+
+.poke[data-state='pending']:hover .ball {
+  animation: ball-wiggle 0.6s ease-in-out;
+}
+
+@keyframes ball-wiggle {
+  25% {
+    transform: rotate(-14deg);
+  }
+
+  75% {
+    transform: rotate(14deg);
+  }
+}
+
+/* ---- "Quem é esse Pokémon?": silhuetas e revelação ---- */
+.poke__logo {
+  position: relative;
+}
+
+.poke[data-state='spinning'] .poke__logo img {
+  filter: brightness(0) drop-shadow(0 0 8px rgb(0 229 255 / 0.9));
+}
+
+.poke[data-state='spinning'] .poke__name {
+  color: var(--ink-gold, #ffd88a);
+  font-size: 0.95rem;
+}
+
+.poke[data-state='reveal'] .poke__logo img {
+  animation: who-is-it 1.1s ease both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.poke[data-state='reveal'] .poke__logo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  animation: flash 1.1s ease both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.poke[data-state='reveal'] .poke__name,
+.poke[data-state='reveal'] .poke__meta {
+  animation: name-in 1.1s ease both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes who-is-it {
+  0%,
+  46% {
+    filter: brightness(0) drop-shadow(0 0 8px rgb(0 229 255 / 0.9));
+    transform: scale(0.94);
+  }
+
+  54% {
+    filter: brightness(2.4);
+    transform: scale(1.14);
+  }
+
+  100% {
+    filter: none;
+    transform: scale(1);
+  }
+}
+
+@keyframes flash {
+  0%,
+  44% {
+    opacity: 0;
+  }
+
+  52% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes name-in {
+  0%,
+  50% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  62% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* cor do tipo do Pokémon no card já revelado */
+.poke[data-state='done'],
+.poke[data-state='reveal'] {
+  border-color: color-mix(in srgb, var(--type, #00e5ff) 45%, transparent);
+}
+
+.poke[data-state='done'] .poke__logo {
+  border-color: var(--type, #00e5ff);
+  box-shadow: 0 0 34px color-mix(in srgb, var(--type, #00e5ff) 55%, transparent);
+}
+
+.poke[data-state='done'] .poke__name {
+  color: #fff;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--type, #00e5ff) 70%, transparent);
+}
+
+/* ---- modo apresentação (tela cheia, só o show) ---- */
+body.presenting main {
+  width: min(100% - 2rem, 120rem);
+}
+
+body.presenting .top__source,
+body.presenting .top__keys,
+body.presenting .seed,
+body.presenting [data-save],
+body.presenting [data-report],
+body.presenting .stats,
+body.presenting .poke__members,
+body.presenting .poke .btn {
+  display: none !important;
+}
+
+body.presenting .top h1 {
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+}
+
+body.presenting .grid {
+  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+}
+
+body.presenting .grid--poke {
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+
+body.presenting .team__head h3 {
+  font-size: 1.4rem;
+}
+
+body.presenting .member__name {
+  font-size: 1.15rem;
+}
+
+body.presenting .poke__logo {
+  width: 11rem;
+  height: 11rem;
+}
+
+body.presenting .poke__name {
+  font-size: 1.3rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-bg span,
+  .team--in,
+  .countdown__pop,
+  .poke[data-state='reveal'] .poke__logo img,
+  .poke[data-state='reveal'] .poke__logo::after,
+  .poke[data-state='reveal'] .poke__name,
+  .poke[data-state='reveal'] .poke__meta {
+    animation: none;
+  }
+
+  .team--waiting {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* "Revelar tudo" ao lado do contador, não numa linha própria */
+.progress [data-skip] {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+/* o brilho da cor do tipo acende junto com a revelação de cada card */
+.poke[data-state='reveal'] .poke__logo {
+  animation: glow-in 1.1s ease both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes glow-in {
+  0%,
+  50% {
+    border-color: rgb(130 160 255 / 0.3);
+    box-shadow: none;
+  }
+
+  100% {
+    border-color: var(--type, #00e5ff);
+    box-shadow: 0 0 34px color-mix(in srgb, var(--type, #00e5ff) 55%, transparent);
+  }
+}

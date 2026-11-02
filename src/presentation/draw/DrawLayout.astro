@@ -1,7 +1,7 @@
 ---
-// layout das telas do sorteio das equipes: ferramenta da organização, fora do site público. Não tem o header do site,
-// o aurora nem o palco 3D (a tela vai pro projetor e precisa de pouca coisa); noindex por garantia, embora o build de
-// produção nem tenha estas páginas (só o `npm run sorteio` as liga)
+// layout das telas do sorteio das equipes: ferramenta da organização, fora do site público. Feita pro projetor: fundo de
+// aurora leve (só CSS), modo apresentação (tela cheia, tecla F), som opcional e atalhos (Espaço sorteia, S revela tudo).
+// noindex por garantia, embora o build de produção nem tenha estas páginas (só o `npm run sorteio` as liga)
 import displayFont from '../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
 import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
 import '@presentation/styles/tokens.css';
@@ -29,9 +29,14 @@ const fontFaces = [
     <style set:html={fontFaces}></style>
   </head>
   <body class="draw">
+    <div class="aurora-bg" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
     <header class="top">
       <div class="top__brand">
-        <p class="top__eyebrow">HackaRun 2026 · organização</p>
+        <p class="top__eyebrow">// HackaRun 2026 · sorteio ao vivo</p>
         <h1>{title}</h1>
       </div>
       <nav class="top__steps" aria-label="Etapas do sorteio">
@@ -42,8 +47,19 @@ const fontFaces = [
           <span>2</span> Nomes
         </a>
       </nav>
+      <div class="top__tools">
+        <button class="btn btn--ghost" type="button" data-present aria-pressed="false">
+          Modo apresentação
+        </button>
+        <button class="btn btn--ghost" type="button" data-sound aria-pressed="false">
+          Som: desligado
+        </button>
+      </div>
       <p class="top__source" data-source data-mode="test">
         Conectando…
+      </p>
+      <p class="top__keys" aria-hidden="true">
+        <kbd>Espaço</kbd> sortear · <kbd>S</kbd> revelar tudo · <kbd>F</kbd> tela cheia
       </p>
     </header>
     <main>
