@@ -1,36 +1,22 @@
-// "palco" das telas do sorteio: modo apresentação (tela cheia, só o show; tecla F), botão de som e os atalhos
-// (Espaço = sortear, S = revelar tudo). Os atalhos não disparam enquanto alguém digita num campo ou com um diálogo aberto
+// "palco" das telas do sorteio: modo apresentação (tela cheia, só o show; tecla F) e a altura do menu do topo, que a
+// tela desconta ao rolar até o card revelado (sem isso o menu fixo cobre a linha que está aparecendo)
 import { mustFind } from '../dom';
-import { DrawSound } from './sound';
-
-export interface StageActions {
-  onPrimary(): void;
-  onSkip(): void;
-}
-
-export interface Stage {
-  sound: DrawSound;
-}
 
 function typing(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
 }
 
-export function setupStage(actions: StageActions): Stage {
-  const sound = new DrawSound();
-  const presentButton = mustFind<HTMLButtonElement>('[data-present]');
-  const soundButton = mustFind<HTMLButtonElement>('[data-sound]');
+function trackTopHeight(): void {
+  const top = mustFind<HTMLElement>('.top');
+  const apply = () => document.documentElement.style.setProperty('--top-h', `${top.offsetHeight}px`);
+  apply();
+  new ResizeObserver(apply).observe(top);
+}
 
-  const paintSound = () => {
-    soundButton.textContent = sound.enabled ? 'Som: ligado' : 'Som: desligado';
-    soundButton.setAttribute('aria-pressed', String(sound.enabled));
-  };
-  paintSound();
-  soundButton.addEventListener('click', () => {
-    sound.toggle();
-    paintSound();
-  });
+export function setupStage(): void {
+  trackTopHeight();
+  const presentButton = mustFind<HTMLButtonElement>('[data-present]');
 
   const setPresenting = (on: boolean) => {
     document.body.classList.toggle('presenting', on);
@@ -53,16 +39,6 @@ export function setupStage(actions: StageActions): Stage {
   document.addEventListener('keydown', (event) => {
     if (event.ctrlKey || event.metaKey || event.altKey || typing(event.target)) return;
     if (document.querySelector('dialog[open]')) return;
-    const key = event.key.toLowerCase();
-    if (key === ' ') {
-      event.preventDefault();
-      actions.onPrimary();
-    } else if (key === 's') {
-      actions.onSkip();
-    } else if (key === 'f') {
-      togglePresenting();
-    }
+    if (event.key.toLowerCase() === 'f') togglePresenting();
   });
-
-  return { sound };
 }

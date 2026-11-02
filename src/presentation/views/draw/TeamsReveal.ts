@@ -1,6 +1,5 @@
 // revelação das equipes sorteadas: os cards entram em cascata e os nomes de cada um giram como uma roleta antes de
 // travar no nome certo. Só mexe no que já está no DOM (cards montados com .team--waiting e o nome certo em data-name)
-import type { DrawSound } from './fx/sound';
 import { cascadeDelays, TEAM_REVEAL } from './fx/timing';
 
 export interface TeamsReveal {
@@ -12,7 +11,6 @@ interface Options {
   // nomes de todo mundo que entrou no sorteio (a roleta gira por eles)
   names: readonly string[];
   reduced: boolean;
-  sound: DrawSound;
   // quantas equipes já estão inteiras na tela
   onProgress(revealed: number, total: number): void;
   // um card acabou de entrar (a tela rola até ele)
@@ -66,7 +64,6 @@ export function revealTeams(cards: readonly HTMLElement[], options: Options): Te
         card.classList.remove('team--waiting');
         card.classList.add('team--in');
         options.onEnter?.(card);
-        options.sound.pop();
         const names = [...card.querySelectorAll<HTMLElement>('.member__name')];
         let pending = names.length;
         if (pending === 0) {

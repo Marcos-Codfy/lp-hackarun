@@ -1,5 +1,4 @@
-// contagem 3, 2, 1 em tela cheia antes do sorteio. Resolve no fim ou quando alguém pula (tecla S / "Revelar tudo")
-import type { DrawSound } from './sound';
+// contagem 3, 2, 1 em tela cheia antes do sorteio. Resolve no fim ou quando alguém pula ("Revelar tudo")
 
 const STEP_MS = 650;
 
@@ -8,7 +7,7 @@ export interface Countdown {
   skip(): void;
 }
 
-export function countdown(sound: DrawSound, reducedMotion: boolean): Countdown {
+export function countdown(reducedMotion: boolean): Countdown {
   if (reducedMotion) return { done: Promise.resolve(), skip: () => undefined };
   const overlay = document.createElement('div');
   overlay.className = 'countdown';
@@ -33,7 +32,6 @@ export function countdown(sound: DrawSound, reducedMotion: boolean): Countdown {
         number.classList.remove('countdown__pop');
         void number.offsetWidth;
         number.classList.add('countdown__pop');
-        sound.tick();
       }, i * STEP_MS),
     );
   });

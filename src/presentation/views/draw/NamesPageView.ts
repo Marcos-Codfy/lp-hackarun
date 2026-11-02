@@ -3,8 +3,8 @@ import type { PokemonEntry } from '@application/draw/TeamDrawUseCases';
 import type { DrawServices } from '@composition/draw';
 import { TeamNamesViewModel, type TeamNamesState } from '@presentation/view-models/draw/TeamNamesViewModel';
 import { follow, h, mustFind, pokemonImage } from './dom';
-import { confetti } from './fx/confetti';
 import { countdown, type Countdown } from './fx/countdown';
+import { finale } from './fx/finale';
 import { setupStage } from './fx/stage';
 import { cascadeDelays, NAME_REVEAL, prefersReducedMotion, typeColor, typeLabel } from './fx/timing';
 
@@ -12,7 +12,7 @@ const SPIN_MS = 90;
 
 // 2ª tela do sorteio: "Quem é esse Pokémon?". Enquanto a planilha grava, silhuetas passam rápido; depois a silhueta do
 // Pokémon sorteado fica um instante e a cor aparece com um flash, junto com o nome da equipe. "Sortear todas" revela em
-// cascata; "Revelar tudo" (S) pula para o fim
+// cascata; "Revelar tudo" pula para o fim
 export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
   const { catalog } = services;
   const byId = new Map<number, PokemonEntry>(catalog.map((p) => [p.id, p]));
@@ -29,17 +29,11 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
   const timers: number[] = [];
   let named = new Set<number>();
   let spinTimer = 0;
-  let stopDrum: () => void = () => undefined;
   let pendingCountdown: Countdown | null = null;
   // um sorteio pedido nesta tela está em andamento (as equipes que ganharem nome agora são reveladas com animação)
   let drawing = false;
 
-  const stage = setupStage({
-    onPrimary: () => {
-      if (!drawAll.disabled) drawAll.click();
-    },
-    onSkip: () => skip(),
-  });
+  setupStage();
 
   const randomId = () => (catalog[Math.floor(Math.random() * catalog.length)] as PokemonEntry).id;
 
@@ -157,30 +151,26 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
     const firstLoad = named.size === 0 && state.spinning.length === 0 && revealAt.size === 0 && !drawing;
     named = now;
     if (fresh.length === 0 || firstLoad || reduced) return;
-    stopDrum();
     const base = performance.now();
     const delays = cascadeDelays(fresh.length, NAME_REVEAL.staggerMs, NAME_REVEAL.maxTotalMs);
     fresh.forEach((number, i) => {
       const at = base + (delays[i] ?? 0);
       revealAt.set(number, at);
-      // a tela rola até o card quando a revelação dele começa; o "ding" toca no flash (metade da animação)
+      // a tela rola até o card quando a revelação dele começa (descontando o menu fixo do topo)
       timers.push(
         window.setTimeout(() => {
           const el = grid.querySelector(`[data-logo="${number}"]`)?.closest('.poke');
           if (el) follow(el, reduced);
         }, delays[i] ?? 0),
       );
-      timers.push(window.setTimeout(() => stage.sound.ding(), (delays[i] ?? 0) + NAME_REVEAL.revealMs * 0.5));
     });
     const last = (delays.at(-1) ?? 0) + NAME_REVEAL.revealMs;
     timers.push(
       window.setTimeout(() => {
         revealAt.clear();
-        if (fresh.length > 1) {
-          stage.sound.fanfare();
-          confetti(reduced);
-        }
         render(vm.state.value);
+        if (fresh.length > 1)
+          finale('Equipes batizadas!', `${fresh.length} equipes com nome de Pokémon`, reduced);
       }, last),
     );
   };
@@ -195,31 +185,25 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
 
   vm.state.subscribe((state) => {
     scheduleReveals(state);
-    // terminou (ou deu erro): o tambor para
-    if (state.spinning.length === 0 && pendingCountdown === null && !drawing) stopDrum();
     render(state);
   });
 
   drawAll.addEventListener('click', async () => {
     if (drawAll.disabled) return;
     drawing = true;
-    stopDrum = stage.sound.drumroll();
-    pendingCountdown = countdown(stage.sound, reduced);
+    pendingCountdown = countdown(reduced);
     render(vm.state.value);
     await pendingCountdown.done;
     pendingCountdown = null;
     await vm.drawAll();
     drawing = false;
-    stopDrum();
   });
   grid.addEventListener('click', (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-draw-one]');
     if (!button || button.disabled) return;
     drawing = true;
-    stopDrum = stage.sound.drumroll();
     void vm.drawOne(Number(button.dataset['drawOne'])).finally(() => {
       drawing = false;
-      stopDrum();
     });
   });
   skipButton.addEventListener('click', skip);

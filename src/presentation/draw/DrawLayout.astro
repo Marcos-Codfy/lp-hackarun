@@ -1,6 +1,6 @@
 ---
 // layout das telas do sorteio das equipes: ferramenta da organização, fora do site público. Feita pro projetor: fundo de
-// aurora leve (só CSS), modo apresentação (tela cheia, tecla F), som opcional e atalhos (Espaço sorteia, S revela tudo).
+// aurora leve (só CSS), modo apresentação (tela cheia, tecla F).
 // noindex por garantia, embora o build de produção nem tenha estas páginas (só o `npm run sorteio` as liga)
 import displayFont from '../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
 import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
@@ -54,15 +54,12 @@ const fontFaces = [
         <button class="btn btn--ghost" type="button" data-present aria-pressed="false">
           Modo apresentação
         </button>
-        <button class="btn btn--ghost" type="button" data-sound aria-pressed="false">
-          Som: desligado
-        </button>
       </div>
       <p class="top__source" data-source data-mode="test">
         Conectando…
       </p>
       <p class="top__keys" aria-hidden="true">
-        <kbd>Espaço</kbd> sortear · <kbd>S</kbd> revelar tudo · <kbd>F</kbd> tela cheia
+        <kbd>F</kbd> tela cheia
       </p>
     </header>
     <main>

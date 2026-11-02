@@ -673,13 +673,65 @@ body.draw {
   }
 }
 
-.confetti {
+/* ---- fim do sorteio ---- */
+.finale {
   position: fixed;
   inset: 0;
-  z-index: 50;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  z-index: 40;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  text-align: center;
+  background: radial-gradient(circle at center, rgb(148 27 255 / 0.25), rgb(2 3 11 / 0.85) 62%);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  animation: finale-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.finale__kicker {
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--c-gold, #ffc24a);
+}
+
+.finale__title {
+  font-family: 'Orbitron Variable', system-ui, sans-serif;
+  font-size: clamp(2.6rem, 9vw, 7rem);
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow:
+    0 0 40px rgb(0 229 255 / 0.8),
+    0 0 120px rgb(148 27 255 / 0.6);
+}
+
+.finale__detail {
+  font-size: clamp(1rem, 2.2vw, 1.5rem);
+  color: var(--text-dim, #b9c3ea);
+}
+
+@keyframes finale-in {
+  from {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* o menu do topo é fixo: ao rolar até o card revelado, a tela desconta a altura dele */
+.team,
+.poke {
+  scroll-margin-top: calc(var(--top-h, 8rem) + 1rem);
+  scroll-margin-bottom: 1.5rem;
 }
 
 /* ---- equipes entrando em cascata ---- */
@@ -918,6 +970,7 @@ body.presenting .poke__name {
   .aurora-bg span,
   .team--in,
   .countdown__pop,
+  .finale,
   .poke[data-state='reveal'] .poke__logo img,
   .poke[data-state='reveal'] .poke__logo::after,
   .poke[data-state='reveal'] .poke__name,

@@ -8,9 +8,6 @@ import {
   TEAM_REVEAL,
   typeColor,
 } from '@presentation/views/draw/fx/timing';
-import type { DrawSound } from '@presentation/views/draw/fx/sound';
-
-const silent = { pop: vi.fn(), tick: vi.fn(), ding: vi.fn(), fanfare: vi.fn() } as unknown as DrawSound;
 
 function cards(teams: string[][]): HTMLElement[] {
   document.body.innerHTML = '';
@@ -81,7 +78,6 @@ describe('revealTeams', () => {
     const reveal = revealTeams(all, {
       names: ['Ana', 'Bia', 'Caio', 'Duda', 'Eva', 'Fabi'],
       reduced: false,
-      sound: silent,
       onProgress: (n) => progress.push(n),
     });
     // no começo todo mundo ainda está escondido
@@ -100,7 +96,6 @@ describe('revealTeams', () => {
     const reveal = revealTeams(all, {
       names: ['X', 'Y'],
       reduced: false,
-      sound: silent,
       onProgress: () => undefined,
     });
     await vi.advanceTimersByTimeAsync(300);
@@ -118,7 +113,6 @@ describe('revealTeams', () => {
     const reveal = revealTeams(all, {
       names: [],
       reduced: true,
-      sound: silent,
       onProgress: (n) => progress.push(n),
     });
     await reveal.done;

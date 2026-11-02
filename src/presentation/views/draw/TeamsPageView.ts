@@ -4,8 +4,8 @@ import { TeamDrawViewModel, type TeamDrawState } from '@presentation/view-models
 import { follow, h, mustFind } from './dom';
 import { confirmDialog } from './confirmDialog';
 import { plural, reportBox, stat, teamCard } from './teamCards';
-import { confetti } from './fx/confetti';
 import { countdown, type Countdown } from './fx/countdown';
+import { finale } from './fx/finale';
 import { setupStage } from './fx/stage';
 import { prefersReducedMotion } from './fx/timing';
 import { revealTeams, type TeamsReveal } from './TeamsReveal';
@@ -42,12 +42,7 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     show?.reveal?.skip();
   };
 
-  const stage = setupStage({
-    onPrimary: () => {
-      if (!drawButton.disabled) drawButton.click();
-    },
-    onSkip: skip,
-  });
+  setupStage();
 
   const setProgress = (revealed: number, total: number) => {
     progress.hidden = total === 0;
@@ -126,10 +121,8 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     setProgress(0, teams.length);
     render(vm.state.value);
 
-    const stopDrum = stage.sound.drumroll();
-    show.countdown = countdown(stage.sound, reduced);
+    show.countdown = countdown(reduced);
     await show.countdown.done;
-    stopDrum();
 
     const cards = teams.map(teamCard);
     grid.replaceChildren(...cards);
@@ -137,15 +130,17 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     show.reveal = revealTeams(cards, {
       names,
       reduced,
-      sound: stage.sound,
       onProgress: setProgress,
       onEnter: (card) => follow(card, reduced),
     });
     await show.reveal.done;
 
     show = null;
-    stage.sound.fanfare();
-    confetti(reduced);
+    finale(
+      'Equipes formadas!',
+      `${plural(teams.length, 'equipe', 'equipes')} prontas para a corrida`,
+      reduced,
+    );
     render(vm.state.value);
   }
 
