@@ -11,7 +11,7 @@ export interface TeamNameAssignment {
 export interface SavedTeam {
   // "Equipe 7" -> 7: a ordem do sorteio das equipes, que não muda quando a equipe ganha nome
   number: number;
-  // nome atual: "Equipe 7" até o sorteio dos nomes, depois "Equipe Pikachu"
+  // nome atual: "Equipe 7" até o sorteio dos nomes, depois "Equipe Charizard"
   name: string;
   // Pokémon sorteado (número da Pokédex) ou null enquanto a equipe ainda é só "Equipe 7"
   pokemonId: number | null;

@@ -18,7 +18,7 @@ export interface PokemonEntry {
   types: readonly string[];
 }
 
-// "Equipe Pikachu"
+// "Equipe Charizard"
 export const teamNameOf = (pokemon: Pick<PokemonEntry, 'name'>): string => `Equipe ${pokemon.name}`;
 
 // semente legível: dia, hora e um sufixo; fica registrada na planilha (dá pra refazer o mesmo sorteio)

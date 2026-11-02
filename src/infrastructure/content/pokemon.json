@@ -50,19 +50,24 @@
     "types": ["bug", "flying"]
   },
   {
+    "id": 15,
+    "name": "Beedrill",
+    "types": ["bug", "poison"]
+  },
+  {
     "id": 16,
     "name": "Pidgey",
+    "types": ["normal", "flying"]
+  },
+  {
+    "id": 18,
+    "name": "Pidgeot",
     "types": ["normal", "flying"]
   },
   {
     "id": 24,
     "name": "Arbok",
     "types": ["poison"]
-  },
-  {
-    "id": 25,
-    "name": "Pikachu",
-    "types": ["electric"]
   },
   {
     "id": 26,
@@ -85,11 +90,6 @@
     "types": ["poison", "ground"]
   },
   {
-    "id": 37,
-    "name": "Vulpix",
-    "types": ["fire"]
-  },
-  {
     "id": 38,
     "name": "Ninetales",
     "types": ["fire"]
@@ -100,8 +100,8 @@
     "types": ["normal"]
   },
   {
-    "id": 54,
-    "name": "Psyduck",
+    "id": 55,
+    "name": "Golduck",
     "types": ["water"]
   },
   {
@@ -175,11 +175,6 @@
     "types": ["fire"]
   },
   {
-    "id": 79,
-    "name": "Slowpoke",
-    "types": ["water", "psychic"]
-  },
-  {
     "id": 91,
     "name": "Cloyster",
     "types": ["water", "ice"]
@@ -205,8 +200,8 @@
     "types": ["water"]
   },
   {
-    "id": 104,
-    "name": "Cubone",
+    "id": 105,
+    "name": "Marowak",
     "types": ["ground"]
   },
   {
@@ -300,6 +295,11 @@
     "types": ["normal"]
   },
   {
+    "id": 141,
+    "name": "Kabutops",
+    "types": ["rock", "water"]
+  },
+  {
     "id": 142,
     "name": "Aerodactyl",
     "types": ["rock", "flying"]
@@ -325,8 +325,8 @@
     "types": ["fire", "flying"]
   },
   {
-    "id": 147,
-    "name": "Dratini",
+    "id": 148,
+    "name": "Dragonair",
     "types": ["dragon"]
   },
   {
@@ -465,6 +465,11 @@
     "types": ["ground"]
   },
   {
+    "id": 237,
+    "name": "Hitmontop",
+    "types": ["fighting"]
+  },
+  {
     "id": 243,
     "name": "Raikou",
     "types": ["electric"]
@@ -478,11 +483,6 @@
     "id": 245,
     "name": "Suicune",
     "types": ["water"]
-  },
-  {
-    "id": 246,
-    "name": "Larvitar",
-    "types": ["rock", "ground"]
   },
   {
     "id": 248,
