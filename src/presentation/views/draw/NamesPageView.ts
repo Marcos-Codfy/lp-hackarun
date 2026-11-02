@@ -2,7 +2,7 @@ import type { SavedTeam } from '@application/draw/DrawGateway';
 import type { PokemonEntry } from '@application/draw/TeamDrawUseCases';
 import type { DrawServices } from '@composition/draw';
 import { TeamNamesViewModel, type TeamNamesState } from '@presentation/view-models/draw/TeamNamesViewModel';
-import { h, mustFind, pokemonImage } from './dom';
+import { follow, h, mustFind, pokemonImage } from './dom';
 import { confetti } from './fx/confetti';
 import { countdown, type Countdown } from './fx/countdown';
 import { setupStage } from './fx/stage';
@@ -163,7 +163,13 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
     fresh.forEach((number, i) => {
       const at = base + (delays[i] ?? 0);
       revealAt.set(number, at);
-      // o "ding" no flash (metade da animação)
+      // a tela rola até o card quando a revelação dele começa; o "ding" toca no flash (metade da animação)
+      timers.push(
+        window.setTimeout(() => {
+          const el = grid.querySelector(`[data-logo="${number}"]`)?.closest('.poke');
+          if (el) follow(el, reduced);
+        }, delays[i] ?? 0),
+      );
       timers.push(window.setTimeout(() => stage.sound.ding(), (delays[i] ?? 0) + NAME_REVEAL.revealMs * 0.5));
     });
     const last = (delays.at(-1) ?? 0) + NAME_REVEAL.revealMs;

@@ -26,6 +26,12 @@ export interface DrawServices {
   generate: GenerateTeamDraw;
   save: SaveTeamDraw;
   names: DrawTeamNames;
+  // só no modo de teste (cópia local): recomeça do zero para sortear de novo quantas vezes quiser. Na planilha real é null
+  resetTest: (() => Promise<void>) | null;
+  // só no teste: volta os nomes para "Equipe N" (as equipes continuam). Na planilha real é null
+  resetTestNames: (() => Promise<void>) | null;
+  // planilha real: o sorteio das equipes grava sozinho (sem botão "Salvar"). No teste o botão continua
+  autoSave: boolean;
 }
 
 function transportFor(source: DrawSource): DrawTransport {
@@ -38,7 +44,8 @@ function transportFor(source: DrawSource): DrawTransport {
 const browserRandom = (): number => (crypto.getRandomValues(new Uint32Array(1))[0] as number) / 4294967296;
 
 export function createDrawServices(source: DrawSource): DrawServices {
-  const gateway = new SheetDrawGateway(transportFor(source));
+  const transport = transportFor(source);
+  const gateway = new SheetDrawGateway(transport);
   const catalog: readonly PokemonEntry[] = pokemon;
   return {
     source,
@@ -47,5 +54,8 @@ export function createDrawServices(source: DrawSource): DrawServices {
     generate: new GenerateTeamDraw(gateway, () => new Date(), browserRandom),
     save: new SaveTeamDraw(gateway),
     names: new DrawTeamNames(gateway, catalog, browserRandom),
+    resetTest: transport instanceof LocalDrawTransport ? () => transport.reset('all') : null,
+    resetTestNames: transport instanceof LocalDrawTransport ? () => transport.reset('names') : null,
+    autoSave: source.mode === 'sheet',
   };
 }

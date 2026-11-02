@@ -65,6 +65,13 @@ export class TeamDrawViewModel {
     }
   }
 
+  // planilha real: sorteia e já grava (sem botão "Salvar"). Refazer só vale enquanto nenhuma equipe tem nome
+  async drawAndSave(seed?: string): Promise<void> {
+    await this.draw(seed);
+    const { preview } = this.state.value;
+    if (preview && !preview.locked) await this.save();
+  }
+
   async save(): Promise<void> {
     const { preview, status } = this.state.value;
     if (!preview || status === 'saving' || status === 'drawing') return;

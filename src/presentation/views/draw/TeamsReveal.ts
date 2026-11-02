@@ -15,6 +15,8 @@ interface Options {
   sound: DrawSound;
   // quantas equipes já estão inteiras na tela
   onProgress(revealed: number, total: number): void;
+  // um card acabou de entrar (a tela rola até ele)
+  onEnter?(card: HTMLElement): void;
 }
 
 function lock(card: HTMLElement): void {
@@ -63,6 +65,7 @@ export function revealTeams(cards: readonly HTMLElement[], options: Options): Te
       window.setTimeout(() => {
         card.classList.remove('team--waiting');
         card.classList.add('team--in');
+        options.onEnter?.(card);
         options.sound.pop();
         const names = [...card.querySelectorAll<HTMLElement>('.member__name')];
         let pending = names.length;

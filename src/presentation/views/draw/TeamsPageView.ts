@@ -1,102 +1,14 @@
-import { levelLabel, type DrawnTeam, type DrawReport } from '@domain/index';
 import type { DrawServices } from '@composition/draw';
 import type { DrawPreview } from '@application/draw/TeamDrawUseCases';
 import { TeamDrawViewModel, type TeamDrawState } from '@presentation/view-models/draw/TeamDrawViewModel';
-import { h, mustFind } from './dom';
+import { follow, h, mustFind } from './dom';
+import { confirmDialog } from './confirmDialog';
+import { plural, reportBox, stat, teamCard } from './teamCards';
 import { confetti } from './fx/confetti';
 import { countdown, type Countdown } from './fx/countdown';
 import { setupStage } from './fx/stage';
 import { prefersReducedMotion } from './fx/timing';
 import { revealTeams, type TeamsReveal } from './TeamsReveal';
-
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
-function stat(label: string, value: string): HTMLElement {
-  return h(
-    'div',
-    { class: 'stat' },
-    h('span', { class: 'stat__value' }, value),
-    h('span', { class: 'stat__label' }, label),
-  );
-}
-
-function reportBox(report: DrawReport, seed: string): HTMLElement {
-  const optimal = report.levelRepeatsTotal === report.levelRepeatsUnavoidable;
-  const repeated = new Map<number, string[]>();
-  for (const r of report.levelRepeats) {
-    repeated.set(r.team, [...(repeated.get(r.team) ?? []), `${levelLabel(r.level)} ×${r.count}`]);
-  }
-  return h(
-    'div',
-    { class: 'report', 'data-optimal': String(optimal) },
-    h(
-      'p',
-      { class: 'report__line' },
-      h('strong', {}, 'Níveis: '),
-      report.levelRepeatsTotal === 0
-        ? 'nenhuma equipe tem dois integrantes do mesmo nível.'
-        : `${plural(report.levelRepeatsTotal, 'repetição', 'repetições')} de nível. ` +
-            (optimal
-              ? 'É o mínimo que a conta permite com as pessoas credenciadas.'
-              : `O mínimo possível seria ${report.levelRepeatsUnavoidable}: pode valer sortear de novo.`),
-    ),
-    h(
-      'p',
-      { class: 'report__line' },
-      h('strong', {}, 'Outras instituições: '),
-      report.externalTotal === 0
-        ? 'ninguém de fora da UniCatólica.'
-        : `${report.externalTotal} pessoas, de ${report.externalPerTeam.min} a ${report.externalPerTeam.max} por equipe` +
-            (report.sameExternalInstitution > 0
-              ? `; ${plural(report.sameExternalInstitution, 'par', 'pares')} da mesma instituição na mesma equipe.`
-              : '; nenhuma equipe repete a instituição de fora.'),
-    ),
-    repeated.size > 0 &&
-      h(
-        'ul',
-        { class: 'report__repeats' },
-        ...[...repeated].map(([team, items]) => h('li', {}, `Equipe ${team}: ${items.join(', ')}`)),
-      ),
-    h('p', { class: 'report__seed' }, `Semente: ${seed}`),
-  );
-}
-
-// card montado "fechado": os nomes aparecem como ??? e a revelação gira e trava no nome certo (data-name)
-function teamCard(team: DrawnTeam): HTMLElement {
-  const counts = new Map<string, number>();
-  for (const m of team.members) counts.set(m.level, (counts.get(m.level) ?? 0) + 1);
-  return h(
-    'article',
-    { class: 'team team--waiting' },
-    h(
-      'header',
-      { class: 'team__head' },
-      h('h3', {}, `Equipe ${team.number}`),
-      h('span', { class: 'team__count' }, `${team.members.length}`),
-    ),
-    h(
-      'ul',
-      { class: 'team__members' },
-      ...team.members.map((m) =>
-        h(
-          'li',
-          {},
-          h('span', { class: 'member__name', 'data-name': m.name }, '???'),
-          h(
-            'span',
-            { class: 'chips' },
-            h(
-              'span',
-              { class: 'chip', 'data-repeat': String((counts.get(m.level) ?? 0) > 1) },
-              levelLabel(m.level),
-            ),
-            m.institution.external && h('span', { class: 'chip chip--outside' }, m.institution.label),
-          ),
-        ),
-      ),
-    ),
-  );
-}
 
 // 1ª tela do sorteio: credenciados, sorteio das equipes com revelação em cascata, relatório e salvar na planilha
 export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
@@ -117,6 +29,9 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
   const skipButton = mustFind<HTMLButtonElement>('[data-skip]');
   const seedInput = mustFind<HTMLInputElement>('[data-seed]');
   const reduced = prefersReducedMotion();
+  // planilha real: grava sozinho ao sortear (o botão "Salvar na planilha" é só do teste)
+  const { autoSave } = services;
+  saveButton.hidden = autoSave;
 
   // o "show" em andamento (contagem e cascata); null = nada rodando
   let show: { countdown: Countdown | null; reveal: TeamsReveal | null } | null = null;
@@ -141,35 +56,20 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     progressBar.style.setProperty('--value', String(total ? revealed / total : 0));
   };
 
-  const confirm = (teams: number, people: number, replacing: boolean): Promise<boolean> =>
-    new Promise((resolve) => {
-      const dialog = h(
-        'dialog',
-        { class: 'dialog' },
-        h('h2', {}, 'Gravar na planilha?'),
-        h(
-          'p',
-          { class: 'dialog__hint' },
-          `${plural(teams, 'equipe', 'equipes')} para ${people} pessoas: a coluna Equipe da aba Inscritos e a aba Equipes serão preenchidas.` +
-            (replacing ? ' Já existe um sorteio salvo, e este vai substituí-lo.' : ''),
-        ),
-        h(
-          'div',
-          { class: 'dialog__actions' },
-          h('button', { class: 'btn', type: 'button', 'data-no': true }, 'Cancelar'),
-          h('button', { class: 'btn btn--primary', type: 'button', 'data-yes': true }, 'Gravar'),
-        ),
-      );
-      document.body.append(dialog);
-      const done = (answer: boolean) => {
-        dialog.close();
-        dialog.remove();
-        resolve(answer);
-      };
-      mustFind('[data-yes]', dialog).addEventListener('click', () => done(true));
-      mustFind('[data-no]', dialog).addEventListener('click', () => done(false));
-      dialog.addEventListener('cancel', () => done(false));
-      dialog.showModal();
+  const confirm = (teams: number, people: number, replacing: boolean) =>
+    confirmDialog({
+      title: 'Gravar na planilha?',
+      text:
+        `${plural(teams, 'equipe', 'equipes')} para ${people} pessoas: a coluna Equipe da aba Inscritos e a aba Equipes serão preenchidas.` +
+        (replacing ? ' Já existe um sorteio salvo, e este vai substituí-lo.' : ''),
+      yes: 'Gravar',
+    });
+
+  const confirmRedo = (saved: number) =>
+    confirmDialog({
+      title: 'Sortear de novo?',
+      text: `Já existem ${plural(saved, 'equipe salva', 'equipes salvas')} na planilha. Sortear de novo substitui todas elas.`,
+      yes: 'Sortear de novo',
     });
 
   const render = (state: TeamDrawState) => {
@@ -234,7 +134,13 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     const cards = teams.map(teamCard);
     grid.replaceChildren(...cards);
     const names = teams.flatMap((t) => t.members.map((m) => m.name));
-    show.reveal = revealTeams(cards, { names, reduced, sound: stage.sound, onProgress: setProgress });
+    show.reveal = revealTeams(cards, {
+      names,
+      reduced,
+      sound: stage.sound,
+      onProgress: setProgress,
+      onEnter: (card) => follow(card, reduced),
+    });
     await show.reveal.done;
 
     show = null;
@@ -244,7 +150,13 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
   }
 
   vm.state.subscribe(render);
-  drawButton.addEventListener('click', () => void vm.draw(seedInput.value));
+  drawButton.addEventListener('click', async () => {
+    if (!autoSave) return void vm.draw(seedInput.value);
+    // na planilha real o sorteio grava na hora: refazer substitui as equipes já salvas, então pergunta antes
+    const saved = vm.state.value.sheet?.saved.length ?? 0;
+    if (saved > 0 && !(await confirmRedo(saved))) return;
+    await vm.drawAndSave(seedInput.value);
+  });
   skipButton.addEventListener('click', skip);
   saveButton.addEventListener('click', async () => {
     const preview = vm.state.value.preview;

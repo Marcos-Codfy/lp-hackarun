@@ -77,6 +77,15 @@ describe('teamSizes · quantas equipes e de que tamanho', () => {
     expect(teamSizes(215, CONFIG).filter((n) => n === 5)).toHaveLength(3);
   });
 
+  it('regra do evento: equipes de 4 e a sobra (1 a 3 pessoas) vira o 5º de equipes diferentes', () => {
+    // 185 credenciados: 46 equipes, 45 de 4 e 1 de 5
+    expect(teamSizes(185, CONFIG).filter((n) => n === 5)).toHaveLength(1);
+    expect(teamSizes(185, CONFIG).filter((n) => n === 4)).toHaveLength(45);
+    // 187: 3 equipes de 5, o resto de 4; nunca uma equipe de 6
+    expect(teamSizes(187, CONFIG).filter((n) => n === 5)).toHaveLength(3);
+    expect(Math.max(...teamSizes(187, CONFIG))).toBe(5);
+  });
+
   it('número pequeno em que a conta não fecha: equipes de 3 ou 4 em vez de passar de 5', () => {
     expect(teamSizes(11, CONFIG)).toEqual([4, 4, 3]);
     expect(teamSizes(7, CONFIG)).toEqual([4, 3]);

@@ -85,6 +85,17 @@ describe('TeamDrawViewModel', () => {
     expect(locked.vm.state.value.error).toMatch(/já tem nome/);
   });
 
+  it('planilha real: sortear já grava; com as equipes travadas não grava nada', async () => {
+    const { vm, save } = drawVm();
+    await vm.drawAndSave();
+    expect(save).toHaveBeenCalledWith(RESULT);
+    expect(vm.state.value.saved).toBe(true);
+
+    const locked = drawVm({ generate: async () => ok(preview({ locked: true })) });
+    await locked.vm.drawAndSave();
+    expect(locked.save).not.toHaveBeenCalled();
+  });
+
   it('erro da planilha vira mensagem na tela, e sortear de novo limpa o erro e o "salvo"', async () => {
     let calls = 0;
     const { vm } = drawVm({
