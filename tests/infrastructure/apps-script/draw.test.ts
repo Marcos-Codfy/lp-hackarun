@@ -55,6 +55,15 @@ describe('Apps Script · sorteio das equipes (Draw.gs)', () => {
     expect(call({ action: 'draw-reset' }).error).toBe('unknown-action');
   });
 
+  it('gerarChaveSorteio cria uma chave longa uma vez só, e com ela o sorteio responde', () => {
+    const { script } = setup(null);
+    const token = script.evaluate<() => string>('gerarChaveSorteio')();
+    expect(token).toMatch(/^[0-9a-f]{64}$/);
+    expect(script.properties['SORTEIO_TOKEN']).toBe(token);
+    expect(script.evaluate<() => string>('gerarChaveSorteio')()).toBe(token);
+    expect(script.post({ action: 'draw-list', token }).ok).toBe(true);
+  });
+
   it('draw-list devolve só os credenciados, com os campos que o sorteio usa', () => {
     const res = setup().call({ action: 'draw-list' });
     const accredited = res['accredited'] as Record<string, string>[];

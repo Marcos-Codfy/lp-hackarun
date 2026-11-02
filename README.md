@@ -452,7 +452,7 @@ canônico das duas versões aponta para `hackarun.com.br`, então os buscadores 
 As telas `/sorteio` e `/sorteio/nomes` são da organização: fora do menu e do sitemap, com `noindex`, e só abrem com o
 login. Quem confere o login é uma Cloudflare Pages Function (`functions/_middleware.ts`, lógica em
 `src/server/sorteio`), que roda só nesses caminhos (`public/_routes.json`). Ela repassa as ações ao Apps Script
-(`apps-script/Draw.gs`) com uma chave que nunca chega ao navegador. Sessão de 12 horas em cookie assinado; 5 senhas
+(`apps-script/Draw.gs`) com uma chave que nunca chega ao navegador. Sessão de 12 horas em cookie assinado; 10 senhas
 erradas seguidas travam o login daquele IP por 15 minutos.
 
 Em **Workers & Pages → hackarun → Settings → Variables and Secrets**, ambiente **Production**:

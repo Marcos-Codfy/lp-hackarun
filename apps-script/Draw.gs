@@ -47,6 +47,20 @@ function drawAction_(body) {
   }
 }
 
+// rode uma vez no editor (selecione gerarChaveSorteio e clique em Executar): cria a chave SORTEIO_TOKEN, se ainda não
+// existir, e mostra no registro de execução para copiar no segredo SORTEIO_TOKEN da Cloudflare. Apagar a propriedade
+// desliga o sorteio pelo site na hora
+function gerarChaveSorteio() {
+  const props = PropertiesService.getScriptProperties();
+  let token = String(props.getProperty(DRAW_TOKEN_PROPERTY) || '');
+  if (token.length < DRAW_TOKEN_MIN) {
+    token = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
+    props.setProperty(DRAW_TOKEN_PROPERTY, token);
+  }
+  console.log('Chave do sorteio (copie no segredo SORTEIO_TOKEN da Cloudflare): ' + token);
+  return token;
+}
+
 function drawAuthorized_(token) {
   const expected = String(PropertiesService.getScriptProperties().getProperty(DRAW_TOKEN_PROPERTY) || '');
   if (expected.length < DRAW_TOKEN_MIN) return false;

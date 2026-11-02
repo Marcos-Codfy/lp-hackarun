@@ -1,7 +1,7 @@
-// limite de tentativas de login: 5 erros seguidos do mesmo IP travam o login por 15 minutos. Na Cloudflare o contador
+// limite de tentativas de login: 10 erros seguidos do mesmo IP travam o login por 15 minutos. Na Cloudflare o contador
 // fica no cache do data center (Cache API): é um freio, não um cofre; a senha e o liga/desliga continuam valendo
 
-export const MAX_FAILURES = 5;
+export const MAX_FAILURES = 10;
 export const LOCK_SECONDS = 15 * 60;
 
 export interface AttemptStore {
