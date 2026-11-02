@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { driveImageUrl } from '@infrastructure/repositories/driveImageUrl';
+import { driveImageUrl, pokemonImageUrl } from '@infrastructure/repositories/driveImageUrl';
 import { AppsScriptClient } from '@infrastructure/registration/AppsScriptClient';
 import { AppsScriptTeamRepository } from '@infrastructure/repositories/AppsScriptTeamRepository';
 import { ContentMapper } from '@infrastructure/mappers/ContentMapper';
@@ -50,5 +50,31 @@ describe('foto na lista ao vivo', () => {
     expect(team('javascript:alert(1)').imageUrl).toBeNull();
     expect(team('http://inseguro.example/a.png').imageUrl).toBeNull();
     expect(team('data:text/html;base64,AAAA').imageUrl).toBeNull();
+    // arte local do Pokémon do sorteio; caminho torto não passa
+    expect(team('/pokemon/6.webp').imageUrl).toBe('/pokemon/6.webp');
+    expect(team('/pokemon/../x.webp').imageUrl).toBeNull();
+    expect(team('/pokemon/6.webp?x=1').imageUrl).toBeNull();
+  });
+
+  it('equipe do sorteio usa a arte do Pokémon (mesmo com insígnia no Drive); número torto fica sem', async () => {
+    const body = {
+      ok: true,
+      teams: [
+        { id: 'a', name: 'Equipe Charizard', memberCount: 4, imageId: DRIVE_ID, pokemonId: 6 },
+        { id: 'b', name: 'Equipe Manual', memberCount: 4, imageId: DRIVE_ID, pokemonId: null },
+        { id: 'c', name: 'Equipe Torta', memberCount: 4, imageId: null, pokemonId: '6/../x' },
+      ],
+    };
+    const fetchFn = vi.fn(async () => new Response(JSON.stringify(body)));
+    const repo = new AppsScriptTeamRepository(
+      new AppsScriptClient('https://script.google.com/x/exec', fetchFn),
+    );
+    expect((await repo.list()).map((t) => t.imageUrl)).toEqual([
+      '/pokemon/6.webp',
+      driveImageUrl(DRIVE_ID),
+      null,
+    ]);
+    expect(pokemonImageUrl(0)).toBeNull();
+    expect(pokemonImageUrl(1.5)).toBeNull();
   });
 });
