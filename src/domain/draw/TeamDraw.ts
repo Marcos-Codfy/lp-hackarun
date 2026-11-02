@@ -39,6 +39,8 @@ export interface DrawReport {
   levelRepeats: { team: number; level: KnowledgeLevel; count: number }[];
   levelRepeatsTotal: number;
   levelRepeatsUnavoidable: number;
+  // níveis com mais gente do que equipes: é deles que vem a repetição que não tem como evitar
+  crowdedLevels: { level: KnowledgeLevel; count: number }[];
   // duas pessoas da mesma instituição de fora na mesma equipe
   sameExternalInstitution: number;
 }
@@ -90,12 +92,16 @@ function teamPenalty(members: readonly DrawParticipant[], targets: Targets): num
   return levelRepeats * W_LEVEL + externalOff * W_EXTERNAL + sameExternal * W_SAME_EXTERNAL;
 }
 
-// o mínimo de repetições de nível que a conta permite: cada nível cabe uma vez por equipe, o resto repete
-export function unavoidableLevelRepeats(participants: readonly DrawParticipant[], teams: number): number {
+function levelCounts(participants: readonly DrawParticipant[]): Map<KnowledgeLevel, number> {
   const counts = new Map<KnowledgeLevel, number>();
   for (const p of participants) counts.set(p.level, (counts.get(p.level) ?? 0) + 1);
+  return counts;
+}
+
+// o mínimo de repetições de nível que a conta permite: cada nível cabe uma vez por equipe, o resto repete
+export function unavoidableLevelRepeats(participants: readonly DrawParticipant[], teams: number): number {
   let repeats = 0;
-  for (const count of counts.values()) repeats += Math.max(0, count - teams);
+  for (const count of levelCounts(participants).values()) repeats += Math.max(0, count - teams);
   return repeats;
 }
 
@@ -129,6 +135,9 @@ function buildReport(teams: readonly DrawnTeam[], all: readonly DrawParticipant[
     levelRepeats,
     levelRepeatsTotal: levelRepeats.reduce((sum, r) => sum + (r.count - 1), 0),
     levelRepeatsUnavoidable: unavoidableLevelRepeats(all, teams.length),
+    crowdedLevels: [...levelCounts(all)]
+      .filter(([, count]) => count > teams.length)
+      .map(([level, count]) => ({ level, count })),
     sameExternalInstitution,
   };
 }

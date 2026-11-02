@@ -116,6 +116,12 @@ describe('drawTeams · regras do sorteio', () => {
       if (!result.ok) throw new Error(result.error);
       expect(result.value.report.levelRepeatsTotal, seed).toBe(5);
       expect(result.value.report.levelRepeatsUnavoidable).toBe(5);
+      // a repetição vem só dos níveis com mais gente do que equipes, e só deles
+      const crowded = result.value.report.crowdedLevels;
+      expect(crowded.reduce((sum, c) => sum + c.count - 53, 0)).toBe(5);
+      expect(result.value.report.levelRepeats.every((r) => crowded.some((c) => c.level === r.level))).toBe(
+        true,
+      );
     }
   });
 

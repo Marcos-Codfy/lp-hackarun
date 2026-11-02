@@ -30,7 +30,9 @@ export function reportBox(report: DrawReport, seed: string): HTMLElement {
         ? 'nenhuma equipe tem dois integrantes do mesmo nível.'
         : `${plural(report.levelRepeatsTotal, 'repetição', 'repetições')} de nível. ` +
             (optimal
-              ? 'É o mínimo que a conta permite com as pessoas credenciadas.'
+              ? `É o mínimo possível: ${report.crowdedLevels
+                  .map((c) => `${levelLabel(c.level)} tem ${c.count} pessoas`)
+                  .join(' e ')} para ${report.teams} equipes.`
               : `O mínimo possível seria ${report.levelRepeatsUnavoidable}: pode valer sortear de novo.`),
     ),
     h(
@@ -40,6 +42,9 @@ export function reportBox(report: DrawReport, seed: string): HTMLElement {
       report.externalTotal === 0
         ? 'ninguém de fora da UniCatólica.'
         : `${report.externalTotal} pessoas, de ${report.externalPerTeam.min} a ${report.externalPerTeam.max} por equipe` +
+            (report.externalTotal > report.teams
+              ? ` (há mais gente de fora do que equipes, então ao menos ${report.externalTotal - report.teams} ficam com 2)`
+              : '') +
             (report.sameExternalInstitution > 0
               ? `; ${plural(report.sameExternalInstitution, 'par', 'pares')} da mesma instituição na mesma equipe.`
               : '; nenhuma equipe repete a instituição de fora.'),
