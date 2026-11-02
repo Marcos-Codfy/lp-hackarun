@@ -113,6 +113,7 @@ das inscrições ativas, e-mails dos credenciados, WhatsApps das inscrições at
    | `Setup`      | `configurarPlanilha()`: cria e formata as abas                              |
    | `Summary`    | Aba Resumo                                                                  |
    | `Mentors`    | Cadastro de mentores: abas Mentores e Resumo Mentores (seção 8)             |
+   | `Draw`       | Sorteio das equipes pelo site (`/sorteio`): aba Sorteio (seção 7)           |
 
 4. Em **Configurações do projeto** (engrenagem), marque **Mostrar arquivo de manifesto "appsscript.json" no
    editor**. Volte ao editor e substitua o conteúdo do `appsscript.json` pelo de [`appsscript.json`](./appsscript.json)
@@ -124,14 +125,15 @@ das inscrições ativas, e-mails dos credenciados, WhatsApps das inscrições at
 Em **Configurações do projeto > Propriedades do script > Adicionar propriedade do script**, crie as propriedades
 abaixo e clique em **Salvar propriedades do script**:
 
-| Propriedade           | Valor atual                 | Função                                                                        |
-| --------------------- | --------------------------- | ----------------------------------------------------------------------------- |
-| `CAPACITY`            | `75`                        | Máximo de inscritos (pessoas). Conta tudo que não está `cancelado`            |
-| `CLOSES_AT`           | `2026-11-08T23:59:00-03:00` | Prazo final, em data ISO **com hora e fuso** (`-03:00` é o horário de Palmas) |
-| `INSCRICOES_FECHADAS` | (vazio)                     | `sim` fecha na hora, sem alterar o site. Para reabrir, apague ou use `nao`    |
-| `FOTOS_PASTA_ID`      | (criada sozinha)            | Pasta do Drive das insígnias (o final da URL da pasta)                        |
-| `ID_SEGREDO`          | (criada sozinha)            | Segredo dos ids públicos das equipes. Não apague nem compartilhe              |
-| `PLANILHA_VERSAO`     | (criada sozinha)            | Versão do layout aplicado (hoje `7`)                                          |
+| Propriedade           | Valor atual                 | Função                                                                                                                                                        |
+| --------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CAPACITY`            | `75`                        | Máximo de inscritos (pessoas). Conta tudo que não está `cancelado`                                                                                            |
+| `CLOSES_AT`           | `2026-11-08T23:59:00-03:00` | Prazo final, em data ISO **com hora e fuso** (`-03:00` é o horário de Palmas)                                                                                 |
+| `INSCRICOES_FECHADAS` | (vazio)                     | `sim` fecha na hora, sem alterar o site. Para reabrir, apague ou use `nao`                                                                                    |
+| `FOTOS_PASTA_ID`      | (criada sozinha)            | Pasta do Drive das insígnias (o final da URL da pasta)                                                                                                        |
+| `ID_SEGREDO`          | (criada sozinha)            | Segredo dos ids públicos das equipes. Não apague nem compartilhe                                                                                              |
+| `PLANILHA_VERSAO`     | (criada sozinha)            | Versão do layout aplicado (hoje `7`)                                                                                                                          |
+| `SORTEIO_TOKEN`       | (chave longa, só no dia)    | Chave do sorteio pelo site: o mesmo valor do segredo `SORTEIO_TOKEN` da Cloudflare. Sem ela (ou com menos de 24 caracteres), o sorteio pelo site não responde |
 
 - Valor inválido em `CLOSES_AT` ou `CAPACITY` **fecha** as inscrições e registra o erro no log.
 - Mantenha `CLOSES_AT` e `CAPACITY` iguais ao bloco `registration` do `src/infrastructure/content/event.json`.
@@ -197,7 +199,23 @@ Ordem recomendada: crie `INSCRICOES_FECHADAS=sim`, cole os arquivos, publique a 
 2. Troque o Status para `credenciado`. Quem não comparecer fica como `ausente`.
 3. **Menores de 18 anos:** confira a autorização do responsável e troque `pendente` por `entregue`.
 
-### Sorteio das equipes (12/11)
+### Sorteio das equipes (12/11), pelo site
+
+O sorteio é feito em `hackarun.com.br/sorteio`, com o login da organização (passo a passo de ligar no README do
+projeto, seção Deploy). O site forma as equipes com quem está `credenciado` e grava tudo sozinho:
+
+1. **Tela 1 (Equipes):** "Sortear equipes" forma as equipes (4 pessoas, a sobra vira 5º integrante) e grava na hora:
+   coluna **Equipe** da aba Inscritos, uma linha `pendente` por equipe na aba **Equipes** e o registro na aba
+   **Sorteio** (número, nome, Pokémon, semente e repetições de nível). Sortear de novo substitui o sorteio anterior,
+   enquanto nenhuma equipe tiver nome.
+2. **Tela 2 (Nomes):** "Sortear todas" dá um Pokémon (e o nome `Equipe <Pokémon>`) a cada equipe, sem repetir, e troca
+   o nome nas três abas. A partir daqui as equipes não podem mais ser refeitas pelo site.
+3. **Publicar no site:** com todos os nomes, o botão confirma as equipes (Status `confirmado`). Em até 1 minuto elas
+   aparecem em `/equipes`, com o nome, a arte do Pokémon e o número de integrantes.
+
+A chave `SORTEIO_TOKEN` pode ser apagada depois do sorteio: o site para de ler e gravar a planilha na hora.
+
+### Sorteio das equipes à mão (plano B)
 
 1. Na aba **Equipes**, escreva o nome de cada equipe na coluna **Equipe** (por exemplo, `Equipe Pikachu`).
 2. Na aba **Inscritos**, escolha a **Equipe** de cada pessoa credenciada no menu da coluna. Só aparecem os nomes
