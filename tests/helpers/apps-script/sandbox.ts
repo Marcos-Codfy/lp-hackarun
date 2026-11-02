@@ -17,6 +17,7 @@ export const SCRIPT_FILES = [
   'Setup.gs',
   'Summary.gs',
   'Mentors.gs',
+  'Draw.gs',
 ] as const;
 
 export interface ScriptResponse {

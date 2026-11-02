@@ -1,0 +1,43 @@
+---
+// 2ª tela do sorteio: dá a cada equipe o nome de um Pokémon da 1ª ou 2ª geração (sem repetir), com a imagem dele de
+// logo. No site, só abre com o login da organização; "Publicar no site" leva as equipes para /equipes
+import DrawLayout from '@presentation/draw/DrawLayout.astro';
+
+const local = import.meta.env.SORTEIO_LOCAL === '1';
+---
+
+<DrawLayout title="Sorteio dos nomes" step="names">
+  <section class="stats" data-stats aria-live="polite"></section>
+  <div class="actions">
+    <button class="btn btn--primary btn--xl" type="button" data-draw-all disabled>
+      Sortear todas
+    </button>
+    <button class="btn btn--ghost btn--xl" type="button" data-skip hidden>
+      Revelar tudo
+    </button>
+    <button class="btn btn--primary btn--xl" type="button" data-publish hidden>
+      Publicar no site
+    </button>
+    {local && (
+      <button class="btn btn--test" type="button" data-reset-names hidden>
+        Sortear os nomes de novo (teste)
+      </button>
+    )}
+  </div>
+  <p class="message" data-message role="status"></p>
+  <div class="grid grid--poke" data-grid></div>
+  <script>
+    import { connect } from '@presentation/views/draw/connect';
+    import { mountNamesPage } from '@presentation/views/draw/NamesPageView';
+
+    connect()
+      .then(mountNamesPage)
+      .catch((error: unknown) => {
+        const message = document.querySelector<HTMLElement>('[data-message]');
+        if (message) {
+          message.dataset['kind'] = 'error';
+          message.textContent = error instanceof Error ? error.message : 'Não consegui falar com a planilha.';
+        }
+      });
+  </script>
+</DrawLayout>

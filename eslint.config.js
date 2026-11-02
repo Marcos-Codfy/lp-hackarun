@@ -10,7 +10,7 @@ const LINE_COUNT = { skipBlankLines: true, skipComments: true };
 const softLimit = { rules: { 'max-lines': builtinRules.get('max-lines') } };
 
 export default tseslint.config(
-  { ignores: ['dist/', '.astro/', 'node_modules/', 'coverage/', 'docs/dist/'] },
+  { ignores: ['dist/', '.astro/', 'node_modules/', 'coverage/', 'docs/dist/', '.wrangler/'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...astro.configs.recommended,

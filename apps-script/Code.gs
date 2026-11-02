@@ -2,7 +2,7 @@
 // publica as equipes confirmadas depois do sorteio. Cole no editor do Apps Script da planilha
 // (Extensões > Apps Script) junto com os outros .gs desta pasta (passo a passo no README.md).
 
-const TEAMS_CACHE_KEY = 'teams:v4';
+const TEAMS_CACHE_KEY = 'teams:v5';
 const TEAMS_CACHE_SECONDS = 60;
 // Propriedade do script com o segredo dos ids públicos das equipes (idSecret_)
 const ID_SECRET_PROPERTY = 'ID_SEGREDO';
@@ -11,6 +11,8 @@ const PUBLIC_TEAM_COLUMNS = ['name', 'badge', 'count', 'status', 'badgeId', 'lin
 
 function doPost(e) {
   const body = parseBody_(e);
+  // sorteio das equipes (Draw.gs): vem da função do site com a chave do sorteio, não do formulário
+  if (body && typeof body.action === 'string' && body.action.indexOf('draw-') === 0) return drawAction_(body);
   // primeiro filtro, barato: honeypot preenchido ou formulário enviado rápido demais
   if (!body || isBot_(body)) return json_({ ok: false, error: 'invalid' });
   // cadastro de mentor: outro fluxo e outra aba (Mentors.gs); não passa pelo prazo nem pelas vagas da inscrição
@@ -93,7 +95,8 @@ function onEdit(e) {
   }
 }
 
-// só o que é público: id derivado do nome, nome da equipe, quantidade de integrantes e o id da insígnia
+// só o que é público: id derivado do nome, nome da equipe, quantidade de integrantes, o id da insígnia e o Pokémon
+// do sorteio dos nomes (a imagem dele vem do próprio site)
 function confirmedTeams_() {
   const cache = CacheService.getScriptCache();
   const hit = cache.get(TEAMS_CACHE_KEY);
@@ -103,6 +106,7 @@ function confirmedTeams_() {
   const rows = hasHeaders_(sheet, TEAM_HEADERS) ? readRows_(sheet, TEAM_HEADERS.length) : [];
   // uma leitura das Propriedades por chamada (e não uma por equipe): a cota diária é contada por leitura
   const secret = rows.length ? idSecret_() : '';
+  const pokemon = rows.length ? drawPokemonByTeam_(SpreadsheetApp.getActiveSpreadsheet()) : {};
   const teams = rows
     .filter((r) => isConfirmed_(r[TCOL.status]) && nameKey_(r[TCOL.name]))
     .map((r) => ({
@@ -110,6 +114,7 @@ function confirmedTeams_() {
       name: cellText_(r[TCOL.name]).trim().slice(0, 40),
       memberCount: Math.max(1, Math.round(Number(r[TCOL.count]) || 1)),
       imageId: publicImageId_(r[TCOL.badgeId]),
+      pokemonId: pokemon[nameKey_(r[TCOL.name])] || null,
     }));
   cache.put(TEAMS_CACHE_KEY, JSON.stringify(teams), TEAMS_CACHE_SECONDS);
   return teams;

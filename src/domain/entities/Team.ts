@@ -3,8 +3,9 @@ import type { TeamName } from '../value-objects/TeamName';
 
 export type TeamStatus = 'confirmed' | 'pending';
 
-// só https (Drive) ou data:image (simulação do dev): nada de javascript: ou http solto no src da foto
-const SAFE_IMAGE_URL = /^(?:https:\/\/|data:image\/(?:png|jpeg|webp);base64,)/;
+// só https (Drive), data:image (simulação do dev) ou a arte local de um Pokémon (/pokemon/6.webp, logo do sorteio dos
+// nomes): nada de javascript: ou http solto no src da foto
+const SAFE_IMAGE_URL = /^(?:https:\/\/|data:image\/(?:png|jpeg|webp);base64,|\/pokemon\/\d{1,4}\.webp$)/;
 
 // equipe pública: só o que o site mostra (nome, quantidade de integrantes e a foto). Nome de pessoa,
 // matrícula e e-mail ficam na planilha

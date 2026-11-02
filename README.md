@@ -447,6 +447,28 @@ canônico das duas versões aponta para `hackarun.com.br`, então os buscadores 
   ambiente de produção da Cloudflare. O endereço público do site vem de `PUBLIC_SITE_URL`; sem ela, vale o padrão do
   código, `https://hackarun.com.br`.
 
+### Sorteio das equipes (`/sorteio`)
+
+As telas `/sorteio` e `/sorteio/nomes` são da organização: fora do menu e do sitemap, com `noindex`, e só abrem com o
+login. Quem confere o login é uma Cloudflare Pages Function (`functions/_middleware.ts`, lógica em
+`src/server/sorteio`), que roda só nesses caminhos (`public/_routes.json`). Ela repassa as ações ao Apps Script
+(`apps-script/Draw.gs`) com uma chave que nunca chega ao navegador. Sessão de 12 horas em cookie assinado; 10 senhas
+erradas seguidas travam o login daquele IP por 15 minutos.
+
+Em **Workers & Pages → hackarun → Settings → Variables and Secrets**, ambiente **Production**:
+
+| Nome                   | Tipo   | Valor                                                                      |
+| ---------------------- | ------ | -------------------------------------------------------------------------- |
+| `SORTEIO_ATIVO`        | Text   | `sim` liga as telas; qualquer outro valor (ou sem a variável) dá 404       |
+| `SORTEIO_USUARIO`      | Text   | login da organização                                                       |
+| `SORTEIO_SENHA`        | Secret | senha da organização                                                       |
+| `SORTEIO_TOKEN`        | Secret | chave longa (48 caracteres aleatórios), igual à propriedade do Apps Script |
+| `SORTEIO_PLANILHA_URL` | Text   | opcional: URL `/exec` do Apps Script (sem ela, vale a da inscrição)        |
+
+Variável nova ou alterada só vale depois de um novo deploy (**Deployments → … → Retry deployment**). Para testar no PC
+sem a planilha real: `npm run build`, um `.dev.vars` com as variáveis acima apontando para a cópia de teste e
+`npx wrangler pages dev dist`.
+
 Para publicar um fork na sua própria conta: na Cloudflare, abra **Workers & Pages → Create application → Pages →
 Connect to Git**, escolha o repositório e use o comando de build `npm run build` com a pasta de saída `dist`.
 

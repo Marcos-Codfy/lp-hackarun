@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   // só no build (código do servidor), vindas da Cloudflare Pages
   readonly CF_PAGES?: string;
   readonly CF_PAGES_BRANCH?: string;
+  // "1" só no `npm run sorteio` (cópia de teste do sorteio, tools/sorteio/integration.mjs)
+  readonly SORTEIO_LOCAL?: string;
 }
 
 interface ImportMeta {

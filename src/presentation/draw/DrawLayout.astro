@@ -1,0 +1,78 @@
+---
+// layout das telas do sorteio das equipes: ferramenta da organização (no site, só abre com o login da função da
+// Cloudflare; fora do menu e do sitemap, noindex). Feita pro projetor: fundo de aurora leve (só CSS), modo apresentação
+// (tela cheia, tecla F). Os botões de teste só existem no `npm run sorteio` (cópia local)
+import displayFont from '../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
+import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
+import '@presentation/styles/tokens.css';
+import './draw.css';
+
+interface Props {
+  title: string;
+  step: 'teams' | 'names';
+}
+
+const { title, step } = Astro.props;
+const local = import.meta.env.SORTEIO_LOCAL === '1';
+const fontFaces = [
+  `@font-face{font-family:'Orbitron Variable';font-style:normal;font-display:swap;font-weight:400 900;src:url(${displayFont}) format('woff2')}`,
+  `@font-face{font-family:'Montserrat Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${bodyFont}) format('woff2')}`,
+].join('');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · HackaRun 2026</title>
+    <style set:html={fontFaces}></style>
+  </head>
+  <body class="draw">
+    <div class="aurora-bg" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <header class="top">
+      <div class="top__brand">
+        <p class="top__eyebrow">// HackaRun 2026 · sorteio ao vivo</p>
+        <h1>{title}</h1>
+      </div>
+      <nav class="top__steps" aria-label="Etapas do sorteio">
+        <a href="/sorteio" aria-current={step === 'teams' ? 'step' : undefined}>
+          <span>1</span> Equipes
+        </a>
+        <a href="/sorteio/nomes" aria-current={step === 'names' ? 'step' : undefined}>
+          <span>2</span> Nomes
+        </a>
+      </nav>
+      <div class="top__tools">
+        {local ? (
+          <button class="btn btn--test" type="button" data-reset hidden>
+            Recomeçar teste
+          </button>
+        ) : (
+          <form method="post" action="/sorteio/sair" class="top__logout">
+            <button class="btn btn--ghost" type="submit">
+              Sair
+            </button>
+          </form>
+        )}
+        <button class="btn btn--ghost" type="button" data-present aria-pressed="false">
+          Modo apresentação
+        </button>
+      </div>
+      <p class="top__source" data-source data-mode="test">
+        Conectando…
+      </p>
+      <p class="top__keys" aria-hidden="true">
+        <kbd>F</kbd> tela cheia
+      </p>
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>
