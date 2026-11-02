@@ -7,27 +7,18 @@ import sorteio from './tools/sorteio/integration.mjs';
 // conta como não definido. Igual ao DEFAULT_SITE_URL de src/shared/config/deploy.ts (um teste confere)
 const site = process.env.PUBLIC_SITE_URL || 'https://hackarun.com.br';
 
-// páginas fora do sitemap (também têm noindex no Seo.astro): /equipes fica escondida até o sorteio e
-// /autorizacao é só o modelo para imprimir
-export const UNLISTED_PATHS = ['/equipes', '/autorizacao'];
+// páginas fora do sitemap (também têm noindex no Seo.astro): /equipes fica escondida até o sorteio,
+// /autorizacao é só o modelo para imprimir e /sorteio é da organização (com login)
+export const UNLISTED_PATHS = ['/equipes', '/autorizacao', '/sorteio', '/sorteio/nomes'];
 
 // a página entra no sitemap? (o filtro recebe a URL completa)
 /** @param {string} page */
 export const isListedInSitemap = (page) =>
   !UNLISTED_PATHS.includes(new URL(page).pathname.replace(/\/$/, ''));
 
-// sorteio das equipes (ferramenta da organização, só no `npm run sorteio`): sem SORTEIO=1 a integração nem é carregada,
-// então o build de produção não tem as telas, a API local nem o código delas
-const draw =
-  process.env.SORTEIO === '1'
-    ? [
-        sorteio({
-          mode: process.env.SORTEIO_MODE === 'sheet' ? 'sheet' : 'local',
-          file: process.env.SORTEIO_FILE,
-          endpoint: process.env.SORTEIO_ENDPOINT,
-        }),
-      ]
-    : [];
+// cópia de teste do sorteio das equipes (só no `npm run sorteio`): sem SORTEIO=1 a integração nem é carregada. As telas
+// /sorteio existem no site, atrás do login da organização (functions/_middleware.ts)
+const draw = process.env.SORTEIO === '1' ? [sorteio({ file: process.env.SORTEIO_FILE })] : [];
 
 export default defineConfig({
   site,

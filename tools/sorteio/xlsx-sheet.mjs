@@ -126,10 +126,17 @@ export function list(ctx) {
       period,
       team,
     }));
+  const confirmed = new Set();
+  for (let i = 2; i <= MAX_ROWS; i++) {
+    const row = ctx.equipes.getRow(i);
+    if (normalize(textOf(row.getCell(ctx.c.teamStatus))) === 'confirmado')
+      confirmed.add(textOf(row.getCell(ctx.c.teamName)));
+  }
   const teams = sorteioRows(ctx).map((t) => ({
     number: t.number,
     name: t.name,
     pokemonId: t.pokemonId,
+    published: confirmed.has(t.name),
     members: people
       .filter((p) => p.team === t.name && p.status !== 'cancelado')
       .map((p) => ({ id: p.protocol, name: p.name })),

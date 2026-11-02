@@ -25,7 +25,7 @@ export class SheetDrawGateway implements DrawGateway {
     if (response.ok) return response;
     const message = response.message ?? 'A planilha recusou o pedido.';
     if (response.error === 'unauthorized')
-      throw new DrawGatewayError('unauthorized', 'Senha do sorteio incorreta.');
+      throw new DrawGatewayError('unauthorized', 'A sessão expirou. Entre de novo.');
     if (response.error === 'conflict') throw new DrawGatewayError('conflict', message);
     throw new DrawGatewayError('server', message);
   }
@@ -44,7 +44,7 @@ export class SheetDrawGateway implements DrawGateway {
   }
 
   async loadSavedTeams(): Promise<SavedTeam[]> {
-    return (await this.list()).teams;
+    return (await this.list()).teams.map((team) => ({ ...team, published: team.published === true }));
   }
 
   async saveTeams(result: DrawResult, options: { replace: boolean }): Promise<void> {
@@ -59,5 +59,9 @@ export class SheetDrawGateway implements DrawGateway {
 
   async saveTeamNames(items: readonly TeamNameAssignment[]): Promise<void> {
     await this.send({ action: 'draw-names', items });
+  }
+
+  async publishTeams(): Promise<void> {
+    await this.send({ action: 'draw-publish' });
   }
 }

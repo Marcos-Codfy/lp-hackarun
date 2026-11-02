@@ -120,6 +120,19 @@ function nameTeams(ctx, body) {
   return { ok: true, named: plan.length };
 }
 
+// "Publicar no site": com todos os nomes sorteados, as equipes do sorteio viram "confirmado" na aba Equipes
+function publish(ctx) {
+  const teams = sorteioRows(ctx);
+  if (teams.length === 0) throw new Conflict('Ainda não há equipes salvas.');
+  if (teams.some((t) => t.pokemonId === null))
+    throw new Conflict('Ainda há equipe sem nome: sorteie todos os nomes antes de publicar.');
+  for (const team of teams) {
+    const row = teamRowByName(ctx, team.name);
+    if (row) ctx.equipes.getRow(row).getCell(ctx.c.teamStatus).value = 'confirmado';
+  }
+  return { ok: true, published: teams.length };
+}
+
 // só na cópia de teste: as equipes continuam, mas voltam a se chamar "Equipe N" (para sortear os nomes de novo)
 function resetNames(ctx) {
   const people = inscritosRows(ctx);
@@ -134,6 +147,7 @@ function resetNames(ctx) {
     const sorteioRow = ctx.sorteio.getRow(team.index);
     sorteioRow.getCell(2).value = original;
     sorteioRow.getCell(3).value = null;
+    if (row) ctx.equipes.getRow(row).getCell(ctx.c.teamStatus).value = 'pendente';
   }
   return { ok: true };
 }
@@ -149,6 +163,7 @@ export function handleDrawAction(file, body) {
       if (body.action === 'draw-list') return list(ctx);
       if (body.action === 'draw-save') out = save(ctx, body);
       else if (body.action === 'draw-names' || body.action === 'draw-name') out = nameTeams(ctx, body);
+      else if (body.action === 'draw-publish') out = publish(ctx);
       // só existe aqui, na cópia de teste: volta ao começo para sortear de novo quantas vezes quiser
       else if (body.action === 'draw-reset') {
         clearPreviousDraw(ctx, inscritosRows(ctx), true);

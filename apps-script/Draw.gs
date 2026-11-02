@@ -109,10 +109,15 @@ function drawList_(ctx) {
       period: drawText_(r[RCOL.period]),
       team: drawText_(r[RCOL.team]),
     }));
+  const confirmed = ctx.teamRows
+    .filter((r) => drawStatus_(r[TCOL.status]) === 'confirmado')
+    .map((r) => drawText_(r[TCOL.name]));
   const teams = drawTeams_(ctx).map((t) => ({
     number: t.number,
     name: t.name,
     pokemonId: t.pokemonId,
+    // já aparece em /equipes (o "Publicar no site" confirmou)
+    published: confirmed.indexOf(t.name) > -1,
     members: people
       .filter((r) => drawText_(r[RCOL.team]) === t.name && drawStatus_(r[RCOL.status]) !== 'cancelado')
       .map((r) => ({ id: drawText_(r[RCOL.protocol]), name: drawText_(r[RCOL.name]) })),

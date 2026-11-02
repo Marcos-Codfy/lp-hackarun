@@ -1,7 +1,7 @@
 ---
-// layout das telas do sorteio das equipes: ferramenta da organização, fora do site público. Feita pro projetor: fundo de
-// aurora leve (só CSS), modo apresentação (tela cheia, tecla F).
-// noindex por garantia, embora o build de produção nem tenha estas páginas (só o `npm run sorteio` as liga)
+// layout das telas do sorteio das equipes: ferramenta da organização (no site, só abre com o login da função da
+// Cloudflare; fora do menu e do sitemap, noindex). Feita pro projetor: fundo de aurora leve (só CSS), modo apresentação
+// (tela cheia, tecla F). Os botões de teste só existem no `npm run sorteio` (cópia local)
 import displayFont from '../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
 import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
 import '@presentation/styles/tokens.css';
@@ -13,6 +13,7 @@ interface Props {
 }
 
 const { title, step } = Astro.props;
+const local = import.meta.env.SORTEIO_LOCAL === '1';
 const fontFaces = [
   `@font-face{font-family:'Orbitron Variable';font-style:normal;font-display:swap;font-weight:400 900;src:url(${displayFont}) format('woff2')}`,
   `@font-face{font-family:'Montserrat Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${bodyFont}) format('woff2')}`,
@@ -48,9 +49,17 @@ const fontFaces = [
         </a>
       </nav>
       <div class="top__tools">
-        <button class="btn btn--test" type="button" data-reset hidden>
-          Recomeçar teste
-        </button>
+        {local ? (
+          <button class="btn btn--test" type="button" data-reset hidden>
+            Recomeçar teste
+          </button>
+        ) : (
+          <form method="post" action="/sorteio/sair" class="top__logout">
+            <button class="btn btn--ghost" type="submit">
+              Sair
+            </button>
+          </form>
+        )}
         <button class="btn btn--ghost" type="button" data-present aria-pressed="false">
           Modo apresentação
         </button>

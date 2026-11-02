@@ -1,7 +1,12 @@
 import { Observable } from '@shared/core/Observable';
 import { wait } from '@shared/utils/async';
 import type { SavedTeam } from '@application/draw/DrawGateway';
-import type { DrawTeamNames, GetDrawStatus, PokemonEntry } from '@application/draw/TeamDrawUseCases';
+import type {
+  DrawTeamNames,
+  GetDrawStatus,
+  PokemonEntry,
+  PublishTeams,
+} from '@application/draw/TeamDrawUseCases';
 
 export interface TeamNamesState {
   loading: boolean;
@@ -10,12 +15,15 @@ export interface TeamNamesState {
   spinning: number[];
   // Pokémon do catálogo que ainda estão livres
   remaining: number;
+  // "Publicar no site" em andamento
+  publishing: boolean;
   error: string | null;
 }
 
 interface Deps {
   status: Pick<GetDrawStatus, 'execute'>;
   names: Pick<DrawTeamNames, 'drawOne' | 'drawAll'>;
+  publish: Pick<PublishTeams, 'execute'>;
   catalog: readonly PokemonEntry[];
   // suspense: as imagens ficam girando pelo menos isto, mesmo que a planilha responda antes (testes passam 0)
   minSpinMs?: number;
@@ -33,6 +41,7 @@ export class TeamNamesViewModel {
     teams: [],
     spinning: [],
     remaining: 0,
+    publishing: false,
     error: null,
   });
 
@@ -100,6 +109,21 @@ export class TeamNamesViewModel {
       this.patch({ error: message(error) });
     } finally {
       this.patch({ spinning: [] });
+    }
+  }
+
+  // confirma as equipes na planilha: elas aparecem em /equipes com o Pokémon de logo
+  async publish(): Promise<void> {
+    if (this.state.value.publishing || this.state.value.spinning.length > 0) return;
+    this.patch({ publishing: true, error: null });
+    try {
+      const result = await this.deps.publish.execute();
+      if (!result.ok) this.patch({ error: result.error });
+      await this.refresh();
+    } catch (error) {
+      this.patch({ error: message(error) });
+    } finally {
+      this.patch({ publishing: false });
     }
   }
 }

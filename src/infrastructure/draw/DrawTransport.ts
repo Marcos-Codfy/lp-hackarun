@@ -4,33 +4,32 @@ import { DrawGatewayError } from '@application/draw/DrawGateway';
 export type WireResponse =
   { ok: true; [key: string]: unknown } | { ok: false; error: string; message?: string };
 
-// como o pedido chega na planilha: pelo servidor local (cópia do xlsx) ou direto no Apps Script (com a senha)
+// como o pedido chega na planilha: pelo servidor local (cópia do xlsx) ou pela função do site (planilha real)
 export interface DrawTransport {
   call(body: Record<string, unknown>): Promise<WireResponse>;
 }
 
 const TIMEOUT_MS = 30_000;
 
-async function postJson(
-  url: string,
-  body: Record<string, unknown>,
-  contentType: string,
-): Promise<WireResponse> {
+async function postJson(url: string, body: Record<string, unknown>): Promise<WireResponse> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const response = await fetch(url, {
       method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': contentType },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-    if (!response.ok) throw new DrawGatewayError('server', `HTTP ${response.status}`);
-    return (await response.json()) as WireResponse;
+    if (response.status === 401) return { ok: false, error: 'unauthorized' };
+    // erro com corpo { ok: false, message } (planilha fora, configuração): a mensagem chega na tela
+    const parsed = (await response.json().catch(() => null)) as WireResponse | null;
+    if (parsed && typeof parsed === 'object' && 'ok' in parsed) return parsed;
+    throw new DrawGatewayError('server', `HTTP ${response.status}`);
   } catch (error) {
     if (error instanceof DrawGatewayError) throw error;
-    throw new DrawGatewayError('network', error instanceof Error ? error.message : 'Sem conexão');
+    throw new DrawGatewayError('network', 'Sem conexão com o site. Confira a internet e tente de novo.');
   } finally {
     clearTimeout(timer);
   }
@@ -41,7 +40,7 @@ export class LocalDrawTransport implements DrawTransport {
   constructor(private readonly path = '/__sorteio/api') {}
 
   call(body: Record<string, unknown>): Promise<WireResponse> {
-    return postJson(this.path, body, 'application/json');
+    return postJson(this.path, body);
   }
 
   // só na cópia de teste: desfaz equipes e nomes (ou só os nomes), mantendo os credenciados
@@ -52,16 +51,12 @@ export class LocalDrawTransport implements DrawTransport {
   }
 }
 
-// Apps Script da planilha real. A senha (SORTEIO_SENHA nas propriedades do script) vai no corpo de cada pedido:
-// quem tem só o endereço do site não consegue ler nem gravar nada
-export class AppsScriptDrawTransport implements DrawTransport {
-  constructor(
-    private readonly endpoint: string,
-    private readonly token: string,
-  ) {}
+// site (hackarun.com.br/sorteio): a função da Cloudflare confere a sessão da organização e repassa ao Apps Script com a
+// chave do sorteio, que nunca passa pelo navegador
+export class SiteDrawTransport implements DrawTransport {
+  constructor(private readonly path = '/api/sorteio') {}
 
   call(body: Record<string, unknown>): Promise<WireResponse> {
-    // text/plain: pedido "simples" (sem preflight), como o formulário do site
-    return postJson(this.endpoint, { ...body, token: this.token }, 'text/plain;charset=utf-8');
+    return postJson(this.path, body);
   }
 }

@@ -97,6 +97,9 @@ describe('/equipes escondida: nenhum link do site leva pra lá', () => {
     'presentation/components/teams/',
     'presentation/sections/TeamsDirectorySection.astro',
     'presentation/components/seo/teamsPageSeo.ts',
+    // telas do sorteio (só a organização, com login): depois de publicar, o link leva à página pública
+    'presentation/views/draw/',
+    'presentation/draw/',
   ];
   const LINK = /(href=["'{`]+\/equipes\b|href\s*=\s*['"`]\/equipes\b|['"`]\/equipes['"`])/;
 

@@ -187,3 +187,23 @@ describe('"Sortear os nomes de novo" (só na cópia local)', () => {
     expect((await names.drawAll()).ok).toBe(true);
   });
 });
+
+describe('"Publicar no site"', () => {
+  it('só publica com todos os nomes; depois as equipes ficam confirmadas na aba Equipes', async () => {
+    const ctx = await setup(24);
+    const preview = await ctx.generate.execute('base');
+    if (!preview.ok) throw new Error(preview.error);
+    await ctx.save.execute(preview.value.result);
+    expect(await ctx.publish.execute()).toEqual({
+      ok: false,
+      error: 'Ainda há equipe sem nome: sorteie todos os nomes antes de publicar.',
+    });
+    await ctx.names.drawAll();
+    expect((await ctx.gateway.loadSavedTeams()).some((t) => t.published)).toBe(false);
+    expect(await ctx.publish.execute()).toEqual({ ok: true, value: 6 });
+    const teams = await ctx.gateway.loadSavedTeams();
+    expect(teams.every((t) => t.published)).toBe(true);
+    const status = (await readSheet(ctx.file, 'Equipes')).slice(1).filter((row) => row[0]);
+    expect(status.every((row) => row.includes('confirmado'))).toBe(true);
+  });
+});

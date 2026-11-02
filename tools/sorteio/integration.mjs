@@ -1,7 +1,7 @@
-// liga o sorteio das equipes ao servidor de desenvolvimento do Astro, e só a ele: as duas páginas (/sorteio e
-// /sorteio/nomes) e a API local entram aqui, por uma integração que o astro.config.mjs só carrega com SORTEIO=1
-// (npm run sorteio). O build de produção nunca passa por aqui, então o site público não tem o sorteio, nem uma rota
-// para adivinhar, nem um byte dele no pacote (tests/draw/productionGuard.test.ts confere)
+// cópia de teste do sorteio no servidor de desenvolvimento do Astro (npm run sorteio, SORTEIO=1): a API local que lê e
+// grava o xlsx e o SORTEIO_LOCAL=1 que faz as telas /sorteio usarem essa API e mostrarem os botões de teste. O build de
+// produção nunca passa por aqui: lá as telas falam com a função da Cloudflare (functions/_middleware.ts), atrás do
+// login da organização, e nada da cópia de teste vai no pacote (tests/draw/productionGuard.test.ts confere)
 import { resolve } from 'node:path';
 import { handleDrawAction } from './xlsx-handler.mjs';
 
@@ -30,25 +30,22 @@ function sendJson(response, status, body) {
 }
 
 /**
- * @param {{ mode: 'local' | 'sheet', file?: string | undefined, endpoint?: string | undefined }} options
- *   local = a cópia do xlsx de teste; sheet = o Apps Script da planilha real (a senha é digitada na tela)
+ * @param {{ file?: string | undefined }} options  o xlsx da cópia de teste
  * @returns {import('astro').AstroIntegration}
  */
 export default function sorteio(options) {
   const file = options.file ? resolve(options.file) : '';
-  const config =
-    options.mode === 'local'
-      ? { mode: 'local', label: file.split(/[\\/]/).slice(-2).join('/') }
-      : { mode: 'sheet', label: 'planilha do HackaRun no Drive', endpoint: options.endpoint };
+  const config = { mode: 'local', label: file.split(/[\\/]/).slice(-2).join('/') };
 
   return {
     name: 'hackarun-sorteio',
     hooks: {
-      'astro:config:setup': ({ injectRoute, updateConfig }) => {
-        injectRoute({ pattern: '/sorteio', entrypoint: './src/presentation/draw/pages/index.astro' });
-        injectRoute({ pattern: '/sorteio/nomes', entrypoint: './src/presentation/draw/pages/nomes.astro' });
+      'astro:config:setup': ({ command, updateConfig }) => {
+        // só no `astro dev`: um build com SORTEIO=1 por engano não leva a cópia de teste para o site
+        if (command !== 'dev') return;
         updateConfig({
           vite: {
+            define: { 'import.meta.env.SORTEIO_LOCAL': JSON.stringify('1') },
             plugins: [
               {
                 name: 'hackarun-sorteio-api',
@@ -60,9 +57,6 @@ export default function sorteio(options) {
                   server.middlewares.use(`${API}/api`, async (request, response) => {
                     if (request.method !== 'POST')
                       return sendJson(response, 405, { ok: false, error: 'method' });
-                    // só a cópia local passa por aqui; a planilha real é falada direto com o Apps Script
-                    if (config.mode !== 'local')
-                      return sendJson(response, 404, { ok: false, error: 'not-local' });
                     try {
                       sendJson(response, 200, await handleDrawAction(file, await readBody(request)));
                     } catch {

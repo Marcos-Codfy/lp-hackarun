@@ -1,6 +1,7 @@
 import {
   DrawTeamNames,
   GenerateTeamDraw,
+  PublishTeams,
   SaveTeamDraw,
   type PokemonEntry,
 } from '@application/draw/TeamDrawUseCases';
@@ -36,5 +37,6 @@ export async function setup(count = 24) {
     generate: new GenerateTeamDraw(gateway, now, createRandom('teste')),
     save: new SaveTeamDraw(gateway),
     names: new DrawTeamNames(gateway, CATALOG, createRandom('nomes')),
+    publish: new PublishTeams(gateway),
   };
 }

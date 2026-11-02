@@ -1,7 +1,9 @@
 ---
 // 2ª tela do sorteio: dá a cada equipe o nome de um Pokémon da 1ª ou 2ª geração (sem repetir), com a imagem dele de
-// logo. Só existe no `npm run sorteio`
-import DrawLayout from '../DrawLayout.astro';
+// logo. No site, só abre com o login da organização; "Publicar no site" leva as equipes para /equipes
+import DrawLayout from '@presentation/draw/DrawLayout.astro';
+
+const local = import.meta.env.SORTEIO_LOCAL === '1';
 ---
 
 <DrawLayout title="Sorteio dos nomes" step="names">
@@ -13,9 +15,14 @@ import DrawLayout from '../DrawLayout.astro';
     <button class="btn btn--ghost btn--xl" type="button" data-skip hidden>
       Revelar tudo
     </button>
-    <button class="btn btn--test" type="button" data-reset-names hidden>
-      Sortear os nomes de novo (teste)
+    <button class="btn btn--primary btn--xl" type="button" data-publish hidden>
+      Publicar no site
     </button>
+    {local && (
+      <button class="btn btn--test" type="button" data-reset-names hidden>
+        Sortear os nomes de novo (teste)
+      </button>
+    )}
   </div>
   <p class="message" data-message role="status"></p>
   <div class="grid grid--poke" data-grid></div>

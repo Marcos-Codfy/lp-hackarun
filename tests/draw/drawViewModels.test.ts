@@ -115,6 +115,7 @@ const team = (number: number, pokemonId: number | null = null): SavedTeam => ({
   number,
   name: pokemonId ? `Equipe P${pokemonId}` : `Equipe ${number}`,
   pokemonId,
+  published: false,
   members: [],
 });
 
@@ -132,8 +133,14 @@ function namesVm(teams: SavedTeam[]) {
     }),
   };
   const catalog = Array.from({ length: 10 }, (_, i) => ({ id: 101 + i, name: `P${i}`, types: [] }));
-  const vm = new TeamNamesViewModel({ status: { execute: status }, names, catalog, minSpinMs: 0 });
-  return { vm, names };
+  const publish = {
+    execute: vi.fn(async () => {
+      current = current.map((t) => ({ ...t, published: true }));
+      return ok(current.length);
+    }),
+  };
+  const vm = new TeamNamesViewModel({ status: { execute: status }, names, publish, catalog, minSpinMs: 0 });
+  return { vm, names, publish };
 }
 
 describe('TeamNamesViewModel', () => {
@@ -182,6 +189,7 @@ describe('TeamNamesViewModel', () => {
     const slow = new TeamNamesViewModel({
       status: { execute: async () => ({ accredited: 0, saved: [team(1)] }) },
       names,
+      publish: { execute: async () => ok(0) },
       catalog: [],
       minSpinMs: 1800,
       sleep,
@@ -191,5 +199,24 @@ describe('TeamNamesViewModel', () => {
     expect(sleep).toHaveBeenCalledTimes(1);
     expect(sleep.mock.calls[0]?.[0]).toBeGreaterThan(1000);
     expect(vm).toBeDefined();
+  });
+});
+
+describe('TeamNamesViewModel · publicar no site', () => {
+  it('publica, recarrega as equipes já publicadas e não publica duas vezes ao mesmo tempo', async () => {
+    const { vm, publish } = namesVm([team(1, 101), team(2, 102)]);
+    await vm.load();
+    await Promise.all([vm.publish(), vm.publish()]);
+    expect(publish.execute).toHaveBeenCalledTimes(1);
+    expect(vm.state.value.teams.every((t) => t.published)).toBe(true);
+    expect(vm.state.value.publishing).toBe(false);
+  });
+
+  it('erro da planilha aparece na tela e o botão volta a ficar livre', async () => {
+    const { vm, publish } = namesVm([team(1, 101)]);
+    publish.execute.mockRejectedValueOnce(new Error('A planilha não respondeu a tempo.'));
+    await vm.load();
+    await vm.publish();
+    expect(vm.state.value).toMatchObject({ error: 'A planilha não respondeu a tempo.', publishing: false });
   });
 });

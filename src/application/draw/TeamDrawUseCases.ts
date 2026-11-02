@@ -152,3 +152,18 @@ export class DrawTeamNames {
     return ok(drawn);
   }
 }
+
+// "Publicar no site": só com todas as equipes nomeadas (a página /equipes mostra nome e Pokémon de cada uma)
+export class PublishTeams {
+  constructor(private readonly gateway: DrawGateway) {}
+
+  async execute(): Promise<Result<number, string>> {
+    const teams = await this.gateway.loadSavedTeams();
+    if (teams.length === 0) return fail('Ainda não há equipes salvas.');
+    if (teams.some((t) => t.pokemonId === null)) {
+      return fail('Ainda há equipe sem nome: sorteie todos os nomes antes de publicar.');
+    }
+    await this.gateway.publishTeams();
+    return ok(teams.length);
+  }
+}

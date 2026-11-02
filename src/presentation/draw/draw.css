@@ -557,6 +557,10 @@ body.draw {
 }
 
 /* ---- ferramentas do topo ---- */
+.top__logout {
+  display: contents;
+}
+
 .top__tools {
   display: flex;
   gap: 0.5rem;

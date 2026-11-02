@@ -15,6 +15,8 @@ export interface SavedTeam {
   name: string;
   // Pokémon sorteado (número da Pokédex) ou null enquanto a equipe ainda é só "Equipe 7"
   pokemonId: number | null;
+  // já aparece na página pública /equipes (status "confirmado" na aba Equipes)
+  published: boolean;
   members: { id: string; name: string }[];
 }
 
@@ -30,6 +32,8 @@ export interface DrawGateway {
   // renomeia "Equipe N" para o nome sorteado, nas duas abas, e guarda o Pokémon (logo da equipe). Várias equipes vão num
   // pedido só (a planilha confere tudo e grava tudo, ou nada)
   saveTeamNames(items: readonly TeamNameAssignment[]): Promise<void>;
+  // confirma as equipes do sorteio: elas passam a aparecer em /equipes, com o Pokémon de logo
+  publishTeams(): Promise<void>;
 }
 
 export class DrawGatewayError extends Error {

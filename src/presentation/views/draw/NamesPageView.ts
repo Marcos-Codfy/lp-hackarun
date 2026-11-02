@@ -2,6 +2,7 @@ import type { SavedTeam } from '@application/draw/DrawGateway';
 import type { PokemonEntry } from '@application/draw/TeamDrawUseCases';
 import type { DrawServices } from '@composition/draw';
 import { TeamNamesViewModel, type TeamNamesState } from '@presentation/view-models/draw/TeamNamesViewModel';
+import { confirmDialog } from './confirmDialog';
 import { follow, h, mustFind, pokemonImage } from './dom';
 import { countdown, type Countdown } from './fx/countdown';
 import { finale } from './fx/finale';
@@ -16,12 +17,18 @@ const SPIN_MS = 90;
 export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
   const { catalog } = services;
   const byId = new Map<number, PokemonEntry>(catalog.map((p) => [p.id, p]));
-  const vm = new TeamNamesViewModel({ status: services.status, names: services.names, catalog });
+  const vm = new TeamNamesViewModel({
+    status: services.status,
+    names: services.names,
+    publish: services.publish,
+    catalog,
+  });
   const stats = mustFind('[data-stats]');
   const message = mustFind<HTMLElement>('[data-message]');
   const grid = mustFind('[data-grid]');
   const drawAll = mustFind<HTMLButtonElement>('[data-draw-all]');
   const skipButton = mustFind<HTMLButtonElement>('[data-skip]');
+  const publishButton = mustFind<HTMLButtonElement>('[data-publish]');
   const reduced = prefersReducedMotion();
 
   // equipe -> instante em que a revelação dela começa (performance.now); some quando a animação termina
@@ -130,11 +137,26 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
         ? 'Todas sorteadas ✓'
         : 'Sortear todas';
     skipButton.hidden = !running && revealAt.size === 0;
+    // publicar só com todas as equipes nomeadas e depois que a revelação terminou
+    const allNamed = state.teams.length > 0 && pending === 0;
+    const published = allNamed && state.teams.every((t) => t.published);
+    publishButton.hidden = !allNamed || running || revealAt.size > 0;
+    publishButton.disabled = state.publishing || published;
+    publishButton.textContent = published
+      ? 'Publicado no site ✓'
+      : state.publishing
+        ? 'Publicando…'
+        : 'Publicar no site';
 
     message.replaceChildren();
-    message.dataset['kind'] = state.error ? 'error' : '';
+    message.dataset['kind'] = state.error ? 'error' : published ? 'ok' : '';
     if (state.error) message.append(state.error);
-    else if (!state.loading && state.teams.length === 0) {
+    else if (published && revealAt.size === 0) {
+      message.append(
+        'Equipes publicadas no site. ',
+        h('a', { href: '/equipes', target: '_blank', rel: 'noopener' }, 'Ver a página das equipes →'),
+      );
+    } else if (!state.loading && state.teams.length === 0) {
       message.append(
         'Ainda não há equipes salvas. ',
         h('a', { href: '/sorteio' }, '← Sortear as equipes primeiro'),
@@ -207,6 +229,15 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
     });
   });
   skipButton.addEventListener('click', skip);
+  publishButton.addEventListener('click', async () => {
+    const total = vm.state.value.teams.length;
+    const yes = await confirmDialog({
+      title: 'Publicar no site?',
+      text: `As ${total} equipes vão aparecer na página pública /equipes, com o nome e o Pokémon de cada uma.`,
+      yes: 'Publicar',
+    });
+    if (yes) await vm.publish();
+  });
   void vm.load();
   return vm;
 }
