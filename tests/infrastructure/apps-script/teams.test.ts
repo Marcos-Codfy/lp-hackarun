@@ -24,15 +24,16 @@ const SEEDED_TEAMS = [
 const SEEDED_PEOPLE = [{ Protocolo: 'HR26-AAAAAA', 'Nome completo': 'Ana Souza', Equipe: 'Equipe Pikachu' }];
 
 describe('Apps Script · lista pública de equipes (aba Equipes)', () => {
-  it('expõe só {id, name, memberCount, imageId} das equipes confirmadas', () => {
+  it('expõe só {id, name, memberCount, imageId, pokemonId} das equipes confirmadas', () => {
     const script = new AppsScriptSandbox();
     script.seed(SEEDED_PEOPLE, SEEDED_TEAMS);
     const res = script.get('teams');
     expect(res.ok).toBe(true);
     expect(res.teams).toHaveLength(1);
     const [team] = res.teams ?? [];
-    expect(Object.keys(team ?? {}).sort()).toEqual(['id', 'imageId', 'memberCount', 'name']);
-    expect(team).toMatchObject({ name: 'Equipe Pikachu', memberCount: 4, imageId: BADGE });
+    expect(Object.keys(team ?? {}).sort()).toEqual(['id', 'imageId', 'memberCount', 'name', 'pokemonId']);
+    // sem aba Sorteio (equipe montada à mão), sem Pokémon
+    expect(team).toMatchObject({ name: 'Equipe Pikachu', memberCount: 4, imageId: BADGE, pokemonId: null });
     expect(team?.['id']).toMatch(/^team-[0-9a-f]{10}$/);
     // nada pessoal escapa
     const raw = JSON.stringify(res);
@@ -104,7 +105,7 @@ describe('Apps Script · lista pública de equipes (aba Equipes)', () => {
       const { registrations } = script.seed(SEEDED_PEOPLE, SEEDED_TEAMS);
       script.get('teams');
       script.onEdit(registrations, column);
-      expect(script.cache.store.has('teams:v4')).toBe(false);
+      expect(script.cache.store.has('teams:v5')).toBe(false);
     },
   );
 
@@ -114,7 +115,7 @@ describe('Apps Script · lista pública de equipes (aba Equipes)', () => {
     script.get('teams');
     script.onEdit(teams, 'E-mails');
     script.onEdit(registrations, 'Curso');
-    expect(script.cache.store.has('teams:v4')).toBe(true);
+    expect(script.cache.store.has('teams:v5')).toBe(true);
   });
 
   it('sem a aba Equipes (planilha nova) a lista vem vazia, sem criar nada nem gerar segredo', () => {
