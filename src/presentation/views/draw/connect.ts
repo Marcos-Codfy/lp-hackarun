@@ -69,6 +69,32 @@ export function showSource(services: DrawServices): void {
   badge.dataset['mode'] = real ? 'real' : 'test';
 }
 
+// botões que só existem no teste (cópia local): "Recomeçar teste" (equipes e nomes) e "Sortear nomes de novo". Na
+// planilha real o serviço nem oferece essas ações, então os botões ficam escondidos
+function setupTestButton(
+  selector: string,
+  action: (() => Promise<void>) | null,
+  goTo: string,
+  busyLabel: string,
+): void {
+  const button = document.querySelector<HTMLButtonElement>(selector);
+  if (!button || !action) return;
+  const label = button.textContent ?? '';
+  button.hidden = false;
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    button.textContent = busyLabel;
+    try {
+      await action();
+      location.href = goTo;
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = label;
+      window.alert(error instanceof Error ? error.message : 'Não consegui recomeçar o teste.');
+    }
+  });
+}
+
 // descobre a origem dos dados e confere que ela responde (senha certa, planilha com as abas). Devolve os serviços prontos
 export async function connect(): Promise<DrawServices> {
   const response = await fetch('/__sorteio/config');
@@ -76,6 +102,8 @@ export async function connect(): Promise<DrawServices> {
   if (config.mode === 'local') {
     const services = createDrawServices({ mode: 'local', label: config.label });
     showSource(services);
+    setupTestButton('[data-reset]', services.resetTest, '/sorteio', 'Recomeçando…');
+    setupTestButton('[data-reset-names]', services.resetTestNames, '/sorteio/nomes', 'Voltando…');
     return services;
   }
   let reason = 'A planilha real só responde a quem sabe a senha. Ela não fica salva em lugar nenhum do site.';

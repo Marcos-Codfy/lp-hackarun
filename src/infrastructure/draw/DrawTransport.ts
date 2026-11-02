@@ -43,6 +43,13 @@ export class LocalDrawTransport implements DrawTransport {
   call(body: Record<string, unknown>): Promise<WireResponse> {
     return postJson(this.path, body, 'application/json');
   }
+
+  // só na cópia de teste: desfaz equipes e nomes (ou só os nomes), mantendo os credenciados
+  async reset(only: 'all' | 'names' = 'all'): Promise<void> {
+    const response = await this.call({ action: only === 'names' ? 'draw-reset-names' : 'draw-reset' });
+    if (!response.ok)
+      throw new DrawGatewayError('server', response.message ?? 'Não consegui recomeçar o teste.');
+  }
 }
 
 // Apps Script da planilha real. A senha (SORTEIO_SENHA nas propriedades do script) vai no corpo de cada pedido:

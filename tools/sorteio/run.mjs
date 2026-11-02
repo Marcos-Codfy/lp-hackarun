@@ -1,11 +1,14 @@
 // npm run sorteio: sobe as telas do sorteio das equipes (só na máquina da organização, em http://127.0.0.1:4400)
 //   npm run sorteio                  usa a cópia de teste (.local/sorteio/hackarun-teste.xlsx; npm run sorteio:preparar cria)
 //   npm run sorteio -- --planilha    usa a planilha real, pelo Apps Script (pede a senha do sorteio na tela)
+//   npm run sorteio -- --port 4405   outra porta
 // O servidor só escuta o próprio computador (127.0.0.1) e as telas não existem no build do site público.
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
 
-const PORT = '4400';
+// porta: 4400, ou outra com --port 4405 (útil quando já tem um servidor do sorteio aberto)
+const portArg = process.argv.indexOf('--port');
+const PORT = portArg > -1 && process.argv[portArg + 1] ? process.argv[portArg + 1] : '4400';
 const real = process.argv.includes('--planilha');
 const file = new URL('../../.local/sorteio/hackarun-teste.xlsx', import.meta.url);
 const filePath = file.pathname.replace(/^\/(\w:)/, '$1');

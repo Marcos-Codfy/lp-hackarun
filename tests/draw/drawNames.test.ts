@@ -150,3 +150,40 @@ describe('o que a planilha recebe de quem não é de outra instituição', () =>
     ]);
   });
 });
+
+describe('"Recomeçar teste" (só na cópia local)', () => {
+  it('desfaz equipes e nomes, mantém os credenciados, e dá para sortear de novo', async () => {
+    const { names, gateway, generate, save, file } = await setup(24);
+    const first = await generate.execute('a');
+    if (!first.ok) throw new Error(first.error);
+    await save.execute(first.value.result);
+    await names.drawAll();
+    expect(await handleDrawAction(file, { action: 'draw-reset' })).toMatchObject({ ok: true });
+    expect(await gateway.loadSavedTeams()).toEqual([]);
+    expect((await teamCells(file)).every((cell) => !cell)).toBe(true);
+    expect(await gateway.loadAccredited()).toHaveLength(24);
+    const again = await generate.execute('b');
+    if (!again.ok) throw new Error(again.error);
+    expect(again.value.locked).toBe(false);
+    expect((await save.execute(again.value.result)).ok).toBe(true);
+  });
+});
+
+describe('"Sortear os nomes de novo" (só na cópia local)', () => {
+  it('as equipes continuam iguais e voltam a se chamar Equipe N, sem Pokémon', async () => {
+    const { names, gateway, generate, save, file } = await setup(24);
+    const first = await generate.execute('a');
+    if (!first.ok) throw new Error(first.error);
+    await save.execute(first.value.result);
+    const members = (await gateway.loadSavedTeams()).map((t) => t.members.map((m) => m.id).sort());
+    await names.drawAll();
+    expect(await handleDrawAction(file, { action: 'draw-reset-names' })).toMatchObject({ ok: true });
+    const teams = await gateway.loadSavedTeams();
+    expect(teams.map((t) => [t.name, t.pokemonId])).toEqual(
+      Array.from({ length: 6 }, (_, i) => [`Equipe ${i + 1}`, null]),
+    );
+    expect(teams.map((t) => t.members.map((m) => m.id).sort())).toEqual(members);
+    // e o sorteio dos nomes funciona de novo
+    expect((await names.drawAll()).ok).toBe(true);
+  });
+});

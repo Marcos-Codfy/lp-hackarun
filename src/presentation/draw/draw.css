@@ -955,3 +955,14 @@ body.presenting .poke__name {
     box-shadow: 0 0 34px color-mix(in srgb, var(--type, #00e5ff) 55%, transparent);
   }
 }
+
+/* "Recomeçar teste": só no modo de teste, na cor do selo da cópia de teste */
+.btn--test {
+  border-color: rgb(255 194 74 / 0.6);
+  background: rgb(255 194 74 / 0.14);
+  color: var(--ink-gold, #ffd88a);
+}
+
+body.presenting .btn--test {
+  display: none;
+}

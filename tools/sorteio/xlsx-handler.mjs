@@ -19,9 +19,11 @@ function teamRowByName(ctx, name) {
   return null;
 }
 
-function clearPreviousDraw(ctx, people) {
+// apaga o sorteio salvo (coluna Equipe, linhas da aba Equipes e aba Sorteio). `force` = mesmo com nomes já sorteados:
+// só o "Recomeçar teste" da cópia local usa (a planilha real não tem essa ação)
+function clearPreviousDraw(ctx, people, force = false) {
   const previous = sorteioRows(ctx);
-  if (previous.some((t) => t.pokemonId !== null))
+  if (!force && previous.some((t) => t.pokemonId !== null))
     throw new Conflict('Alguma equipe já tem nome: não dá para refazer.');
   const names = new Set(previous.map((t) => t.name));
   for (const person of people) {
@@ -118,6 +120,24 @@ function nameTeams(ctx, body) {
   return { ok: true, named: plan.length };
 }
 
+// só na cópia de teste: as equipes continuam, mas voltam a se chamar "Equipe N" (para sortear os nomes de novo)
+function resetNames(ctx) {
+  const people = inscritosRows(ctx);
+  for (const team of sorteioRows(ctx)) {
+    if (team.pokemonId === null) continue;
+    const original = `Equipe ${team.number}`;
+    const row = teamRowByName(ctx, team.name);
+    if (row) ctx.equipes.getRow(row).getCell(ctx.c.teamName).value = original;
+    for (const person of people) {
+      if (person.team === team.name) ctx.inscritos.getRow(person.index).getCell(ctx.c.team).value = original;
+    }
+    const sorteioRow = ctx.sorteio.getRow(team.index);
+    sorteioRow.getCell(2).value = original;
+    sorteioRow.getCell(3).value = null;
+  }
+  return { ok: true };
+}
+
 // uma operação por vez: duas gravações juntas se atropelariam no mesmo arquivo
 let queue = Promise.resolve();
 
@@ -129,6 +149,11 @@ export function handleDrawAction(file, body) {
       if (body.action === 'draw-list') return list(ctx);
       if (body.action === 'draw-save') out = save(ctx, body);
       else if (body.action === 'draw-names' || body.action === 'draw-name') out = nameTeams(ctx, body);
+      // só existe aqui, na cópia de teste: volta ao começo para sortear de novo quantas vezes quiser
+      else if (body.action === 'draw-reset') {
+        clearPreviousDraw(ctx, inscritosRows(ctx), true);
+        out = { ok: true };
+      } else if (body.action === 'draw-reset-names') out = resetNames(ctx);
       else return { ok: false, error: 'unknown-action' };
       await ctx.book.xlsx.writeFile(file);
       return out;

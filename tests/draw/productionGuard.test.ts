@@ -70,3 +70,31 @@ describe('o sorteio fica fora do site público', () => {
     expect(read('.gitignore')).toMatch(/^\.local\/$/m);
   });
 });
+
+describe('"Recomeçar teste" não existe com a planilha real', () => {
+  it('o serviço só oferece o reset com a cópia local', async () => {
+    const { createDrawServices } = await import('@composition/draw');
+    expect(createDrawServices({ mode: 'local', label: 'x' }).resetTest).toBeTypeOf('function');
+    expect(
+      createDrawServices({ mode: 'sheet', endpoint: 'https://example.com', token: 't', label: 'x' })
+        .resetTest,
+    ).toBeNull();
+  });
+});
+
+describe('planilha real: grava sozinho e sem botões de teste', () => {
+  it('na planilha real o sorteio salva automático; no teste o botão "Salvar" continua', async () => {
+    const { createDrawServices } = await import('@composition/draw');
+    const real = createDrawServices({
+      mode: 'sheet',
+      endpoint: 'https://example.com',
+      token: 't',
+      label: 'x',
+    });
+    const test = createDrawServices({ mode: 'local', label: 'x' });
+    expect(real.autoSave).toBe(true);
+    expect(real.resetTestNames).toBeNull();
+    expect(test.autoSave).toBe(false);
+    expect(test.resetTestNames).toBeTypeOf('function');
+  });
+});
