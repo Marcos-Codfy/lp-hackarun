@@ -33,6 +33,10 @@ export type ConfigState =
 
 const text = (value: string | undefined) => (value ?? '').trim();
 
+// https sempre; http só para o próprio computador (teste local com o wrangler apontando para a cópia de teste)
+const validEndpoint = (url: string) =>
+  url.startsWith('https://') || /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//.test(url);
+
 export function readConfig(env: SorteioEnv): ConfigState {
   if (text(env.SORTEIO_ATIVO).toLowerCase() !== 'sim') return { kind: 'off' };
   const endpoint = text(env.SORTEIO_PLANILHA_URL) || text(env.PUBLIC_REGISTRATION_ENDPOINT);
@@ -41,7 +45,7 @@ export function readConfig(env: SorteioEnv): ConfigState {
   // a senha vale como foi digitada (espaço no começo ou no fim conta)
   if (!env.SORTEIO_SENHA) missing.push('SORTEIO_SENHA');
   if (text(env.SORTEIO_TOKEN).length < TOKEN_MIN) missing.push('SORTEIO_TOKEN');
-  if (!endpoint.startsWith('https://')) missing.push('SORTEIO_PLANILHA_URL');
+  if (!validEndpoint(endpoint)) missing.push('SORTEIO_PLANILHA_URL');
   if (missing.length > 0) return { kind: 'broken', missing };
   return {
     kind: 'on',

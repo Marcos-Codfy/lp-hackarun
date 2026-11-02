@@ -31,7 +31,6 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
   const reduced = prefersReducedMotion();
   // planilha real: grava sozinho ao sortear (o botão "Salvar na planilha" é só do teste)
   const { autoSave } = services;
-  saveButton.hidden = autoSave;
 
   // o "show" em andamento (contagem e cascata); null = nada rodando
   let show: { countdown: Countdown | null; reveal: TeamsReveal | null } | null = null;
@@ -88,8 +87,17 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
       state.status === 'drawing' ? 'Sorteando…' : preview ? 'Sortear de novo' : 'Sortear equipes';
     drawButton.disabled = busy || (preview?.locked ?? false);
     saveButton.disabled = busy || !preview || state.saved || preview.locked;
+    // planilha real grava sozinho; o botão só volta se a gravação falhar (mesmas equipes da tela, sem sortear de novo)
+    const retry = autoSave && preview !== null && !state.saved && state.error !== null;
+    saveButton.hidden = autoSave && !retry;
     saveButton.textContent =
-      state.status === 'saving' ? 'Gravando…' : state.saved ? 'Gravado ✓' : 'Salvar na planilha';
+      state.status === 'saving'
+        ? 'Gravando…'
+        : state.saved
+          ? 'Gravado ✓'
+          : retry
+            ? 'Tentar gravar de novo'
+            : 'Salvar na planilha';
     skipButton.hidden = show === null;
 
     message.replaceChildren();
@@ -156,6 +164,7 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
   saveButton.addEventListener('click', async () => {
     const preview = vm.state.value.preview;
     if (!preview) return;
+    if (autoSave) return void vm.save();
     const { report: r } = preview.result;
     if (await confirm(r.teams, r.participants, preview.alreadySaved)) await vm.save();
   });

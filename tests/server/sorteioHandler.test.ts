@@ -65,6 +65,14 @@ describe('sorteio no site · liga/desliga', () => {
     expect(await response.text()).not.toContain('SORTEIO_TOKEN');
   });
 
+  it('a planilha só por https (http só no próprio computador, para o teste local)', async () => {
+    const status = async (url: string) =>
+      (await harness({ ...ENV, SORTEIO_PLANILHA_URL: url }).send('/sorteio')).status;
+    expect(await status('http://script.google.com/x')).toBe(503);
+    expect(await status('http://127.0.0.1.evil.example/x')).toBe(503);
+    expect(await status('http://127.0.0.1:4401/__sorteio/api')).toBe(200);
+  });
+
   it('só os caminhos do sorteio passam pela função', () => {
     expect(['/sorteio', '/sorteio/nomes', '/sorteio.html', '/api/sorteio'].every(isSorteioPath)).toBe(true);
     expect(['/', '/equipes', '/sorteios', '/api/outra', '/inscricao'].some(isSorteioPath)).toBe(false);

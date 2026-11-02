@@ -5,3 +5,4 @@ coverage
 package-lock.json
 # só a pasta de referências da raiz (docs/design continua formatada)
 /design
+.wrangler

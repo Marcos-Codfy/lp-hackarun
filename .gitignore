@@ -39,3 +39,7 @@ scripts/qa/out/
 
 # sorteio das equipes: cópia local da planilha de teste (dados pessoais, nunca vai pro Git)
 .local/
+
+# segredos locais das Cloudflare Pages Functions (wrangler pages dev)
+.dev.vars
+.wrangler/

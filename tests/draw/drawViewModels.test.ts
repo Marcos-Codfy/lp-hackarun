@@ -96,6 +96,22 @@ describe('TeamDrawViewModel', () => {
     expect(locked.save).not.toHaveBeenCalled();
   });
 
+  it('planilha real: se a gravação falha, as equipes da tela continuam e dá para gravar de novo as mesmas', async () => {
+    let calls = 0;
+    const { vm, save } = drawVm({
+      save: async () => {
+        if (calls++ === 0) throw new Error('A planilha não respondeu a tempo.');
+        return ok(undefined);
+      },
+    });
+    await vm.drawAndSave();
+    expect(vm.state.value).toMatchObject({ saved: false, error: 'A planilha não respondeu a tempo.' });
+    expect(vm.state.value.preview?.result).toBe(RESULT);
+    await vm.save();
+    expect(save).toHaveBeenLastCalledWith(RESULT);
+    expect(vm.state.value).toMatchObject({ saved: true, error: null });
+  });
+
   it('erro da planilha vira mensagem na tela, e sortear de novo limpa o erro e o "salvo"', async () => {
     let calls = 0;
     const { vm } = drawVm({
